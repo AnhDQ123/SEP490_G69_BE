@@ -1,4 +1,4 @@
-package org.example.ffb_be;
+package org.ffb_be;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

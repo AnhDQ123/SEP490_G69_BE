@@ -1,4 +1,4 @@
-package org.example.ffb_be;
+package org.ffb_be;
 
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;

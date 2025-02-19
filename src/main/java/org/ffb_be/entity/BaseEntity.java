@@ -1,4 +1,4 @@
-package org.example.ffb_be.entity;
+package org.ffb_be.entity;
 
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;

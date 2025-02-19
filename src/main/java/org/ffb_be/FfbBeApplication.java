@@ -1,4 +1,4 @@
-package org.example.ffb_be;
+package org.ffb_be;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
