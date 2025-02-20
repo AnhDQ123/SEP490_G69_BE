@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.NoArgsConstructor;
 import org.ffb_be.utils.enums.Status;
 
+import java.util.List;
 
 
 @Entity
@@ -37,4 +38,31 @@ public class User extends BaseEntity{
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "role_id")
     private Role role;
+
+    @OneToMany(mappedBy = "writer")
+    private List<Blog> blogs;
+
+    @OneToMany(mappedBy = "owner")
+    private List<Cart> carts;
+
+    @OneToMany(mappedBy = "writer")
+    private List<Comment> comments;
+
+    @OneToMany(mappedBy = "writer")
+    private List<Feedback> feedbacks;
+
+    @OneToMany(mappedBy = "owner")
+    private List<Order> orders;
+
+    @OneToMany(mappedBy = "shipper")
+    private List<Order> shipperOrders;
+
+    @OneToOne(mappedBy = "user")
+    private Profile profile;
+
+    @OneToOne(mappedBy = "owner")
+    private Shop shop;
+
+    @OneToMany(mappedBy = "reporter")
+    private List<Report> reports;
 }

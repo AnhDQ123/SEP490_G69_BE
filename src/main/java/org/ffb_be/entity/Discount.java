@@ -2,16 +2,19 @@ package org.ffb_be.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.NoArgsConstructor;
 import org.ffb_be.utils.enums.Status;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
-@Table(name = "discount")
+@Table(name = "discounts")
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class Discount {
     @Id
     @Column(name = "discount_id")
@@ -34,4 +37,7 @@ public class Discount {
     private LocalDate end_date ;
     @Enumerated(EnumType.STRING)
     private Status status;
+
+    @OneToMany(mappedBy = "discount")
+    private List<Product> products;
 }

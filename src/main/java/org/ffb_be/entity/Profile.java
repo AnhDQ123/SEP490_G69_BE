@@ -2,6 +2,7 @@ package org.ffb_be.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.NoArgsConstructor;
 
 import java.sql.Date;
@@ -10,6 +11,7 @@ import java.time.LocalDate;
 @Table(name = "types")
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class Profile {
     @Id
     @Column(name = "profile_id")
@@ -54,5 +56,9 @@ public class Profile {
 
     @Column(name="updated_at")
     private LocalDate updated_at;
+
+    @OneToOne
+    @JoinColumn(name = "user_id", unique = true)
+    private User user;
 
 }

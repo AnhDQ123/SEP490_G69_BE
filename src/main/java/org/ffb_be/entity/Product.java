@@ -2,15 +2,19 @@ package org.ffb_be.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.NoArgsConstructor;
 import org.ffb_be.utils.enums.Status;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Set;
 
 @Entity
-@Table(name = "product")
+@Table(name = "products")
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class Product {
     @Id
     @Column(name = "product_id")
@@ -43,4 +47,33 @@ public class Product {
 
     @Column(name="updated_at")
     private LocalDate updated_at;
+
+    @ManyToMany
+    @JoinTable(
+            name = "food_category",
+            joinColumns = @JoinColumn(name = "food_id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id")
+    )
+    private Set<Category> categories;
+
+    @ManyToOne
+    @JoinColumn(name = "discount_id")
+    private Discount discount;
+
+    @OneToMany(mappedBy = "product")
+    private List<Feedback> feedbacks;
+
+    @OneToMany(mappedBy = "product")
+    private List<CartItem> cartItems;
+
+    @OneToMany(mappedBy = "product")
+    private List<OrderItem> orderItems;
+
+    @OneToMany(mappedBy = "food")
+    private List<FoodOption> foodOptions;
+
+    @ManyToOne
+    @JoinColumn(name = "shop_id")
+    private Shop shop;
+
 }

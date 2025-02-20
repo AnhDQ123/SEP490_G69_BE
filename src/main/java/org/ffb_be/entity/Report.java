@@ -2,16 +2,17 @@ package org.ffb_be.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.NoArgsConstructor;
-import org.ffb_be.utils.enums.ReportEnum;
-import org.ffb_be.utils.enums.Status;
+import org.ffb_be.utils.enums.ReportStatus;
 
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "report")
+@Table(name = "reports")
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class Report {
     @Id
     @Column(name = "report")
@@ -22,7 +23,7 @@ public class Report {
     private String reason;
 
     @Enumerated(EnumType.STRING)
-    private ReportEnum status;
+    private ReportStatus status;
 
     @Column(name="created_at")
     private LocalDate created_at;
@@ -30,4 +31,13 @@ public class Report {
     @Column(name="updated_at")
     private LocalDate updated_at;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User reporter;
+
+    @ManyToOne
+    @JoinColumn(name = "type_id")
+    private Types type;
+
+    private Long relatedId;
 }

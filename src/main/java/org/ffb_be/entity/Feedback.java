@@ -2,16 +2,18 @@ package org.ffb_be.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.NoArgsConstructor;
 import org.ffb_be.utils.enums.Status;
 
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "feedback")
+@Table(name = "feedbacks")
 @AllArgsConstructor
 @NoArgsConstructor
-public class Feedback {
+@Builder
+public class Feedback extends BaseEntity{
     @Id
     @Column(name = "feedback_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,4 +33,16 @@ public class Feedback {
 
     @Column(name="updated_at")
     private LocalDate updated_at;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User writer;
+
+    @ManyToOne
+    @JoinColumn(name = "product_id")
+    private Product product;
+
+    @ManyToOne
+    @JoinColumn(name = "shop_id")
+    private Shop shop;
 }

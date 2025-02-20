@@ -2,14 +2,16 @@ package org.ffb_be.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "image")
+@Table(name = "images")
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class Image {
     @Id
     @Column(name = "image_id")
@@ -21,4 +23,9 @@ public class Image {
 
     @Column(name="created_at")
     private LocalDate created_at;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Types type;
+
+    private Long relatedId;
 }
