@@ -1,6 +1,6 @@
 package org.ffb_be.utils.enums;
 
-public enum UserStatus {
+public enum Status {
     ACTIVE,
-    INACTIVE
+    INACTIVE,
 }

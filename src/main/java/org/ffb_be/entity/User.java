@@ -4,7 +4,8 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
-import org.ffb_be.utils.enums.UserStatus;
+import org.ffb_be.utils.enums.Status;
+
 
 
 @Entity
@@ -21,13 +22,17 @@ public class User extends BaseEntity{
     @Column(unique = true)
     private String email;
 
+    @Column(name="phone",unique = true)
+    private String phone;
+
     @Column(nullable = false)
     private String username;
 
     @Column(nullable = false)
     private String password;
 
-    private UserStatus status;
+    @Enumerated(EnumType.STRING)
+    private Status status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "role_id")

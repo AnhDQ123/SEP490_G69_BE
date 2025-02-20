@@ -3,25 +3,30 @@ package org.ffb_be.entity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
-import org.ffb_be.utils.enums.TypesEnum;
+
+import java.time.LocalDate;
 
 @Entity
-@Table(name = "types")
+@Table(name = "category")
 @AllArgsConstructor
 @NoArgsConstructor
-public class Types {
+public class Category {
     @Id
-    @Column(name = "type_id")
+    @Column(name = "category_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
-    private TypesEnum status;
-
-    @Column(name = "name")
+    @Column(name="category_name")
     private String name;
 
-    @Column(name = "description")
+    @Column(name="description")
     private String description;
+
+    @Column(name="created_at")
+    private LocalDate created_at;
+
+    @Column(name="updated_at")
+    private LocalDate updated_at;
+
 
 }
