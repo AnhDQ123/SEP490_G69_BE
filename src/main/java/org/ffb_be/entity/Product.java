@@ -15,7 +15,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Product {
+public class Product extends BaseEntity {
     @Id
     @Column(name = "product_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,12 +41,6 @@ public class Product {
 
     @Enumerated(EnumType.STRING)
     private Status is_active;
-
-    @Column(name="created_at")
-    private LocalDate created_at;
-
-    @Column(name="updated_at")
-    private LocalDate updated_at;
 
     @ManyToMany
     @JoinTable(

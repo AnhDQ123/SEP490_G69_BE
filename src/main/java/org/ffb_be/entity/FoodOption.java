@@ -15,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class FoodOption {
+public class FoodOption extends BaseEntity {
     @Id
     @Column(name = "food_option_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,11 +35,6 @@ public class FoodOption {
 
     private String image;
 
-    @Column(name="created_at")
-    private LocalDate created_at;
-
-    @Column(name="updated_at")
-    private LocalDate updated_at;
 
     @ManyToOne
     @JoinColumn(name = "product_id")

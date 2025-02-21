@@ -24,13 +24,6 @@ public class Blog extends BaseEntity{
 
     @Enumerated(EnumType.STRING)
     private Status status;
-
-    @Column(name="created_at")
-    private LocalDate created_at;
-
-    @Column(name="updated_at")
-    private LocalDate updated_at;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User writer;

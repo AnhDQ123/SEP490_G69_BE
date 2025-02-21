@@ -29,11 +29,6 @@ public class CartItem extends BaseEntity{
     @Column(name = "totalPrice")
     private BigDecimal totalPrice;
 
-    @Column(name="created_at")
-    private LocalDate created_at;
-
-    @Column(name="updated_at")
-    private LocalDate updated_at;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cart_id")

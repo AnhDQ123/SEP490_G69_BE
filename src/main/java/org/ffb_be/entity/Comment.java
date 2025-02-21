@@ -26,12 +26,6 @@ public class Comment extends BaseEntity{
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    @Column(name="created_at")
-    private LocalDate created_at;
-
-    @Column(name="updated_at")
-    private LocalDate updated_at;
-
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User writer;

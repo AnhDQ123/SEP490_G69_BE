@@ -24,12 +24,6 @@ public class Discount {
     @Column(name="discount_percentage")
     private BigDecimal discount_percentage;
 
-    @Column(name="created_at")
-    private LocalDate created_at;
-
-    @Column(name="updated_at")
-    private LocalDate updated_at;
-
     @Column(name="start_date")
     private LocalDate start_date;
 

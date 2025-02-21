@@ -14,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Shop {
+public class Shop extends BaseEntity{
     @Id
     @Column(name = "shop_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -52,12 +52,6 @@ public class Shop {
 
     @Enumerated(EnumType.STRING)
     private Status is_active;
-
-    @Column(name="created_at")
-    private LocalDate created_at;
-
-    @Column(name="updated_at")
-    private LocalDate updated_at;
 
     @OneToMany(mappedBy = "shop")
     private List<Product> products;

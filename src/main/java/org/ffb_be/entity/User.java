@@ -3,6 +3,7 @@ package org.ffb_be.entity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.ffb_be.utils.enums.Status;
 
@@ -14,6 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Data
 public class User extends BaseEntity{
     @Id
     @Column(name = "user_id")
@@ -25,9 +27,6 @@ public class User extends BaseEntity{
 
     @Column(name="phone",unique = true)
     private String phone;
-
-    @Column(nullable = false)
-    private String username;
 
     @Column(nullable = false)
     private String password;

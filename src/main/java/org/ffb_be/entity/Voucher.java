@@ -15,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Voucher {
+public class Voucher  extends BaseEntity {
     @Id
     @Column(name = "voucher_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,12 +25,6 @@ public class Voucher {
 
     @Column(name="discount_percentage")
     private BigDecimal discount_percentage;
-
-    @Column(name="created_at")
-    private LocalDate created_at;
-
-    @Column(name="updated_at")
-    private LocalDate updated_at;
 
     @Column(name="start_date")
     private LocalDate start_date;

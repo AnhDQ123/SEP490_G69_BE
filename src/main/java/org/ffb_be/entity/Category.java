@@ -25,11 +25,6 @@ public class Category extends BaseEntity{
     @Column(name="description")
     private String description;
 
-    @Column(name="created_at")
-    private LocalDate created_at;
-
-    @Column(name="updated_at")
-    private LocalDate updated_at;
 
     @ManyToMany(mappedBy = "categories")
     private Set<Product> foods;

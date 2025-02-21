@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Profile {
+public class Profile extends BaseEntity {
     @Id
     @Column(name = "profile_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -50,12 +50,6 @@ public class Profile {
 
     @Column(name="drivingLicenseDate")
     private LocalDate drivingLicenseDate;
-
-    @Column(name="created_at")
-    private LocalDate created_at;
-
-    @Column(name="updated_at")
-    private LocalDate updated_at;
 
     @OneToOne
     @JoinColumn(name = "user_id", unique = true)

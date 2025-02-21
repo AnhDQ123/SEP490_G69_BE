@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Image {
+public class Image extends BaseEntity {
     @Id
     @Column(name = "image_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,9 +20,6 @@ public class Image {
 
     @Column(name = "url")
     private String url;
-
-    @Column(name="created_at")
-    private LocalDate created_at;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Types type;

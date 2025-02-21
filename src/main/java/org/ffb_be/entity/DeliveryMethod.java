@@ -33,12 +33,6 @@ public class DeliveryMethod extends BaseEntity{
     @Column(name="fee")
     private BigDecimal fee;
 
-    @Column(name="created_at")
-    private LocalDate created_at;
-
-    @Column(name="updated_at")
-    private LocalDate updated_at;
-
     @OneToMany(mappedBy = "deliveryMethod")
     private List<Order> orders;
 }

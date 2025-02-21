@@ -15,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Payment {
+public class Payment extends BaseEntity {
     @Id
     @Column(name = "payment_method_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,12 +32,6 @@ public class Payment {
 
     @Column(name="fee")
     private BigDecimal fee;
-
-    @Column(name="created_at")
-    private LocalDate created_at;
-
-    @Column(name="updated_at")
-    private LocalDate updated_at;
 
     @OneToMany(mappedBy = "paymentMethod")
     private List<Order> orders;

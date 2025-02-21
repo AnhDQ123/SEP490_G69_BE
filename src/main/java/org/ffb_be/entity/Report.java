@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Report {
+public class Report extends BaseEntity {
     @Id
     @Column(name = "report")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,12 +24,6 @@ public class Report {
 
     @Enumerated(EnumType.STRING)
     private ReportStatus status;
-
-    @Column(name="created_at")
-    private LocalDate created_at;
-
-    @Column(name="updated_at")
-    private LocalDate updated_at;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
