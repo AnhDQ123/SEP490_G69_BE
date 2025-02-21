@@ -37,11 +37,11 @@ public class Order {
     private LocalDate updated_at;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "owner_id")
     private User owner;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "shipper_id")
     private User shipper;
 
     @ManyToOne(fetch = FetchType.LAZY)
