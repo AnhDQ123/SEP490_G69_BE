@@ -6,8 +6,6 @@ import lombok.Builder;
 import lombok.NoArgsConstructor;
 import org.ffb_be.utils.enums.ReportStatus;
 
-import java.time.LocalDate;
-
 @Entity
 @Table(name = "reports")
 @AllArgsConstructor
@@ -15,7 +13,7 @@ import java.time.LocalDate;
 @Builder
 public class Report extends BaseEntity {
     @Id
-    @Column(name = "report")
+    @Column(name = "report_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
@@ -25,11 +23,11 @@ public class Report extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private ReportStatus status;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User reporter;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "type_id")
     private Types type;
 

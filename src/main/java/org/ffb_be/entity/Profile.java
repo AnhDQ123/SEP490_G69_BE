@@ -4,11 +4,9 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
-
-import java.sql.Date;
 import java.time.LocalDate;
 @Entity
-@Table(name = "types")
+@Table(name = "profiles")
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -33,22 +31,22 @@ public class Profile extends BaseEntity {
     @Column(name="citizenIDNumber")
     private String citizenIDNumber;
 
-    @Column(name="citizenIDCardFront")
+    @Column(name="citizen_id_card_front")
     private String citizenIDCardFront;
 
-    @Column(name="citizenIDCardBack")
+    @Column(name="citizen_id_card_back")
     private String citizenIDCardBack;
 
-    @Column(name="drivingLicenseFront")
+    @Column(name="driving_license_front")
     private String drivingLicenseFront;
 
-    @Column(name="drivingLicenseBack")
+    @Column(name="driving_license_back")
     private String drivingLicenseBack;
 
-    @Column(name="citizenIDExpiredDate")
+    @Column(name="citizen_id_expired_date")
     private LocalDate citizenIDExpiredDate;
 
-    @Column(name="drivingLicenseDate")
+    @Column(name="driving_license_date")
     private LocalDate drivingLicenseDate;
 
     @OneToOne

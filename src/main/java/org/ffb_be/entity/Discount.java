@@ -15,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Discount {
+public class Discount extends BaseEntity{
     @Id
     @Column(name = "discount_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,8 +27,9 @@ public class Discount {
     @Column(name="start_date")
     private LocalDate start_date;
 
-    @Column(name="end_date ")
+    @Column(name="end_date")
     private LocalDate end_date ;
+
     @Enumerated(EnumType.STRING)
     private Status status;
 

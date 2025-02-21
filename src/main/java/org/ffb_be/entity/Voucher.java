@@ -29,7 +29,7 @@ public class Voucher  extends BaseEntity {
     @Column(name="start_date")
     private LocalDate start_date;
 
-    @Column(name="end_date ")
+    @Column(name="end_date")
     private LocalDate end_date ;
 
     @Enumerated(EnumType.STRING)

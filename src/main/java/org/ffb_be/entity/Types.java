@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
-import org.ffb_be.utils.enums.TypesStatus;
+import org.ffb_be.utils.enums.TypesCategory;
 
 import java.util.List;
 
@@ -20,7 +20,7 @@ public class Types extends BaseEntity {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    private TypesStatus status;
+    private TypesCategory category;
 
     @Column(name = "name")
     private String name;

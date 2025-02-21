@@ -4,9 +4,6 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDate;
-
 @Entity
 @Table(name = "images")
 @AllArgsConstructor
@@ -22,6 +19,7 @@ public class Image extends BaseEntity {
     private String url;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "type_id")
     private Types type;
 
     private Long relatedId;

@@ -5,8 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 import org.ffb_be.utils.enums.Status;
-
-import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -29,7 +27,7 @@ public class Shop extends BaseEntity{
     @Column(name="logo")
     private String logo;
 
-    @Column(name="backgroundImage")
+    @Column(name="background_image")
     private String backgroundImage;
 
     @Column(name="phone")

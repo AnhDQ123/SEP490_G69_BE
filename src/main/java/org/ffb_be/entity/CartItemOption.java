@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @Table(name = "cart_item_options")
 @Builder
-public class CartItemOption {
+public class CartItemOption extends BaseEntity{
     @Id
     @Column(name = "cart_item_option_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)

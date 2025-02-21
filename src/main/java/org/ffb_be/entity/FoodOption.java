@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import org.ffb_be.utils.enums.Status;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -34,7 +33,6 @@ public class FoodOption extends BaseEntity {
     private Status status;
 
     private String image;
-
 
     @ManyToOne
     @JoinColumn(name = "product_id")

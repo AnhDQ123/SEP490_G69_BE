@@ -19,13 +19,13 @@ public class OrderItem  extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "unitPrice")
+    @Column(name = "unit_price")
     private BigDecimal unitPrice;
 
     @Column(name = "quantity")
     private BigDecimal quantity;
 
-    @Column(name = "totalPrice")
+    @Column(name = "total_price")
     private BigDecimal totalPrice;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -20,13 +19,13 @@ public class CartItem extends BaseEntity{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "unitPrice")
+    @Column(name = "unit_price")
     private BigDecimal unitPrice;
 
     @Column(name = "quantity")
     private BigDecimal quantity;
 
-    @Column(name = "totalPrice")
+    @Column(name = "total_price")
     private BigDecimal totalPrice;
 
 
