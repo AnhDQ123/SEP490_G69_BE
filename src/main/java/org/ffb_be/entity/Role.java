@@ -3,6 +3,7 @@ package org.ffb_be.entity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @Table(name = "roles")
 @Builder
+@Data
 public class Role extends BaseEntity{
     @Id
     @Column(name = "role_id")
