@@ -1,10 +1,13 @@
 package org.ffb_be.controller;
 
 import lombok.AllArgsConstructor;
-import org.ffb_be.entity.Blog;
+import org.ffb_be.dto.auth.blog.BlogDTO;
 import org.ffb_be.service.blog.BlogService;
 import org.ffb_be.utils.constants.PagingConstant;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,35 +19,43 @@ import java.util.List;
 public class BlogController {
     private final BlogService blogService;
 
-    @PostMapping
-    public ResponseEntity<Blog> createBlog(@RequestBody Blog blog) {
-        Blog createdBlog = blogService.createBlog(blog);
-        return ResponseEntity.ok(createdBlog);
+    @GetMapping
+    public ResponseEntity<List<BlogDTO>> getBlogs(
+            @RequestParam(defaultValue = "" + PagingConstant.PAGE_NUMBER) int page,
+            @RequestParam(defaultValue = "" + PagingConstant.PAGE_SIZE) int limit) {
+        return ResponseEntity.ok(blogService.getBlogs(page, limit));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Blog> getBlogById(@PathVariable Long id) {
-        Blog blog = blogService.getBlogById(id);
-        return ResponseEntity.ok(blog);
+    public ResponseEntity<BlogDTO> getBlogById(@PathVariable Long id) {
+        return ResponseEntity.ok(blogService.getBlogById(id));
     }
 
-    @GetMapping
-    public ResponseEntity<List<Blog>> getBlogs(
-            @RequestParam(defaultValue = "" + PagingConstant.PAGE_NUMBER) int page,
-            @RequestParam(defaultValue = "" + PagingConstant.PAGE_SIZE) int limit
-    ) {
-        List<Blog> blogs = blogService.getBlogs(page, limit);
-        return ResponseEntity.ok(blogs);
+    @PostMapping
+    public ResponseEntity<?> createBlog(
+            @Validated @RequestBody BlogDTO blogDTO,
+            BindingResult result) {
+        if (result.hasErrors()) {
+            return ResponseEntity.badRequest().body(result.getAllErrors());
+        }
+        blogService.createBlog(blogDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Blog> updateBlog(@PathVariable Long id, @RequestBody Blog blogDetails) {
-        Blog updatedBlog = blogService.updateBlog(id, blogDetails);
-        return ResponseEntity.ok(updatedBlog);
+    public ResponseEntity<?> updateBlog(
+            @PathVariable Long id,
+            @Validated @RequestBody BlogDTO blogDTO,
+            BindingResult result) {
+        if (result.hasErrors()) {
+            return ResponseEntity.badRequest().body(result.getAllErrors());
+        }
+        blogService.updateBlog(id, blogDTO);
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteBlog(@PathVariable Long id) {
+    public ResponseEntity<?> deleteBlog(@PathVariable Long id) {
         blogService.deleteBlog(id);
         return ResponseEntity.noContent().build();
     }

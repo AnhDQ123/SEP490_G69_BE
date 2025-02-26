@@ -12,8 +12,4 @@ public interface CommentService {
     Comment updateComment(Long id, Comment commentDetails);
 
     void deleteComment(Long id);
-
-    List<Comment> getComments(int page, int limit);
-
-    List<Comment> getCommentsByBlogId(Long blogId, int page, int limit);
 }

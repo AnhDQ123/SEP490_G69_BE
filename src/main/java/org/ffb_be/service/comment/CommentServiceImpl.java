@@ -6,8 +6,6 @@ import org.ffb_be.repository.CommentRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 @Service
 @Transactional
 @AllArgsConstructor
@@ -32,16 +30,5 @@ public class CommentServiceImpl implements CommentService{
     @Override
     public void deleteComment(Long id) {
         commentRepository.deleteById(id);
-    }
-
-    @Override
-    public List<Comment> getComments(int page, int limit) {
-        return List.of();
-    }
-
-    @Override
-    public List<Comment> getCommentsByBlogId(Long blogId, int page, int limit) {
-        commentRepository.findCommentsByBlogId(blogId);
-        return List.of();
     }
 }

@@ -3,6 +3,10 @@ package org.ffb_be.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.ffb_be.utils.enums.Status;
+import org.hibernate.annotations.Where;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "blogs")
@@ -25,4 +29,7 @@ public class Blog extends BaseEntity{
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User writer;
+
+    @OneToMany(mappedBy = "blog", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
 }

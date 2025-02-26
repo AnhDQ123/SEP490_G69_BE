@@ -1,18 +1,17 @@
 package org.ffb_be.service.blog;
 
-import org.ffb_be.entity.Blog;
+import org.ffb_be.dto.auth.blog.BlogDTO;
 
 import java.util.List;
 
 public interface BlogService {
+    List<BlogDTO> getBlogs(int page, int limit);
 
-    Blog createBlog(Blog blog);
+    BlogDTO getBlogById(Long id);
 
-    Blog getBlogById(Long id);
+    void createBlog(BlogDTO blogDTO);
 
-    Blog updateBlog(Long id, Blog blogDetails);
+    void updateBlog(Long id, BlogDTO blogDTO);
 
     void deleteBlog(Long id);
-
-    List<Blog> getBlogs(int page, int limit);
 }

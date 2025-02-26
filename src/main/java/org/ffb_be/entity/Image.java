@@ -3,12 +3,14 @@ package org.ffb_be.entity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "images")
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Data
 public class Image extends BaseEntity {
     @Id
     @Column(name = "image_id")
