@@ -70,6 +70,4 @@ public class UserController {
         Pageable pageable = PageRequest.of(page-1, size);
         return ResponseEntity.ok( userService.findAll(search,pageable));
     }
-
-
 }

@@ -5,6 +5,7 @@ import org.ffb_be.dto.auth.userDto.UserCreateDTO;
 import org.ffb_be.dto.auth.userDto.UserResponseDTO;
 import org.ffb_be.dto.auth.userDto.UserUpdateDTO;
 import org.ffb_be.entity.Profile;
+import org.ffb_be.entity.Role;
 import org.ffb_be.entity.User;
 import org.ffb_be.repository.UserRepository;
 import org.ffb_be.utils.enums.upload.CloudinaryUpload;
@@ -37,9 +38,12 @@ public class UserServiceImpl implements UserService {
         userRepository.findByPhone(userCreateDTO.getPhone()).ifPresent((x)->{
             throw new NonUniqueResultException("Phone already exists!");
         });
+        Role a=new Role();
+        a.setId(1l);
         user.setEmail(userCreateDTO.getEmail());
         user.setPhone(userCreateDTO.getPhone());
         user.setUsername(userCreateDTO.getPhone());
+        user.setRole(a);
         user.setPassword(passwordEncoder.encode(userCreateDTO.getPassword()));
         userRepository.save(user);
     }
