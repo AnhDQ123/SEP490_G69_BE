@@ -43,7 +43,7 @@ public class UserController {
         return ResponseEntity.ok(profile);
     }
 
-    @PostMapping
+    @PostMapping("/add")
     public ResponseEntity<?> addUser(@Validated @RequestBody UserCreateDTO user,
                                          BindingResult bindingResult) throws IOException {
         if(bindingResult.hasErrors()) {

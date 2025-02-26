@@ -7,6 +7,8 @@ import org.ffb_be.dto.auth.userDto.UserUpdateDTO;
 import org.ffb_be.entity.Profile;
 import org.ffb_be.entity.Role;
 import org.ffb_be.entity.User;
+import org.ffb_be.repository.ProfileRepository;
+import org.ffb_be.repository.RoleRepository;
 import org.ffb_be.repository.UserRepository;
 import org.ffb_be.utils.enums.upload.CloudinaryUpload;
 import org.springframework.beans.BeanUtils;
@@ -23,11 +25,12 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final CloudinaryUpload cloudinaryUpload;
-
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, CloudinaryUpload cloudinaryUpload) {
+    private final RoleRepository roleRepository;
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, CloudinaryUpload cloudinaryUpload, RoleRepository roleRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.cloudinaryUpload = cloudinaryUpload;
+        this.roleRepository = roleRepository;
     }
     public void create(UserCreateDTO userCreateDTO) throws IOException {
         User user = new User();
@@ -38,12 +41,12 @@ public class UserServiceImpl implements UserService {
         userRepository.findByPhone(userCreateDTO.getPhone()).ifPresent((x)->{
             throw new NonUniqueResultException("Phone already exists!");
         });
-        Role a=new Role();
-        a.setId(1l);
+        Role role = roleRepository.findById(1L)
+                .orElseThrow(() -> new RuntimeException("Role not found"));
         user.setEmail(userCreateDTO.getEmail());
         user.setPhone(userCreateDTO.getPhone());
         user.setUsername(userCreateDTO.getPhone());
-        user.setRole(a);
+        user.setRole(role);
         user.setPassword(passwordEncoder.encode(userCreateDTO.getPassword()));
         userRepository.save(user);
     }
