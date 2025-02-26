@@ -1,9 +1,5 @@
 package org.ffb_be.service.comment;
 
-import org.ffb_be.entity.Comment;
-
-import java.util.List;
-
 public interface CommentService {
     Comment createComment(Comment comment);
 
