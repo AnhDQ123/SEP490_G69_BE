@@ -18,7 +18,7 @@ import java.util.logging.Logger;
 public class SMSService {
 
 
-    private OtpCacheService otpCacheService;
+
     @Value("${API_KEY}")
     private String key;
 
@@ -28,6 +28,12 @@ public class SMSService {
     @Value("${API_URL}")
     private String API_URL;
     private final RestTemplate restTemplate = new RestTemplate();
+    private final OtpCacheService otpCacheService;
+
+    public SMSService(OtpCacheService otpCacheService) {
+        this.otpCacheService = otpCacheService;
+    }
+
     public String sendOtp(String phone) {
 
             // Loại bỏ dấu `+` khỏi số điện thoại
