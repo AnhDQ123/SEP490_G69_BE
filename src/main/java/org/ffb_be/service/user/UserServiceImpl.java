@@ -26,11 +26,14 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final CloudinaryUpload cloudinaryUpload;
     private final RoleRepository roleRepository;
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, CloudinaryUpload cloudinaryUpload, RoleRepository roleRepository) {
+    private final ProfileRepository profileRepository;
+
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, CloudinaryUpload cloudinaryUpload, RoleRepository roleRepository, ProfileRepository profileRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.cloudinaryUpload = cloudinaryUpload;
         this.roleRepository = roleRepository;
+        this.profileRepository = profileRepository;
     }
     public void create(UserCreateDTO userCreateDTO) throws IOException {
         User user = new User();
@@ -68,7 +71,8 @@ public class UserServiceImpl implements UserService {
     public void update(UserUpdateDTO userUpdateDTO, MultipartFile avatar) throws IOException {
         User user = new User();
         BeanUtils.copyProperties(userUpdateDTO, user);
-        Profile p=new Profile();
+        Profile p = profileRepository.findById(1L)
+                .orElseThrow(() -> new RuntimeException("Role not found"));
         p.setAddress(userUpdateDTO.getAddress());
         p.setName(userUpdateDTO.getName());
         p.setGender(userUpdateDTO.getGender());
