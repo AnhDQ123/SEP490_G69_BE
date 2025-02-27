@@ -72,7 +72,7 @@ public class UserServiceImpl implements UserService {
         User user = new User();
         BeanUtils.copyProperties(userUpdateDTO, user);
         Profile p = profileRepository.findById(userUpdateDTO.getId())
-                .orElseThrow(() -> new RuntimeException("Role not found"));
+                .orElseThrow(() -> new RuntimeException("Profile not found"));
         p.setAddress(userUpdateDTO.getAddress());
         p.setName(userUpdateDTO.getName());
         p.setGender(userUpdateDTO.getGender());
