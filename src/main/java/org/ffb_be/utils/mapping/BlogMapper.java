@@ -1,7 +1,7 @@
 package org.ffb_be.utils.mapping;
 
-import org.ffb_be.dto.auth.blog.BlogDTO;
-import org.ffb_be.dto.auth.comment.CommentDTO;
+import org.ffb_be.dto.blog.BlogDTO;
+import org.ffb_be.dto.comment.CommentDTO;
 import org.ffb_be.entity.Blog;
 import org.ffb_be.entity.Comment;
 import org.ffb_be.entity.Image;
@@ -18,39 +18,43 @@ public interface BlogMapper {
     @Mapping(target = "comments", ignore = true)
     BlogDTO toDTO(Blog blog);
 
-    default BlogDTO toDTO(Blog blog, List<String> imageUrls, List<Comment> comments) {
-        BlogDTO dto = toDTO(blog);
-        dto.setImageUrls(imageUrls);
-        dto.setComments(comments.stream().map(this::toCommentDTO).collect(Collectors.toList()));
-        return dto;
-    }
-
-    default BlogDTO toDTOWithImagesAndComment(Blog blog, List<Image> images, Comment topComment) {
+    default BlogDTO toDTOWithImagesAndComments(Blog blog, List<Image> images, List<Comment> allComments) {
         BlogDTO dto = toDTO(blog);
         List<String> imageUrls = images.stream().map(Image::getUrl).collect(Collectors.toList());
         dto.setImageUrls(imageUrls);
 
-        if (topComment != null) {
-            dto.setComments(List.of(toCommentDTO(topComment)));
-        } else {
-            dto.setComments(List.of());
-        }
-
-        return dto;
-    }
-
-    default BlogDTO toDTOWithFullComments(Blog blog, List<Image> images, List<Comment> comments) {
-        BlogDTO dto = toDTOWithImagesAndComment(blog, images, null);
-        dto.setComments(comments.stream().map(this::toCommentDTO).collect(Collectors.toList()));
-        return dto;
-    }
-
-    default CommentDTO toCommentDTO(Comment comment) {
-        List<CommentDTO> replies = comment.getReplies().stream()
-                .map(this::toCommentDTO)
+        // Lấy danh sách comment gốc
+        List<CommentDTO> topLevelComments = allComments.stream()
+                .filter(comment -> comment.getParentComment() == null)
+                .map(comment -> toCommentDTO(comment, allComments))
                 .collect(Collectors.toList());
 
-        return new CommentDTO(comment.getId(), comment.getContent(), comment.getWriter().getUsername(), replies);
+        dto.setComments(topLevelComments);
+        return dto;
+    }
+
+    default CommentDTO toCommentDTO(Comment comment, List<Comment> allComments) {
+        // Lấy tối đa 2 replies con
+        List<CommentDTO> limitedReplies = allComments.stream()
+                .filter(c -> c.getParentComment() != null && c.getParentComment().getId().equals(comment.getId()))
+                .sorted((c1, c2) -> c1.getCreatedAt().compareTo(c2.getCreatedAt())) // Sắp xếp theo thời gian
+                .limit(2)
+                .map(c -> toCommentDTO(c, allComments))
+                .collect(Collectors.toList());
+
+        boolean hasMoreReplies = allComments.stream().anyMatch(c ->
+                c.getParentComment() != null &&
+                        c.getParentComment().getId().equals(comment.getId()) &&
+                        !limitedReplies.contains(c)
+        );
+
+        return new CommentDTO(
+                comment.getId(),
+                comment.getContent(),
+//                comment.getWriter().getUsername(),
+                limitedReplies,
+                hasMoreReplies
+        );
     }
 
     Blog toEntity(BlogDTO blogDTO);

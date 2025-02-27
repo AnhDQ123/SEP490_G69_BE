@@ -1,6 +1,6 @@
 package org.ffb_be.service.blog;
 
-import org.ffb_be.dto.auth.blog.BlogDTO;
+import org.ffb_be.dto.blog.BlogDTO;
 
 import java.util.List;
 

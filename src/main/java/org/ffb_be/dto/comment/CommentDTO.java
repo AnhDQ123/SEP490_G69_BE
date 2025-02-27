@@ -1,17 +1,19 @@
-package org.ffb_be.dto.auth.comment;
+package org.ffb_be.dto.comment;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.ffb_be.entity.BaseEntity;
 
 import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CommentDTO {
+public class CommentDTO extends BaseEntity {
     private Long id;
     private String content;
-    private String author;
+//    private String author;
     private List<CommentDTO> replies;
+    private boolean hasMoreReplies;
 }

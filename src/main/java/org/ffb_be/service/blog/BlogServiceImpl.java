@@ -1,7 +1,7 @@
 package org.ffb_be.service.blog;
 
 import lombok.AllArgsConstructor;
-import org.ffb_be.dto.auth.blog.BlogDTO;
+import org.ffb_be.dto.blog.BlogDTO;
 import org.ffb_be.entity.Blog;
 import org.ffb_be.entity.Comment;
 import org.ffb_be.entity.Image;
@@ -19,8 +19,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,14 +35,10 @@ public class BlogServiceImpl implements BlogService {
 
     @Override
     public List<BlogDTO> getBlogs(int page, int limit) {
-        Pageable pageable = PageRequest.of(page, limit, Sort.by("id").descending());
+        Pageable pageable = PageRequest.of(page, limit, Sort.by("id").ascending());
         Page<Blog> blogPage = blogRepository.findAll(pageable);
         return blogPage.getContent().stream()
-                .map(blog -> {
-                    List<Image> images = imageRepository.findBlogImagesByRelatedId(blog.getId());
-                    Comment topComment = commentRepository.findTopByBlogIdOrderByCreatedAtDesc(blog.getId());
-                    return blogMapper.toDTOWithImagesAndComment(blog, images, topComment);
-                })
+                .map(this::mapBlogToDTO)
                 .collect(Collectors.toList());
     }
 
@@ -50,22 +46,24 @@ public class BlogServiceImpl implements BlogService {
     public BlogDTO getBlogById(Long id) {
         Blog blog = blogRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Blog"));
+        return mapBlogToDTO(blog);
+    }
 
-        List<Image> images = imageRepository.findBlogImagesByRelatedId(id);
-        List<Comment> comments = commentRepository.findCommentsByBlogId(id);
-
-        return blogMapper.toDTOWithFullComments(blog, images, comments);
+    private BlogDTO mapBlogToDTO(Blog blog) {
+        List<Image> images = imageRepository.findBlogImagesByRelatedId(blog.getId());
+        List<Comment> rootComments = commentRepository.findRootCommentsByBlogId(blog.getId());
+        return blogMapper.toDTOWithImagesAndComments(blog, images, rootComments);
     }
 
     @Override
     public void createBlog(BlogDTO blogDTO) {
         Blog blog = blogMapper.toEntity(blogDTO);
-        Blog savedBlog = blogRepository.save(blog);
+        blog = blogRepository.save(blog);
 
-        List<Comment> comments = blogMapper.toEntities(blogDTO.getComments(), savedBlog);
+        List<Comment> comments = blogMapper.toEntities(blogDTO.getComments(), blog);
         commentRepository.saveAll(comments);
 
-        saveBlogImages(savedBlog.getId(), blogDTO.getImageUrls());
+        saveBlogImages(blog.getId(), blogDTO.getImageUrls());
     }
 
     @Override
@@ -84,19 +82,26 @@ public class BlogServiceImpl implements BlogService {
         Types blogType = typesRepository.findByCategory(TypesCategory.BLOG)
                 .orElseThrow(() -> new NotFoundException("Types"));
 
-        List<Image> images = imageUrls.stream()
+        Set<String> existingUrls = imageRepository.findBlogImagesByRelatedId(blogId)
+                .stream()
+                .map(Image::getUrl)
+                .collect(Collectors.toSet());
+
+        List<Image> imagesToAdd = imageUrls.stream()
+                .filter(url -> !existingUrls.contains(url))
                 .limit(5)
                 .map(url -> new Image(null, url, blogType, blogId))
                 .collect(Collectors.toList());
-        imageRepository.saveAll(images);
+        imageRepository.saveAll(imagesToAdd);
     }
 
     @Override
     public void deleteBlog(Long id) {
-        Blog blog = blogRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Blog"));
+        if (!blogRepository.existsById(id)) {
+            throw new NotFoundException("Blog");
+        }
         commentRepository.deleteByBlogId(id);
         imageRepository.deleteByBlogId(id);
-        blogRepository.delete(blog);
+        blogRepository.deleteById(id);
     }
 }

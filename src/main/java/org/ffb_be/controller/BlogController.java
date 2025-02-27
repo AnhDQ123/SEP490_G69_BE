@@ -1,7 +1,7 @@
 package org.ffb_be.controller;
 
 import lombok.AllArgsConstructor;
-import org.ffb_be.dto.auth.blog.BlogDTO;
+import org.ffb_be.dto.blog.BlogDTO;
 import org.ffb_be.service.blog.BlogService;
 import org.ffb_be.utils.constants.PagingConstant;
 import org.springframework.http.HttpStatus;
