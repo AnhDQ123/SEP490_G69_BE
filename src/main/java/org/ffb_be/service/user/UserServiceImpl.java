@@ -71,7 +71,7 @@ public class UserServiceImpl implements UserService {
     public void update(UserUpdateDTO userUpdateDTO, MultipartFile avatar) throws IOException {
         User user = new User();
         BeanUtils.copyProperties(userUpdateDTO, user);
-        Profile p = profileRepository.findById(1L)
+        Profile p = profileRepository.findById(userUpdateDTO.getId())
                 .orElseThrow(() -> new RuntimeException("Role not found"));
         p.setAddress(userUpdateDTO.getAddress());
         p.setName(userUpdateDTO.getName());
