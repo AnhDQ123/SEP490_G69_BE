@@ -22,9 +22,6 @@ public class Types extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private TypesCategory category;
 
-    @Column(name = "name")
-    private String name;
-
     @Column(name = "description")
     private String description;
 
