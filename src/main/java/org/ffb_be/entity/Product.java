@@ -27,6 +27,9 @@ public class Product extends BaseEntity {
     @Column(name="manufacturer")
     private String manufacturer;
 
+    @Column
+    private int quantity;
+
     @Column(name="supplier")
     private String supplier;
 
