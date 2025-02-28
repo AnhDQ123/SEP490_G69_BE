@@ -50,8 +50,13 @@ public class UserServiceImpl implements UserService {
         user.setPhone(userCreateDTO.getPhone());
         user.setUsername(userCreateDTO.getPhone());
         user.setRole(role);
+
         user.setPassword(passwordEncoder.encode(userCreateDTO.getPassword()));
         userRepository.save(user);
+
+        Profile profile = new Profile();
+        profile.setUser(user);
+        profileRepository.save(profile);
     }
 
 
@@ -71,7 +76,7 @@ public class UserServiceImpl implements UserService {
     public void update(UserUpdateDTO userUpdateDTO, MultipartFile avatar) throws IOException {
         User user = new User();
         BeanUtils.copyProperties(userUpdateDTO, user);
-        Profile p = profileRepository.findById(userUpdateDTO.getId())
+        Profile p = profileRepository.findByUserId2(userUpdateDTO.getId())
                 .orElseThrow(() -> new RuntimeException("Profile not found"));
         p.setAddress(userUpdateDTO.getAddress());
         p.setName(userUpdateDTO.getName());
