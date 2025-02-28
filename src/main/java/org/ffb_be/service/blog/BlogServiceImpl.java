@@ -1,9 +1,8 @@
 package org.ffb_be.service.blog;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.ffb_be.dto.blog.BlogDTO;
 import org.ffb_be.entity.Blog;
-import org.ffb_be.entity.Comment;
 import org.ffb_be.entity.Image;
 import org.ffb_be.entity.Types;
 import org.ffb_be.exception.NotFoundException;
@@ -19,14 +18,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 @Transactional
-@AllArgsConstructor
-public class BlogServiceImpl implements BlogService {
+@RequiredArgsConstructor
+class BlogServiceImpl implements BlogService {
     private final BlogRepository blogRepository;
     private final ImageRepository imageRepository;
     private final CommentRepository commentRepository;
@@ -45,25 +46,27 @@ public class BlogServiceImpl implements BlogService {
     @Override
     public BlogDTO getBlogById(Long id) {
         Blog blog = blogRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Blog"));
-        return mapBlogToDTO(blog);
+                .orElseThrow(() -> new NotFoundException("Blog not found"));
+
+        List<Image> images = imageRepository.findBlogImagesByRelatedId(blog.getId());
+        return blogMapper.toDTOWithImages(blog, images);
     }
 
     private BlogDTO mapBlogToDTO(Blog blog) {
         List<Image> images = imageRepository.findBlogImagesByRelatedId(blog.getId());
-        List<Comment> rootComments = commentRepository.findRootCommentsByBlogId(blog.getId());
-        return blogMapper.toDTOWithImagesAndComments(blog, images, rootComments);
+        int commentCount = commentRepository.countByBlogId(blog.getId()); // Đếm số comment
+        BlogDTO blogDTO = blogMapper.toDTOWithImages(blog, images);
+        blogDTO.setCommentCount(commentCount);
+        return blogDTO;
     }
 
     @Override
     public void createBlog(BlogDTO blogDTO) {
         Blog blog = blogMapper.toEntity(blogDTO);
         blog = blogRepository.save(blog);
-
-        List<Comment> comments = blogMapper.toEntities(blogDTO.getComments(), blog);
-        commentRepository.saveAll(comments);
-
-        saveBlogImages(blog.getId(), blogDTO.getImageUrls());
+        Types blogType = typesRepository.findByCategory(TypesCategory.BLOG)
+                .orElseThrow(() -> new NotFoundException("Types"));
+        imageRepository.saveBlogImages(blog.getId(), blogDTO.getImageUrls(),blogType);
     }
 
     @Override
@@ -74,25 +77,29 @@ public class BlogServiceImpl implements BlogService {
         blogMapper.updateEntity(blogDTO, blog);
         blogRepository.save(blog);
 
-        imageRepository.deleteByBlogId(blogId);
-        saveBlogImages(blogId, blogDTO.getImageUrls());
+        // Cập nhật hình ảnh
+        updateBlogImages(blogId, blogDTO.getImageUrls());
     }
 
-    private void saveBlogImages(Long blogId, List<String> imageUrls) {
+    private void updateBlogImages(Long blogId, List<String> imageUrls) {
+        Set<String> existingUrls = new HashSet<>(imageRepository.findImageUrlsByBlogId(blogId));
+
+        // Xóa ảnh không còn tồn tại trong danh sách mới
+        imageRepository.deleteByBlogIdAndUrlNotIn(blogId, imageUrls);
+
+        // Thêm ảnh mới nếu chưa tồn tại
         Types blogType = typesRepository.findByCategory(TypesCategory.BLOG)
                 .orElseThrow(() -> new NotFoundException("Types"));
 
-        Set<String> existingUrls = imageRepository.findBlogImagesByRelatedId(blogId)
-                .stream()
-                .map(Image::getUrl)
-                .collect(Collectors.toSet());
-
-        List<Image> imagesToAdd = imageUrls.stream()
+        List<Image> newImages = imageUrls.stream()
                 .filter(url -> !existingUrls.contains(url))
                 .limit(5)
                 .map(url -> new Image(null, url, blogType, blogId))
                 .collect(Collectors.toList());
-        imageRepository.saveAll(imagesToAdd);
+
+        if (!newImages.isEmpty()) {
+            imageRepository.saveAll(newImages);
+        }
     }
 
     @Override

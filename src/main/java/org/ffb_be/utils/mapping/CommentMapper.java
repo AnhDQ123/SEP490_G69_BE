@@ -13,29 +13,28 @@ import java.util.stream.Collectors;
 public interface CommentMapper {
 
     @Mapping(target = "replies", ignore = true)
+    @Mapping(target = "hasMoreReplies", ignore = true)
     CommentDTO toDTO(Comment comment);
 
-    default CommentDTO toDTOWithReplies(Comment comment, List<Comment> allReplies, int currentDepth, int maxDepth) {
-        if (currentDepth >= maxDepth) {
-            return toDTO(comment);
-        }
+    default CommentDTO toDTOWithReplies(Comment comment, List<Comment> allReplies, int depth, int maxDepth) {
+        if (depth >= maxDepth) return toDTO(comment);
 
-        List<Comment> directReplies = allReplies.stream()
+        List<Comment> limitedReplies = allReplies.stream()
                 .filter(c -> c.getParentComment() != null && c.getParentComment().getId().equals(comment.getId()))
                 .sorted(Comparator.comparing(Comment::getCreatedAt))
-                .limit(2)
-                .toList();
+                .limit(3) // Giới hạn số lượng reply
+                .collect(Collectors.toList());
 
-        boolean hasMoreReplies = allReplies.stream()
-                .anyMatch(c -> c.getParentComment() != null
-                        && c.getParentComment().getId().equals(comment.getId())
-                        && !directReplies.contains(c));
+        boolean hasMoreReplies = allReplies.stream().anyMatch(c -> c.getParentComment() != null
+                && c.getParentComment().getId().equals(comment.getId())
+                && !limitedReplies.contains(c));
 
-        CommentDTO dto = toDTO(comment);
-        dto.setReplies(directReplies.stream()
-                .map(c -> toDTOWithReplies(c, allReplies, currentDepth + 1, maxDepth))
-                .collect(Collectors.toList()));
-        dto.setHasMoreReplies(hasMoreReplies);
-        return dto;
+        return new CommentDTO(
+                comment.getId(),
+                comment.getContent(),
+                comment.getParentComment() != null ? comment.getParentComment().getId() : null,
+                limitedReplies.stream().map(c -> toDTOWithReplies(c, allReplies, depth + 1, maxDepth)).collect(Collectors.toList()),
+                hasMoreReplies
+        );
     }
 }

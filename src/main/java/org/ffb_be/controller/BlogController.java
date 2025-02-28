@@ -1,6 +1,6 @@
 package org.ffb_be.controller;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.ffb_be.dto.blog.BlogDTO;
 import org.ffb_be.service.blog.BlogService;
 import org.ffb_be.utils.constants.PagingConstant;
@@ -15,7 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/blogs")
 @CrossOrigin("*")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class BlogController {
     private final BlogService blogService;
 
