@@ -27,6 +27,9 @@ public class Product extends BaseEntity {
     @Column(name="manufacturer")
     private String manufacturer;
 
+    @Column
+    private int quantity;
+
     @Column(name="supplier")
     private String supplier;
 
@@ -42,13 +45,9 @@ public class Product extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Status is_active;
 
-    @ManyToMany
-    @JoinTable(
-            name = "food_category",
-            joinColumns = @JoinColumn(name = "food_id"),
-            inverseJoinColumns = @JoinColumn(name = "category_id")
-    )
-    private Set<Category> categories;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
 
     @ManyToOne
     @JoinColumn(name = "discount_id")

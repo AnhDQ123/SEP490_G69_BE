@@ -26,6 +26,6 @@ public class Category extends BaseEntity{
     private String description;
 
 
-    @ManyToMany(mappedBy = "categories")
+    @OneToMany(mappedBy = "category")
     private Set<Product> foods;
 }
