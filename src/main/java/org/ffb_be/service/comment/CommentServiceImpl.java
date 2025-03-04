@@ -32,16 +32,26 @@ public class CommentServiceImpl implements CommentService{
     }
 
     @Override
-    public List<CommentDTO> getMoreReplies(Long parentId) {
+    public List<CommentDTO> getMoreReplies(Long parentId, int offset, int limit) {
         List<Comment> replies = commentRepository.findByParentCommentId(parentId)
                 .stream()
                 .sorted(Comparator.comparing(Comment::getCreatedAt))
+                .skip(offset)
+                .limit(limit)
                 .collect(Collectors.toList());
 
+        boolean hasMoreReplies = commentRepository.countByParentCommentId(parentId) > (offset + limit);
+
         return replies.stream()
-                .map(reply -> commentMapper.toDTOWithReplies(reply, replies, 0, 3)) // Giới hạn cấp reply
+                .map(reply -> {
+                    CommentDTO dto = commentMapper.toDTOWithReplies(reply, replies, 0, 3);
+                    dto.setHasMoreReplies(hasMoreReplies);
+                    return dto;
+                })
                 .collect(Collectors.toList());
     }
+
+
 
     @Override
     public void addComment(Long blogId, CommentDTO commentDTO) {
@@ -59,7 +69,6 @@ public class CommentServiceImpl implements CommentService{
         commentRepository.save(comment);
     }
 
-    // 📌 Xóa comment
     @Override
     public void deleteComment(Long commentId) {
         if (!commentRepository.existsById(commentId)) {

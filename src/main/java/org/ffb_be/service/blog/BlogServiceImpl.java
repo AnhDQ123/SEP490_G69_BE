@@ -77,17 +77,16 @@ class BlogServiceImpl implements BlogService {
         blogMapper.updateEntity(blogDTO, blog);
         blogRepository.save(blog);
 
-        // Cập nhật hình ảnh
         updateBlogImages(blogId, blogDTO.getImageUrls());
     }
 
     private void updateBlogImages(Long blogId, List<String> imageUrls) {
         Set<String> existingUrls = new HashSet<>(imageRepository.findImageUrlsByBlogId(blogId));
 
-        // Xóa ảnh không còn tồn tại trong danh sách mới
+        // Delete image not in new list
         imageRepository.deleteByBlogIdAndUrlNotIn(blogId, imageUrls);
 
-        // Thêm ảnh mới nếu chưa tồn tại
+        // Add new image
         Types blogType = typesRepository.findByCategory(TypesCategory.BLOG)
                 .orElseThrow(() -> new NotFoundException("Types"));
 

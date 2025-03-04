@@ -20,9 +20,11 @@ public class CommentController {
         return commentService.getCommentsByBlogId(blogId);
     }
 
-    @GetMapping("/replies/{parentId}")
-    public List<CommentDTO> getMoreReplies(@PathVariable Long parentId) {
-        return commentService.getMoreReplies(parentId);
+    @GetMapping("/comments/more")
+    public List<CommentDTO> getMoreReplies(@RequestParam Long parentId,
+                                           @RequestParam int offset,
+                                           @RequestParam int limit) {
+        return commentService.getMoreReplies(parentId, offset, limit);
     }
 
     @PostMapping

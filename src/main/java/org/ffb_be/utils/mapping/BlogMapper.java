@@ -1,9 +1,7 @@
 package org.ffb_be.utils.mapping;
 
 import org.ffb_be.dto.blog.BlogDTO;
-import org.ffb_be.dto.comment.CommentDTO;
 import org.ffb_be.entity.Blog;
-import org.ffb_be.entity.Comment;
 import org.ffb_be.entity.Image;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

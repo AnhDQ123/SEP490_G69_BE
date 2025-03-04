@@ -22,8 +22,8 @@ public interface CommentMapper {
         List<Comment> limitedReplies = allReplies.stream()
                 .filter(c -> c.getParentComment() != null && c.getParentComment().getId().equals(comment.getId()))
                 .sorted(Comparator.comparing(Comment::getCreatedAt))
-                .limit(3) // Giới hạn số lượng reply
-                .collect(Collectors.toList());
+                .limit(3)
+                .toList();
 
         boolean hasMoreReplies = allReplies.stream().anyMatch(c -> c.getParentComment() != null
                 && c.getParentComment().getId().equals(comment.getId())
