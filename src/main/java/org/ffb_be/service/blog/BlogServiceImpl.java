@@ -81,7 +81,9 @@ class BlogServiceImpl implements BlogService {
                     .orElseThrow(() -> new NotFoundException("Types"));
 
             cloudinaryUpload.uploadFiles(files);
-            imageRepository.saveBlogImages(blog.getId(), blogDTO.getImageUrls(), blogType);
+            for(String url : blogDTO.getImageUrls()) {
+                imageRepository.saveBlogImages(url, blogType.getId(), blog.getId());
+            }
         }
     }
 
@@ -94,16 +96,17 @@ class BlogServiceImpl implements BlogService {
         blogRepository.save(blog);
 
         if(files != null) {
-        // Nếu có file upload, upload lên Cloudinary
-        List<String> uploadedUrls = (files.length > 0) ? cloudinaryUpload.uploadFiles(files) : new ArrayList<>();
+            // Nếu có file upload, upload lên Cloudinary
+            List<String> uploadedUrls = (files.length > 0) ? cloudinaryUpload.uploadFiles(files) : new ArrayList<>();
 
-        // Gộp URL cũ từ request và URL mới từ file upload
-        List<String> finalImageUrls = new ArrayList<>(uploadedUrls);
-        if (blogDTO.getImageUrls() != null) {
-            finalImageUrls.addAll(blogDTO.getImageUrls());
-        }
+            // Gộp URL cũ từ request và URL mới từ file upload
+            List<String> finalImageUrls = new ArrayList<>(uploadedUrls);
+            if (blogDTO.getImageUrls() != null) {
+                finalImageUrls.addAll(blogDTO.getImageUrls());
+            }
 
-        updateBlogImages(blogId, finalImageUrls);
+
+            updateBlogImages(blogId, finalImageUrls);
         }
     }
 

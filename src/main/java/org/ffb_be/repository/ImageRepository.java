@@ -10,7 +10,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Repository
 public interface ImageRepository extends JpaRepository<Image, Long> {
@@ -32,6 +31,7 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
 
     @Transactional
     @Modifying
-    @Query("INSERT INTO Image (url, type, relatedId) VALUES (:url, :type, :relatedId)")
-    void saveBlogImages(Long id, List<String> imageUrls, Types type);
+    @Query(value = "INSERT INTO images (url, type_id, related_id) VALUES (:url, :typeId, :blogId)", nativeQuery = true)
+    void saveBlogImages(@Param("url") String url, @Param("typeId") Long typeId, @Param("blogId") Long blogId);
+
 }
