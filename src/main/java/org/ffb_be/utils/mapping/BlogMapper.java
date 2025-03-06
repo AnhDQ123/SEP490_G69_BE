@@ -28,6 +28,8 @@ public interface BlogMapper {
         return dto;
     }
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(source = "content", target = "content")
     Blog toEntity(BlogDTO blogDTO);
 
     void updateEntity(BlogDTO blogDTO, @MappingTarget Blog blog);

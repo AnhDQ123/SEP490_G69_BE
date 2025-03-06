@@ -29,10 +29,10 @@ public class Comment extends BaseEntity{
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT", name = "liked_users")
     private String likedUsers;
 
-    @Column(nullable = false)
+    @Column(name = "like_count")
     private int likeCount = 0;
 
     @ManyToOne

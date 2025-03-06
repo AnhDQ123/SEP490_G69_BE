@@ -36,28 +36,33 @@ public class BlogController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createBlog(
-            @Validated @RequestBody BlogDTO blogDTO,
+            @Validated @ModelAttribute BlogDTO blogDTO,
             BindingResult result,
-            @RequestPart(required = false) MultipartFile[] files) throws IOException {
+            @RequestParam(value = "files", required = false) MultipartFile[] files) throws IOException {
+
         if (result.hasErrors()) {
             return ResponseEntity.badRequest().body(result.getAllErrors());
         }
+
         blogService.createBlog(blogDTO, files);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping(value = "/{id}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> updateBlog(
             @PathVariable Long id,
-            @Validated @RequestBody BlogDTO blogDTO,
+            @Validated @ModelAttribute BlogDTO blogDTO,
             BindingResult result,
-            @RequestPart(required = false) MultipartFile[] files) throws IOException {
+            @RequestParam(value = "files", required = false) MultipartFile[] files) throws IOException {
+
         if (result.hasErrors()) {
             return ResponseEntity.badRequest().body(result.getAllErrors());
         }
+
         blogService.updateBlog(id, blogDTO, files);
         return ResponseEntity.ok().build();
     }
+
 
     @PostMapping("/{blogId}/like")
     public ResponseEntity<?> toggleLikeBlog(@PathVariable Long blogId, @RequestParam Long userId) {

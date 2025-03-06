@@ -18,16 +18,16 @@ public class Blog extends BaseEntity{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name="content", nullable = false, length = 1000)
+    @Column(name="content", length = 1000)
     private String content;
 
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT", name = "liked_users")
     private String likedUsers;
 
-    @Column(nullable = false)
+    @Column(name = "like_count")
     private int likeCount = 0;
 
     @ManyToOne(fetch = FetchType.LAZY)

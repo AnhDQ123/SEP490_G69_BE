@@ -8,6 +8,7 @@ import org.ffb_be.entity.Types;
 import org.ffb_be.entity.User;
 import org.ffb_be.exception.NotFoundException;
 import org.ffb_be.repository.*;
+import org.ffb_be.utils.enums.Status;
 import org.ffb_be.utils.enums.TypesCategory;
 import org.ffb_be.utils.enums.upload.CloudinaryUpload;
 import org.ffb_be.utils.mapping.BlogMapper;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -70,12 +72,17 @@ class BlogServiceImpl implements BlogService {
             blog.setWriter(writer);
         }
 
-        blog = blogRepository.save(blog);
-        Types blogType = typesRepository.findByCategory(TypesCategory.BLOG)
-                .orElseThrow(() -> new NotFoundException("Types"));
+        blog.setStatus(Status.ACTIVE);
+        blog.setCreatedAt(LocalDateTime.now());
 
-        cloudinaryUpload.uploadFiles(files);
-        imageRepository.saveBlogImages(blog.getId(), blogDTO.getImageUrls(), blogType);
+        blog = blogRepository.save(blog);
+        if(files != null) {
+            Types blogType = typesRepository.findByCategory(TypesCategory.BLOG)
+                    .orElseThrow(() -> new NotFoundException("Types"));
+
+            cloudinaryUpload.uploadFiles(files);
+            imageRepository.saveBlogImages(blog.getId(), blogDTO.getImageUrls(), blogType);
+        }
     }
 
     @Override
@@ -86,8 +93,9 @@ class BlogServiceImpl implements BlogService {
         blogMapper.updateEntity(blogDTO, blog);
         blogRepository.save(blog);
 
+        if(files != null) {
         // Nếu có file upload, upload lên Cloudinary
-        List<String> uploadedUrls = (files != null && files.length > 0) ? cloudinaryUpload.uploadFiles(files) : new ArrayList<>();
+        List<String> uploadedUrls = (files.length > 0) ? cloudinaryUpload.uploadFiles(files) : new ArrayList<>();
 
         // Gộp URL cũ từ request và URL mới từ file upload
         List<String> finalImageUrls = new ArrayList<>(uploadedUrls);
@@ -96,6 +104,7 @@ class BlogServiceImpl implements BlogService {
         }
 
         updateBlogImages(blogId, finalImageUrls);
+        }
     }
 
     private void updateBlogImages(Long blogId, List<String> imageUrls) {
