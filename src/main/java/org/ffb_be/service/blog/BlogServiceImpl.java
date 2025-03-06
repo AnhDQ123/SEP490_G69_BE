@@ -39,7 +39,7 @@ class BlogServiceImpl implements BlogService {
 
     @Override
     public List<BlogDTO> getBlogs(int page, int limit) {
-        Pageable pageable = PageRequest.of(page, limit, Sort.by("id").ascending());
+        Pageable pageable = PageRequest.of(page, 10000, Sort.by("id").ascending());
         Page<Blog> blogPage = blogRepository.findAll(pageable);
         return blogPage.getContent().stream()
                 .map(this::mapBlogToDTO)
@@ -79,9 +79,7 @@ class BlogServiceImpl implements BlogService {
         if(files != null) {
             Types blogType = typesRepository.findByCategory(TypesCategory.BLOG)
                     .orElseThrow(() -> new NotFoundException("Types"));
-
-            cloudinaryUpload.uploadFiles(files);
-            for(String url : blogDTO.getImageUrls()) {
+            for(String url : cloudinaryUpload.uploadFiles(files)) {
                 imageRepository.saveBlogImages(url, blogType.getId(), blog.getId());
             }
         }

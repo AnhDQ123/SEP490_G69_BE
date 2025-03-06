@@ -2,7 +2,6 @@ package org.ffb_be.repository;
 
 import jakarta.transaction.Transactional;
 import org.ffb_be.entity.Image;
-import org.ffb_be.entity.Types;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
