@@ -28,7 +28,7 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
     void deleteByBlogIdAndUrlNotIn(Long blogId, List<String> imageUrls);
 
     @Query("SELECT i.url FROM Image i WHERE i.type.category = 'BLOG' AND i.relatedId = :blogId")
-    int findImageUrlsByBlogId(Long blogId);
+    List<String> findImageUrlsByBlogId(Long blogId);
 
     @Transactional
     @Modifying

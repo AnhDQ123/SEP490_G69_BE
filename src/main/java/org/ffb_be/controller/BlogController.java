@@ -5,11 +5,14 @@ import org.ffb_be.dto.blog.BlogDTO;
 import org.ffb_be.service.blog.BlogService;
 import org.ffb_be.utils.constants.PagingConstant;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -31,26 +34,28 @@ public class BlogController {
         return ResponseEntity.ok(blogService.getBlogById(id));
     }
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createBlog(
             @Validated @RequestBody BlogDTO blogDTO,
-            BindingResult result) {
+            BindingResult result,
+            @RequestPart(required = false) MultipartFile[] files) throws IOException {
         if (result.hasErrors()) {
             return ResponseEntity.badRequest().body(result.getAllErrors());
         }
-        blogService.createBlog(blogDTO);
+        blogService.createBlog(blogDTO, files);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> updateBlog(
             @PathVariable Long id,
             @Validated @RequestBody BlogDTO blogDTO,
-            BindingResult result) {
+            BindingResult result,
+            @RequestPart(required = false) MultipartFile[] files) throws IOException {
         if (result.hasErrors()) {
             return ResponseEntity.badRequest().body(result.getAllErrors());
         }
-        blogService.updateBlog(id, blogDTO);
+        blogService.updateBlog(id, blogDTO, files);
         return ResponseEntity.ok().build();
     }
 
