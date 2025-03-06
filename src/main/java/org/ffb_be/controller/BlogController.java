@@ -54,6 +54,12 @@ public class BlogController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/{blogId}/like")
+    public ResponseEntity<?> toggleLikeBlog(@PathVariable Long blogId, @RequestParam Long userId) {
+        blogService.toggleLike(blogId, userId);
+        return ResponseEntity.ok().build();
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteBlog(@PathVariable Long id) {
         blogService.deleteBlog(id);

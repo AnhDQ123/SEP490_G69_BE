@@ -9,18 +9,20 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/blogs/{blogId}/comments")
+@RequestMapping("/api/comments")
 @CrossOrigin("*")
 @RequiredArgsConstructor
 public class CommentController {
     private final CommentService commentService;
 
-    @GetMapping
-    public List<CommentDTO> getCommentsByBlog(@PathVariable Long blogId) {
-        return commentService.getCommentsByBlogId(blogId);
+    @GetMapping("/{blogId}")
+    public List<CommentDTO> getCommentsByBlog(@PathVariable Long blogId,
+                                              @RequestParam int offset,
+                                              @RequestParam int limit) {
+        return commentService.getCommentsByBlogId(blogId, offset, limit);
     }
 
-    @GetMapping("/comments/more")
+    @GetMapping("/replies")
     public List<CommentDTO> getMoreReplies(@RequestParam Long parentId,
                                            @RequestParam int offset,
                                            @RequestParam int limit) {
@@ -28,9 +30,15 @@ public class CommentController {
     }
 
     @PostMapping
-    public ResponseEntity<String> addComment(@PathVariable Long blogId, @RequestBody CommentDTO commentDTO) {
+    public ResponseEntity<String> addComment(@RequestParam Long blogId, @RequestBody CommentDTO commentDTO) {
         commentService.addComment(blogId, commentDTO);
         return ResponseEntity.ok("Comment added successfully");
+    }
+
+    @PostMapping("/{commentId}/like")
+    public ResponseEntity<?> toggleLikeComment(@PathVariable Long commentId, @RequestParam Long userId) {
+        commentService.toggleLikeComment(commentId, userId);
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{commentId}")

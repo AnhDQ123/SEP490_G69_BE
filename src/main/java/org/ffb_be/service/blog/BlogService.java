@@ -13,5 +13,7 @@ public interface BlogService {
 
     void updateBlog(Long id, BlogDTO blogDTO);
 
+    void toggleLike(Long blogId, Long userId);
+
     void deleteBlog(Long id);
 }

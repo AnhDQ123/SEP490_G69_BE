@@ -5,11 +5,9 @@ import org.ffb_be.dto.blog.BlogDTO;
 import org.ffb_be.entity.Blog;
 import org.ffb_be.entity.Image;
 import org.ffb_be.entity.Types;
+import org.ffb_be.entity.User;
 import org.ffb_be.exception.NotFoundException;
-import org.ffb_be.repository.BlogRepository;
-import org.ffb_be.repository.CommentRepository;
-import org.ffb_be.repository.ImageRepository;
-import org.ffb_be.repository.TypesRepository;
+import org.ffb_be.repository.*;
 import org.ffb_be.utils.enums.TypesCategory;
 import org.ffb_be.utils.mapping.BlogMapper;
 import org.springframework.data.domain.Page;
@@ -19,6 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -32,6 +31,7 @@ class BlogServiceImpl implements BlogService {
     private final ImageRepository imageRepository;
     private final CommentRepository commentRepository;
     private final TypesRepository typesRepository;
+    private final UserRepository userRepository;
     private final BlogMapper blogMapper;
 
     @Override
@@ -47,15 +47,14 @@ class BlogServiceImpl implements BlogService {
     public BlogDTO getBlogById(Long id) {
         Blog blog = blogRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Blog not found"));
-
-        List<Image> images = imageRepository.findBlogImagesByRelatedId(blog.getId());
-        return blogMapper.toDTOWithImages(blog, images);
+        return mapBlogToDTO(blog);
     }
 
     private BlogDTO mapBlogToDTO(Blog blog) {
         List<Image> images = imageRepository.findBlogImagesByRelatedId(blog.getId());
         int commentCount = commentRepository.countByBlogId(blog.getId()); // Đếm số comment
         BlogDTO blogDTO = blogMapper.toDTOWithImages(blog, images);
+        blogDTO.setWriter(blogMapper.toWriterDTO(blog.getWriter()));
         blogDTO.setCommentCount(commentCount);
         return blogDTO;
     }
@@ -63,10 +62,18 @@ class BlogServiceImpl implements BlogService {
     @Override
     public void createBlog(BlogDTO blogDTO) {
         Blog blog = blogMapper.toEntity(blogDTO);
+
+        if (blogDTO.getWriter() != null) {
+            User writer = userRepository.findById(blogDTO.getWriter().getId())
+                    .orElseThrow(() -> new NotFoundException("User"));
+            blog.setWriter(writer);
+        }
+
         blog = blogRepository.save(blog);
         Types blogType = typesRepository.findByCategory(TypesCategory.BLOG)
                 .orElseThrow(() -> new NotFoundException("Types"));
-        imageRepository.saveBlogImages(blog.getId(), blogDTO.getImageUrls(),blogType);
+
+        imageRepository.saveBlogImages(blog.getId(), blogDTO.getImageUrls(), blogType);
     }
 
     @Override
@@ -99,6 +106,31 @@ class BlogServiceImpl implements BlogService {
         if (!newImages.isEmpty()) {
             imageRepository.saveAll(newImages);
         }
+    }
+
+    @Override
+    public void toggleLike(Long blogId, Long userId) {
+        Blog blog = blogRepository.findById(blogId)
+                .orElseThrow(() -> new NotFoundException("Blog not found"));
+
+        Set<Long> likedUserSet = new HashSet<>();
+        if (blog.getLikedUsers() != null) {
+            likedUserSet.addAll(Arrays.stream(blog.getLikedUsers().split(","))
+                    .map(Long::parseLong).collect(Collectors.toSet()));
+        }
+
+        if (likedUserSet.contains(userId)) {
+            likedUserSet.remove(userId);
+            blog.setLikeCount(blog.getLikeCount() - 1);
+        } else {
+            likedUserSet.add(userId);
+            blog.setLikeCount(blog.getLikeCount() + 1);
+        }
+
+        blog.setLikedUsers(likedUserSet.isEmpty() ? null : likedUserSet.stream()
+                .map(String::valueOf).collect(Collectors.joining(",")));
+
+        blogRepository.save(blog);
     }
 
     @Override

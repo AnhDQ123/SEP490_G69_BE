@@ -8,11 +8,16 @@ import org.ffb_be.exception.NotFoundException;
 import org.ffb_be.repository.BlogRepository;
 import org.ffb_be.repository.CommentRepository;
 import org.ffb_be.utils.mapping.CommentMapper;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Comparator;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,21 +29,25 @@ public class CommentServiceImpl implements CommentService{
     private final CommentMapper commentMapper;
 
     @Override
-    public List<CommentDTO> getCommentsByBlogId(Long blogId) {
-        List<Comment> rootComments = commentRepository.findRootCommentsByBlogId(blogId);
+    public List<CommentDTO> getCommentsByBlogId(Long blogId, int offset, int limit) {
+        Pageable pageable = PageRequest.of(offset, limit, Sort.by("createdAt").ascending());
+        List<Comment> rootComments = commentRepository.findRootCommentsByBlogId(blogId, pageable);
+
+        boolean hasMoreComments = commentRepository.countByBlogId(blogId) > (offset + limit);
+
         return rootComments.stream()
-                .map(comment -> commentMapper.toDTOWithReplies(comment, rootComments, 0, 3))
+                .map(comment -> {
+                    CommentDTO dto = commentMapper.toDTOWithReplies(comment, rootComments, 0, 3);
+                    dto.setHasMoreReplies(hasMoreComments);
+                    return dto;
+                })
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<CommentDTO> getMoreReplies(Long parentId, int offset, int limit) {
-        List<Comment> replies = commentRepository.findByParentCommentId(parentId)
-                .stream()
-                .sorted(Comparator.comparing(Comment::getCreatedAt))
-                .skip(offset)
-                .limit(limit)
-                .collect(Collectors.toList());
+        Pageable pageable = PageRequest.of(offset, limit, Sort.by("createdAt").ascending());
+        List<Comment> replies = commentRepository.findByParentCommentId(parentId, pageable);
 
         boolean hasMoreReplies = commentRepository.countByParentCommentId(parentId) > (offset + limit);
 
@@ -66,6 +75,31 @@ public class CommentServiceImpl implements CommentService{
                     .orElseThrow(() -> new NotFoundException("Parent comment"));
             comment.setParentComment(parentComment);
         }
+        commentRepository.save(comment);
+    }
+
+    @Override
+    public void toggleLikeComment(Long commentId, Long userId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new NotFoundException("Comment not found"));
+
+        Set<Long> likedUserSet = new HashSet<>();
+        if (comment.getLikedUsers() != null) {
+            likedUserSet.addAll(Arrays.stream(comment.getLikedUsers().split(","))
+                    .map(Long::parseLong).collect(Collectors.toSet()));
+        }
+
+        if (likedUserSet.contains(userId)) {
+            likedUserSet.remove(userId);
+            comment.setLikeCount(comment.getLikeCount() - 1);
+        } else {
+            likedUserSet.add(userId);
+            comment.setLikeCount(comment.getLikeCount() + 1);
+        }
+
+        comment.setLikedUsers(likedUserSet.isEmpty() ? null : likedUserSet.stream()
+                .map(String::valueOf).collect(Collectors.joining(",")));
+
         commentRepository.save(comment);
     }
 

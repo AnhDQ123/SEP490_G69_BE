@@ -3,8 +3,6 @@ package org.ffb_be.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.ffb_be.utils.enums.Status;
-import org.hibernate.annotations.Where;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +23,12 @@ public class Blog extends BaseEntity{
 
     @Enumerated(EnumType.STRING)
     private Status status;
+
+    @Column(columnDefinition = "TEXT")
+    private String likedUsers;
+
+    @Column(nullable = false)
+    private int likeCount = 0;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
