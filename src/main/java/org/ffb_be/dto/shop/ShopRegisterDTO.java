@@ -1,27 +1,24 @@
-
 package org.ffb_be.dto.shop;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.ffb_be.dto.auth.userDto.OwnerDTO;
-import org.ffb_be.utils.enums.Status;
+import org.ffb_be.dto.auth.ProfileDto.BusinessProfileDTO;
+import org.ffb_be.utils.enums.SellType;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ShopDTO {
-    private Long id;
+public class ShopRegisterDTO {
     private String name;
     private String description;
-    private String logo;
-    private String backgroundImage;
     private String phone;
     private String address;
-    private int rate;
-    private int viewCount;
-    private Status status;
+    private String registrationCertificate;
+    private String foodSafetyCertificate;
     private Boolean isShipping;
     private Boolean isOpening;
-    private OwnerDTO owner;
+    private SellType sellType;
+    private String openTime;
+    private BusinessProfileDTO profile;
 }

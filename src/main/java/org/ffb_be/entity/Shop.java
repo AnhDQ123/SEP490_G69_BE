@@ -3,7 +3,9 @@ package org.ffb_be.entity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.ffb_be.utils.enums.SellType;
 import org.ffb_be.utils.enums.Status;
 import java.util.List;
 
@@ -12,6 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Data
 public class Shop extends BaseEntity{
     @Id
     @Column(name = "shop_id")
@@ -37,22 +40,31 @@ public class Shop extends BaseEntity{
     private String address;
 
     @Column(name="registration_certificate")
-    private String Registration_certificate;
+    private String registrationCertificate;
 
     @Column(name="food_safety_certificate")
-    private String Food_safety_certificate;
+    private String foodSafetyCertificate;
 
     @Column(name="rate")
-    private int rate;
+    private double rate;
 
     @Column(name="view_count")
-    private int view_count;
+    private int viewCount;
 
     @Enumerated(EnumType.STRING)
-    private Status is_active;
+    private Status isActive;
+
+    @Column(name="is_shipping")
+    private Boolean isShipping;
+
+    @Column(name="is_opening")
+    private Boolean isOpening;
 
     @OneToMany(mappedBy = "shop")
     private List<Product> products;
+
+    @Enumerated(EnumType.STRING)
+    private SellType sellType;
 
     @OneToMany(mappedBy = "shop")
     private List<Feedback> feedbacks;
