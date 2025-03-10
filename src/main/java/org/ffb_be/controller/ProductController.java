@@ -1,5 +1,6 @@
 package org.ffb_be.controller;
 
+
 import org.ffb_be.dto.product.FoodOptionDTO;
 import org.ffb_be.dto.product.ProductCreateDTO;
 import org.ffb_be.dto.product.ProductResponseDTO;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -67,10 +69,13 @@ public class ProductController {
             foodOptionDTOs.add(dto);
         }
         BeanUtils.copyProperties(product, productResponseDTO);
-        Discount d= discountRepository.findById(product.getDiscount().getId());
+        if (product.getDiscount().getId() != null) {
+            Discount d= discountRepository.findById(product.getDiscount().getId());
+            productResponseDTO.setDiscount(d.getDiscount_percentage());
+        }
+        else productResponseDTO.setDiscount(BigDecimal.ZERO);
         Optional<Category> c=categoryRepository.findById(product.getCategory().getId());
         Category category = c.get();
-        productResponseDTO.setDiscount(d.getDiscount_percentage());
         productResponseDTO.setFoodOption(foodOptionDTOs);
         productResponseDTO.setCategory(category.getName());
         return ResponseEntity.ok(productResponseDTO);
@@ -85,6 +90,17 @@ public class ProductController {
         }
         productService.save(productCreateDTO, avatar, option);
         return ResponseEntity.ok().body(productCreateDTO);
-
+    }
+    @GetMapping("/filter")
+    public ResponseEntity<?> getByCategory(@RequestParam String cat) {
+        Category category = categoryRepository.findByName(cat);
+        List<Product> productList=productRepository.findAllByCategory(category);
+        List<ProductResponseDTO> productResponseDTOList = new ArrayList<>();
+        for (Product product : productList) {
+            ProductResponseDTO productResponseDTO = new ProductResponseDTO();
+            BeanUtils.copyProperties(product, productResponseDTO);
+            productResponseDTOList.add(productResponseDTO);
+        }
+        return ResponseEntity.ok(productResponseDTOList);
     }
 }
