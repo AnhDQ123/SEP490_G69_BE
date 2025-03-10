@@ -1,15 +1,16 @@
 package org.ffb_be.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
 import java.time.LocalDate;
 @Entity
 @Table(name = "profiles")
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Getter
+@Setter
 public class Profile extends BaseEntity {
     @Id
     @Column(name = "profile_id")
@@ -25,8 +26,14 @@ public class Profile extends BaseEntity {
     @Column(name="avatar")
     private String avatar;
 
+    @Column(name="dob")
+    private LocalDate dob;
+
+    @Column(name="gender")
+    private String gender;
+
     @Column(name="tax_code")
-    private String tax_code;
+    private String taxCode;
 
     @Column(name="citizenIDNumber")
     private String citizenIDNumber;
@@ -52,5 +59,6 @@ public class Profile extends BaseEntity {
     @OneToOne
     @JoinColumn(name = "user_id", unique = true)
     private User user;
+
 
 }
