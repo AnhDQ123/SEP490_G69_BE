@@ -1,4 +1,3 @@
-
 package org.ffb_be.dto.shop;
 
 import lombok.AllArgsConstructor;
