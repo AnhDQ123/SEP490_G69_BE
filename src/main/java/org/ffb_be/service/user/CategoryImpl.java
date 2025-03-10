@@ -1,6 +1,7 @@
 package org.ffb_be.service.user;
 
-import org.ffb_be.entity.Category;
+import org.ffb_be.dto.auth.category.CategoryDTO;
+
 import org.ffb_be.repository.CategoryRepository;
 
 import org.springframework.stereotype.Service;
@@ -17,8 +18,8 @@ public class CategoryImpl implements CategoryService {
     }
 
     @Override
-    public List<Category> findAll() {
-        return categoryRepository.findAll();
+    public List<CategoryDTO> findAll() {
+        return categoryRepository.findAllCategories();
     }
 
 
