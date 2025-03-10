@@ -39,7 +39,7 @@ public class ProductServiceImpl implements ProductService {
         this.foodOptionRepository = foodOptionRepository;
     }
 
-        public void save(ProductCreateDTO productCreateDTO, Map<String, List<MultipartFile>> files) throws IOException {
+        public void save(ProductCreateDTO productCreateDTO,MultipartFile avatar, List<MultipartFile>option) throws IOException {
         Product product = new Product();
         Category category = categoryRepository.findById(productCreateDTO.getCategory_id())
                 .orElseThrow(() -> new EntityNotFoundException("Category not found!"));
@@ -54,21 +54,18 @@ public class ProductServiceImpl implements ProductService {
         product.setCategory(category);
         product.setFoodOptions(foodOptions);
 
-
-            if (files.containsKey("product") && !files.get("product").isEmpty()) {
-                MultipartFile file = files.get("product").get(0);
-                String url = cloudinaryUpload.uploadFile(file);
+            if (avatar != null && !avatar.isEmpty()) {
+                System.out.println("Uploading Avatar: " + avatar.getOriginalFilename());
+                String url = cloudinaryUpload.uploadFile(avatar);
                 product.setImage(url);
+                System.out.println("Avatar URL: " + url);
             }
 
-            if (files.containsKey("option")) {
-                List<MultipartFile> uploadedFiles = files.get("option");
-
-                // Đảm bảo số lượng ảnh không vượt quá số lượng phần tử trong danh sách foodOptionList
-                int size = Math.min(uploadedFiles.size(), foodOptions.size());
-                for (int i = 0; i < size; i++) {
-                    String url = cloudinaryUpload.uploadFile(uploadedFiles.get(i)); // Upload từng ảnh
-                    foodOptions.get(i).setImage(url); // Gán ảnh cho từng FoodOption tương ứng
+            if (option != null && !option.isEmpty()) {
+                System.out.println("Uploading " + option.size() + " option images");
+                for (int i = 0; i < option.size(); i++) {
+                    String url = cloudinaryUpload.uploadFile(option.get(i));
+                    foodOptions.get(i).setImage(url);
                 }
             }
 

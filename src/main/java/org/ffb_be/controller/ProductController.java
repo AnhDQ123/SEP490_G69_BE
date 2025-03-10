@@ -77,13 +77,14 @@ public class ProductController {
         return ResponseEntity.ok(productResponseDTO);
     }
     @PostMapping("/add")
-    public ResponseEntity<?> addEmployee(@Validated @ModelAttribute("product") ProductCreateDTO productCreateDTO,
+    public ResponseEntity<?> addEmployee(@Validated @ModelAttribute("employee") ProductCreateDTO productCreateDTO,
                                          BindingResult bindingResult,
-                                         @RequestParam("avatar") Map<String, List<MultipartFile>> files) throws IOException {
+                                         @RequestParam("avatar") MultipartFile avatar,
+                                         @RequestParam("avatar")  List<MultipartFile> option) throws IOException {
         if(bindingResult.hasErrors()) {
-            return ResponseEntity.badRequest().body("Invalid data!");
+            return ResponseEntity.badRequest().body(bindingResult.getAllErrors());
         }
-        productService.save(productCreateDTO, files);
+        productService.save(productCreateDTO, avatar, option);
         return ResponseEntity.ok().body(productCreateDTO);
 
     }

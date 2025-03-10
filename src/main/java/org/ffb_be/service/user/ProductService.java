@@ -14,6 +14,6 @@ import java.util.Map;
 
 @Service
 public interface ProductService {
-   void save(ProductCreateDTO productCreateDTO, Map<String, List<MultipartFile>> files) throws IOException;
+   void save(ProductCreateDTO productCreateDTO,MultipartFile avatar, List<MultipartFile>option) throws IOException;
     Page<ProductResponseDTO> findAll(Long id,Pageable pageable);
 }
