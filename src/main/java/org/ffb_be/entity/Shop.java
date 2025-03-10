@@ -3,6 +3,7 @@ package org.ffb_be.entity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.ffb_be.utils.enums.Status;
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Data
 public class Shop extends BaseEntity{
     @Id
     @Column(name = "shop_id")
@@ -50,6 +52,12 @@ public class Shop extends BaseEntity{
 
     @Enumerated(EnumType.STRING)
     private Status is_active;
+
+    @Column(name="is_shipping")
+    private Boolean is_shipping;
+
+    @Column(name="is_opening")
+    private Boolean is_opening;
 
     @OneToMany(mappedBy = "shop")
     private List<Product> products;

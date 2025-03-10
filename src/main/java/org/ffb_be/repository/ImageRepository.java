@@ -9,7 +9,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Repository
 public interface ImageRepository extends JpaRepository<Image, Long> {
@@ -20,4 +19,18 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
     @Modifying
     @Query("DELETE FROM Image i WHERE i.relatedId = :blogId AND i.type.category = 'BLOG'")
     void deleteByBlogId(@Param("blogId") Long blogId);
+
+    @Transactional
+    @Modifying
+    @Query("DELETE FROM Image i WHERE i.relatedId = :blogId AND i.type.category = 'BLOG' AND i.url NOT IN :imageUrls")
+    void deleteByBlogIdAndUrlNotIn(Long blogId, List<String> imageUrls);
+
+    @Query("SELECT i.url FROM Image i WHERE i.type.category = 'BLOG' AND i.relatedId = :blogId")
+    List<String> findImageUrlsByBlogId(Long blogId);
+
+    @Transactional
+    @Modifying
+    @Query(value = "INSERT INTO images (url, type_id, related_id) VALUES (:url, :typeId, :blogId)", nativeQuery = true)
+    void saveBlogImages(@Param("url") String url, @Param("typeId") Long typeId, @Param("blogId") Long blogId);
+
 }

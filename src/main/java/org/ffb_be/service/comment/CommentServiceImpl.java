@@ -1,52 +1,113 @@
 package org.ffb_be.service.comment;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.ffb_be.dto.comment.CommentDTO;
+import org.ffb_be.entity.Blog;
 import org.ffb_be.entity.Comment;
+import org.ffb_be.exception.NotFoundException;
 import org.ffb_be.repository.BlogRepository;
 import org.ffb_be.repository.CommentRepository;
 import org.ffb_be.utils.mapping.CommentMapper;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 @Transactional
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class CommentServiceImpl implements CommentService{
     private final CommentRepository commentRepository;
     private final BlogRepository blogRepository;
     private final CommentMapper commentMapper;
 
-    public List<CommentDTO> getCommentsByBlogId(Long blogId) {
-        List<Comment> allComments = commentRepository.findByBlogId(blogId);
-        return allComments.stream()
-                .filter(comment -> comment.getParentComment() == null) // Chỉ lấy comment cha
-                .map(comment -> commentMapper.toDTOWithReplies(comment, allComments, 0, 3)) // Tối đa 3 cấp
+    @Override
+    public List<CommentDTO> getCommentsByBlogId(Long blogId, int offset, int limit) {
+        Pageable pageable = PageRequest.of(offset, limit, Sort.by("createdAt").ascending());
+        List<Comment> rootComments = commentRepository.findRootCommentsByBlogId(blogId, pageable);
+
+        boolean hasMoreComments = commentRepository.countByBlogId(blogId) > (offset + limit);
+
+        return rootComments.stream()
+                .map(comment -> {
+                    CommentDTO dto = commentMapper.toDTOWithReplies(comment, rootComments, 0, 3);
+                    dto.setHasMoreReplies(hasMoreComments);
+                    return dto;
+                })
                 .collect(Collectors.toList());
     }
 
-    public List<CommentDTO> getMoreReplies(Long parentId) {
-        List<Comment> replies = commentRepository.findByParentCommentId(parentId);
+    @Override
+    public List<CommentDTO> getMoreReplies(Long parentId, int offset, int limit) {
+        Pageable pageable = PageRequest.of(offset, limit, Sort.by("createdAt").ascending());
+        List<Comment> replies = commentRepository.findByParentCommentId(parentId, pageable);
+
+        boolean hasMoreReplies = commentRepository.countByParentCommentId(parentId) > (offset + limit);
 
         return replies.stream()
-                .map(reply -> commentMapper.toDTOWithReplies(reply, replies, 0, 3))
+                .map(reply -> {
+                    CommentDTO dto = commentMapper.toDTOWithReplies(reply, replies, 0, 3);
+                    dto.setHasMoreReplies(hasMoreReplies);
+                    return dto;
+                })
                 .collect(Collectors.toList());
     }
 
-    public CommentDTO addComment(Long blogId, Long parentId, String content, String username) {
-        Comment newComment = new Comment();
-        newComment.setContent(content);
-        newComment.setBlog(blogRepository.findById(blogId).orElseThrow());
-//        newComment.setWriter();
 
-        if (parentId != null) {
-            newComment.setParentComment(commentRepository.findById(parentId).orElseThrow());
+
+    @Override
+    public void addComment(Long blogId, CommentDTO commentDTO) {
+        Blog blog = blogRepository.findById(blogId)
+                .orElseThrow(() -> new NotFoundException("Blog"));
+
+        Comment comment = new Comment();
+        comment.setContent(commentDTO.getContent());
+        comment.setBlog(blog);
+        if (commentDTO.getParentId() != null) {
+            Comment parentComment = commentRepository.findById(commentDTO.getParentId())
+                    .orElseThrow(() -> new NotFoundException("Parent comment"));
+            comment.setParentComment(parentComment);
+        }
+        commentRepository.save(comment);
+    }
+
+    @Override
+    public void toggleLikeComment(Long commentId, Long userId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new NotFoundException("Comment not found"));
+
+        Set<Long> likedUserSet = new HashSet<>();
+        if (comment.getLikedUsers() != null) {
+            likedUserSet.addAll(Arrays.stream(comment.getLikedUsers().split(","))
+                    .map(Long::parseLong).collect(Collectors.toSet()));
         }
 
-        Comment savedComment = commentRepository.save(newComment);
-        return commentMapper.toDTO(savedComment);
+        if (likedUserSet.contains(userId)) {
+            likedUserSet.remove(userId);
+            comment.setLikeCount(comment.getLikeCount() - 1);
+        } else {
+            likedUserSet.add(userId);
+            comment.setLikeCount(comment.getLikeCount() + 1);
+        }
+
+        comment.setLikedUsers(likedUserSet.isEmpty() ? null : likedUserSet.stream()
+                .map(String::valueOf).collect(Collectors.joining(",")));
+
+        commentRepository.save(comment);
+    }
+
+    @Override
+    public void deleteComment(Long commentId) {
+        if (!commentRepository.existsById(commentId)) {
+            throw new NotFoundException("Comment not found");
+        }
+        commentRepository.deleteById(commentId);
     }
 }
