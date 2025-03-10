@@ -14,4 +14,5 @@ public interface ProfileRepository extends JpaRepository<Profile, Long> {
             "FROM Profile p WHERE p.user.id = :userId")
     Optional<ProfileDTO> findByUserId( Long userId);
 
+    Optional<Profile> getByUserId(Long userId);
 }
