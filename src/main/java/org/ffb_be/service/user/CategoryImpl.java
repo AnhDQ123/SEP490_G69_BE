@@ -2,8 +2,7 @@ package org.ffb_be.service.user;
 
 import org.ffb_be.entity.Category;
 import org.ffb_be.repository.CategoryRepository;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,5 +20,6 @@ public class CategoryImpl implements CategoryService {
     public List<Category> findAll() {
         return categoryRepository.findAll();
     }
+
 
 }

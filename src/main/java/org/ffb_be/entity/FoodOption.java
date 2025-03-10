@@ -28,9 +28,6 @@ public class FoodOption extends BaseEntity {
     @Column(name="price")
     private BigDecimal price;
 
-    @Column(name="quantity")
-    private int quantity;
-
     @Enumerated(EnumType.STRING)
     private Status status;
 

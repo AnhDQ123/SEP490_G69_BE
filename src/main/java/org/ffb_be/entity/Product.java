@@ -9,7 +9,7 @@ import org.ffb_be.utils.enums.Status;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Set;
+
 
 @Entity
 @Table(name = "products")
@@ -32,6 +32,9 @@ public class Product extends BaseEntity {
     @Column
     private int quantity;
 
+    @Column
+    private String image;
+
     @Column(name="supplier")
     private String supplier;
 
@@ -39,7 +42,7 @@ public class Product extends BaseEntity {
     private LocalDate expired_date;
 
     @Column(name="description")
-    private LocalDate description;
+    private String description;
 
     @Column(name="rate")
     private Float rate;

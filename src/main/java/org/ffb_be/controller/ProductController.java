@@ -17,10 +17,15 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -70,5 +75,16 @@ public class ProductController {
         productResponseDTO.setFoodOption(foodOptionDTOs);
         productResponseDTO.setCategory(category.getName());
         return ResponseEntity.ok(productResponseDTO);
+    }
+    @PostMapping("/add")
+    public ResponseEntity<?> addEmployee(@Validated @ModelAttribute("product") ProductCreateDTO productCreateDTO,
+                                         BindingResult bindingResult,
+                                         @RequestParam("avatar") Map<String, List<MultipartFile>> files) throws IOException {
+        if(bindingResult.hasErrors()) {
+            return ResponseEntity.badRequest().body("Invalid data!");
+        }
+        productService.save(productCreateDTO, files);
+        return ResponseEntity.ok().body(productCreateDTO);
+
     }
 }
