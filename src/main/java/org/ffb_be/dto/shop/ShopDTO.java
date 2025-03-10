@@ -16,6 +16,7 @@ public class ShopDTO {
     private String description;
     private String logo;
     private String backgroundImage;
+    private String menu;
     private String phone;
     private String address;
     private int rate;

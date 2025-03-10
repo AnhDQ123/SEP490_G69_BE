@@ -20,7 +20,8 @@ public interface ShopService {
             MultipartFile citizenIDFront,
             MultipartFile citizenIDBack,
             MultipartFile registrationCert,
-            MultipartFile foodSafetyCert
+            MultipartFile foodSafetyCert,
+            MultipartFile menu
     ) throws IOException;
 
     ShopDTO getShopById(Long shopId);

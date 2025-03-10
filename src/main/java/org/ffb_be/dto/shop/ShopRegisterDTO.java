@@ -20,7 +20,6 @@ public class ShopRegisterDTO {
     private String address;
     private String taxCode;
     private String citizenIDNumber;
-    @DateTimeFormat(pattern = "dd/MM/yyyy")
     private LocalDate citizenIDExpiredDate;
     private Boolean isShipping;
     private Boolean isOpening;

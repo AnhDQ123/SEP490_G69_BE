@@ -52,7 +52,8 @@ public class ShopServiceImpl implements ShopService {
             MultipartFile citizenIDFront,
             MultipartFile citizenIDBack,
             MultipartFile registrationCert,
-            MultipartFile foodSafetyCert
+            MultipartFile foodSafetyCert,
+            MultipartFile menu
     ) throws IOException {
         if (shopRepository.existsByOwnerId(userId)) {
             throw new BadRequestException("User đã có cửa hàng.");
@@ -78,6 +79,9 @@ public class ShopServiceImpl implements ShopService {
 
         String registrationCertUrl = cloudinaryUpload.uploadFile(registrationCert);
         if (registrationCertUrl != null) shop.setRegistrationCertificate(registrationCertUrl);
+
+        String menuUrl = cloudinaryUpload.uploadFile(menu);
+        if (menuUrl != null) shop.setMenu(menuUrl);
 
         String foodSafetyCertUrl = cloudinaryUpload.uploadFile(foodSafetyCert);
         if (foodSafetyCertUrl != null) shop.setFoodSafetyCertificate(foodSafetyCertUrl);

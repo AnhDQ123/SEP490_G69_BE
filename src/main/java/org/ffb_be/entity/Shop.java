@@ -45,6 +45,9 @@ public class Shop extends BaseEntity{
     @Column(name="food_safety_certificate")
     private String foodSafetyCertificate;
 
+    @Column(name="menu")
+    private String menu;
+
     @Column(name="rate")
     private Double rate;
 

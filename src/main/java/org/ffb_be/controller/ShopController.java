@@ -42,13 +42,14 @@ public class ShopController {
             @RequestParam(value = "citizenIDBack", required = false) MultipartFile citizenIDBack,
             @RequestParam(value = "registrationCert", required = false) MultipartFile registrationCert,
             @RequestParam(value = "foodSafetyCert", required = false) MultipartFile foodSafetyCert,
+            @RequestParam(value = "menu", required = false) MultipartFile menu,
             BindingResult result
     ) throws IOException {
         if (result.hasErrors()) {
             return ResponseEntity.badRequest().body(result.getAllErrors());
         }
         // Gửi toàn bộ file lên Service, kể cả file rỗng
-        shopService.registerShop(userId, shopDTO, logo, citizenIDFront, citizenIDBack, registrationCert, foodSafetyCert);
+        shopService.registerShop(userId, shopDTO, logo, citizenIDFront, citizenIDBack, registrationCert, foodSafetyCert, menu);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }
