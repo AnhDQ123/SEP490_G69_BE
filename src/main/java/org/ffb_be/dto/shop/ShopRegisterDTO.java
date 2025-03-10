@@ -9,6 +9,7 @@ import org.ffb_be.utils.enums.SellType;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Data
 @AllArgsConstructor
@@ -22,8 +23,7 @@ public class ShopRegisterDTO {
     private String citizenIDNumber;
     @DateTimeFormat(pattern = "dd/MM/yyyy")
     private LocalDate citizenIDExpiredDate;
-    private Boolean isShipping;
-    private Boolean isOpening;
     private SellType sellType;
-    private String openTime;
+    private LocalTime openTime;
+    private LocalTime closeTime;
 }
