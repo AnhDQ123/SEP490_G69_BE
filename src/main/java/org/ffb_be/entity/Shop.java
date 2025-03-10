@@ -63,7 +63,11 @@ public class Shop extends BaseEntity{
     @Column(name="is_opening")
     private Boolean isOpening;
 
+    @Column(name="open_time")
     private String openTime;
+
+    @Column(name="close_time")
+    private String closeTime;
 
     @OneToMany(mappedBy = "shop")
     private List<Product> products;
