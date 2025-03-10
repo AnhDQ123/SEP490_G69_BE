@@ -11,8 +11,12 @@ import java.util.Base64;
 public class EncryptUtil {
     private final SecretKeySpec secretKey;
 
-    public EncryptUtil(@Value("${aes.secret.key}") String secretKey) {
-        this.secretKey = new SecretKeySpec(secretKey.getBytes(), "AES");
+
+    public EncryptUtil(@Value("${aes.secret.key}") String key) {
+        if (key.length() != 16 && key.length() != 24 && key.length() != 32) {
+            throw new IllegalArgumentException("AES key must be 16, 24, or 32 bytes long.");
+        }
+        this.secretKey = new SecretKeySpec(key.getBytes(), "AES");
     }
 
     public String encrypt(String data) {

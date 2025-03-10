@@ -12,7 +12,6 @@ import java.time.LocalDate;
 public class BusinessProfileDTO {
     private Long id;
     private String name;
-    private String address;
     private String avatar;
     private String tax_code;
     private String citizenIDNumber;

@@ -5,12 +5,23 @@ import org.ffb_be.dto.shop.ShopRegisterDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 public interface ShopService {
     Page<ShopDTO> getShops(Pageable pageable);
 
     @Transactional
-    ShopRegisterDTO registerShop(Long userId, ShopRegisterDTO shopDTO);
+    void registerShop(
+            Long userId,
+            ShopRegisterDTO shopDTO,
+            MultipartFile logo,
+            MultipartFile citizenIDFront,
+            MultipartFile citizenIDBack,
+            MultipartFile registrationCert,
+            MultipartFile foodSafetyCert
+    ) throws IOException;
 
     ShopDTO getShopById(Long shopId);
 }

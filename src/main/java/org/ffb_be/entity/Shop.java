@@ -46,10 +46,10 @@ public class Shop extends BaseEntity{
     private String foodSafetyCertificate;
 
     @Column(name="rate")
-    private double rate;
+    private Double rate;
 
     @Column(name="view_count")
-    private int viewCount;
+    private Integer viewCount;
 
     @Enumerated(EnumType.STRING)
     private Status isActive;
@@ -59,6 +59,8 @@ public class Shop extends BaseEntity{
 
     @Column(name="is_opening")
     private Boolean isOpening;
+
+    private String openTime;
 
     @OneToMany(mappedBy = "shop")
     private List<Product> products;

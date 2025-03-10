@@ -6,8 +6,15 @@ import org.ffb_be.dto.shop.ShopRegisterDTO;
 import org.ffb_be.service.shop.ShopService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/shops")
@@ -16,39 +23,33 @@ import org.springframework.web.bind.annotation.*;
 public class ShopController {
     private final ShopService shopService;
 
-    // 📌 Lấy danh sách các shop có phân trang
     @GetMapping
-    public ResponseEntity<Page<ShopDTO>> getAllShops(Pageable pageable) {
+    public ResponseEntity<Page<ShopDTO>> getShops(Pageable pageable) {
         return ResponseEntity.ok(shopService.getShops(pageable));
     }
 
-    // 📌 Lấy thông tin shop theo ID
-    @GetMapping("/{id}")
-    public ResponseEntity<ShopDTO> getShopById(@PathVariable Long id) {
-        return ResponseEntity.ok(shopService.getShopById(id));
+    @GetMapping("/{shopId}")
+    public ResponseEntity<ShopDTO> getShopById(@PathVariable Long shopId) {
+        return ResponseEntity.ok(shopService.getShopById(shopId));
     }
 
-    // 📌 Đăng ký shop mới (gắn với một User)
-    @PostMapping("/register/{userId}")
-    public ResponseEntity<ShopRegisterDTO> registerShop(
-            @PathVariable Long userId,
-            @RequestBody ShopRegisterDTO shopDTO) {
-        return ResponseEntity.ok(shopService.registerShop(userId, shopDTO));
+    @PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> registerShop(
+            @RequestParam Long userId,
+            @Validated @ModelAttribute ShopRegisterDTO shopDTO,
+            @RequestParam(value = "logo", required = false) MultipartFile logo,
+            @RequestParam(value = "citizenIDFront", required = false) MultipartFile citizenIDFront,
+            @RequestParam(value = "citizenIDBack", required = false) MultipartFile citizenIDBack,
+            @RequestParam(value = "registrationCert", required = false) MultipartFile registrationCert,
+            @RequestParam(value = "foodSafetyCert", required = false) MultipartFile foodSafetyCert,
+            BindingResult result
+    ) throws IOException {
+        if (result.hasErrors()) {
+            return ResponseEntity.badRequest().body(result.getAllErrors());
+        }
+        // Gửi toàn bộ file lên Service, kể cả file rỗng
+        shopService.registerShop(userId, shopDTO, logo, citizenIDFront, citizenIDBack, registrationCert, foodSafetyCert);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
-
-//    // 📌 Xóa shop theo ID
-//    @DeleteMapping("/{id}")
-//    public ResponseEntity<Void> deleteShop(@PathVariable Long id) {
-//        shopService.deleteShop(id);
-//        return ResponseEntity.noContent().build();
-//    }
-//
-//    // 📌 Cập nhật thông tin shop
-//    @PutMapping("/{id}")
-//    public ResponseEntity<ShopDTO> updateShop(
-//            @PathVariable Long id,
-//            @RequestBody ShopDTO shopDTO) {
-//        return ResponseEntity.ok(shopService.updateShop(id, shopDTO));
-//    }
 }
 
