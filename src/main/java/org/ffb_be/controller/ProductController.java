@@ -3,6 +3,7 @@ package org.ffb_be.controller;
 import org.ffb_be.dto.product.FoodOptionDTO;
 import org.ffb_be.dto.product.ProductCreateDTO;
 import org.ffb_be.dto.product.ProductResponseDTO;
+import org.ffb_be.dto.shop.ShopDTO;
 import org.ffb_be.entity.Category;
 import org.ffb_be.entity.Discount;
 import org.ffb_be.entity.FoodOption;
@@ -13,6 +14,7 @@ import org.ffb_be.repository.FoodOptionRepository;
 import org.ffb_be.repository.ProductRepository;
 import org.ffb_be.service.product.ProductService;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -85,6 +87,10 @@ public class ProductController {
         }
         productService.save(productCreateDTO, avatar, option);
         return ResponseEntity.ok().body(productCreateDTO);
-
     }
+    @GetMapping
+    public ResponseEntity<Page<ProductResponseDTO>> getShops(Pageable pageable) {
+        return ResponseEntity.ok(productService.findAll(pageable));
+    }
+
 }
