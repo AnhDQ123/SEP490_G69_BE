@@ -1,4 +1,4 @@
-package org.ffb_be.dto.auth.product;
+package org.ffb_be.dto.product;
 
 import lombok.Data;
 

@@ -1,6 +1,6 @@
-package org.ffb_be.service.user;
+package org.ffb_be.service.category;
 
-import org.ffb_be.dto.auth.category.CategoryDTO;
+import org.ffb_be.dto.category.CategoryDTO;
 
 import org.ffb_be.repository.CategoryRepository;
 
@@ -9,11 +9,13 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class CategoryImpl implements CategoryService {
+public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
 
-    public CategoryImpl(CategoryRepository categoryRepository) {
+
+
+    public CategoryServiceImpl(CategoryRepository categoryRepository) {
         this.categoryRepository = categoryRepository;
     }
 
@@ -21,6 +23,5 @@ public class CategoryImpl implements CategoryService {
     public List<CategoryDTO> findAll() {
         return categoryRepository.findAllCategories();
     }
-
-
 }
+

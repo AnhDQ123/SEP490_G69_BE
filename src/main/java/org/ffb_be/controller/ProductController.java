@@ -1,8 +1,8 @@
 package org.ffb_be.controller;
 
-import org.ffb_be.dto.auth.product.FoodOptionDTO;
-import org.ffb_be.dto.auth.product.ProductCreateDTO;
-import org.ffb_be.dto.auth.product.ProductResponseDTO;
+import org.ffb_be.dto.product.FoodOptionDTO;
+import org.ffb_be.dto.product.ProductCreateDTO;
+import org.ffb_be.dto.product.ProductResponseDTO;
 import org.ffb_be.entity.Category;
 import org.ffb_be.entity.Discount;
 import org.ffb_be.entity.FoodOption;
@@ -11,7 +11,7 @@ import org.ffb_be.repository.CategoryRepository;
 import org.ffb_be.repository.DiscountRepository;
 import org.ffb_be.repository.FoodOptionRepository;
 import org.ffb_be.repository.ProductRepository;
-import org.ffb_be.service.user.ProductService;
+import org.ffb_be.service.product.ProductService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,7 +25,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -49,7 +48,7 @@ public class ProductController {
                                     @RequestParam(value = "page", defaultValue = "1", required = false) Integer page,
                                     @RequestParam(value = "size", defaultValue = "20", required = false) Integer size) {
         Pageable pageable = PageRequest.of(page-1, size);
-        return ResponseEntity.ok( productService.findAll(id,pageable));
+        return ResponseEntity.ok( productService.findAllByShop(id,pageable));
     }
     @GetMapping("/product/{id}")
     public ResponseEntity<?> getProductById(@PathVariable Long id) {
@@ -77,7 +76,7 @@ public class ProductController {
         return ResponseEntity.ok(productResponseDTO);
     }
     @PostMapping("/add")
-    public ResponseEntity<?> addEmployee(@Validated @ModelAttribute("employee") ProductCreateDTO productCreateDTO,
+    public ResponseEntity<?> addProduct(@Validated @ModelAttribute("employee") ProductCreateDTO productCreateDTO,
                                          BindingResult bindingResult,
                                          @RequestParam("avatar") MultipartFile avatar,
                                          @RequestParam("avatar")  List<MultipartFile> option) throws IOException {

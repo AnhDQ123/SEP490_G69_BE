@@ -1,10 +1,9 @@
-package org.ffb_be.service.user;
-
+package org.ffb_be.service.product;
 
 import jakarta.persistence.EntityNotFoundException;
 
-import org.ffb_be.dto.auth.product.ProductCreateDTO;
-import org.ffb_be.dto.auth.product.ProductResponseDTO;
+import org.ffb_be.dto.product.ProductCreateDTO;
+import org.ffb_be.dto.product.ProductResponseDTO;
 
 import org.ffb_be.entity.Category;
 import org.ffb_be.entity.FoodOption;
@@ -22,7 +21,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 
 import java.util.List;
-import java.util.Map;
 
 
 @Service
@@ -39,7 +37,7 @@ public class ProductServiceImpl implements ProductService {
         this.foodOptionRepository = foodOptionRepository;
     }
 
-        public void save(ProductCreateDTO productCreateDTO,MultipartFile avatar, List<MultipartFile>option) throws IOException {
+    public void save(ProductCreateDTO productCreateDTO,MultipartFile avatar, List<MultipartFile>option) throws IOException {
         Product product = new Product();
         Category category = categoryRepository.findById(productCreateDTO.getCategory_id())
                 .orElseThrow(() -> new EntityNotFoundException("Category not found!"));
@@ -54,31 +52,39 @@ public class ProductServiceImpl implements ProductService {
         product.setCategory(category);
         product.setFoodOptions(foodOptions);
 
-            if (avatar != null && !avatar.isEmpty()) {
-                System.out.println("Uploading Avatar: " + avatar.getOriginalFilename());
-                String url = cloudinaryUpload.uploadFile(avatar);
-                product.setImage(url);
-                System.out.println("Avatar URL: " + url);
-            }
+        if (avatar != null && !avatar.isEmpty()) {
+            System.out.println("Uploading Avatar: " + avatar.getOriginalFilename());
+            String url = cloudinaryUpload.uploadFile(avatar);
+            product.setImage(url);
+            System.out.println("Avatar URL: " + url);
+        }
 
-            if (option != null && !option.isEmpty()) {
-                System.out.println("Uploading " + option.size() + " option images");
-                for (int i = 0; i < option.size(); i++) {
-                    String url = cloudinaryUpload.uploadFile(option.get(i));
-                    foodOptions.get(i).setImage(url);
-                }
+        if (option != null && !option.isEmpty()) {
+            System.out.println("Uploading " + option.size() + " option images");
+            for (int i = 0; i < option.size(); i++) {
+                String url = cloudinaryUpload.uploadFile(option.get(i));
+                foodOptions.get(i).setImage(url);
             }
+        }
 
         productRepository.save(product);
         foodOptionRepository.saveAll(foodOptions);
     }
 
     @Override
-    public Page<ProductResponseDTO> findAll(Long id,Pageable pageable) {
+    public Page<ProductResponseDTO> findAllByShop(Long id,Pageable pageable) {
         return productRepository.findAllByShop_Id(id,pageable).map(product -> {
             ProductResponseDTO productResponseDTO = new ProductResponseDTO();
             BeanUtils.copyProperties(product, productResponseDTO);
             return productResponseDTO;
         });
-}
+    }
+    @Override
+    public Page<ProductResponseDTO> findAll(Pageable pageable) {
+        return productRepository.findAll(pageable).map(product -> {
+            org.ffb_be.dto.product.ProductResponseDTO productResponseDTO = new org.ffb_be.dto.product.ProductResponseDTO();
+            BeanUtils.copyProperties(product, productResponseDTO);
+            return productResponseDTO;
+        });
+    }
 }

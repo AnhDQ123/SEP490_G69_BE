@@ -1,6 +1,6 @@
-package org.ffb_be.service.user;
+package org.ffb_be.service.category;
 
-import org.ffb_be.dto.auth.category.CategoryDTO;
+import org.ffb_be.dto.category.CategoryDTO;
 
 import org.springframework.stereotype.Service;
 

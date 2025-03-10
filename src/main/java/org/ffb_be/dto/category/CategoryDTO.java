@@ -1,4 +1,4 @@
-package org.ffb_be.dto.auth.category;
+package org.ffb_be.dto.category;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

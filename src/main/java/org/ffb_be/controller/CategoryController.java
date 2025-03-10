@@ -1,8 +1,6 @@
 package org.ffb_be.controller;
 
-import org.ffb_be.repository.CategoryRepository;
-import org.ffb_be.service.user.CategoryService;
-
+import org.ffb_be.service.category.CategoryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
