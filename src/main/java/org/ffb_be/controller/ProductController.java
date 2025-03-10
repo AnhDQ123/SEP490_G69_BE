@@ -88,8 +88,8 @@ public class ProductController {
         productService.save(productCreateDTO, avatar, option);
         return ResponseEntity.ok().body(productCreateDTO);
     }
-    @GetMapping
-    public ResponseEntity<Page<ProductResponseDTO>> getShops(Pageable pageable) {
+    @GetMapping("/all")
+    public ResponseEntity<Page<ProductResponseDTO>> getAllProduct(Pageable pageable) {
         return ResponseEntity.ok(productService.findAll(pageable));
     }
 
