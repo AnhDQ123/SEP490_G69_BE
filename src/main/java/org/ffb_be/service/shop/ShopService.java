@@ -10,7 +10,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 
 public interface ShopService {
-    Page<ShopDTO> getShops(Pageable pageable);
+
+    Page<ShopDTO> getShops(String status, String search, Pageable pageable);
 
     @Transactional
     void registerShop(

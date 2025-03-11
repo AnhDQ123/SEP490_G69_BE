@@ -24,8 +24,13 @@ public class ShopController {
     private final ShopService shopService;
 
     @GetMapping
-    public ResponseEntity<Page<ShopDTO>> getShops(Pageable pageable) {
-        return ResponseEntity.ok(shopService.getShops(pageable));
+    public ResponseEntity<Page<ShopDTO>> getShops(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String search,
+            Pageable pageable) {
+
+        Page<ShopDTO> shops = shopService.getShops(status, search, pageable);
+        return ResponseEntity.ok(shops);
     }
 
     @GetMapping("/{shopId}")

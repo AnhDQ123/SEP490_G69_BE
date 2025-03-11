@@ -22,6 +22,8 @@ public class ShopRegisterDTO {
     private String taxCode;
     private String citizenIDNumber;
     private LocalDate citizenIDExpiredDate;
+    private String accountNumber;
+    private String bankName;
     private SellType sellType;
     private LocalTime openTime;
     private LocalTime closeTime;

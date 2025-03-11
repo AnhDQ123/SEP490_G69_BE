@@ -69,6 +69,12 @@ public class Shop extends BaseEntity{
     @Column(name="close_time")
     private String closeTime;
 
+    @Column(name="account_number")
+    private String accountNumber;
+
+    @Column(name="bank_code")
+    private String bankCode;
+
     @OneToMany(mappedBy = "shop")
     private List<Product> products;
 
