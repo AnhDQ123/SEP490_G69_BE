@@ -10,6 +10,7 @@ public class FoodOptionDTO {
     private String name;
     private BigDecimal price;
     private String image;
-    private String type_id;
+    private Long type_id;
     private String status;
+    private Long product_id;
 }

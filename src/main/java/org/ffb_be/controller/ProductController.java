@@ -83,10 +83,10 @@ public class ProductController {
         return ResponseEntity.ok(productResponseDTO);
     }
     @PostMapping("/add")
-    public ResponseEntity<?> addProduct(@Validated @ModelAttribute("employee") ProductCreateDTO productCreateDTO,
+    public ResponseEntity<?> addProduct(@Validated @ModelAttribute() ProductCreateDTO productCreateDTO,
                                          BindingResult bindingResult,
                                          @RequestParam("avatar") MultipartFile avatar,
-                                         @RequestParam("avatar")  List<MultipartFile> option) throws IOException {
+                                         @RequestParam("option")  List<MultipartFile> option) throws IOException {
         if(bindingResult.hasErrors()) {
             return ResponseEntity.badRequest().body(bindingResult.getAllErrors());
         }

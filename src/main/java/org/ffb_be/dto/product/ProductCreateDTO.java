@@ -1,7 +1,6 @@
 package org.ffb_be.dto.product;
 
 import lombok.Data;
-import org.ffb_be.entity.FoodOption;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -12,7 +11,7 @@ public class ProductCreateDTO {
     private Long category_id;
     private int quantity;
     private LocalDate expiryDate;
-    private List<FoodOption> foodOption;
+    private List<FoodOptionDTO> foodOption;
     private String supplier;
     private String manufacturer;
 }
