@@ -80,6 +80,12 @@ public class ShopController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/isOpen")
+    public ResponseEntity<Boolean> isShopOpen(@RequestParam Long shopId) {
+        boolean isOpen = shopService.isShopOpen(shopId);
+        return ResponseEntity.ok(isOpen);
+    }
+
     @PutMapping("/{shopId}/status")
     public ResponseEntity<Void> updateShopStatus(
             @PathVariable Long shopId,

@@ -41,5 +41,7 @@ public interface ShopService {
     @Transactional
     void updateShopStatus(Long shopId, Status newStatus);
 
+    boolean isShopOpen(Long shopId);
+
     ShopDTO getShopById(Long shopId);
 }

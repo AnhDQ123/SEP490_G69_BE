@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.ffb_be.utils.enums.SellType;
 import org.ffb_be.utils.enums.Status;
+
+import java.time.LocalTime;
 import java.util.List;
 
 @Entity
@@ -64,10 +66,10 @@ public class Shop extends BaseEntity{
     private Boolean isOpening;
 
     @Column(name="open_time")
-    private String openTime;
+    private LocalTime openTime;
 
     @Column(name="close_time")
-    private String closeTime;
+    private LocalTime closeTime;
 
     @Column(name="account_number")
     private String accountNumber;

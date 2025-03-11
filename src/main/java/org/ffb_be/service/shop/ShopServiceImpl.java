@@ -27,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Service
 @Transactional
@@ -154,8 +155,8 @@ public class ShopServiceImpl implements ShopService {
             shop.setAccountNumber(encryptSafe(shopDTO.getAccountNumber()));
             requireApproval = true;
         }
-        if (shopDTO.getBankName() != null && !shopDTO.getBankName().equals(shop.getBankCode())) {
-            shop.setBankCode(shopDTO.getBankName());
+        if (shopDTO.getBankCode() != null && !shopDTO.getBankCode().equals(shop.getBankCode())) {
+            shop.setBankCode(shopDTO.getBankCode());
             requireApproval = true;
         }
         if (registrationCert != null && !registrationCert.isEmpty()) {
@@ -210,6 +211,30 @@ public class ShopServiceImpl implements ShopService {
 
         shop.setIsActive(newStatus);
         shopRepository.save(shop);
+    }
+
+    @Override
+    public boolean isShopOpen(Long shopId) {
+        Shop shop = shopRepository.findById(shopId)
+                .orElseThrow(() -> new RuntimeException("Shop not found"));
+
+        LocalTime now = LocalTime.now();
+        LocalTime openTime = shop.getOpenTime();
+        LocalTime closeTime = shop.getCloseTime();
+
+        // Trường hợp mở 24/24
+        if (openTime.equals(closeTime)) {
+            return true;
+        }
+
+        // Trường hợp mở qua đêm
+        boolean isOvernight = closeTime.isBefore(openTime);
+
+        if (isOvernight) {
+            return now.isAfter(openTime) || now.isBefore(closeTime);
+        } else {
+            return now.isAfter(openTime) && now.isBefore(closeTime);
+        }
     }
 
 

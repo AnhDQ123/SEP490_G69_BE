@@ -15,7 +15,7 @@ public interface ShopMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "accountNumber", ignore = true)
-    @Mapping(target = "bankName", ignore = true)
+    @Mapping(target = "bankCode", ignore = true)
     void updateShopFromDTO(ShopRegisterDTO dto, @MappingTarget Shop shop);
 }
 
