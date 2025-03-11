@@ -6,9 +6,11 @@ import org.ffb_be.dto.product.ProductCreateDTO;
 import org.ffb_be.dto.product.ProductResponseDTO;
 
 import org.ffb_be.entity.Category;
+import org.ffb_be.entity.Discount;
 import org.ffb_be.entity.FoodOption;
 import org.ffb_be.entity.Product;
 import org.ffb_be.repository.CategoryRepository;
+import org.ffb_be.repository.DiscountRepository;
 import org.ffb_be.repository.FoodOptionRepository;
 import org.ffb_be.repository.ProductRepository;
 import org.ffb_be.utils.enums.upload.CloudinaryUpload;
@@ -20,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 
@@ -30,11 +33,13 @@ public class ProductServiceImpl implements ProductService {
     private final CategoryRepository categoryRepository;
     private final CloudinaryUpload cloudinaryUpload;
     private final FoodOptionRepository foodOptionRepository;
-    public ProductServiceImpl(ProductRepository productRepository, CategoryRepository categoryRepository, CloudinaryUpload cloudinaryUpload, FoodOptionRepository foodOptionRepository) {
+    private final DiscountRepository discountRepository;
+    public ProductServiceImpl(ProductRepository productRepository, CategoryRepository categoryRepository, CloudinaryUpload cloudinaryUpload, FoodOptionRepository foodOptionRepository, DiscountRepository discountRepository) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
         this.cloudinaryUpload = cloudinaryUpload;
         this.foodOptionRepository = foodOptionRepository;
+        this.discountRepository = discountRepository;
     }
 
     public void save(ProductCreateDTO productCreateDTO,MultipartFile avatar, List<MultipartFile>option) throws IOException {
@@ -82,7 +87,14 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Page<ProductResponseDTO> findAll(Pageable pageable) {
         return productRepository.findAll(pageable).map(product -> {
-            org.ffb_be.dto.product.ProductResponseDTO productResponseDTO = new org.ffb_be.dto.product.ProductResponseDTO();
+            ProductResponseDTO productResponseDTO = new ProductResponseDTO();
+            if (product.getDiscount() != null && product.getDiscount().getId() != null) {
+                Discount d = discountRepository.findById(product.getDiscount().getId());
+                productResponseDTO.setDiscount(d.getDiscount_percentage());
+            } else {
+                productResponseDTO.setDiscount(BigDecimal.ZERO);
+            }
+            productResponseDTO.setCategory(product.getCategory().getName());
             BeanUtils.copyProperties(product, productResponseDTO);
             return productResponseDTO;
         });

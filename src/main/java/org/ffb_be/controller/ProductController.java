@@ -52,7 +52,7 @@ public class ProductController {
         Pageable pageable = PageRequest.of(page-1, size);
         return ResponseEntity.ok( productService.findAllByShop(id,pageable));
     }
-    @GetMapping("/product/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<?> getProductById(@PathVariable Long id) {
         Optional<Product> productOptional = productRepository.findById(id);
         if (productOptional.isEmpty()) {
@@ -69,11 +69,13 @@ public class ProductController {
             foodOptionDTOs.add(dto);
         }
         BeanUtils.copyProperties(product, productResponseDTO);
-        if (product.getDiscount().getId() != null) {
-            Discount d= discountRepository.findById(product.getDiscount().getId());
+        if (product.getDiscount() != null && product.getDiscount().getId() != null) {
+            Discount d = discountRepository.findById(product.getDiscount().getId());
             productResponseDTO.setDiscount(d.getDiscount_percentage());
+        } else {
+            productResponseDTO.setDiscount(BigDecimal.ZERO);
         }
-        else productResponseDTO.setDiscount(BigDecimal.ZERO);
+
         Optional<Category> c=categoryRepository.findById(product.getCategory().getId());
         Category category = c.get();
         productResponseDTO.setFoodOption(foodOptionDTOs);
@@ -91,7 +93,7 @@ public class ProductController {
         productService.save(productCreateDTO, avatar, option);
         return ResponseEntity.ok().body(productCreateDTO);
     }
-    @GetMapping("/filter")
+    @GetMapping("/filter") //filter
     public ResponseEntity<?> getByCategory(@RequestParam String cat) {
         Category category = categoryRepository.findByName(cat);
         List<Product> productList=productRepository.findAllByCategory(category);
@@ -99,6 +101,14 @@ public class ProductController {
         for (Product product : productList) {
             ProductResponseDTO productResponseDTO = new ProductResponseDTO();
             BeanUtils.copyProperties(product, productResponseDTO);
+            if (product.getDiscount() != null && product.getDiscount().getId() != null) {
+                Discount d = discountRepository.findById(product.getDiscount().getId());
+                productResponseDTO.setDiscount(d.getDiscount_percentage());
+            } else {
+                productResponseDTO.setDiscount(BigDecimal.ZERO);
+            }
+
+            productResponseDTO.setCategory(product.getCategory().getName());
             productResponseDTOList.add(productResponseDTO);
         }
         return ResponseEntity.ok(productResponseDTOList);
