@@ -25,11 +25,12 @@ public class ShopController {
 
     @GetMapping
     public ResponseEntity<Page<ShopDTO>> getShops(
-            @RequestParam(required = false) String status,
-            @RequestParam(required = false) String search,
+            @RequestParam(value = "status", required = false) String status,
+            @RequestParam(value = "search",required = false) String search,
+            @RequestParam(value = "type",required = false) String type,
             Pageable pageable) {
 
-        Page<ShopDTO> shops = shopService.getShops(status, search, pageable);
+        Page<ShopDTO> shops = shopService.getShops(type, status, search, pageable);
         return ResponseEntity.ok(shops);
     }
 

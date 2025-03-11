@@ -79,6 +79,7 @@ public class Shop extends BaseEntity{
     private List<Product> products;
 
     @Enumerated(EnumType.STRING)
+    @Column(name="sell_type")
     private SellType sellType;
 
     @OneToMany(mappedBy = "shop")

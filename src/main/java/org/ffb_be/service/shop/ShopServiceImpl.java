@@ -40,12 +40,17 @@ public class ShopServiceImpl implements ShopService {
     private final EncryptUtil encryptUtil;
 
     @Override
-    public Page<ShopDTO> getShops(String status, String search, Pageable pageable) {
+    public Page<ShopDTO> getShops(String type, String status, String search, Pageable pageable) {
         Specification<Shop> spec = Specification.where(null);
 
         // Lọc theo status nếu có
         if (status != null && !status.isEmpty()) {
-            spec = spec.and((root, query, cb) -> cb.equal(root.get("status"), status));
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("isActive"), status));
+        }
+
+        // Lọc theo loai hang ban nếu có
+        if (type != null && !type.isEmpty()) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("sellType"), type));
         }
 
         // Tìm kiếm theo tên nếu có

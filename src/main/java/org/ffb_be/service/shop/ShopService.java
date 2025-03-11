@@ -11,7 +11,7 @@ import java.io.IOException;
 
 public interface ShopService {
 
-    Page<ShopDTO> getShops(String status, String search, Pageable pageable);
+    Page<ShopDTO> getShops(String type, String status, String search, Pageable pageable);
 
     @Transactional
     void registerShop(
