@@ -2,6 +2,7 @@ package org.ffb_be.service.shop;
 
 import org.ffb_be.dto.shop.ShopDTO;
 import org.ffb_be.dto.shop.ShopRegisterDTO;
+import org.ffb_be.utils.enums.Status;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +25,21 @@ public interface ShopService {
             MultipartFile foodSafetyCert,
             MultipartFile menu
     ) throws IOException;
+
+    @Transactional
+    void updateShop(
+            Long shopId,
+            ShopRegisterDTO shopDTO,
+            MultipartFile logo,
+            MultipartFile menu,
+            MultipartFile registrationCert,
+            MultipartFile foodSafetyCert,
+            MultipartFile citizenIDFront,
+            MultipartFile citizenIDBack
+    ) throws IOException;
+
+    @Transactional
+    void updateShopStatus(Long shopId, Status newStatus);
 
     ShopDTO getShopById(Long shopId);
 }

@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.ffb_be.dto.shop.ShopDTO;
 import org.ffb_be.dto.shop.ShopRegisterDTO;
 import org.ffb_be.service.shop.ShopService;
+import org.ffb_be.utils.enums.Status;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -58,5 +59,34 @@ public class ShopController {
         shopService.registerShop(userId, shopDTO, logo, citizenIDFront, citizenIDBack, registrationCert, foodSafetyCert, menu);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
+
+    // 1️⃣ API cập nhật Shop
+    @PutMapping(value = "/{shopId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> updateShop(
+            @PathVariable Long shopId,
+            @Validated @ModelAttribute ShopRegisterDTO shopDTO,
+            @RequestPart(value = "logo", required = false) MultipartFile logo,
+            @RequestPart(value = "citizenIDFront", required = false) MultipartFile citizenIDFront,
+            @RequestPart(value = "citizenIDBack", required = false) MultipartFile citizenIDBack,
+            @RequestPart(value = "registrationCert", required = false) MultipartFile registrationCert,
+            @RequestPart(value = "foodSafetyCert", required = false) MultipartFile foodSafetyCert,
+            @RequestPart(value = "menu", required = false) MultipartFile menu,
+            BindingResult result
+    ) throws IOException {
+        if (result.hasErrors()) {
+            return ResponseEntity.badRequest().body(result.getAllErrors());
+        }
+        shopService.updateShop(shopId, shopDTO, logo, citizenIDFront, citizenIDBack, registrationCert, foodSafetyCert, menu);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{shopId}/status")
+    public ResponseEntity<Void> updateShopStatus(
+            @PathVariable Long shopId,
+            @RequestParam Status status) {
+        shopService.updateShopStatus(shopId, status);
+        return ResponseEntity.ok().build();
+    }
+
 }
 

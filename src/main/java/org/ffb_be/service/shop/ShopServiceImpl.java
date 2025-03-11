@@ -118,6 +118,104 @@ public class ShopServiceImpl implements ShopService {
         shopRepository.save(shop);
     }
 
+    @Transactional
+    @Override
+    public void updateShop(
+            Long shopId,
+            ShopRegisterDTO shopDTO,
+            MultipartFile logo,
+            MultipartFile menu,
+            MultipartFile registrationCert,
+            MultipartFile foodSafetyCert,
+            MultipartFile citizenIDFront,
+            MultipartFile citizenIDBack
+    ) throws IOException {
+        Shop shop = shopRepository.findById(shopId)
+                .orElseThrow(() -> new NotFoundException("Shop không tồn tại"));
+
+        Profile profile = profileRepository.getByUserId(shop.getOwner().getId())
+                .orElseThrow(() -> new NotFoundException("User"));
+
+        boolean requireApproval = false;
+
+        // Áp dụng mapper để cập nhật các trường không null
+        shopMapper.updateShopFromDTO(shopDTO, shop);
+
+        // Xử lý thay đổi logo, menu (không cần phê duyệt)
+        if (logo != null && !logo.isEmpty()) {
+            shop.setLogo(cloudinaryUpload.uploadFile(logo));
+        }
+        if (menu != null && !menu.isEmpty()) {
+            shop.setMenu(cloudinaryUpload.uploadFile(menu));
+        }
+
+        // Xử lý các trường cần phê duyệt lại
+        if (shopDTO.getAccountNumber() != null && !shopDTO.getAccountNumber().equals(shop.getAccountNumber())) {
+            shop.setAccountNumber(encryptSafe(shopDTO.getAccountNumber()));
+            requireApproval = true;
+        }
+        if (shopDTO.getBankName() != null && !shopDTO.getBankName().equals(shop.getBankCode())) {
+            shop.setBankCode(shopDTO.getBankName());
+            requireApproval = true;
+        }
+        if (registrationCert != null && !registrationCert.isEmpty()) {
+            shop.setRegistrationCertificate(cloudinaryUpload.uploadFile(registrationCert));
+            requireApproval = true;
+        }
+        if (foodSafetyCert != null && !foodSafetyCert.isEmpty()) {
+            shop.setFoodSafetyCertificate(cloudinaryUpload.uploadFile(foodSafetyCert));
+            requireApproval = true;
+        }
+        if (shopDTO.getTaxCode() != null && !shopDTO.getTaxCode().equals(profile.getTaxCode())) {
+            profile.setTaxCode(encryptSafe(shopDTO.getTaxCode()));
+            requireApproval = true;
+        }
+        if (shopDTO.getCitizenIDNumber() != null && !shopDTO.getCitizenIDNumber().equals(profile.getCitizenIDNumber())) {
+            profile.setCitizenIDNumber(encryptSafe(shopDTO.getCitizenIDNumber()));
+            requireApproval = true;
+        }
+        if (shopDTO.getCitizenIDExpiredDate() != null && !shopDTO.getCitizenIDExpiredDate().equals(profile.getCitizenIDExpiredDate())) {
+            profile.setCitizenIDExpiredDate(shopDTO.getCitizenIDExpiredDate());
+            requireApproval = true;
+        }
+
+        // Xử lý citizen ID card
+        if (citizenIDFront != null && !citizenIDFront.isEmpty()) {
+            profile.setCitizenIDCardFront(cloudinaryUpload.uploadFile(citizenIDFront));
+            requireApproval = true;
+        }
+        if (citizenIDBack != null && !citizenIDBack.isEmpty()) {
+            profile.setCitizenIDCardBack(cloudinaryUpload.uploadFile(citizenIDBack));
+            requireApproval = true;
+        }
+
+        // Nếu có thay đổi yêu cầu phê duyệt, cập nhật trạng thái shop
+        if (requireApproval) {
+            shop.setIsActive(Status.PENDING);
+        }
+
+        profileRepository.save(profile);
+        shopRepository.save(shop);
+    }
+
+    @Transactional
+    @Override
+    public void updateShopStatus(Long shopId, Status newStatus) {
+        Shop shop = shopRepository.findById(shopId)
+                .orElseThrow(() -> new NotFoundException("Shop không tồn tại"));
+
+        if (shop.getIsActive() == newStatus) {
+            throw new BadRequestException("Shop đã ở trạng thái này rồi");
+        }
+
+        shop.setIsActive(newStatus);
+        shopRepository.save(shop);
+    }
+
+
+
+
+
     @Override
     public ShopDTO getShopById(Long shopId) {
         return shopRepository.findById(shopId)
