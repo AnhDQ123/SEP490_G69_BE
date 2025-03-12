@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 public class ProfileDTO {
     private Long id;
     private String name;
+    private String role;
     private String address;
     private String avatar;
     private LocalDateTime createdAt;;
