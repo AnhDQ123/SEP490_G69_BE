@@ -22,5 +22,6 @@ public interface ProductService {
     List<ProductResponseDTO> findCookedProducts();
     List<ProductResponseDTO> findByCategory(String cat);
     ProductResponseDTO findById(Long id);
+    List<ProductResponseDTO> findSimimlarProduct(String name);
 }
 

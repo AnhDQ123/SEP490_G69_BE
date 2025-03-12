@@ -202,6 +202,23 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public List<ProductResponseDTO> findSimimlarProduct(String name) {
+        List<Product> products=productRepository.findSimilarProducts(name);
+        List<ProductResponseDTO> productResponseDTOList = new ArrayList<>();
+        for (Product product : products) {
+            ProductResponseDTO productResponseDTO = new ProductResponseDTO();
+            productResponseDTO.setId(product.getId());
+            productResponseDTO.setName(product.getName());
+            productResponseDTO.setManufacturer(product.getManufacturer());
+            productResponseDTO.setImage(product.getImage());
+            productResponseDTO.setCategory(product.getCategory().getName());
+            productResponseDTO.setSupplier(product.getSupplier());
+            productResponseDTOList.add(productResponseDTO);
+        }
+        return productResponseDTOList;
+    }
+
+    @Override
     public Page<ProductResponseDTO> findAll(Pageable pageable) {
         return productRepository.findAll(pageable).map(product -> {
             ProductResponseDTO productResponseDTO = new ProductResponseDTO();

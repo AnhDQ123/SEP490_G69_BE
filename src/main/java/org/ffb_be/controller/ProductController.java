@@ -64,4 +64,8 @@ public class ProductController {
     public ResponseEntity<?> getPopular() {
         return ResponseEntity.ok(productService.findPopularProducts());
     }
+    @GetMapping
+    public ResponseEntity<?> getSimilarProducts(@RequestParam String search) {
+        return ResponseEntity.ok(productService.findSimimlarProduct(search));
+    }
 }
