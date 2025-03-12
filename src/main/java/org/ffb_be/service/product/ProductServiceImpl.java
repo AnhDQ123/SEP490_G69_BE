@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -34,13 +35,15 @@ public class ProductServiceImpl implements ProductService {
     private final FoodOptionRepository foodOptionRepository;
     private final DiscountRepository discountRepository;
     private final TypesRepository typesRepository;
-    public ProductServiceImpl(ProductRepository productRepository, CategoryRepository categoryRepository, CloudinaryUpload cloudinaryUpload, FoodOptionRepository foodOptionRepository, DiscountRepository discountRepository, TypesRepository typesRepository) {
+    private final OrderRepository orderRepository;
+    public ProductServiceImpl(ProductRepository productRepository, CategoryRepository categoryRepository, CloudinaryUpload cloudinaryUpload, FoodOptionRepository foodOptionRepository, DiscountRepository discountRepository, TypesRepository typesRepository, OrderRepository orderRepository) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
         this.cloudinaryUpload = cloudinaryUpload;
         this.foodOptionRepository = foodOptionRepository;
         this.discountRepository = discountRepository;
         this.typesRepository = typesRepository;
+        this.orderRepository = orderRepository;
     }
 
     public void save(ProductCreateDTO productCreateDTO,MultipartFile avatar, List<MultipartFile>option) throws IOException {
@@ -97,6 +100,107 @@ public class ProductServiceImpl implements ProductService {
             return productResponseDTO;
         });
     }
+
+    @Override
+    public List<ProductResponseDTO> findPopularProducts() {
+        List<Object[]> products=orderRepository.findTopSellingProducts();
+        List<ProductResponseDTO> productResponseDTOList = new ArrayList<>();
+        for (Object[] objects : products) {
+            Product product=productRepository.findById((Long) objects[0]).get();
+            ProductResponseDTO productResponseDTO = new ProductResponseDTO();
+            productResponseDTO.setId(product.getId());
+            productResponseDTO.setName(product.getName());
+            productResponseDTO.setManufacturer(product.getManufacturer());
+            productResponseDTO.setSupplier(product.getSupplier());
+            productResponseDTO.setImage(product.getImage());
+            productResponseDTO.setCategory(product.getCategory().getName());
+            productResponseDTOList.add(productResponseDTO);
+        }
+        return productResponseDTOList;
+    }
+
+    @Override
+    public List<ProductResponseDTO> findFreshProducts() {
+        List<Product> products = productRepository.findFreshProducts();
+        List<ProductResponseDTO> productResponseDTOList = new ArrayList<>();
+        for (Product product : products) {
+            ProductResponseDTO productResponseDTO = new ProductResponseDTO();
+            productResponseDTO.setId(product.getId());
+            productResponseDTO.setName(product.getName());
+            productResponseDTO.setManufacturer(product.getManufacturer());
+            productResponseDTO.setImage(product.getImage());
+            productResponseDTO.setCategory(product.getCategory().getName());
+            productResponseDTO.setSupplier(product.getSupplier());
+            productResponseDTOList.add(productResponseDTO);
+        }
+        return productResponseDTOList;
+    }
+
+    @Override
+    public List<ProductResponseDTO> findCookedProducts() {
+        List<Product> products = productRepository.findCookedProducts();
+        List<ProductResponseDTO> productResponseDTOList = new ArrayList<>();
+        for (Product product : products) {
+            ProductResponseDTO productResponseDTO = new ProductResponseDTO();
+            productResponseDTO.setId(product.getId());
+            productResponseDTO.setName(product.getName());
+            productResponseDTO.setManufacturer(product.getManufacturer());
+            productResponseDTO.setImage(product.getImage());
+            productResponseDTO.setCategory(product.getCategory().getName());
+            productResponseDTO.setSupplier(product.getSupplier());
+            productResponseDTOList.add(productResponseDTO);
+        }
+        return productResponseDTOList;
+    }
+
+    @Override
+    public List<ProductResponseDTO> findByCategory(String cat) {
+        Category category = categoryRepository.findByName(cat);
+        List<Product> productList=productRepository.findAllByCategory(category);
+        List<ProductResponseDTO> productResponseDTOList = new ArrayList<>();
+        for (Product product : productList) {
+            ProductResponseDTO productResponseDTO = new ProductResponseDTO();
+            BeanUtils.copyProperties(product, productResponseDTO);
+            if (product.getDiscount() != null && product.getDiscount().getId() != null) {
+                Discount d = discountRepository.findById(product.getDiscount().getId());
+                productResponseDTO.setDiscount(d.getDiscount_percentage());
+            } else {
+                productResponseDTO.setDiscount(BigDecimal.ZERO);
+            }
+
+            productResponseDTO.setCategory(product.getCategory().getName());
+            productResponseDTOList.add(productResponseDTO);
+        }
+        return productResponseDTOList;
+    }
+
+    @Override
+    public ProductResponseDTO findById(Long id) {
+        Optional<Product> productOptional = productRepository.findById(id);
+        Product product = productOptional.get();
+        ProductResponseDTO productResponseDTO = new ProductResponseDTO();
+        List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product);
+        List<FoodOptionDTO> foodOptionDTOs = new ArrayList<>();
+        for (FoodOption foodOption : foodOptions) {
+            FoodOptionDTO dto = new FoodOptionDTO();
+            BeanUtils.copyProperties(foodOption, dto);
+            foodOptionDTOs.add(dto);
+        }
+        BeanUtils.copyProperties(product, productResponseDTO);
+        if (product.getDiscount() != null && product.getDiscount().getId() != null) {
+            Discount d = discountRepository.findById(product.getDiscount().getId());
+            productResponseDTO.setDiscount(d.getDiscount_percentage());
+        } else {
+            productResponseDTO.setDiscount(BigDecimal.ZERO);
+        }
+
+        Optional<Category> c=categoryRepository.findById(product.getCategory().getId());
+        Category category = c.get();
+        productResponseDTO.setFoodOption(foodOptionDTOs);
+        productResponseDTO.setCategory(category.getName());
+        return productResponseDTO;
+    }
+
     @Override
     public Page<ProductResponseDTO> findAll(Pageable pageable) {
         return productRepository.findAll(pageable).map(product -> {
