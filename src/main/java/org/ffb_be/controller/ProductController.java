@@ -1,23 +1,13 @@
 package org.ffb_be.controller;
 
-import org.ffb_be.dto.product.FoodOptionDTO;
+
+
 import org.ffb_be.dto.product.ProductCreateDTO;
-import org.ffb_be.dto.product.ProductResponseDTO;
-import org.ffb_be.dto.shop.ShopDTO;
-import org.ffb_be.entity.Category;
-import org.ffb_be.entity.Discount;
-import org.ffb_be.entity.FoodOption;
-import org.ffb_be.entity.Product;
-import org.ffb_be.repository.CategoryRepository;
-import org.ffb_be.repository.DiscountRepository;
-import org.ffb_be.repository.FoodOptionRepository;
-import org.ffb_be.repository.ProductRepository;
+
 import org.ffb_be.service.product.ProductService;
-import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.Page;
+
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
@@ -25,24 +15,15 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/product")
 public class ProductController {
     private final ProductService productService;
-    private final ProductRepository productRepository;
-    private final FoodOptionRepository foodOptionRepository;
-    private final DiscountRepository discountRepository;
-    private final CategoryRepository categoryRepository;
-    public ProductController(ProductService productService, ProductRepository productRepository, FoodOptionRepository foodOptionRepository, DiscountRepository discountRepository, CategoryRepository categoryRepository) {
+
+    public ProductController(ProductService productService) {
         this.productService = productService;
-        this.productRepository = productRepository;
-        this.foodOptionRepository = foodOptionRepository;
-        this.discountRepository = discountRepository;
-        this.categoryRepository = categoryRepository;
     }
 
     @GetMapping("/shop/{id}")
@@ -52,45 +33,39 @@ public class ProductController {
         Pageable pageable = PageRequest.of(page-1, size);
         return ResponseEntity.ok( productService.findAllByShop(id,pageable));
     }
-    @GetMapping("/product/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<?> getProductById(@PathVariable Long id) {
-        Optional<Product> productOptional = productRepository.findById(id);
-        if (productOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found!");
-        }
-        Product product = productOptional.get();
-        ProductResponseDTO productResponseDTO = new ProductResponseDTO();
-        List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product);
-        List<FoodOptionDTO> foodOptionDTOs = new ArrayList<>();
-
-        for (FoodOption foodOption : foodOptions) {
-            FoodOptionDTO dto = new FoodOptionDTO();
-            BeanUtils.copyProperties(foodOption, dto);
-            foodOptionDTOs.add(dto);
-        }
-        BeanUtils.copyProperties(product, productResponseDTO);
-        Discount d= discountRepository.findById(product.getDiscount().getId());
-        Optional<Category> c=categoryRepository.findById(product.getCategory().getId());
-        Category category = c.get();
-        productResponseDTO.setDiscount(d.getDiscount_percentage());
-        productResponseDTO.setFoodOption(foodOptionDTOs);
-        productResponseDTO.setCategory(category.getName());
-        return ResponseEntity.ok(productResponseDTO);
+        return ResponseEntity.ok(productService.findById(id));
     }
     @PostMapping("/add")
-    public ResponseEntity<?> addProduct(@Validated @ModelAttribute("employee") ProductCreateDTO productCreateDTO,
+    public ResponseEntity<?> addProduct(@Validated @ModelAttribute() ProductCreateDTO productCreateDTO,
                                          BindingResult bindingResult,
                                          @RequestParam("avatar") MultipartFile avatar,
-                                         @RequestParam("avatar")  List<MultipartFile> option) throws IOException {
+                                         @RequestParam("option")  List<MultipartFile> option) throws IOException {
         if(bindingResult.hasErrors()) {
             return ResponseEntity.badRequest().body(bindingResult.getAllErrors());
         }
         productService.save(productCreateDTO, avatar, option);
         return ResponseEntity.ok().body(productCreateDTO);
     }
-    @GetMapping("/all")
-    public ResponseEntity<Page<ProductResponseDTO>> getAllProduct(Pageable pageable) {
-        return ResponseEntity.ok(productService.findAll(pageable));
+    @GetMapping("/filter") //filter
+    public ResponseEntity<?> getByCategory(@RequestParam String cat) {
+        return ResponseEntity.ok(productService.findByCategory(cat));
     }
-
+    @GetMapping("/getFresh")
+    public ResponseEntity<?> getProductByFreshType() {
+        return ResponseEntity.ok(productService.findFreshProducts());
+    }
+    @GetMapping("/getCooked")
+    public ResponseEntity<?> getProductByCookedType() {
+        return ResponseEntity.ok(productService.findCookedProducts());
+    }
+    @GetMapping("/getPopular")
+    public ResponseEntity<?> getPopular() {
+        return ResponseEntity.ok(productService.findPopularProducts());
+    }
+    @GetMapping("/similar")
+    public ResponseEntity<?> getSimilarProducts(@RequestParam String search) {
+        return ResponseEntity.ok(productService.findSimimlarProduct(search));
+    }
 }

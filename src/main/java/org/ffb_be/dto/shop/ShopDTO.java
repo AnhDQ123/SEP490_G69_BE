@@ -15,12 +15,9 @@ public class ShopDTO {
     private String description;
     private String logo;
     private String backgroundImage;
+    private String menu;
     private String phone;
     private String address;
-    private int rate;
-    private int viewCount;
-    private Status status;
-    private Boolean isShipping;
-    private Boolean isOpening;
+    private Status isActive;
     private OwnerDTO owner;
 }

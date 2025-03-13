@@ -13,7 +13,7 @@ import java.util.Optional;
 public interface CategoryRepository extends JpaRepository<Category, Long> {
     Optional<Category> findById(Long id);
 
-    @Query("SELECT new org.ffb_be.dto.category.CategoryDTO(c.id, c.name) FROM Category c")
+    @Query("SELECT new org.ffb_be.dto.category.CategoryDTO(c.id, c.name,c.image) FROM Category c")
     List<CategoryDTO> findAllCategories();
-
+    Category findByName(String name);
 }
