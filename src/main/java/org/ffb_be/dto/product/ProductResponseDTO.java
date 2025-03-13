@@ -17,6 +17,7 @@ public class ProductResponseDTO {
     private String manufacturer;
     private String supplier;
     private int quantity;
+    private String shopName;
     private String category;
     private String status;
     private BigDecimal discount;

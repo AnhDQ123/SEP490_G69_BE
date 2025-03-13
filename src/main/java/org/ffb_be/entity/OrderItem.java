@@ -23,7 +23,7 @@ public class OrderItem  extends BaseEntity {
     private BigDecimal unitPrice;
 
     @Column(name = "quantity")
-    private BigDecimal quantity;
+    private int quantity;
 
     @Column(name = "total_price")
     private BigDecimal totalPrice;
