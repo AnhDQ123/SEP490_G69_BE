@@ -3,6 +3,7 @@ package org.ffb_be.entity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.ffb_be.utils.enums.Status;
 
@@ -15,6 +16,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Data
 public class Product extends BaseEntity {
     @Id
     @Column(name = "product_id")
@@ -30,6 +32,9 @@ public class Product extends BaseEntity {
     @Column
     private int quantity;
 
+    @Column
+    private String image;
+
     @Column(name="supplier")
     private String supplier;
 
@@ -37,7 +42,7 @@ public class Product extends BaseEntity {
     private LocalDate expired_date;
 
     @Column(name="description")
-    private LocalDate description;
+    private String description;
 
     @Column(name="rate")
     private Float rate;
@@ -45,15 +50,11 @@ public class Product extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Status is_active;
 
-    @ManyToMany
-    @JoinTable(
-            name = "food_category",
-            joinColumns = @JoinColumn(name = "food_id"),
-            inverseJoinColumns = @JoinColumn(name = "category_id")
-    )
-    private Set<Category> categories;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "discount_id")
     private Discount discount;
 
