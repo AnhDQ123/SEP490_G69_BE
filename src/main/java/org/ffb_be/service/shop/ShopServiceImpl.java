@@ -255,7 +255,7 @@ public class ShopServiceImpl implements ShopService {
         if (ownerDTO != null) {
             BusinessProfileDTO profile = ownerDTO.getProfile();
             if (profile != null) {
-                profile.setTax_code(decryptSafe(profile.getTax_code()));
+                profile.setTaxCode(decryptSafe(profile.getTaxCode()));
                 profile.setCitizenIDNumber(decryptSafe(profile.getCitizenIDNumber()));
                 profile.setDrivingLicense(decryptSafe(profile.getDrivingLicense()));
             }

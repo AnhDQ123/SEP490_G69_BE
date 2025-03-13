@@ -19,6 +19,6 @@ public class ShopDTO {
     private String menu;
     private String phone;
     private String address;
-    private Status status;
+    private Status isActive;
     private OwnerDTO owner;
 }

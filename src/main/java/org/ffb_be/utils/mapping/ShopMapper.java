@@ -9,6 +9,7 @@ import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring", uses = {OwnerMapper.class})
 public interface ShopMapper {
+    @Mapping(target = "isActive", source = "isActive")
     ShopDTO toDTO(Shop shop);
 
     Shop toEntity(ShopRegisterDTO dto);
