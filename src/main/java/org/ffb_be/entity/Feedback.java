@@ -3,16 +3,17 @@ package org.ffb_be.entity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.ffb_be.utils.enums.Status;
 
-import java.time.LocalDate;
 
 @Entity
 @Table(name = "feedbacks")
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Data
 public class Feedback extends BaseEntity{
     @Id
     @Column(name = "feedback_id")
@@ -24,6 +25,9 @@ public class Feedback extends BaseEntity{
 
     @Column(name="rate")
     private int rate;
+
+    @Column
+    private String image;
 
     @Enumerated(EnumType.STRING)
     private Status status;
