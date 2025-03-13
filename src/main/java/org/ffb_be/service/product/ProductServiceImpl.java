@@ -95,6 +95,7 @@ public class ProductServiceImpl implements ProductService {
     public Page<ProductResponseDTO> findAllByShop(Long id,Pageable pageable) {
         return productRepository.findAllByShop_Id(id,pageable).map(product -> {
             ProductResponseDTO productResponseDTO = new ProductResponseDTO();
+            productResponseDTO.setShopName(product.getShop().getName());
             BeanUtils.copyProperties(product, productResponseDTO);
             return productResponseDTO;
         });
@@ -193,7 +194,6 @@ public class ProductServiceImpl implements ProductService {
         } else {
             productResponseDTO.setDiscount(BigDecimal.ZERO);
         }
-
         Optional<Category> c=categoryRepository.findById(product.getCategory().getId());
         Category category = c.get();
         productResponseDTO.setFoodOption(foodOptionDTOs);
@@ -203,7 +203,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<ProductResponseDTO> findSimimlarProduct(String name) {
-        List<Product> products=productRepository.findSimilarProducts(name);
+        String[] words = name.split("\\s+");
+        String substring = words[0].concat(words[1]);
+        List<Product> products=productRepository.findSimilarProducts(substring);
         List<ProductResponseDTO> productResponseDTOList = new ArrayList<>();
         for (Product product : products) {
             ProductResponseDTO productResponseDTO = new ProductResponseDTO();
@@ -213,6 +215,7 @@ public class ProductServiceImpl implements ProductService {
             productResponseDTO.setImage(product.getImage());
             productResponseDTO.setCategory(product.getCategory().getName());
             productResponseDTO.setSupplier(product.getSupplier());
+            productResponseDTO.setShopName(product.getShop().getName());
             productResponseDTOList.add(productResponseDTO);
         }
         return productResponseDTOList;
