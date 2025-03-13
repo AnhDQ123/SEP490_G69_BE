@@ -1,6 +1,6 @@
 package org.ffb_be.service.product;
 
-import jakarta.persistence.EntityNotFoundException;
+
 
 import org.ffb_be.dto.product.FoodOptionDTO;
 import org.ffb_be.dto.product.ProductCreateDTO;
@@ -48,8 +48,7 @@ public class ProductServiceImpl implements ProductService {
 
     public void save(ProductCreateDTO productCreateDTO,MultipartFile avatar, List<MultipartFile>option) throws IOException {
         Product product = new Product();
-        Category category = categoryRepository.findById(productCreateDTO.getCategory_id())
-                .orElseThrow(() -> new EntityNotFoundException("Category not found!"));
+        Category category = categoryRepository.findByName(productCreateDTO.getCategory());
         List<FoodOption> foodOptions = new ArrayList<>();
         List<FoodOptionDTO> foodOptionDTOs = productCreateDTO.getFoodOption();
 
@@ -183,6 +182,7 @@ public class ProductServiceImpl implements ProductService {
         List<FoodOptionDTO> foodOptionDTOs = new ArrayList<>();
         for (FoodOption foodOption : foodOptions) {
             FoodOptionDTO dto = new FoodOptionDTO();
+            dto.setType_id(foodOption.getType().getId());
             BeanUtils.copyProperties(foodOption, dto);
             foodOptionDTOs.add(dto);
         }
