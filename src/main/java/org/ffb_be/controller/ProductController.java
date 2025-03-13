@@ -2,10 +2,13 @@ package org.ffb_be.controller;
 
 
 
+import lombok.RequiredArgsConstructor;
 import org.ffb_be.dto.product.ProductCreateDTO;
 
+import org.ffb_be.dto.product.ProductResponseDTO;
 import org.ffb_be.service.product.ProductService;
 
+import org.ffb_be.service.product.RecommendationService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -19,12 +22,12 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/product")
+@RequiredArgsConstructor
+@CrossOrigin("*")
 public class ProductController {
     private final ProductService productService;
+    private final RecommendationService recommendationService;
 
-    public ProductController(ProductService productService) {
-        this.productService = productService;
-    }
 
     @GetMapping("/shop/{id}")
     public ResponseEntity<?> getAllByShop(@PathVariable Long id,
@@ -68,4 +71,20 @@ public class ProductController {
     public ResponseEntity<?> getSimilarProducts(@RequestParam String search) {
         return ResponseEntity.ok(productService.findSimimlarProduct(search));
     }
+
+    @GetMapping("/{userId}/{productType}/{top}")
+    public ResponseEntity<List<ProductResponseDTO>> getRecommendations(
+            @PathVariable Long userId,
+            @PathVariable String productType,
+            @PathVariable int top) {
+        List<ProductResponseDTO> recommendations = recommendationService.getRecommendations(userId, productType, top);
+        return ResponseEntity.ok(recommendations);
+    }
+
+    @PostMapping("/recommendation-data")
+    public ResponseEntity<String> getData() {
+        recommendationService.sendDataToPython();
+        return ResponseEntity.ok("Dữ liệu đã được đẩy sang Python");
+    }
+
 }

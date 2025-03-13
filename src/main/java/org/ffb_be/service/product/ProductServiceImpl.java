@@ -17,13 +17,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
-
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 
 @Service
@@ -36,6 +32,7 @@ public class ProductServiceImpl implements ProductService {
     private final DiscountRepository discountRepository;
     private final TypesRepository typesRepository;
     private final OrderRepository orderRepository;
+
     public ProductServiceImpl(ProductRepository productRepository, CategoryRepository categoryRepository, CloudinaryUpload cloudinaryUpload, FoodOptionRepository foodOptionRepository, DiscountRepository discountRepository, TypesRepository typesRepository, OrderRepository orderRepository) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
