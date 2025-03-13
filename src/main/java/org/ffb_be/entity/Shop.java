@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.ffb_be.utils.enums.SellType;
 import org.ffb_be.utils.enums.Status;
-
 import java.time.LocalTime;
 import java.util.List;
 
@@ -47,6 +46,9 @@ public class Shop extends BaseEntity{
     @Column(name="food_safety_certificate")
     private String foodSafetyCertificate;
 
+    @Column(name="menu")
+    private String menu;
+
     @Column(name="rate")
     private Double rate;
 
@@ -68,10 +70,17 @@ public class Shop extends BaseEntity{
     @Column(name="close_time")
     private LocalTime closeTime;
 
+    @Column(name="account_number")
+    private String accountNumber;
+
+    @Column(name="bank_code")
+    private String bankCode;
+
     @OneToMany(mappedBy = "shop")
     private List<Product> products;
 
     @Enumerated(EnumType.STRING)
+    @Column(name="sell_type")
     private SellType sellType;
 
     @OneToMany(mappedBy = "shop")
