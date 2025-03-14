@@ -19,7 +19,7 @@ public class ShopDTO {
     private String address;
     private int rate;
     private int viewCount;
-    private Status status;
+    private Status isActive;
     private Boolean isShipping;
     private Boolean isOpening;
     private OwnerDTO owner;

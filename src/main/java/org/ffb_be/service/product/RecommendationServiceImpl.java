@@ -2,21 +2,25 @@ package org.ffb_be.service.product;
 
 import lombok.RequiredArgsConstructor;
 import org.ffb_be.dto.product.ProductResponseDTO;
-import org.ffb_be.entity.Feedback;
-import org.ffb_be.entity.Order;
-import org.ffb_be.entity.OrderItem;
+import org.ffb_be.dto.product.recommendation.FeedbackDataDTO;
+import org.ffb_be.dto.product.recommendation.FoodDataDTO;
+import org.ffb_be.dto.product.recommendation.OrderDataDTO;
+import org.ffb_be.dto.product.recommendation.OrderItemDataDTO;
 import org.ffb_be.entity.Product;
 import org.ffb_be.repository.FeedbackRepository;
 import org.ffb_be.repository.OrderItemRepository;
 import org.ffb_be.repository.OrderRepository;
 import org.ffb_be.repository.ProductRepository;
+import org.ffb_be.utils.mapping.FeedbackMapper;
+import org.ffb_be.utils.mapping.OrderMapper;
+import org.ffb_be.utils.mapping.ProductMapper;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,58 +33,80 @@ public class RecommendationServiceImpl implements RecommendationService {
     private final OrderItemRepository orderItemRepository;
     private final OrderRepository orderRepository;
     private final FeedbackRepository feedbackRepository;
+    private final ProductMapper productMapper;
+    private final OrderMapper orderMapper;
+    private final FeedbackMapper feedbackMapper;
     private final RestTemplate restTemplate = new RestTemplate();
-
     private static final String PYTHON_API_URL = "http://localhost:5000";
 
     @Override
     public List<ProductResponseDTO> getRecommendations(Long userId, String productType, int top) {
         String url = String.format("%s/recommend/%d/%s/%d", PYTHON_API_URL, userId, productType, top);
 
-        ResponseEntity<List<Long>> response = restTemplate.exchange(
-                url, HttpMethod.GET, null, new ParameterizedTypeReference<List<Long>>() {}
+        ResponseEntity<List<Map<String, Long>>> response = restTemplate.exchange(
+                url, HttpMethod.GET, null, new ParameterizedTypeReference<List<Map<String, Long>>>() {}
         );
 
-        List<Long> productIds = response.getBody();
+        if (response.getBody() == null || response.getBody().isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // Lấy danh sách productId từ JSON
+        List<Long> productIds = response.getBody().stream()
+                .map(map -> map.get("productId"))
+                .collect(Collectors.toList());
+
+        // Tìm sản phẩm trong DB
         List<Product> products = productRepository.findByIdIn(productIds);
 
-        return products.stream().map(this::getDto).collect(Collectors.toList());
+        // Chuyển đổi sang DTO
+        return products.stream()
+                .map(this::getDto)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public void sendDataToPython() {
-        List<Product> products = productRepository.findAll();
-        List<Order> orders = orderRepository.findAll();
-        List<OrderItem> orderDetails = orderItemRepository.findAll();
-        List<Feedback> feedbacks = feedbackRepository.findAll();
+    public Map<String, Object> getAllData() {
+        Map<String, Object> response = new HashMap<>();
 
-        Map<String, Object> data = new HashMap<>();
-        data.put("products", products);
-        data.put("orders", orders);
-        data.put("order_details", orderDetails);
-        data.put("feedbacks", feedbacks);
+        List<OrderDataDTO> orderDataDTOS = orderRepository.findAll()
+                .stream()
+                .map(orderMapper::toDTO)
+                .toList();
 
-        try {
-            ResponseEntity<String> response = restTemplate.postForEntity(PYTHON_API_URL + "/post-data", data, String.class);
-            System.out.println("Dữ liệu đã được gửi thành công! Phản hồi từ Python: " + response.getBody());
-        } catch (HttpStatusCodeException e) {
-            System.err.println("Lỗi HTTP: " + e.getStatusCode() + " - " + e.getResponseBodyAsString());
-        } catch (ResourceAccessException e) {
-            System.err.println("Lỗi kết nối đến Python API: " + e.getMessage());
-        } catch (Exception e) {
-            System.err.println("Lỗi không xác định: " + e.getMessage());
-        }
+        List<FoodDataDTO> foodDataDTOS = productRepository.findAll()
+                .stream()
+                .map(productMapper::toDTO)
+                .toList();
+
+        List<OrderItemDataDTO> orderItemDataDTOS = orderItemRepository.findAll()
+                .stream()
+                .map(orderMapper::toDTO)
+                .toList();
+
+        List<FeedbackDataDTO> feedbackDTOs = feedbackRepository.findAll()
+                .stream()
+                .map(feedbackMapper::toDTO)
+                .toList();
+
+        response.put("orders", orderDataDTOS);
+        response.put("order_details", orderItemDataDTOS);
+        response.put("products", foodDataDTOS);
+        response.put("feedbacks", feedbackDTOs);
+
+        return response;
     }
 
     private ProductResponseDTO getDto(Product product) {
-        return ProductResponseDTO.builder()
-                .id(product.getId())
-                .name(product.getName())
-                .manufacturer(product.getManufacturer())
-                .image(product.getImage())
-                .category(product.getCategory().getName())
-                .supplier(product.getSupplier())
-                .shopName(product.getShop().getName())
-                .build();
+        ProductResponseDTO productResponseDTO = new ProductResponseDTO();
+        productResponseDTO.setId(product.getId());
+        productResponseDTO.setName(product.getName());
+        productResponseDTO.setManufacturer(product.getManufacturer());
+        productResponseDTO.setImage(product.getImage());
+        if (product.getCategory() != null) {
+            productResponseDTO.setCategory(product.getCategory().getName());
+        }
+        productResponseDTO.setSupplier(product.getSupplier());
+        return productResponseDTO;
     }
 }
