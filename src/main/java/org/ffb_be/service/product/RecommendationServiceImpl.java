@@ -1,5 +1,7 @@
 package org.ffb_be.service.product;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import org.ffb_be.dto.product.ProductResponseDTO;
 import org.ffb_be.dto.product.recommendation.FeedbackDataDTO;
@@ -20,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -38,6 +41,26 @@ public class RecommendationServiceImpl implements RecommendationService {
     private final FeedbackMapper feedbackMapper;
     private final RestTemplate restTemplate = new RestTemplate();
     private static final String PYTHON_API_URL = "http://localhost:5000";
+    private Process pythonProcess;
+
+    @PostConstruct
+    public void startPythonServer() {
+        try {
+            pythonProcess = new ProcessBuilder("python", "rcmService.py").start();
+            System.out.println("✅ Python service started!");
+        } catch (IOException e) {
+            System.err.println("❌ Lỗi khi khởi động Python: " + e.getMessage());
+        }
+    }
+
+    // Khi Spring Boot tắt, dừng Python
+    @PreDestroy
+    public void stopPythonServer() {
+        if (pythonProcess != null) {
+            pythonProcess.destroy();
+            System.out.println("🛑 Python service stopped!");
+        }
+    }
 
     @Override
     public List<ProductResponseDTO> getRecommendations(Long userId, String productType, int top) {
