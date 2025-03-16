@@ -20,6 +20,7 @@ public class FeedbackServiceImpl implements FeedbackService {
         return feedbackRepository.findAllByProduct_Id(id,pageable).map(feedback -> {
             FeedbackDTO feedbackDTO = new FeedbackDTO();
             feedbackDTO.setId(feedback.getId());
+            feedbackDTO.setRate(feedback.getRate());
             feedbackDTO.setContent(feedback.getContent());
             feedbackDTO.setImage(feedback.getImage());
             feedbackDTO.setCreatedAt(feedback.getCreatedAt());

@@ -24,7 +24,7 @@ public class Feedback extends BaseEntity{
     private String content;
 
     @Column(name="rate")
-    private int rate;
+    private Double rate;
 
     @Column
     private String image;

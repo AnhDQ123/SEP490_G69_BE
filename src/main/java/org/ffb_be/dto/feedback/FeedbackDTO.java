@@ -8,6 +8,7 @@ public class FeedbackDTO {
     private Long id;
     private String content;
     private String status;
+    private Double rate;
     private String image;
     private LocalDateTime createdAt;
 
