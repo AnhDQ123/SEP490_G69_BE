@@ -15,4 +15,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "GROUP BY oi.product.id, oi.product.name " +
             "ORDER BY totalQuantity DESC")
     List<Object[]> findTopSellingProducts();
+
+
 }
