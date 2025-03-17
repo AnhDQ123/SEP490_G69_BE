@@ -23,10 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -74,7 +71,6 @@ public class RecommendationServiceImpl implements RecommendationService {
             return Collections.emptyList();
         }
 
-        // Lấy danh sách productId từ JSON
         List<Long> productIds = response.getBody().stream()
                 .map(map -> map.get("productId"))
                 .collect(Collectors.toList());
@@ -82,11 +78,20 @@ public class RecommendationServiceImpl implements RecommendationService {
         // Tìm sản phẩm trong DB
         List<Product> products = productRepository.findByIdIn(productIds);
 
-        // Chuyển đổi sang DTO
-        return products.stream()
+        // Sắp xếp lại danh sách theo thứ tự ban đầu của productIds
+        Map<Long, Product> productMap = new LinkedHashMap<>();
+        productIds.forEach(id -> productMap.put(id, null));
+        for (Product p : products) {
+            productMap.put(p.getId(), p);
+        }
+
+        return productMap.values().stream()
+                .filter(Objects::nonNull)
                 .map(this::getDto)
                 .collect(Collectors.toList());
+
     }
+
 
     @Override
     public Map<String, Object> getAllData() {

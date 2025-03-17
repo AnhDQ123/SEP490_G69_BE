@@ -19,6 +19,7 @@ import org.ffb_be.utils.enums.upload.CloudinaryUpload;
 import org.ffb_be.utils.mapping.ShopMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Service
 @Transactional
@@ -39,9 +41,28 @@ public class ShopServiceImpl implements ShopService {
     private final EncryptUtil encryptUtil;
 
     @Override
-    public Page<ShopDTO> getShops(Pageable pageable) {
-        return shopRepository.findAll(pageable).map(this::decryptShopDTO);
+    public Page<ShopDTO> getShops(String type, String status, String search, Pageable pageable) {
+        Specification<Shop> spec = Specification.where(null);
+
+        // Lọc theo status nếu có
+        if (status != null && !status.isEmpty()) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("isActive"), status));
+        }
+
+        // Lọc theo loai hang ban nếu có
+        if (type != null && !type.isEmpty()) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("sellType"), type));
+        }
+
+        // Tìm kiếm theo tên nếu có
+        if (search != null && !search.isEmpty()) {
+            spec = spec.and((root, query, cb) -> cb.like(cb.lower(root.get("name")), cb.literal("%" + search.toLowerCase() + "%")));
+        }
+
+        Page<Shop> shops = shopRepository.findAll(spec, pageable);
+        return shops.map(this::decryptShopDTO);
     }
+
 
     @Transactional
     @Override
@@ -52,7 +73,8 @@ public class ShopServiceImpl implements ShopService {
             MultipartFile citizenIDFront,
             MultipartFile citizenIDBack,
             MultipartFile registrationCert,
-            MultipartFile foodSafetyCert
+            MultipartFile foodSafetyCert,
+            MultipartFile menu
     ) throws IOException {
         if (shopRepository.existsByOwnerId(userId)) {
             throw new BadRequestException("User đã có cửa hàng.");
@@ -79,6 +101,9 @@ public class ShopServiceImpl implements ShopService {
         String registrationCertUrl = cloudinaryUpload.uploadFile(registrationCert);
         if (registrationCertUrl != null) shop.setRegistrationCertificate(registrationCertUrl);
 
+        String menuUrl = cloudinaryUpload.uploadFile(menu);
+        if (menuUrl != null) shop.setMenu(menuUrl);
+
         String foodSafetyCertUrl = cloudinaryUpload.uploadFile(foodSafetyCert);
         if (foodSafetyCertUrl != null) shop.setFoodSafetyCertificate(foodSafetyCertUrl);
         if (shopDTO.getCitizenIDExpiredDate() != null && shopDTO.getCitizenIDExpiredDate().isBefore(LocalDate.now())) {
@@ -86,12 +111,135 @@ public class ShopServiceImpl implements ShopService {
         }
 
         // Mã hóa thông tin nhạy cảm
+        shop.setAccountNumber(encryptSafe(shopDTO.getAccountNumber()));
         profile.setTaxCode(encryptSafe(shopDTO.getTaxCode()));
         profile.setCitizenIDNumber(encryptSafe(shopDTO.getCitizenIDNumber()));
         profile.setCitizenIDExpiredDate(shopDTO.getCitizenIDExpiredDate());
         profileRepository.save(profile);
         shopRepository.save(shop);
     }
+
+    @Transactional
+    @Override
+    public void updateShop(
+            Long shopId,
+            ShopRegisterDTO shopDTO,
+            MultipartFile logo,
+            MultipartFile menu,
+            MultipartFile registrationCert,
+            MultipartFile foodSafetyCert,
+            MultipartFile citizenIDFront,
+            MultipartFile citizenIDBack
+    ) throws IOException {
+        Shop shop = shopRepository.findById(shopId)
+                .orElseThrow(() -> new NotFoundException("Shop không tồn tại"));
+
+        Profile profile = profileRepository.getByUserId(shop.getOwner().getId())
+                .orElseThrow(() -> new NotFoundException("User"));
+
+        boolean requireApproval = false;
+
+        // Áp dụng mapper để cập nhật các trường không null
+        shopMapper.updateShopFromDTO(shopDTO, shop);
+
+        // Xử lý thay đổi logo, menu (không cần phê duyệt)
+        if (logo != null && !logo.isEmpty()) {
+            shop.setLogo(cloudinaryUpload.uploadFile(logo));
+        }
+        if (menu != null && !menu.isEmpty()) {
+            shop.setMenu(cloudinaryUpload.uploadFile(menu));
+        }
+
+        // Xử lý các trường cần phê duyệt lại
+        if (shopDTO.getAccountNumber() != null && !shopDTO.getAccountNumber().equals(shop.getAccountNumber())) {
+            shop.setAccountNumber(encryptSafe(shopDTO.getAccountNumber()));
+            requireApproval = true;
+        }
+        if (shopDTO.getBankCode() != null && !shopDTO.getBankCode().equals(shop.getBankCode())) {
+            shop.setBankCode(shopDTO.getBankCode());
+            requireApproval = true;
+        }
+        if (registrationCert != null && !registrationCert.isEmpty()) {
+            shop.setRegistrationCertificate(cloudinaryUpload.uploadFile(registrationCert));
+            requireApproval = true;
+        }
+        if (foodSafetyCert != null && !foodSafetyCert.isEmpty()) {
+            shop.setFoodSafetyCertificate(cloudinaryUpload.uploadFile(foodSafetyCert));
+            requireApproval = true;
+        }
+        if (shopDTO.getTaxCode() != null && !shopDTO.getTaxCode().equals(profile.getTaxCode())) {
+            profile.setTaxCode(encryptSafe(shopDTO.getTaxCode()));
+            requireApproval = true;
+        }
+        if (shopDTO.getCitizenIDNumber() != null && !shopDTO.getCitizenIDNumber().equals(profile.getCitizenIDNumber())) {
+            profile.setCitizenIDNumber(encryptSafe(shopDTO.getCitizenIDNumber()));
+            requireApproval = true;
+        }
+        if (shopDTO.getCitizenIDExpiredDate() != null && !shopDTO.getCitizenIDExpiredDate().equals(profile.getCitizenIDExpiredDate())) {
+            profile.setCitizenIDExpiredDate(shopDTO.getCitizenIDExpiredDate());
+            requireApproval = true;
+        }
+
+        // Xử lý citizen ID card
+        if (citizenIDFront != null && !citizenIDFront.isEmpty()) {
+            profile.setCitizenIDCardFront(cloudinaryUpload.uploadFile(citizenIDFront));
+            requireApproval = true;
+        }
+        if (citizenIDBack != null && !citizenIDBack.isEmpty()) {
+            profile.setCitizenIDCardBack(cloudinaryUpload.uploadFile(citizenIDBack));
+            requireApproval = true;
+        }
+
+        // Nếu có thay đổi yêu cầu phê duyệt, cập nhật trạng thái shop
+        if (requireApproval) {
+            shop.setIsActive(Status.PENDING);
+        }
+
+        profileRepository.save(profile);
+        shopRepository.save(shop);
+    }
+
+    @Transactional
+    @Override
+    public void updateShopStatus(Long shopId, Status newStatus) {
+        Shop shop = shopRepository.findById(shopId)
+                .orElseThrow(() -> new NotFoundException("Shop không tồn tại"));
+
+        if (shop.getIsActive() == newStatus) {
+            throw new BadRequestException("Shop đã ở trạng thái này rồi");
+        }
+
+        shop.setIsActive(newStatus);
+        shopRepository.save(shop);
+    }
+
+    @Override
+    public boolean isShopOpen(Long shopId) {
+        Shop shop = shopRepository.findById(shopId)
+                .orElseThrow(() -> new RuntimeException("Shop not found"));
+
+        LocalTime now = LocalTime.now();
+        LocalTime openTime = shop.getOpenTime();
+        LocalTime closeTime = shop.getCloseTime();
+
+        // Trường hợp mở 24/24
+        if (openTime.equals(closeTime)) {
+            return true;
+        }
+
+        // Trường hợp mở qua đêm
+        boolean isOvernight = closeTime.isBefore(openTime);
+
+        if (isOvernight) {
+            return now.isAfter(openTime) || now.isBefore(closeTime);
+        } else {
+            return now.isAfter(openTime) && now.isBefore(closeTime);
+        }
+    }
+
+
+
+
 
     @Override
     public ShopDTO getShopById(Long shopId) {
@@ -107,9 +255,9 @@ public class ShopServiceImpl implements ShopService {
         if (ownerDTO != null) {
             BusinessProfileDTO profile = ownerDTO.getProfile();
             if (profile != null) {
-                profile.setTax_code(decryptSafe(profile.getTax_code()));
-                profile.setCitizenIDNumber(decryptSafe(profile.getCitizenIDNumber()));
-                profile.setDrivingLicense(decryptSafe(profile.getDrivingLicense()));
+                profile.setTaxCode((profile.getTaxCode()));
+                profile.setCitizenIDNumber((profile.getCitizenIDNumber()));
+                profile.setDrivingLicense((profile.getDrivingLicense()));
             }
         }
         return shopDTO;

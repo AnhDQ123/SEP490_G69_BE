@@ -1,14 +1,13 @@
 package org.ffb_be.dto.shop;
 
-import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.ffb_be.dto.auth.ProfileDto.BusinessProfileDTO;
 import org.ffb_be.utils.enums.SellType;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Data
 @AllArgsConstructor
@@ -22,8 +21,9 @@ public class ShopRegisterDTO {
     private String citizenIDNumber;
     @DateTimeFormat(pattern = "dd/MM/yyyy")
     private LocalDate citizenIDExpiredDate;
-    private Boolean isShipping;
-    private Boolean isOpening;
+    private String accountNumber;
+    private String bankCode;
     private SellType sellType;
-    private String openTime;
+    private LocalTime openTime;
+    private LocalTime closeTime;
 }
