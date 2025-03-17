@@ -68,4 +68,11 @@ public class ProductController {
     public ResponseEntity<?> getSimilarProducts(@RequestParam String search) {
         return ResponseEntity.ok(productService.findSimimlarProduct(search));
     }
+
+    @GetMapping("/all")
+    public ResponseEntity<?> getAll(@RequestParam(value = "page", defaultValue = "1", required = false) Integer page,
+                                    @RequestParam(value = "size", defaultValue = "20", required = false) Integer size) {
+        Pageable pageable = PageRequest.of(page-1, size);
+        return ResponseEntity.ok( productService.findAll(pageable));
+    }
 }

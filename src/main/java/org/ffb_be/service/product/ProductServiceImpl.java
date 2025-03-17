@@ -113,6 +113,8 @@ public class ProductServiceImpl implements ProductService {
             productResponseDTO.setManufacturer(product.getManufacturer());
             productResponseDTO.setSupplier(product.getSupplier());
             productResponseDTO.setImage(product.getImage());
+            productResponseDTO.setQuantity(product.getQuantity());
+            productResponseDTO.setRate(product.getRate());
             productResponseDTO.setCategory(product.getCategory().getName());
             productResponseDTOList.add(productResponseDTO);
         }
@@ -131,6 +133,15 @@ public class ProductServiceImpl implements ProductService {
             productResponseDTO.setImage(product.getImage());
             productResponseDTO.setCategory(product.getCategory().getName());
             productResponseDTO.setSupplier(product.getSupplier());
+            productResponseDTO.setRate(product.getRate()); // them rate
+            productResponseDTO.setQuantity(product.getQuantity()); // them quantity
+            productResponseDTO.setShopName(product.getShop().getName()); //them shop
+            if (product.getDiscount() != null && product.getDiscount().getId() != null) {
+                Discount d = discountRepository.findById(product.getDiscount().getId());
+                productResponseDTO.setDiscount(d.getDiscount_percentage());
+            } else {
+                productResponseDTO.setDiscount(BigDecimal.ZERO);
+            }//them discount
             productResponseDTOList.add(productResponseDTO);
         }
         return productResponseDTOList;
@@ -147,6 +158,15 @@ public class ProductServiceImpl implements ProductService {
             productResponseDTO.setManufacturer(product.getManufacturer());
             productResponseDTO.setImage(product.getImage());
             productResponseDTO.setCategory(product.getCategory().getName());
+            productResponseDTO.setRate(product.getRate()); // them rate
+            productResponseDTO.setQuantity(product.getQuantity()); // them quantity
+            productResponseDTO.setShopName(product.getShop().getName()); //them shop
+            if (product.getDiscount() != null && product.getDiscount().getId() != null) {
+                Discount d = discountRepository.findById(product.getDiscount().getId());
+                productResponseDTO.setDiscount(d.getDiscount_percentage());
+            } else {
+                productResponseDTO.setDiscount(BigDecimal.ZERO);
+            }//them discount
             productResponseDTO.setSupplier(product.getSupplier());
             productResponseDTOList.add(productResponseDTO);
         }
@@ -167,7 +187,7 @@ public class ProductServiceImpl implements ProductService {
             } else {
                 productResponseDTO.setDiscount(BigDecimal.ZERO);
             }
-
+            productResponseDTO.setShopName(product.getShop().getName());
             productResponseDTO.setCategory(product.getCategory().getName());
             productResponseDTOList.add(productResponseDTO);
         }
@@ -216,6 +236,8 @@ public class ProductServiceImpl implements ProductService {
             productResponseDTO.setCategory(product.getCategory().getName());
             productResponseDTO.setSupplier(product.getSupplier());
             productResponseDTO.setShopName(product.getShop().getName());
+            productResponseDTO.setDiscount(product.getDiscount().getDiscount_percentage());
+            productResponseDTO.setQuantity(product.getQuantity());
             productResponseDTOList.add(productResponseDTO);
         }
         return productResponseDTOList;
