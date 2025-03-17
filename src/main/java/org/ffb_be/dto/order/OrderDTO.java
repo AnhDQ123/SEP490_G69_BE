@@ -11,11 +11,12 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class OderDTO {
+public class OrderDTO {
     private Long id;
     private Long ownerId;
     private Long shipperId;
     private Long shipMethodId;
+    private Long paymentMethodId;
     private Long voucherId;
     private Long discountId;
     private String address;
