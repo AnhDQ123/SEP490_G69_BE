@@ -17,6 +17,7 @@ public class OderDTO {
     private Long shipperId;
     private Long shipMethodId;
     private Long voucherId;
+    private Long discountId;
     private String address;
     private BigDecimal total;
     private LocalDateTime createdAt;
