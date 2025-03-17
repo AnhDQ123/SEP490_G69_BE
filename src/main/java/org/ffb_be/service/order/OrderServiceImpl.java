@@ -12,10 +12,13 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.time.LocalDate;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -27,7 +30,8 @@ public class OrderServiceImpl implements OrderService {
     private final UserRepository userRepository;
     private final DeliveryMethodRepository deliveryMethodRepository;
     private final PaymentRepository paymentRepository;
-    public OrderServiceImpl(OrderRepository orderRepository, ProductRepository productRepository, FoodOptionRepository foodOptionRepository, OrderItemRepository orderItemRepository, OrderItemOptionRepository orderItemOptionRepository, UserRepository userRepository, DeliveryMethodRepository deliveryMethodRepository, PaymentRepository paymentRepository) {
+    private final ShopRepository shopRepository;
+    public OrderServiceImpl(OrderRepository orderRepository, ProductRepository productRepository, FoodOptionRepository foodOptionRepository, OrderItemRepository orderItemRepository, OrderItemOptionRepository orderItemOptionRepository, UserRepository userRepository, DeliveryMethodRepository deliveryMethodRepository, PaymentRepository paymentRepository, ShopRepository shopRepository) {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
         this.foodOptionRepository = foodOptionRepository;
@@ -36,60 +40,94 @@ public class OrderServiceImpl implements OrderService {
         this.userRepository = userRepository;
         this.deliveryMethodRepository = deliveryMethodRepository;
         this.paymentRepository = paymentRepository;
+        this.shopRepository = shopRepository;
     }
 
     @Override
     public void save(OrderDTO orderDTO) throws IOException {
-        Order order = new Order();
-        BigDecimal total=BigDecimal.ZERO;
-        OrderStatus pending = OrderStatus.PENDING;
-        order.setCreatedAt(LocalDateTime.now());
-        orderRepository.save(order);
-        List<OrderItemDTO> orderItemDTOList=orderDTO.getOrderItem();
-        List<OrderItem> orderItem=new ArrayList<>();
-        for(OrderItemDTO orderItemDTO:orderItemDTOList){
-            OrderItem orderItem1 = new OrderItem();
-            orderItem1.setOrder(order);
-            orderItem1.setProduct(productRepository.findById(orderItemDTO.getProductId()).get());
-            orderItem1.setQuantity(orderItemDTO.getQuantity());
-            orderItem1.setCreatedAt(LocalDateTime.now());
-            List<OrderItemOptionDTO> orderItemOptionDTOList=orderItemDTO.getOrderItemOptions();
-            List<OrderItemOption> orderItemOptionList=new ArrayList<>();
-            for(OrderItemOptionDTO orderItemOptionDTO:orderItemOptionDTOList){
-                OrderItemOption orderItemOption = new OrderItemOption();
-                if(orderItemOptionDTO.getTypeId()== 2){
-                    orderItem1.setUnitPrice(foodOptionRepository.findById(orderItemOptionDTO.getOptionId()).get().getPrice());
-                    if(orderItem1.getProduct().getDiscount().getId()!=null&&orderItem1.getProduct().getDiscount().getEnd_date().isAfter(LocalDate.now())){
-                        orderItem1.setTotalPrice(orderItem1.getUnitPrice().multiply(new BigDecimal(orderItem1.getQuantity())).multiply(orderItem1.getProduct().getDiscount().getDiscount_percentage()));
-                    }else
-                        orderItem1.setTotalPrice(orderItem1.getUnitPrice().multiply(new BigDecimal(orderItem1.getQuantity())));
-                }
-                orderItemOption.setOrderItem(orderItem1);
-                orderItemOption.setQuantity(orderItemOptionDTO.getQuantity());
-                orderItemOption.setUnitPrice(foodOptionRepository.findById(orderItemOptionDTO.getOptionId()).get().getPrice());
-                orderItemOption.setTotalPrice( orderItemOption.getUnitPrice().multiply(BigDecimal.valueOf(orderItemOption.getQuantity())).multiply(new BigDecimal(orderItem1.getQuantity())));
-                orderItemOption.setFoodOption(foodOptionRepository.findById(orderItemOptionDTO.getOptionId()).get());
-                total=total.add(orderItemOption.getTotalPrice());
-                orderItemOptionList.add(orderItemOption);
-            }
-            total=total.add(orderItem1.getTotalPrice());
-            orderItemOptionRepository.saveAll(orderItemOptionList);
-            orderItem1.setOrderItemOptions(orderItemOptionList);
-            orderItem.add(orderItem1);
+        // Nhóm sản phẩm theo Shop
+        Map<Long, List<OrderItemDTO>> shopOrderItems = new HashMap<>();
+
+        for (OrderItemDTO orderItemDTO : orderDTO.getOrderItem()) {
+            Long shopId = shopRepository.findByProduct(orderItemDTO.getProductId()).getId();
+            shopOrderItems.computeIfAbsent(shopId, k -> new ArrayList<>()).add(orderItemDTO);
         }
 
-        orderItemRepository.saveAll(orderItem);
-        order.setOwner(userRepository.findById(orderDTO.getOwnerId()).get());
-        order.setShipper(userRepository.findById(orderDTO.getShipperId()).get());
-        order.setStatus(pending);
-        order.setDeliveryMethod(deliveryMethodRepository.findById(orderDTO.getShipMethodId()).get());
-        total=total.add(deliveryMethodRepository.findById(orderDTO.getShipMethodId()).get().getFee());
-        order.setTotal(total);
-        order.setPaymentMethod(paymentRepository.findById(orderDTO.getPaymentMethodId()).get());
-//        if(orderDTO.getVoucherId()!=null&&){
-//
-//        }
-//        order.setVoucher();
-        orderRepository.save(order);
+        // Duyệt từng shop để tạo Order riêng
+        for (Map.Entry<Long, List<OrderItemDTO>> entry : shopOrderItems.entrySet()) {
+            Long shopId = entry.getKey();
+            List<OrderItemDTO> orderItemDTOList = entry.getValue();
+
+            // Tạo đơn hàng mới cho từng shop
+            Order order = new Order();
+            order.setOwner(userRepository.findById(orderDTO.getOwnerId())
+                    .orElseThrow(() -> new RuntimeException("User not found")));
+            order.setShipper(userRepository.findById(orderDTO.getShipperId())
+                    .orElseThrow(() -> new RuntimeException("Shipper not found")));
+            order.setStatus(OrderStatus.PENDING);
+            order.setDeliveryMethod(deliveryMethodRepository.findById(orderDTO.getShipMethodId())
+                    .orElseThrow(() -> new RuntimeException("Delivery method not found")));
+            order.setPaymentMethod(paymentRepository.findById(orderDTO.getPaymentMethodId())
+                    .orElseThrow(() -> new RuntimeException("Payment method not found")));
+            order.setTotal(BigDecimal.ZERO);
+            order.setCreatedAt(LocalDateTime.now());
+            orderRepository.save(order); // Lưu Order trước để có ID
+
+            BigDecimal totalOrderPrice = BigDecimal.ZERO;
+
+            // Duyệt qua từng OrderItem của shop này
+            for (OrderItemDTO orderItemDTO : orderItemDTOList) {
+                OrderItem orderItem = new OrderItem();
+                orderItem.setOrder(order);
+                orderItem.setProduct(productRepository.findById(orderItemDTO.getProductId())
+                        .orElseThrow(() -> new RuntimeException("Product not found")));
+                orderItem.setQuantity(orderItemDTO.getQuantity());
+                orderItem.setCreatedAt(LocalDateTime.now());
+
+                // **Lưu OrderItem trước để có ID**
+                orderItem = orderItemRepository.save(orderItem);
+
+                List<OrderItemOption> orderItemOptions = new ArrayList<>();
+                for (OrderItemOptionDTO orderItemOptionDTO : orderItemDTO.getOrderItemOptions()) {
+                    OrderItemOption orderItemOption = new OrderItemOption();
+
+                    if (orderItemOptionDTO.getTypeId() == 2) {
+                        BigDecimal unitPrice = foodOptionRepository.findById(orderItemOptionDTO.getOptionId())
+                                .orElseThrow(() -> new RuntimeException("Food Option not found"))
+                                .getPrice();
+                        orderItem.setUnitPrice(unitPrice);
+                    }
+
+                    orderItemOption.setOrderItem(orderItem);
+                    orderItemOption.setQuantity(orderItemOptionDTO.getQuantity());
+                    orderItemOption.setUnitPrice(foodOptionRepository.findById(orderItemOptionDTO.getOptionId())
+                            .orElseThrow(() -> new RuntimeException("Food Option not found")).getPrice());
+                    orderItemOption.setTotalPrice(orderItemOption.getUnitPrice()
+                            .multiply(BigDecimal.valueOf(orderItemOption.getQuantity()))
+                            .multiply(BigDecimal.valueOf(orderItem.getQuantity())));
+                    orderItemOption.setFoodOption(foodOptionRepository.findById(orderItemOptionDTO.getOptionId())
+                            .orElseThrow(() -> new RuntimeException("Food Option not found")));
+
+                    totalOrderPrice = totalOrderPrice.add(orderItemOption.getTotalPrice());
+                    orderItemOptions.add(orderItemOption);
+                }
+
+                // **Lưu tất cả OrderItemOptions vào DB sau khi OrderItem có ID**
+                orderItemOptionRepository.saveAll(orderItemOptions);
+
+                // **Lưu OrderItem ngay sau khi hoàn thành**
+                orderItemRepository.save(orderItem);
+            }
+
+            // Cập nhật tổng tiền của Order (bao gồm phí ship)
+            totalOrderPrice = totalOrderPrice.add(order.getDeliveryMethod().getFee());
+            order.setShipping_address(orderDTO.getAddress());
+            order.setTotal(totalOrderPrice);
+            orderRepository.save(order);
+        }
     }
+
+
+
+
 }

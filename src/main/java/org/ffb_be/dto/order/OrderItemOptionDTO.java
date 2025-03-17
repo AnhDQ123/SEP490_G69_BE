@@ -2,12 +2,13 @@ package org.ffb_be.dto.order;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.checkerframework.checker.units.qual.N;
+import lombok.NoArgsConstructor;
+
 
 import java.math.BigDecimal;
 @Data
 @AllArgsConstructor
-@N
+@NoArgsConstructor
 public class OrderItemOptionDTO {
     private Long id;
     private Long orderItemId;
