@@ -30,8 +30,12 @@ public class CartController {
         cartService.save(cartDTO);
         return ResponseEntity.ok().body(cartDTO);
     }
-    @GetMapping("/{id}")
+    @GetMapping("owner/{id}")
     public ResponseEntity<?> getCartByUserId(@PathVariable Long id) {
         return ResponseEntity.ok(cartService.findByUserId(id));
+    }
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getCartById(@PathVariable Long id) {
+        return ResponseEntity.ok(cartService.findById(id));
     }
 }

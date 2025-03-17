@@ -162,6 +162,40 @@ public class CartServiceImpl implements CartService {
         return cartDTOList;
     }
 
+    @Override
+    public CartDTO findById(Long id) {
+        Cart cart=cartRepository.findById(id).get();
+        CartDTO cartDTO=new CartDTO();
+            cartDTO.setUserId(cart.getOwner().getId());
+            cartDTO.setId(cart.getId());
+            cartDTO.setPrice(cart.getTotal());
+            List<CartItemDTO> cartItemDTOList=new ArrayList<>();
+            List<CartItem> cartItems=cart.getCartItems();
+            for(CartItem cartItem:cartItems){
+                CartItemDTO cartItemDTO=new CartItemDTO();
+                cartItemDTO.setProductId(cartItem.getProduct().getId());
+                cartDTO.setShopId(shopRepository.findByProduct(cartItem.getProduct().getId()).getId());
+                cartItemDTO.setQuantity(cartItem.getQuantity());
+                cartItemDTO.setTotalPrice(cartItem.getTotalPrice());
+                cartItemDTO.setId(cartItem.getId());
+                cartItemDTO.setCartId(cart.getId());
+                List<CartItemOptionDTO> cartItemOptionDTOList=new ArrayList<>();
+                List<CartItemOption> cartItemOptions=cartItem.getCartItemOptions();
+                for(CartItemOption cartItemOption:cartItemOptions){
+                    CartItemOptionDTO cartItemOptionDTO=new CartItemOptionDTO();
+                    cartItemOptionDTO.setOptionId(cartItemOption.getId());
+                    cartItemOptionDTO.setQuantity(cartItemOption.getQuantity());
+                    cartItemOptionDTO.setCartItemId(cartItemDTO.getId());
+                    cartItemOptionDTO.setTypeId(cartItemOption.getFoodOption().getType().getId());
+                    cartItemOptionDTOList.add(cartItemOptionDTO);
+                }
+                cartItemDTO.setCartItemOptionDTOList(cartItemOptionDTOList);
+                cartItemDTOList.add(cartItemDTO);
+            }
+            cartDTO.setCartItemDTOList(cartItemDTOList);
+        return cartDTO;
+    }
+
 
 }
 //@Override

@@ -10,4 +10,5 @@ import java.util.List;
 public interface CartService {
     void save(CartDTO cartDTO) throws IOException;
     List<CartDTO> findByUserId(Long id);
+    CartDTO findById(Long id);
 }
