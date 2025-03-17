@@ -44,8 +44,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void save(OrderDTO orderDTO) throws IOException {
-        // Nhóm sản phẩm theo Shop
+    public List<Order> save(OrderDTO orderDTO) throws IOException {
         Map<Long, List<OrderItemDTO>> shopOrderItems = new HashMap<>();
 
         for (OrderItemDTO orderItemDTO : orderDTO.getOrderItem()) {
@@ -53,12 +52,11 @@ public class OrderServiceImpl implements OrderService {
             shopOrderItems.computeIfAbsent(shopId, k -> new ArrayList<>()).add(orderItemDTO);
         }
 
-        // Duyệt từng shop để tạo Order riêng
+        List<Order> createdOrders = new ArrayList<>();
+
         for (Map.Entry<Long, List<OrderItemDTO>> entry : shopOrderItems.entrySet()) {
-            Long shopId = entry.getKey();
             List<OrderItemDTO> orderItemDTOList = entry.getValue();
 
-            // Tạo đơn hàng mới cho từng shop
             Order order = new Order();
             order.setOwner(userRepository.findById(orderDTO.getOwnerId())
                     .orElseThrow(() -> new RuntimeException("User not found")));
@@ -71,11 +69,10 @@ public class OrderServiceImpl implements OrderService {
                     .orElseThrow(() -> new RuntimeException("Payment method not found")));
             order.setTotal(BigDecimal.ZERO);
             order.setCreatedAt(LocalDateTime.now());
-            orderRepository.save(order); // Lưu Order trước để có ID
+            orderRepository.save(order);
 
             BigDecimal totalOrderPrice = BigDecimal.ZERO;
 
-            // Duyệt qua từng OrderItem của shop này
             for (OrderItemDTO orderItemDTO : orderItemDTOList) {
                 OrderItem orderItem = new OrderItem();
                 orderItem.setOrder(order);
@@ -84,20 +81,11 @@ public class OrderServiceImpl implements OrderService {
                 orderItem.setQuantity(orderItemDTO.getQuantity());
                 orderItem.setCreatedAt(LocalDateTime.now());
 
-                // **Lưu OrderItem trước để có ID**
                 orderItem = orderItemRepository.save(orderItem);
 
                 List<OrderItemOption> orderItemOptions = new ArrayList<>();
                 for (OrderItemOptionDTO orderItemOptionDTO : orderItemDTO.getOrderItemOptions()) {
                     OrderItemOption orderItemOption = new OrderItemOption();
-
-                    if (orderItemOptionDTO.getTypeId() == 2) {
-                        BigDecimal unitPrice = foodOptionRepository.findById(orderItemOptionDTO.getOptionId())
-                                .orElseThrow(() -> new RuntimeException("Food Option not found"))
-                                .getPrice();
-                        orderItem.setUnitPrice(unitPrice);
-                    }
-
                     orderItemOption.setOrderItem(orderItem);
                     orderItemOption.setQuantity(orderItemOptionDTO.getQuantity());
                     orderItemOption.setUnitPrice(foodOptionRepository.findById(orderItemOptionDTO.getOptionId())
@@ -112,20 +100,20 @@ public class OrderServiceImpl implements OrderService {
                     orderItemOptions.add(orderItemOption);
                 }
 
-                // **Lưu tất cả OrderItemOptions vào DB sau khi OrderItem có ID**
                 orderItemOptionRepository.saveAll(orderItemOptions);
-
-                // **Lưu OrderItem ngay sau khi hoàn thành**
-                orderItemRepository.save(orderItem);
             }
 
-            // Cập nhật tổng tiền của Order (bao gồm phí ship)
             totalOrderPrice = totalOrderPrice.add(order.getDeliveryMethod().getFee());
-            order.setShipping_address(orderDTO.getAddress());
             order.setTotal(totalOrderPrice);
             orderRepository.save(order);
+
+            createdOrders.add(order);
         }
+
+        return createdOrders;  // Trả về danh sách tất cả Order đã được tạo
     }
+
+
 
 
 

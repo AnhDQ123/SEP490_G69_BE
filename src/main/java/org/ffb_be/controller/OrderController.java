@@ -1,16 +1,21 @@
 package org.ffb_be.controller;
 
 import org.ffb_be.dto.order.OrderDTO;
+import org.ffb_be.entity.Order;
 import org.ffb_be.service.order.OrderService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.annotation.Validated;
+
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/order")
@@ -22,12 +27,24 @@ public class OrderController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<?> addProduct(@Validated @RequestBody() OrderDTO cartDTO,
-                                        BindingResult bindingResult) throws IOException {
-        if(bindingResult.hasErrors()) {
-            return ResponseEntity.badRequest().body(bindingResult.getAllErrors());
+    public ResponseEntity<List<Map<String, Object>>> saveOrder(@RequestBody OrderDTO orderDTO) throws IOException {
+        List<Order> createdOrders = orderService.save(orderDTO);
+
+        if (createdOrders.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(List.of(Map.of("error", "Không thể tạo đơn hàng")));
         }
-        orderService.save(cartDTO);
-        return ResponseEntity.ok().body(cartDTO);
+
+        // Trả về danh sách tất cả Order đã tạo
+        List<Map<String, Object>> responseList = new ArrayList<>();
+        for (Order order : createdOrders) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("orderId", order.getId());
+            response.put("total", order.getTotal());
+            response.put("status", order.getStatus().toString());
+            responseList.add(response);
+        }
+
+        return ResponseEntity.ok(responseList);
     }
 }
