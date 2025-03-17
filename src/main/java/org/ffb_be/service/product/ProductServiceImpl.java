@@ -224,7 +224,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<ProductResponseDTO> findSimimlarProduct(String name) {
         String[] words = name.split("\\s+");
-        String substring = words[0].concat(words[1]);
+        String substring = words[0];
         List<Product> products=productRepository.findSimilarProducts(substring);
         List<ProductResponseDTO> productResponseDTOList = new ArrayList<>();
         for (Product product : products) {
@@ -253,6 +253,14 @@ public class ProductServiceImpl implements ProductService {
             } else {
                 productResponseDTO.setDiscount(BigDecimal.ZERO);
             }
+            BigDecimal defaultprice=null;
+            List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product);
+            for (FoodOption foodOption : foodOptions) {
+                if(foodOption.getType().getId()==2&&foodOption.getPrice().compareTo(defaultprice) < 0){
+                    defaultprice = foodOption.getPrice();
+                }
+            }
+            productResponseDTO.setDefaultPrice(defaultprice);
             productResponseDTO.setCategory(product.getCategory().getName());
             BeanUtils.copyProperties(product, productResponseDTO);
             return productResponseDTO;
