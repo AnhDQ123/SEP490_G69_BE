@@ -4,8 +4,10 @@ import org.ffb_be.dto.cart.CartDTO;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.List;
 
 @Service
 public interface CartService {
     void save(CartDTO cartDTO) throws IOException;
+    List<CartDTO> findByUserId(Long id);
 }
