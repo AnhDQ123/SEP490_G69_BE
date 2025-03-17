@@ -22,6 +22,7 @@ public class ShopDTO {
     private LocalTime openTime;
     private LocalTime closeTime;
     private String registrationCertificate;
+    private String foodSafetyCertificate;
     private String address;
     private Status isActive;
     private OwnerDTO owner;
