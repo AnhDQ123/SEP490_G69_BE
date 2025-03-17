@@ -3,6 +3,7 @@ package org.ffb_be.entity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
@@ -13,6 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Data
 public class CartItem extends BaseEntity{
     @Id
     @Column(name = "cart_item_id")
@@ -23,7 +25,7 @@ public class CartItem extends BaseEntity{
     private BigDecimal unitPrice;
 
     @Column(name = "quantity")
-    private BigDecimal quantity;
+    private int quantity;
 
     @Column(name = "total_price")
     private BigDecimal totalPrice;
