@@ -247,20 +247,26 @@ public class ProductServiceImpl implements ProductService {
     public Page<ProductResponseDTO> findAll(Pageable pageable) {
         return productRepository.findAll(pageable).map(product -> {
             ProductResponseDTO productResponseDTO = new ProductResponseDTO();
+
             if (product.getDiscount() != null && product.getDiscount().getId() != null) {
                 Discount d = discountRepository.findById(product.getDiscount().getId());
                 productResponseDTO.setDiscount(d.getDiscount_percentage());
             } else {
                 productResponseDTO.setDiscount(BigDecimal.ZERO);
             }
-            BigDecimal defaultprice=null;
+
+            BigDecimal defaultprice = null;
             List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product);
+
             for (FoodOption foodOption : foodOptions) {
-                if(foodOption.getType().getId()==2&&foodOption.getPrice().compareTo(defaultprice) < 0){
-                    defaultprice = foodOption.getPrice();
+                if (foodOption.getType().getId() == 2) {
+                    if (defaultprice == null || foodOption.getPrice().compareTo(defaultprice) < 0) {
+                        defaultprice = foodOption.getPrice();
+                    }
                 }
             }
-            productResponseDTO.setDefaultPrice(defaultprice);
+
+            productResponseDTO.setDefaultPrice(defaultprice != null ? defaultprice : BigDecimal.ZERO);
             productResponseDTO.setCategory(product.getCategory().getName());
             BeanUtils.copyProperties(product, productResponseDTO);
             return productResponseDTO;
