@@ -14,6 +14,7 @@ public class CartDTO {
     private Long id;
     private Long userId;
     private Long shopId;
+    private String shopName;
     private BigDecimal price;
     private String status;
     private List<CartItemDTO> cartItemDTOList;

@@ -13,6 +13,8 @@ public class CartItemOptionDTO {
     private Long id;
     private Long optionId;
     private Long typeId;
+    private String optionName;
+    private String image;
     private Long cartItemId;
     private BigDecimal price;
     private BigDecimal totalPrice;

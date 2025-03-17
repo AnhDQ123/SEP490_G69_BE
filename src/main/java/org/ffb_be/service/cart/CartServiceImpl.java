@@ -131,7 +131,6 @@ public class CartServiceImpl implements CartService {
                 CartDTO cartDTO=new CartDTO();
                 cartDTO.setUserId(cart.getOwner().getId());
                 cartDTO.setId(cart.getId());
-
                 cartDTO.setPrice(cart.getTotal());
                 List<CartItemDTO> cartItemDTOList=new ArrayList<>();
                 List<CartItem> cartItems=cart.getCartItems();
@@ -139,6 +138,9 @@ public class CartServiceImpl implements CartService {
                     CartItemDTO cartItemDTO=new CartItemDTO();
                     cartItemDTO.setProductId(cartItem.getProduct().getId());
                     cartDTO.setShopId(shopRepository.findByProduct(cartItem.getProduct().getId()).getId());
+                    cartDTO.setShopName(shopRepository.findById(cartDTO.getShopId()).get().getName());
+                    cartItemDTO.setProductName(productRepository.findById(cartItemDTO.getProductId()).get().getName());
+                    cartItemDTO.setImage(productRepository.findById(cartItemDTO.getProductId()).get().getImage());
                     cartItemDTO.setQuantity(cartItem.getQuantity());
                     cartItemDTO.setTotalPrice(cartItem.getTotalPrice());
                     cartItemDTO.setId(cartItem.getId());
@@ -148,6 +150,8 @@ public class CartServiceImpl implements CartService {
                     for(CartItemOption cartItemOption:cartItemOptions){
                         CartItemOptionDTO cartItemOptionDTO=new CartItemOptionDTO();
                         cartItemOptionDTO.setOptionId(cartItemOption.getId());
+                        cartItemOptionDTO.setOptionName(cartItemOption.getFoodOption().getName());
+                        cartItemOptionDTO.setImage(cartItemOption.getFoodOption().getImage());
                         cartItemOptionDTO.setQuantity(cartItemOption.getQuantity());
                         cartItemOptionDTO.setCartItemId(cartItemDTO.getId());
                         cartItemOptionDTO.setTypeId(cartItemOption.getFoodOption().getType().getId());
