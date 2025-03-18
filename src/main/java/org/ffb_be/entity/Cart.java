@@ -3,11 +3,12 @@ package org.ffb_be.entity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.ffb_be.utils.enums.CartStatus;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+
 import java.util.List;
 
 @Entity
@@ -15,6 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Data
 public class Cart extends BaseEntity{
     @Id
     @Column(name = "cart_id")
