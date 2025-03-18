@@ -6,10 +6,7 @@ import org.ffb_be.service.order.OrderService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -35,7 +32,6 @@ public class OrderController {
                     .body(List.of(Map.of("error", "Không thể tạo đơn hàng")));
         }
 
-        // Trả về danh sách tất cả Order đã tạo
         List<Map<String, Object>> responseList = new ArrayList<>();
         for (Order order : createdOrders) {
             Map<String, Object> response = new HashMap<>();
@@ -44,7 +40,17 @@ public class OrderController {
             response.put("status", order.getStatus().toString());
             responseList.add(response);
         }
-
         return ResponseEntity.ok(responseList);
+    }
+    @GetMapping("/checkout")
+    public ResponseEntity<?> checkout(@RequestParam List<Long> ids) throws IOException {
+        List<OrderDTO> orders = orderService.viewOrder(ids);
+
+        if (orders.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", "Không tìm thấy sản phẩm nào với danh sách ID đã cung cấp"));
+        }
+
+        return ResponseEntity.ok(orders);
     }
 }

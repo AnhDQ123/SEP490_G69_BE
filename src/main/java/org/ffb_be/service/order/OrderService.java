@@ -10,4 +10,5 @@ import java.util.List;
 @Service
 public interface OrderService {
     List<Order> save(OrderDTO oderDTO) throws IOException;
+    List<OrderDTO> viewOrder(List<Long> id) throws IOException;
 }

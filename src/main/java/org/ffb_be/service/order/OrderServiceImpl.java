@@ -113,8 +113,60 @@ public class OrderServiceImpl implements OrderService {
         return createdOrders;  // Trả về danh sách tất cả Order đã được tạo
     }
 
+    @Override
+    public List<OrderDTO> viewOrder(List<Long> id) throws IOException {
+        List<Order> orders = orderRepository.findAllById(id); // Load tất cả đơn hàng trước
+        List<OrderDTO> orderDTOs = new ArrayList<>();
 
+        for (Order order : orders) {
+            OrderDTO orderDTO = new OrderDTO();
+            orderDTO.setId(order.getId());
+            orderDTO.setAddress(order.getShipping_address());
+            orderDTO.setTotal(order.getTotal());
 
+            // Kiểm tra null trước khi lấy ID
+            orderDTO.setVoucherId(order.getVoucher() != null ? order.getVoucher().getId() : null);
+            orderDTO.setShipperId(order.getShipper() != null ? order.getShipper().getId() : null);
+            orderDTO.setPaymentMethodId(order.getPaymentMethod() != null ? order.getPaymentMethod().getId() : null);
+            orderDTO.setShipMethodId(order.getDeliveryMethod() != null ? order.getDeliveryMethod().getId() : null);
+
+            // Danh sách Order Items
+            List<OrderItemDTO> orderItemDTOList = new ArrayList<>();
+            for (OrderItem orderItem : order.getOrderItems()) {
+                OrderItemDTO orderItemDTO = new OrderItemDTO();
+                orderItemDTO.setId(orderItem.getId());
+                orderItemDTO.setQuantity(orderItem.getQuantity());
+                orderItemDTO.setProductId(orderItem.getProduct().getId());
+                orderItemDTO.setTotal(orderItem.getTotalPrice());
+                orderItemDTO.setCreatedAt(orderItem.getCreatedAt());
+                orderItemDTO.setOrderId(order.getId());
+
+                // Danh sách Order Item Options
+                List<OrderItemOptionDTO> orderItemOptionDTOList = new ArrayList<>();
+                for (OrderItemOption orderItemOption : orderItem.getOrderItemOptions()) {
+                    OrderItemOptionDTO orderItemOptionDTO = new OrderItemOptionDTO();
+                    orderItemOptionDTO.setId(orderItemOption.getId());
+                    orderItemOptionDTO.setQuantity(orderItemOption.getQuantity());
+                    orderItemOptionDTO.setOrderItemId(orderItem.getId());
+
+                    // Kiểm tra null trước khi lấy optionId
+                    orderItemOptionDTO.setOptionId(orderItemOption.getFoodOption().getId());
+
+                    orderItemOptionDTO.setTotal(orderItemOption.getTotalPrice());
+                    orderItemOptionDTO.setPrice(orderItemOption.getUnitPrice());
+
+                    orderItemOptionDTOList.add(orderItemOptionDTO);
+                }
+
+                orderItemDTO.setOrderItemOptions(orderItemOptionDTOList);
+                orderItemDTOList.add(orderItemDTO);
+            }
+
+            orderDTO.setOrderItem(orderItemDTOList);
+            orderDTOs.add(orderDTO);
+        }
+        return orderDTOs;
+    }
 
 
 
