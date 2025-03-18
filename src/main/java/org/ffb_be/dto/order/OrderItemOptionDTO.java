@@ -13,6 +13,8 @@ public class OrderItemOptionDTO {
     private Long id;
     private Long orderItemId;
     private Long optionId;
+    private String optionName;
+    private String image;
     private Long typeId;
     private BigDecimal price;
     private BigDecimal total;

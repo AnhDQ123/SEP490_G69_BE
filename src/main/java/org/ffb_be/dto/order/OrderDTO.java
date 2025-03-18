@@ -20,6 +20,8 @@ public class OrderDTO {
     private Long voucherId;
     private Long discountId;
     private String address;
+    private String shopName;
+    private String image;
     private BigDecimal total;
     private LocalDateTime createdAt;
     private List<OrderItemDTO> orderItem;

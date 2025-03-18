@@ -140,7 +140,10 @@ public class OrderServiceImpl implements OrderService {
                 orderItemDTO.setTotal(orderItem.getTotalPrice());
                 orderItemDTO.setCreatedAt(orderItem.getCreatedAt());
                 orderItemDTO.setOrderId(order.getId());
-
+                orderDTO.setShopName(shopRepository.findByProduct(orderItemDTO.getProductId()).getName());
+                orderDTO.setImage(shopRepository.findByProduct(orderItemDTO.getProductId()).getBackgroundImage());
+                orderItemDTO.setProductName(productRepository.findById(orderItemDTO.getProductId()).get().getName());
+                orderItemDTO.setImage(productRepository.findById(orderItemDTO.getProductId()).get().getImage());
                 // Danh sách Order Item Options
                 List<OrderItemOptionDTO> orderItemOptionDTOList = new ArrayList<>();
                 for (OrderItemOption orderItemOption : orderItem.getOrderItemOptions()) {
@@ -151,7 +154,8 @@ public class OrderServiceImpl implements OrderService {
 
                     // Kiểm tra null trước khi lấy optionId
                     orderItemOptionDTO.setOptionId(orderItemOption.getFoodOption().getId());
-
+                    orderItemOptionDTO.setOptionName(orderItemOption.getFoodOption().getName());
+                    orderItemOptionDTO.setImage(orderItemOption.getFoodOption().getImage());
                     orderItemOptionDTO.setTotal(orderItemOption.getTotalPrice());
                     orderItemOptionDTO.setPrice(orderItemOption.getUnitPrice());
 
