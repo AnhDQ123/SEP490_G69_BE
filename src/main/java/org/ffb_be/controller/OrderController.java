@@ -54,9 +54,9 @@ public class OrderController {
 
         return ResponseEntity.ok(orders);
     }
-    @GetMapping("/checkout")
-    public ResponseEntity<?> findByStatus(@RequestParam OrderStatus status) throws IOException {
-        List<OrderDTO> orders = orderService.findAllByStatus(status);
+    @GetMapping("/status")
+    public ResponseEntity<?> findByStatus(@RequestParam Long id ,@RequestParam OrderStatus status) throws IOException {
+        List<OrderDTO> orders = orderService.findAllByOwnerAndStatus(id,status);
         if (orders.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Map.of("error", "Không tìm thấy sản phẩm nào với danh sách ID đã cung cấp"));
