@@ -40,14 +40,19 @@ public class UserServiceImpl implements UserService {
     public void create(UserCreateDTO userCreateDTO) throws IOException {
         User user = new User();
         BeanUtils.copyProperties(userCreateDTO, user);
+
         userRepository.findByEmail(userCreateDTO.getEmail()).ifPresent((x)->{
             throw new NonUniqueResultException("Email already exists!");
         });
-        userRepository.findByPhone(userCreateDTO.getPhone()).ifPresent((x)->{
-            throw new NonUniqueResultException("Phone already exists!");
-        });
-        Role role = roleRepository.findById(1L)
+
+        Role role = roleRepository.findById(userCreateDTO.getRoleId())
                 .orElseThrow(() -> new RuntimeException("Role not found"));
+        if(!role.getName().equals("operator")) {
+            userRepository.findByPhone(userCreateDTO.getPhone()).ifPresent((x)->{
+                throw new NonUniqueResultException("Phone already exists!");
+            });
+        }
+
         user.setEmail(userCreateDTO.getEmail());
         user.setPhone(userCreateDTO.getPhone());
         user.setUsername(userCreateDTO.getPhone());
@@ -73,6 +78,7 @@ public class UserServiceImpl implements UserService {
             userResponseDTO.setStatus(user.getStatus().toString());
             userResponseDTO.setAvatar(user.getProfile().getAvatar());
             userResponseDTO.setName(user.getProfile().getName());
+            userResponseDTO.setRole(user.getRole().getName());
             return userResponseDTO;
         });
     }
