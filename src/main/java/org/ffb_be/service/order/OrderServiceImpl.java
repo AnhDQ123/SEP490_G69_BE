@@ -172,6 +172,7 @@ public class OrderServiceImpl implements OrderService {
                                 .getPrice();
                         orderItemDTO.setPrice(unitPrice);
                         orderItemDTO.setTotal(unitPrice.multiply(BigDecimal.valueOf(orderItemDTO.getQuantity())));
+                        orderItemTotal=orderItemTotal.add(orderItemDTO.getTotal());
                         orderItemOptionDTO.setQuantity(orderItemDTO.getQuantity());
                     }
                     // Kiểm tra null trước khi lấy optionId
@@ -180,8 +181,8 @@ public class OrderServiceImpl implements OrderService {
                     orderItemOptionDTO.setImage(orderItemOption.getFoodOption().getImage());
                     if(orderItemOptionDTO.getTypeId() != 2){
                         orderItemOptionDTO.setTotal(orderItemOptionDTO.getPrice().multiply(BigDecimal.valueOf(orderItemOptionDTO.getQuantity())));
+                        orderItemOptionTotal=orderItemOptionTotal.add(orderItemOptionDTO.getTotal());
                     }
-                    orderItemOptionTotal=orderItemOptionTotal.add(orderItemOptionDTO.getTotal());
                     orderItemOptionDTOList.add(orderItemOptionDTO);
                 }
                 orderItemTotal = orderItemTotal.add(orderItemOptionTotal);
