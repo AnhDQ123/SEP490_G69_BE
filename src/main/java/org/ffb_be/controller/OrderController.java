@@ -3,6 +3,7 @@ package org.ffb_be.controller;
 import org.ffb_be.dto.order.OrderDTO;
 import org.ffb_be.entity.Order;
 import org.ffb_be.service.order.OrderService;
+import org.ffb_be.utils.enums.OrderStatus;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -53,4 +54,15 @@ public class OrderController {
 
         return ResponseEntity.ok(orders);
     }
+    @GetMapping("/checkout")
+    public ResponseEntity<?> findByStatus(@RequestParam OrderStatus status) throws IOException {
+        List<OrderDTO> orders = orderService.findAllByStatus(status);
+        if (orders.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", "Không tìm thấy sản phẩm nào với danh sách ID đã cung cấp"));
+        }
+
+        return ResponseEntity.ok(orders);
+    }
+
 }
