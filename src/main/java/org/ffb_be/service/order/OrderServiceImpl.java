@@ -123,7 +123,7 @@ public class OrderServiceImpl implements OrderService {
             orderDTO.setId(order.getId());
             orderDTO.setAddress(order.getShipping_address());
             orderDTO.setTotal(order.getTotal());
-
+            orderDTO.setOwnerId(order.getOwner().getId());
             // Kiểm tra null trước khi lấy ID
             orderDTO.setVoucherId(order.getVoucher() != null ? order.getVoucher().getId() : null);
             orderDTO.setShipperId(order.getShipper() != null ? order.getShipper().getId() : null);
@@ -134,6 +134,7 @@ public class OrderServiceImpl implements OrderService {
             List<OrderItemDTO> orderItemDTOList = new ArrayList<>();
             for (OrderItem orderItem : order.getOrderItems()) {
                 OrderItemDTO orderItemDTO = new OrderItemDTO();
+
                 orderItemDTO.setId(orderItem.getId());
                 orderItemDTO.setQuantity(orderItem.getQuantity());
                 orderItemDTO.setProductId(orderItem.getProduct().getId());
