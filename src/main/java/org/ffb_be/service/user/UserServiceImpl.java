@@ -79,6 +79,9 @@ public class UserServiceImpl implements UserService {
     public ProfileDTO findById(Long id) {
         Profile profile = profileRepository.findById(id).orElse(null);
         ProfileDTO profileDTO = new ProfileDTO();
+        if(userRepository.findById(id).get()!=null) {
+            profileDTO.setStatus(userRepository.findById(id).get().getStatus());
+        }
         if(profile.getAvatar() != null) {
             profileDTO.setAvatar(profile.getAvatar());
         }
