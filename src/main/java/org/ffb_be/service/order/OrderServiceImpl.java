@@ -31,6 +31,7 @@ public class OrderServiceImpl implements OrderService {
     private final DeliveryMethodRepository deliveryMethodRepository;
     private final PaymentRepository paymentRepository;
     private final ShopRepository shopRepository;
+
     public OrderServiceImpl(OrderRepository orderRepository, ProductRepository productRepository, FoodOptionRepository foodOptionRepository, OrderItemRepository orderItemRepository, OrderItemOptionRepository orderItemOptionRepository, UserRepository userRepository, DeliveryMethodRepository deliveryMethodRepository, PaymentRepository paymentRepository, ShopRepository shopRepository) {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
@@ -167,7 +168,4 @@ public class OrderServiceImpl implements OrderService {
         }
         return orderDTOs;
     }
-
-
-
 }
