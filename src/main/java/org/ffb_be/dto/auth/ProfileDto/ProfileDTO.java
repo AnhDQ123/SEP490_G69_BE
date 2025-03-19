@@ -3,6 +3,7 @@ package org.ffb_be.dto.auth.ProfileDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.ffb_be.utils.enums.Status;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 public class ProfileDTO {
     private Long id;
     private String name;
+    private Status status;
     private String role;
     private String address;
     private String avatar;
