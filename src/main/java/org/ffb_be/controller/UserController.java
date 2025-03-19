@@ -3,6 +3,7 @@ package org.ffb_be.controller;
 import org.ffb_be.dto.auth.ProfileDto.ProfileDTO;
 import org.ffb_be.dto.auth.userDto.UserCreateDTO;
 import org.ffb_be.dto.auth.userDto.UserUpdateDTO;
+import org.ffb_be.entity.Profile;
 import org.ffb_be.repository.ProfileRepository;
 import org.ffb_be.repository.UserRepository;
 import org.ffb_be.service.user.UserService;
@@ -34,13 +35,7 @@ public class UserController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getUserById(@PathVariable Long id) {
-
-        Optional<ProfileDTO> optionalUser = profileRepository.findByUserId(id);
-        if (optionalUser.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found!");
-        }
-        ProfileDTO profile = optionalUser.get();
-        return ResponseEntity.ok(profile);
+        return ResponseEntity.ok( userService.findById(id));
     }
 
     @PostMapping("/add")

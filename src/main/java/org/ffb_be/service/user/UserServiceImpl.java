@@ -1,6 +1,7 @@
 package org.ffb_be.service.user;
 
 import jakarta.persistence.NonUniqueResultException;
+import org.ffb_be.dto.auth.ProfileDto.ProfileDTO;
 import org.ffb_be.dto.auth.userDto.UserCreateDTO;
 import org.ffb_be.dto.auth.userDto.UserResponseDTO;
 import org.ffb_be.dto.auth.userDto.UserUpdateDTO;
@@ -72,6 +73,52 @@ public class UserServiceImpl implements UserService {
             userResponseDTO.setName(user.getProfile().getName());
             return userResponseDTO;
         });
+    }
+
+    @Override
+    public ProfileDTO findById(Long id) {
+        Profile profile = profileRepository.findById(id).orElse(null);
+        ProfileDTO profileDTO = new ProfileDTO();
+        if(profile.getAvatar() != null) {
+            profileDTO.setAvatar(profile.getAvatar());
+        }
+        if(profile.getName() != null) {
+            profileDTO.setName(profile.getName());
+        }
+        if(profile.getUser() != null) {
+            profileDTO.setId(profile.getUser().getId());
+        }
+        if(profile.getAvatar() != null) {
+            profileDTO.setAvatar(profile.getAvatar());
+        }
+        if(profile.getDob() != null) {
+            profileDTO.setDob(profile.getDob());
+        }
+        if(profile.getCitizenIDExpiredDate() != null) {
+            profileDTO.setCitizenIDExpiredDate(profile.getCitizenIDExpiredDate());
+        }
+        if(profile.getCitizenIDNumber() != null) {
+            profileDTO.setCitizenIDNumber(profile.getCitizenIDNumber());
+        }
+        if(profile.getCitizenIDCardBack() != null) {
+            profileDTO.setCitizenIDCardBack(profile.getCitizenIDCardBack());
+        }
+        if(profile.getCitizenIDCardFront() != null) {
+            profileDTO.setCitizenIDCardFront(profile.getCitizenIDCardFront());
+        }
+        if(profile.getAddress() != null) {
+            profileDTO.setAddress(profile.getAddress());
+        }
+        if(profile.getGender() != null) {
+            profileDTO.setGender(profile.getGender());
+        }
+        if(profile.getTax_code() != null) {
+            profileDTO.setTax_code(profile.getTax_code());
+        }
+        if(userRepository.findById(id).get().getPhone()!=null) {
+            profileDTO.setPhone(userRepository.findById(id).get().getPhone());
+        }
+        return profileDTO;
     }
 
 

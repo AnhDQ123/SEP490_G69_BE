@@ -18,6 +18,7 @@ public class ProfileDTO {
     private String role;
     private String address;
     private String avatar;
+    private String gender;
     private LocalDateTime createdAt;;
     private LocalDate dob;
     private String phone;
