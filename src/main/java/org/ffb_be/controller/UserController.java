@@ -52,7 +52,7 @@ public class UserController {
         userService.create(user);
         return ResponseEntity.ok().body(user);
     }
-    @PostMapping("/update")
+    @PutMapping("/update")
     public ResponseEntity<?> updateProfile(@Validated @ModelAttribute("employee") UserUpdateDTO user,
                                          BindingResult bindingResult,
                                          @RequestParam("avatar") MultipartFile avatar) throws IOException {
