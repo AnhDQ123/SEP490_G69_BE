@@ -289,6 +289,7 @@ public class OrderServiceImpl implements OrderService {
     public void cancelOrder(Long id) {
         Order order = orderRepository.findById(id).get();
         order.setStatus(OrderStatus.CANCELLED);
+        orderRepository.save(order);
     }
 
 

@@ -65,7 +65,7 @@ public class OrderController {
         return ResponseEntity.ok(orders);
     }
 
-    @PutMapping("/cancel")
+    @PostMapping("/cancel")
     public void cancelOrder(@RequestParam Long id) throws IOException {
         orderService.cancelOrder(id);
     }
