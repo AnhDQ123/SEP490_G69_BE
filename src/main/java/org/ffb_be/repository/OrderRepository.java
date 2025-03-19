@@ -1,6 +1,7 @@
 package org.ffb_be.repository;
 
 import org.ffb_be.entity.Order;
+import org.ffb_be.entity.Voucher;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -20,4 +21,9 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Override
     Optional<Order> findById(Long aLong);
+
+    int countByOwnerIdAndVoucher(Long ownerId, Voucher voucher);
+
+    @Query("SELECT v.code, COUNT(o) FROM Order o JOIN o.voucher v GROUP BY v.code")
+    List<Object[]> getVoucherUsageStatistics();
 }
