@@ -66,6 +66,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByAllField(search, pageable).map(user -> {
             UserResponseDTO userResponseDTO = new UserResponseDTO();
             BeanUtils.copyProperties(user, userResponseDTO);
+            userResponseDTO.setId(user.getId());
             userResponseDTO.setAvatar(user.getProfile().getAvatar());
             userResponseDTO.setName(user.getProfile().getName());
             return userResponseDTO;
