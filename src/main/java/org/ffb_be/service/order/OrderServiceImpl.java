@@ -285,5 +285,11 @@ public class OrderServiceImpl implements OrderService {
         return orderDTOs;
     }
 
+    @Override
+    public void cancelOrder(Long id) {
+        Order order = orderRepository.findById(id).get();
+        order.setStatus(OrderStatus.CANCELLED);
+    }
+
 
 }
