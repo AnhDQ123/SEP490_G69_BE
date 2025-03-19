@@ -92,6 +92,7 @@ public class UserServiceImpl implements UserService {
         if(profile.getAvatar() != null) {
             profileDTO.setAvatar(profile.getAvatar());
         }
+        profileDTO.setRole(userRepository.findById(id).get().getRole().getName());
         if(profile.getName() != null) {
             profileDTO.setName(profile.getName());
         }
