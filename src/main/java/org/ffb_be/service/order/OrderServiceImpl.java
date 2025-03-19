@@ -164,7 +164,7 @@ public class OrderServiceImpl implements OrderService {
                     orderItemOptionDTO.setOptionId(orderItemOption.getFoodOption().getId());
                     orderItemOptionDTO.setQuantity(orderItemOption.getQuantity());
                     orderItemOptionDTO.setOrderItemId(orderItem.getId());
-                    orderItemOptionDTO.setPrice(orderItemOption.getUnitPrice());
+                    orderItemOptionDTO.setPrice(foodOptionRepository.findById(orderItemOptionDTO.getOptionId()).get().getPrice());
                     orderItemOptionDTO.setTypeId(orderItemOption.getFoodOption().getType().getId());
                     if (orderItemOptionDTO.getTypeId() == 2) {
                         BigDecimal unitPrice = foodOptionRepository.findById(orderItemOptionDTO.getOptionId())
@@ -178,12 +178,15 @@ public class OrderServiceImpl implements OrderService {
 
                     orderItemOptionDTO.setOptionName(orderItemOption.getFoodOption().getName());
                     orderItemOptionDTO.setImage(orderItemOption.getFoodOption().getImage());
-                    orderItemOptionDTO.setTotal(orderItemOptionDTO.getPrice().multiply(BigDecimal.valueOf(orderItemOptionDTO.getQuantity())));
+                    if(orderItemOptionDTO.getTypeId() != 2){
+                        orderItemOptionDTO.setTotal(orderItemOptionDTO.getPrice().multiply(BigDecimal.valueOf(orderItemOptionDTO.getQuantity())));
+                    }
                     orderItemOptionTotal=orderItemOptionTotal.add(orderItemOptionDTO.getTotal());
                     orderItemOptionDTOList.add(orderItemOptionDTO);
                 }
                 orderItemTotal = orderItemTotal.add(orderItemOptionTotal);
                 orderItemDTO.setTotal(orderItemTotal.multiply(BigDecimal.ONE.subtract(orderItemDTO.getDiscount())));
+                orderItemTotal=orderItemDTO.getTotal();
                 orderItemDTO.setOrderItemOptions(orderItemOptionDTOList);
                 orderItemDTOList.add(orderItemDTO);
             }
