@@ -151,13 +151,21 @@ public class OrderServiceImpl implements OrderService {
                     orderItemOptionDTO.setId(orderItemOption.getId());
                     orderItemOptionDTO.setQuantity(orderItemOption.getQuantity());
                     orderItemOptionDTO.setOrderItemId(orderItem.getId());
-
+                    orderItemOptionDTO.setPrice(orderItemOption.getUnitPrice());
+                    orderItemOptionDTO.setTypeId(orderItemOption.getFoodOption().getType().getId());
+                    if (orderItemOptionDTO.getTypeId() == 2) {
+                        BigDecimal unitPrice = foodOptionRepository.findById(orderItemOptionDTO.getOptionId())
+                                .orElseThrow(() -> new RuntimeException("Food Option not found"))
+                                .getPrice();
+                        orderItemDTO.setPrice(unitPrice);
+                        orderItemDTO.setTotal(unitPrice.multiply(BigDecimal.valueOf(orderItemDTO.getQuantity())));
+                    }
                     // Kiểm tra null trước khi lấy optionId
                     orderItemOptionDTO.setOptionId(orderItemOption.getFoodOption().getId());
                     orderItemOptionDTO.setOptionName(orderItemOption.getFoodOption().getName());
                     orderItemOptionDTO.setImage(orderItemOption.getFoodOption().getImage());
                     orderItemOptionDTO.setTotal(orderItemOption.getTotalPrice());
-                    orderItemOptionDTO.setPrice(orderItemOption.getUnitPrice());
+
 
                     orderItemOptionDTOList.add(orderItemOptionDTO);
                 }
