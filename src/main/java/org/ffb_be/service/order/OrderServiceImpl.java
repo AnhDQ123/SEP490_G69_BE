@@ -117,6 +117,7 @@ public class OrderServiceImpl implements OrderService {
     public List<OrderDTO> viewOrder(List<Long> id) throws IOException {
         List<Order> orders = orderRepository.findAllById(id); // Load tất cả đơn hàng trước
         List<OrderDTO> orderDTOs = new ArrayList<>();
+        BigDecimal orderTotal = BigDecimal.ZERO;
 
         for (Order order : orders) {
             OrderDTO orderDTO = new OrderDTO();
@@ -125,20 +126,29 @@ public class OrderServiceImpl implements OrderService {
             orderDTO.setTotal(order.getTotal());
             orderDTO.setOwnerId(order.getOwner().getId());
             // Kiểm tra null trước khi lấy ID
-            orderDTO.setVoucherId(order.getVoucher() != null ? order.getVoucher().getId() : null);
+            if(order.getVoucher() != null) {
+                orderDTO.setVoucherId(order.getVoucher().getId());
+                orderDTO.setVoucherAmount(order.getVoucher().getDiscount_percentage());
+            }else orderDTO.setVoucherAmount(BigDecimal.ZERO);
+
             orderDTO.setShipperId(order.getShipper() != null ? order.getShipper().getId() : null);
             orderDTO.setPaymentMethodId(order.getPaymentMethod() != null ? order.getPaymentMethod().getId() : null);
             orderDTO.setShipMethodId(order.getDeliveryMethod() != null ? order.getDeliveryMethod().getId() : null);
 
             // Danh sách Order Items
             List<OrderItemDTO> orderItemDTOList = new ArrayList<>();
+            BigDecimal orderItemTotal = BigDecimal.ZERO;
             for (OrderItem orderItem : order.getOrderItems()) {
                 OrderItemDTO orderItemDTO = new OrderItemDTO();
-
                 orderItemDTO.setId(orderItem.getId());
                 orderItemDTO.setQuantity(orderItem.getQuantity());
                 orderItemDTO.setProductId(orderItem.getProduct().getId());
                 orderItemDTO.setTotal(orderItem.getTotalPrice());
+                if(orderItem.getProduct().getDiscount() != null){
+                    orderItemDTO.setDiscoundId(orderItem.getProduct().getDiscount().getId());
+                    orderItemDTO.setDiscount(orderItem.getProduct().getDiscount().getDiscount_percentage());
+                }else orderItemDTO.setDiscount(BigDecimal.ZERO);
+
                 orderItemDTO.setCreatedAt(orderItem.getCreatedAt());
                 orderItemDTO.setOrderId(order.getId());
                 orderDTO.setShopName(shopRepository.findByProduct(orderItemDTO.getProductId()).getName());
@@ -147,6 +157,7 @@ public class OrderServiceImpl implements OrderService {
                 orderItemDTO.setImage(productRepository.findById(orderItemDTO.getProductId()).get().getImage());
                 // Danh sách Order Item Options
                 List<OrderItemOptionDTO> orderItemOptionDTOList = new ArrayList<>();
+                BigDecimal orderItemOptionTotal = BigDecimal.ZERO;
                 for (OrderItemOption orderItemOption : orderItem.getOrderItemOptions()) {
                     OrderItemOptionDTO orderItemOptionDTO = new OrderItemOptionDTO();
                     orderItemOptionDTO.setId(orderItemOption.getId());
@@ -167,16 +178,17 @@ public class OrderServiceImpl implements OrderService {
 
                     orderItemOptionDTO.setOptionName(orderItemOption.getFoodOption().getName());
                     orderItemOptionDTO.setImage(orderItemOption.getFoodOption().getImage());
-                    orderItemOptionDTO.setTotal(orderItemOption.getTotalPrice());
-
-
+                    orderItemOptionDTO.setTotal(orderItemOptionDTO.getPrice().multiply(BigDecimal.valueOf(orderItemOptionDTO.getQuantity())));
+                    orderItemOptionTotal=orderItemOptionTotal.add(orderItemOptionDTO.getTotal());
                     orderItemOptionDTOList.add(orderItemOptionDTO);
                 }
-
+                orderItemTotal = orderItemTotal.add(orderItemOptionTotal);
+                orderItemDTO.setTotal(orderItemTotal.multiply(BigDecimal.ONE.subtract(orderItemDTO.getDiscount())));
                 orderItemDTO.setOrderItemOptions(orderItemOptionDTOList);
                 orderItemDTOList.add(orderItemDTO);
             }
-
+            orderTotal = orderTotal.add(orderItemTotal);
+            orderDTO.setTotal(orderTotal.multiply(BigDecimal.ONE.subtract(orderDTO.getVoucherAmount())));
             orderDTO.setOrderItem(orderItemDTOList);
             orderDTOs.add(orderDTO);
         }
