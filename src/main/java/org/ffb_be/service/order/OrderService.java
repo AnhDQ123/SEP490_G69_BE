@@ -12,5 +12,5 @@ import java.util.List;
 public interface OrderService {
     List<Order> save(OrderDTO oderDTO) throws IOException;
     List<OrderDTO> viewOrder(List<Long> id) throws IOException;
-    List<OrderDTO> findAllByStatus(OrderStatus status);
+    List<OrderDTO> findAllByOwnerAndStatus(Long id, OrderStatus status);
 }

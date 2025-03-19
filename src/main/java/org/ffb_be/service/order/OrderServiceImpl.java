@@ -200,8 +200,8 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<OrderDTO> findAllByStatus(OrderStatus status) {
-        List<Order> orders = orderRepository.findAllByStatus(status);
+    public List<OrderDTO> findAllByOwnerAndStatus(Long id,OrderStatus status) {
+        List<Order> orders = orderRepository.findAllByOwner_IdAndStatus(id,status);
         List<OrderDTO> orderDTOs = new ArrayList<>();
         BigDecimal orderTotal = BigDecimal.ZERO;
 

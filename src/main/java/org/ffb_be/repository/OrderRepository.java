@@ -18,7 +18,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "ORDER BY totalQuantity DESC")
     List<Object[]> findTopSellingProducts();
 
-    List<Order> findAllByStatus(OrderStatus status);
+    List<Order> findAllByOwner_IdAndStatus(Long ownerId, OrderStatus status);
     @Override
     Optional<Order> findById(Long aLong);
 }
