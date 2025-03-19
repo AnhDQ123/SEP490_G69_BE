@@ -11,6 +11,7 @@ import org.ffb_be.entity.User;
 import org.ffb_be.repository.ProfileRepository;
 import org.ffb_be.repository.RoleRepository;
 import org.ffb_be.repository.UserRepository;
+import org.ffb_be.utils.enums.Status;
 import org.ffb_be.utils.enums.upload.CloudinaryUpload;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
@@ -51,7 +52,8 @@ public class UserServiceImpl implements UserService {
         user.setPhone(userCreateDTO.getPhone());
         user.setUsername(userCreateDTO.getPhone());
         user.setRole(role);
-
+        Status status = Status.ACTIVE;
+        user.setStatus(status);
         user.setPassword(passwordEncoder.encode(userCreateDTO.getPassword()));
         userRepository.save(user);
 
@@ -80,6 +82,7 @@ public class UserServiceImpl implements UserService {
         Profile profile = profileRepository.findById(id).orElse(null);
         ProfileDTO profileDTO = new ProfileDTO();
         profileDTO.setStatus(userRepository.findById(id).get().getStatus());
+        profileDTO.setEmail(userRepository.findById(id).get().getEmail());
         if(profile.getAvatar() != null) {
             profileDTO.setAvatar(profile.getAvatar());
         }
