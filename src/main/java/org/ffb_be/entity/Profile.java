@@ -53,8 +53,11 @@ public class Profile extends BaseEntity {
     @Column(name="citizen_id_expired_date")
     private LocalDate citizenIDExpiredDate;
 
-    @Column(name="driving_license_date")
-    private LocalDate drivingLicenseDate;
+    @Column(name="driving_license_expired_date")
+    private LocalDate drivingLicenseExpiredDate;
+
+    @Column(name="judicial_record")
+    private String judicialRecord;
 
     @OneToOne
     @JoinColumn(name = "user_id", unique = true)

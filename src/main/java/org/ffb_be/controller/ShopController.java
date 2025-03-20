@@ -60,7 +60,6 @@ public class ShopController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    // 1️⃣ API cập nhật Shop
     @PutMapping(value = "/{shopId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> updateShop(
             @PathVariable Long shopId,

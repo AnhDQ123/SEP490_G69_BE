@@ -106,7 +106,7 @@ public class ShopServiceImpl implements ShopService {
 
         String foodSafetyCertUrl = cloudinaryUpload.uploadFile(foodSafetyCert);
         if (foodSafetyCertUrl != null) shop.setFoodSafetyCertificate(foodSafetyCertUrl);
-        if (shopDTO.getCitizenIDExpiredDate() != null && shopDTO.getCitizenIDExpiredDate().isBefore(LocalDate.now())) {
+        if (shopDTO.getCitizenIDExpiredDate() != null && shopDTO.getCitizenIDExpiredDate().isBefore(LocalDate.now().plusYears(1))) {
             throw new BadRequestException("Giấy tờ tùy thân đã hết hạn!");
         }
 
@@ -257,7 +257,6 @@ public class ShopServiceImpl implements ShopService {
             if (profile != null) {
                 profile.setTaxCode(decryptSafe(profile.getTaxCode()));
                 profile.setCitizenIDNumber(decryptSafe(profile.getCitizenIDNumber()));
-                profile.setDrivingLicense(decryptSafe(profile.getDrivingLicense()));
             }
         }
         return shopDTO;
