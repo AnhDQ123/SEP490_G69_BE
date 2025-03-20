@@ -152,7 +152,7 @@ public class CartServiceImpl implements CartService {
                     BigDecimal ItemOptionTotalPrice=BigDecimal.ZERO;
                     for(CartItemOption cartItemOption:cartItemOptions){
                         CartItemOptionDTO cartItemOptionDTO=new CartItemOptionDTO();
-                        cartItemOptionDTO.setOptionId(cartItemOption.getId());
+                        cartItemOptionDTO.setOptionId(cartItemOption.getFoodOption().getId());
                         cartItemOptionDTO.setOptionName(cartItemOption.getFoodOption().getName());
                         cartItemOptionDTO.setImage(cartItemOption.getFoodOption().getImage());
                         cartItemOptionDTO.setQuantity(cartItemOption.getQuantity());
