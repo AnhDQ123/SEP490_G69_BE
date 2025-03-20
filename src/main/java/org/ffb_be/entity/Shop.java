@@ -5,7 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.ffb_be.utils.enums.SellType;
 import org.ffb_be.utils.enums.Status;
+import java.time.LocalTime;
 import java.util.List;
 
 @Entity
@@ -39,28 +41,47 @@ public class Shop extends BaseEntity{
     private String address;
 
     @Column(name="registration_certificate")
-    private String Registration_certificate;
+    private String registrationCertificate;
 
     @Column(name="food_safety_certificate")
-    private String Food_safety_certificate;
+    private String foodSafetyCertificate;
+
+    @Column(name="menu")
+    private String menu;
 
     @Column(name="rate")
-    private int rate;
+    private Double rate;
 
     @Column(name="view_count")
-    private int view_count;
+    private Integer viewCount;
 
     @Enumerated(EnumType.STRING)
-    private Status is_active;
+    private Status isActive;
 
     @Column(name="is_shipping")
-    private Boolean is_shipping;
+    private Boolean isShipping;
 
     @Column(name="is_opening")
-    private Boolean is_opening;
+    private Boolean isOpening;
+
+    @Column(name="open_time")
+    private LocalTime openTime;
+
+    @Column(name="close_time")
+    private LocalTime closeTime;
+
+    @Column(name="account_number")
+    private String accountNumber;
+
+    @Column(name="bank_code")
+    private String bankCode;
 
     @OneToMany(mappedBy = "shop")
     private List<Product> products;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name="sell_type")
+    private SellType sellType;
 
     @OneToMany(mappedBy = "shop")
     private List<Feedback> feedbacks;
