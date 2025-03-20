@@ -164,7 +164,9 @@ public class CartServiceImpl implements CartService {
                         cartItemOptionDTO.setTotalPrice(cartItemOptionDTO.getPrice().multiply(BigDecimal.valueOf(cartItemOption.getQuantity())));
                         cartItemOptionDTO.setTypeId(cartItemOption.getFoodOption().getType().getId());
                         cartItemOptionDTOList.add(cartItemOptionDTO);
-                        ItemOptionTotalPrice=ItemOptionTotalPrice.add(cartItemOptionDTO.getTotalPrice());
+                        if(cartItemOption.getFoodOption().getType().getId()!=2){
+                            ItemOptionTotalPrice=ItemOptionTotalPrice.add(cartItemOptionDTO.getTotalPrice());
+                        }
                     }
                     itemTotalPrice=itemTotalPrice.add(ItemOptionTotalPrice);
                     cartItemDTO.setTotalPrice(itemTotalPrice);
