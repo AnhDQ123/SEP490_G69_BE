@@ -57,6 +57,10 @@ public class UserController {
         userService.update(user, avatar);
         return ResponseEntity.ok().body(user);
     }
+    @PostMapping("/inactive")
+    public void inactiveUser(@RequestParam Long id) throws IOException {
+       userService.inactiveUser(id);
+    }
 
     @GetMapping
     public ResponseEntity<?> getAll(@RequestParam(value = "search", defaultValue = "", required = false) String search,

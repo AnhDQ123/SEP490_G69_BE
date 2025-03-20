@@ -15,5 +15,6 @@ public interface UserService {
     void update(UserUpdateDTO employeeCreateDTO, MultipartFile avatar) throws IOException;
     Page<UserResponseDTO> findAll(String search, Pageable pageable);
     ProfileDTO findById(Long id);
+    void inactiveUser(Long id);
 }
 

@@ -132,6 +132,13 @@ public class UserServiceImpl implements UserService {
         return profileDTO;
     }
 
+    @Override
+    public void inactiveUser(Long id) {
+        User user=userRepository.findById(id).orElse(null);
+        user.setStatus(Status.INACTIVE);
+        userRepository.save(user);
+    }
+
 
     public void update(UserUpdateDTO userUpdateDTO, MultipartFile avatar) throws IOException {
         User user = new User();
