@@ -127,6 +127,7 @@ public class CartServiceImpl implements CartService {
             CartStatus status = CartStatus.PENDING;
             List<Cart> cartList=cartRepository.findAllByOwner_IdAndStatus(id,status);
             List<CartDTO> cartDTOList=new ArrayList<>();
+            BigDecimal cartTotalPrice=BigDecimal.ZERO;
             for(Cart cart:cartList){
                 CartDTO cartDTO=new CartDTO();
                 cartDTO.setUserId(cart.getOwner().getId());
@@ -134,6 +135,7 @@ public class CartServiceImpl implements CartService {
                 cartDTO.setPrice(cart.getTotal());
                 List<CartItemDTO> cartItemDTOList=new ArrayList<>();
                 List<CartItem> cartItems=cart.getCartItems();
+                BigDecimal itemTotalPrice=BigDecimal.ZERO;
                 for(CartItem cartItem:cartItems){
                     CartItemDTO cartItemDTO=new CartItemDTO();
                     cartItemDTO.setProductId(cartItem.getProduct().getId());
@@ -142,11 +144,11 @@ public class CartServiceImpl implements CartService {
                     cartItemDTO.setProductName(productRepository.findById(cartItemDTO.getProductId()).get().getName());
                     cartItemDTO.setImage(productRepository.findById(cartItemDTO.getProductId()).get().getImage());
                     cartItemDTO.setQuantity(cartItem.getQuantity());
-                    cartItemDTO.setTotalPrice(cartItem.getTotalPrice());
                     cartItemDTO.setId(cartItem.getId());
                     cartItemDTO.setCartId(cart.getId());
                     List<CartItemOptionDTO> cartItemOptionDTOList=new ArrayList<>();
                     List<CartItemOption> cartItemOptions=cartItem.getCartItemOptions();
+                    BigDecimal ItemOptionTotalPrice=BigDecimal.ZERO;
                     for(CartItemOption cartItemOption:cartItemOptions){
                         CartItemOptionDTO cartItemOptionDTO=new CartItemOptionDTO();
                         cartItemOptionDTO.setOptionId(cartItemOption.getId());
@@ -154,12 +156,23 @@ public class CartServiceImpl implements CartService {
                         cartItemOptionDTO.setImage(cartItemOption.getFoodOption().getImage());
                         cartItemOptionDTO.setQuantity(cartItemOption.getQuantity());
                         cartItemOptionDTO.setCartItemId(cartItemDTO.getId());
+                        if(cartItemOption.getFoodOption().getType().getId()==2){
+                            cartItemDTO.setPrice(cartItemOption.getFoodOption().getPrice());
+                            cartItemOptionDTO.setQuantity(cartItemDTO.getQuantity());
+                        }
+                        cartItemOptionDTO.setPrice(cartItemOption.getFoodOption().getPrice());
+                        cartItemOptionDTO.setTotalPrice(cartItemOptionDTO.getPrice().multiply(BigDecimal.valueOf(cartItemOption.getQuantity())));
                         cartItemOptionDTO.setTypeId(cartItemOption.getFoodOption().getType().getId());
                         cartItemOptionDTOList.add(cartItemOptionDTO);
+                        ItemOptionTotalPrice=ItemOptionTotalPrice.add(cartItemOptionDTO.getTotalPrice());
                     }
+                    itemTotalPrice=itemTotalPrice.add(ItemOptionTotalPrice);
+                    cartItemDTO.setTotalPrice(itemTotalPrice);
                     cartItemDTO.setCartItemOptionDTOList(cartItemOptionDTOList);
                     cartItemDTOList.add(cartItemDTO);
+                    cartTotalPrice=cartTotalPrice.add(itemTotalPrice);
                 }
+                cartDTO.setPrice(cartTotalPrice);
                 cartDTO.setCartItemDTOList(cartItemDTOList);
                 cartDTOList.add(cartDTO);
             }
