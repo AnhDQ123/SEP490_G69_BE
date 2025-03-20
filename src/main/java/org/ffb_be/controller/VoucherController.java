@@ -17,9 +17,9 @@ import java.util.Map;
 public class VoucherController {
     private final VoucherService voucherService;
 
-    @GetMapping
-    public ResponseEntity<List<VoucherDTO>> getAllVouchers() {
-        return ResponseEntity.ok(voucherService.getAllVouchers());
+    @GetMapping("/{shopId}")
+    public ResponseEntity<List<VoucherDTO>> getAllVouchers(@PathVariable Long shopId) {
+        return ResponseEntity.ok(voucherService.getAllVouchers(shopId));
     }
 
     @GetMapping("/{code}")

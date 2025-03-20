@@ -26,8 +26,8 @@ public class VoucherServiceImpl implements VoucherService {
     private final VoucherMapper voucherMapper;
 
     @Override
-    public List<VoucherDTO> getAllVouchers() {
-        List<Voucher> vouchers = voucherRepository.findAll();
+    public List<VoucherDTO> getAllVouchers(Long shopId) {
+        List<Voucher> vouchers = voucherRepository.getAllByShopId(shopId);
         return vouchers.stream().map(voucherMapper::toDTO).collect(Collectors.toList());
     }
 
