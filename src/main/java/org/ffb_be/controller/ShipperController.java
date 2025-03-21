@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.ffb_be.dto.auth.userDto.ShipperInfoDTO;
 import org.ffb_be.dto.auth.userDto.ShipperRegisterDTO;
 import org.ffb_be.service.shipper.ShipperService;
+import org.ffb_be.utils.enums.ShipperStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -44,10 +45,10 @@ public class ShipperController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/reject/{userId}")
-    public ResponseEntity<?> rejectShipper(@PathVariable Long userId) {
-        shipperService.rejectShipper(userId);
-        return ResponseEntity.ok().build();
+    @PostMapping("/{userId}/reject")
+    public ResponseEntity<String> rejectShipper(@PathVariable Long userId, @RequestParam String reason) {
+        shipperService.rejectShipper(userId, reason);
+        return ResponseEntity.ok("Shipper bị từ chối thành công.");
     }
 
     @PutMapping("/update/{userId}")
@@ -65,6 +66,18 @@ public class ShipperController {
             return ResponseEntity.badRequest().body(result.getAllErrors());
         }
         shipperService.updateShipperInfo(userId, shipperRegisterDTO, citizenIDFront, citizenIDBack, drivingLicenseFront, drivingLicenseBack, judicialRecord);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{userId}/active")
+    public ResponseEntity<?> shipperActive(@PathVariable Long userId) {
+        shipperService.shipperStatus(userId, ShipperStatus.ACTIVE);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{userId}/inactive")
+    public ResponseEntity<?> shipperInactive(@PathVariable Long userId) {
+        shipperService.shipperStatus(userId, ShipperStatus.INACTIVE);
         return ResponseEntity.ok().build();
     }
 

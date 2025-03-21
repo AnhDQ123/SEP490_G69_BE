@@ -2,6 +2,7 @@ package org.ffb_be.service.shipper;
 
 import org.ffb_be.dto.auth.userDto.ShipperInfoDTO;
 import org.ffb_be.dto.auth.userDto.ShipperRegisterDTO;
+import org.ffb_be.utils.enums.ShipperStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,7 +22,9 @@ public interface ShipperService {
 
     void approveShipper(Long userId);
 
-    void rejectShipper(Long userId);
+    void rejectShipper(Long userId, String reason);
+
+    void shipperStatus(Long userId, ShipperStatus status);
 
     void updateShipperInfo(
             Long userId,

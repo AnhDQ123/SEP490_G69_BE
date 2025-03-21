@@ -11,6 +11,8 @@ import org.ffb_be.repository.ProfileRepository;
 import org.ffb_be.repository.RoleRepository;
 import org.ffb_be.repository.UserRepository;
 import org.ffb_be.utils.EncryptUtil;
+import org.ffb_be.utils.enums.DeliveryStatus;
+import org.ffb_be.utils.enums.ShipperStatus;
 import org.ffb_be.utils.enums.upload.CloudinaryUpload;
 import org.ffb_be.utils.mapping.ShipperMapper;
 import org.springframework.data.domain.Page;
@@ -76,7 +78,7 @@ public class ShipperServiceImpl implements ShipperService {
         profile.setCitizenIDNumber(encryptSafe(shipperRegisterDTO.getCitizenIDNumber()));
         profile.setCitizenIDExpiredDate(shipperRegisterDTO.getCitizenIDExpiredDate());
         profile.setDrivingLicenseExpiredDate(shipperRegisterDTO.getDrivingLicenseExpiredDate());
-        user.setRole(roleRepository.getByName("pending_shipper"));
+        user.setShipperStatus(ShipperStatus.PENDING);
         profileRepository.save(profile);
         userRepository.save(user);
     }
@@ -84,25 +86,35 @@ public class ShipperServiceImpl implements ShipperService {
     @Override
     public void approveShipper(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("User"));
 
-        if (!Objects.equals(user.getRole().getName(), "pending_shipper")) {
-            throw new BadRequestException("User không ở trạng thái chờ duyệt.");
+        if (!Objects.equals(user.getRole().getName(), "shipper")) {
+            throw new BadRequestException("User đã là shipper.");
         }
 
         user.setRole(roleRepository.getByName("shipper"));
+        user.setShipperStatus(ShipperStatus.ACTIVE);
+        user.setDeliveryStatus(DeliveryStatus.AVAILABLE);
         userRepository.save(user);
     }
 
     @Override
-    public void rejectShipper(Long userId) {
+    public void rejectShipper(Long userId, String reason) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User"));
 
-        if (!Objects.equals(user.getRole().getName(), "pending_shipper")) {
-            throw new BadRequestException("User không ở trạng thái chờ duyệt.");
+        if (user.getShipperStatus() != ShipperStatus.PENDING) {
+            throw new IllegalStateException("Chỉ có thể từ chối shipper đang ở trạng thái chờ.");
         }
         user.setRole(roleRepository.getByName("user"));
+        userRepository.save(user);
+    }
+
+    @Override
+    public void shipperStatus(Long userId, ShipperStatus status) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User"));
+        user.setShipperStatus(status);
         userRepository.save(user);
     }
 
@@ -168,22 +180,14 @@ public class ShipperServiceImpl implements ShipperService {
         profile.setCitizenIDNumber(encryptSafe(shipperRegisterDTO.getCitizenIDNumber()));
         profile.setCitizenIDExpiredDate(shipperRegisterDTO.getCitizenIDExpiredDate());
         profile.setDrivingLicenseExpiredDate(shipperRegisterDTO.getDrivingLicenseExpiredDate());
-        user.setRole(roleRepository.getByName("pending_shipper"));
+        user.setShipperStatus(ShipperStatus.PENDING);
         profileRepository.save(profile);
         userRepository.save(user);
     }
 
     @Override
     public Page<ShipperInfoDTO> getShippersByStatus(String status, Pageable pageable) {
-        Page<User> shippers;
-        if ("active".equalsIgnoreCase(status)) {
-            shippers = userRepository.findByRole_Name("shipper", pageable);
-        } else if ("pending".equalsIgnoreCase(status)) {
-            shippers = userRepository.findByRole_Name("pending_shipper", pageable);
-        } else {
-            throw new BadRequestException("Trạng thái không hợp lệ!");
-        }
-
+        Page<User> shippers = userRepository.findByRoleAndShipperStatus(roleRepository.getByName("shipper"), ShipperStatus.valueOf(status), pageable);
         return shippers.map(this::decryptDTO);
     }
 
