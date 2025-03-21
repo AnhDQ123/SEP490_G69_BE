@@ -3,10 +3,12 @@ package org.ffb_be.controller;
 import org.ffb_be.dto.order.OrderDTO;
 import org.ffb_be.entity.Order;
 import org.ffb_be.service.order.OrderService;
+import org.ffb_be.utils.enums.OrderStatus;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -53,4 +55,37 @@ public class OrderController {
 
         return ResponseEntity.ok(orders);
     }
+    @GetMapping("/status")
+    public ResponseEntity<?> findByStatus(@RequestParam Long id ,@RequestParam OrderStatus status) throws IOException {
+        List<OrderDTO> orders = orderService.findAllByOwnerAndStatus(id,status);
+        if (orders.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", "Không tìm thấy sản phẩm nào với danh sách ID đã cung cấp"));
+        }
+
+        return ResponseEntity.ok(orders);
+    }
+
+    @PostMapping("/cancel")
+    public void cancelOrder(@RequestParam Long id) throws IOException {
+        orderService.cancelOrder(id);
+    }
+    @PostMapping("/accept")
+    public void acceptOrder(@RequestParam Long id) throws IOException {
+        orderService.acceptOrder(id);
+    }
+    @PostMapping("/reject")
+    public void rejectOrder(@RequestParam Long id) throws IOException {
+        orderService.rejectOrder(id);
+    }
+    @PutMapping("/changeStatus")
+    public void changeStatus(@RequestParam Long id, OrderStatus status,@RequestParam("avatar") MultipartFile avatar) throws IOException {
+        orderService.changeStatus(id, status, avatar);
+    }
+
+    @GetMapping("/shop/status")
+    public ResponseEntity<?> findByShopStatus(@RequestParam Long id ,@RequestParam OrderStatus status) throws IOException {
+        return ResponseEntity.ok(orderService.findAllByShopAndStatus(id,status));
+    }
+
 }

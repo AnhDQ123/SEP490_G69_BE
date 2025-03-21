@@ -18,7 +18,7 @@ public class OrderDTO {
     private Long shipMethodId;
     private Long paymentMethodId;
     private Long voucherId;
-    private Long discountId;
+    private BigDecimal voucherAmount;
     private String address;
     private String shopName;
     private String image;
