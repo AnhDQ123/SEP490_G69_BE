@@ -3,12 +3,15 @@ package org.ffb_be.service.order;
 import org.ffb_be.dto.order.OrderDTO;
 import org.ffb_be.dto.order.OrderItemDTO;
 import org.ffb_be.dto.order.OrderItemOptionDTO;
+import org.ffb_be.entity.Image;
 import org.ffb_be.entity.Order;
 import org.ffb_be.entity.OrderItem;
 import org.ffb_be.entity.OrderItemOption;
 import org.ffb_be.repository.*;
 import org.ffb_be.utils.enums.OrderStatus;
+import org.ffb_be.utils.enums.upload.CloudinaryUpload;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -31,7 +34,11 @@ public class OrderServiceImpl implements OrderService {
     private final DeliveryMethodRepository deliveryMethodRepository;
     private final PaymentRepository paymentRepository;
     private final ShopRepository shopRepository;
-    public OrderServiceImpl(OrderRepository orderRepository, ProductRepository productRepository, FoodOptionRepository foodOptionRepository, OrderItemRepository orderItemRepository, OrderItemOptionRepository orderItemOptionRepository, UserRepository userRepository, DeliveryMethodRepository deliveryMethodRepository, PaymentRepository paymentRepository, ShopRepository shopRepository) {
+    private final CloudinaryUpload cloudinaryUpload;
+    private final TypesRepository typesRepository;
+    private final ImageRepository imageRepository;
+
+    public OrderServiceImpl(OrderRepository orderRepository, ProductRepository productRepository, FoodOptionRepository foodOptionRepository, OrderItemRepository orderItemRepository, OrderItemOptionRepository orderItemOptionRepository, UserRepository userRepository, DeliveryMethodRepository deliveryMethodRepository, PaymentRepository paymentRepository, ShopRepository shopRepository, CloudinaryUpload cloudinaryUpload, TypesRepository typesRepository, ImageRepository imageRepository) {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
         this.foodOptionRepository = foodOptionRepository;
@@ -41,6 +48,9 @@ public class OrderServiceImpl implements OrderService {
         this.deliveryMethodRepository = deliveryMethodRepository;
         this.paymentRepository = paymentRepository;
         this.shopRepository = shopRepository;
+        this.cloudinaryUpload = cloudinaryUpload;
+        this.typesRepository = typesRepository;
+        this.imageRepository = imageRepository;
     }
 
     @Override
@@ -117,27 +127,38 @@ public class OrderServiceImpl implements OrderService {
     public List<OrderDTO> viewOrder(List<Long> id) throws IOException {
         List<Order> orders = orderRepository.findAllById(id); // Load tất cả đơn hàng trước
         List<OrderDTO> orderDTOs = new ArrayList<>();
+        BigDecimal orderTotal = BigDecimal.ZERO;
 
         for (Order order : orders) {
             OrderDTO orderDTO = new OrderDTO();
             orderDTO.setId(order.getId());
             orderDTO.setAddress(order.getShipping_address());
             orderDTO.setTotal(order.getTotal());
-
+            orderDTO.setOwnerId(order.getOwner().getId());
             // Kiểm tra null trước khi lấy ID
-            orderDTO.setVoucherId(order.getVoucher() != null ? order.getVoucher().getId() : null);
+            if(order.getVoucher() != null) {
+                orderDTO.setVoucherId(order.getVoucher().getId());
+                orderDTO.setVoucherAmount(order.getVoucher().getDiscount_percentage());
+            }else orderDTO.setVoucherAmount(BigDecimal.ZERO);
+
             orderDTO.setShipperId(order.getShipper() != null ? order.getShipper().getId() : null);
             orderDTO.setPaymentMethodId(order.getPaymentMethod() != null ? order.getPaymentMethod().getId() : null);
             orderDTO.setShipMethodId(order.getDeliveryMethod() != null ? order.getDeliveryMethod().getId() : null);
 
             // Danh sách Order Items
             List<OrderItemDTO> orderItemDTOList = new ArrayList<>();
+            BigDecimal orderItemTotal = BigDecimal.ZERO;
             for (OrderItem orderItem : order.getOrderItems()) {
                 OrderItemDTO orderItemDTO = new OrderItemDTO();
                 orderItemDTO.setId(orderItem.getId());
                 orderItemDTO.setQuantity(orderItem.getQuantity());
                 orderItemDTO.setProductId(orderItem.getProduct().getId());
                 orderItemDTO.setTotal(orderItem.getTotalPrice());
+                if(orderItem.getProduct().getDiscount() != null){
+                    orderItemDTO.setDiscoundId(orderItem.getProduct().getDiscount().getId());
+                    orderItemDTO.setDiscount(orderItem.getProduct().getDiscount().getDiscount_percentage());
+                }else orderItemDTO.setDiscount(BigDecimal.ZERO);
+
                 orderItemDTO.setCreatedAt(orderItem.getCreatedAt());
                 orderItemDTO.setOrderId(order.getId());
                 orderDTO.setShopName(shopRepository.findByProduct(orderItemDTO.getProductId()).getName());
@@ -146,32 +167,256 @@ public class OrderServiceImpl implements OrderService {
                 orderItemDTO.setImage(productRepository.findById(orderItemDTO.getProductId()).get().getImage());
                 // Danh sách Order Item Options
                 List<OrderItemOptionDTO> orderItemOptionDTOList = new ArrayList<>();
+                BigDecimal orderItemOptionTotal = BigDecimal.ZERO;
                 for (OrderItemOption orderItemOption : orderItem.getOrderItemOptions()) {
                     OrderItemOptionDTO orderItemOptionDTO = new OrderItemOptionDTO();
                     orderItemOptionDTO.setId(orderItemOption.getId());
+                    orderItemOptionDTO.setOptionId(orderItemOption.getFoodOption().getId());
                     orderItemOptionDTO.setQuantity(orderItemOption.getQuantity());
                     orderItemOptionDTO.setOrderItemId(orderItem.getId());
-
+                    orderItemOptionDTO.setPrice(foodOptionRepository.findById(orderItemOptionDTO.getOptionId()).get().getPrice());
+                    orderItemOptionDTO.setTypeId(orderItemOption.getFoodOption().getType().getId());
+                    if (orderItemOptionDTO.getTypeId() == 2) {
+                        BigDecimal unitPrice = foodOptionRepository.findById(orderItemOptionDTO.getOptionId())
+                                .orElseThrow(() -> new RuntimeException("Food Option not found"))
+                                .getPrice();
+                        orderItemDTO.setPrice(unitPrice);
+                        orderItemDTO.setTotal(unitPrice.multiply(BigDecimal.valueOf(orderItemDTO.getQuantity())));
+                        orderItemTotal=orderItemTotal.add(orderItemDTO.getTotal());
+                        orderItemOptionDTO.setQuantity(orderItemDTO.getQuantity());
+                    }
                     // Kiểm tra null trước khi lấy optionId
-                    orderItemOptionDTO.setOptionId(orderItemOption.getFoodOption().getId());
+
                     orderItemOptionDTO.setOptionName(orderItemOption.getFoodOption().getName());
                     orderItemOptionDTO.setImage(orderItemOption.getFoodOption().getImage());
-                    orderItemOptionDTO.setTotal(orderItemOption.getTotalPrice());
-                    orderItemOptionDTO.setPrice(orderItemOption.getUnitPrice());
-
+                    if(orderItemOptionDTO.getTypeId() != 2){
+                        orderItemOptionDTO.setTotal(orderItemOptionDTO.getPrice().multiply(BigDecimal.valueOf(orderItemOptionDTO.getQuantity())));
+                        orderItemOptionTotal=orderItemOptionTotal.add(orderItemOptionDTO.getTotal());
+                    }
                     orderItemOptionDTOList.add(orderItemOptionDTO);
                 }
-
+                orderItemTotal = orderItemTotal.add(orderItemOptionTotal);
+                orderItemDTO.setTotal(orderItemTotal.multiply(BigDecimal.ONE.subtract(orderItemDTO.getDiscount())));
+                orderItemTotal=orderItemDTO.getTotal();
                 orderItemDTO.setOrderItemOptions(orderItemOptionDTOList);
                 orderItemDTOList.add(orderItemDTO);
             }
-
+            orderTotal = orderTotal.add(orderItemTotal);
+            orderDTO.setTotal(orderTotal.multiply(BigDecimal.ONE.subtract(orderDTO.getVoucherAmount())));
             orderDTO.setOrderItem(orderItemDTOList);
             orderDTOs.add(orderDTO);
         }
         return orderDTOs;
     }
 
+    @Override
+    public List<OrderDTO> findAllByOwnerAndStatus(Long id,OrderStatus status) {
+        List<Order> orders = orderRepository.findAllByOwner_IdAndStatus(id,status);
+        List<OrderDTO> orderDTOs = new ArrayList<>();
+        BigDecimal orderTotal = BigDecimal.ZERO;
 
+        for (Order order : orders) {
+            OrderDTO orderDTO = new OrderDTO();
+            orderDTO.setId(order.getId());
+            orderDTO.setAddress(order.getShipping_address());
+            orderDTO.setTotal(order.getTotal());
+            orderDTO.setOwnerId(order.getOwner().getId());
+            // Kiểm tra null trước khi lấy ID
+            if(order.getVoucher() != null) {
+                orderDTO.setVoucherId(order.getVoucher().getId());
+                orderDTO.setVoucherAmount(order.getVoucher().getDiscount_percentage());
+            }else orderDTO.setVoucherAmount(BigDecimal.ZERO);
+
+            orderDTO.setShipperId(order.getShipper() != null ? order.getShipper().getId() : null);
+            orderDTO.setPaymentMethodId(order.getPaymentMethod() != null ? order.getPaymentMethod().getId() : null);
+            orderDTO.setShipMethodId(order.getDeliveryMethod() != null ? order.getDeliveryMethod().getId() : null);
+
+            // Danh sách Order Items
+            List<OrderItemDTO> orderItemDTOList = new ArrayList<>();
+            BigDecimal orderItemTotal = BigDecimal.ZERO;
+            for (OrderItem orderItem : order.getOrderItems()) {
+                OrderItemDTO orderItemDTO = new OrderItemDTO();
+                orderItemDTO.setId(orderItem.getId());
+                orderItemDTO.setQuantity(orderItem.getQuantity());
+                orderItemDTO.setProductId(orderItem.getProduct().getId());
+                orderItemDTO.setTotal(orderItem.getTotalPrice());
+                if(orderItem.getProduct().getDiscount() != null){
+                    orderItemDTO.setDiscoundId(orderItem.getProduct().getDiscount().getId());
+                    orderItemDTO.setDiscount(orderItem.getProduct().getDiscount().getDiscount_percentage());
+                }else orderItemDTO.setDiscount(BigDecimal.ZERO);
+
+                orderItemDTO.setCreatedAt(orderItem.getCreatedAt());
+                orderItemDTO.setOrderId(order.getId());
+                orderDTO.setShopName(shopRepository.findByProduct(orderItemDTO.getProductId()).getName());
+                orderDTO.setImage(shopRepository.findByProduct(orderItemDTO.getProductId()).getBackgroundImage());
+                orderItemDTO.setProductName(productRepository.findById(orderItemDTO.getProductId()).get().getName());
+                orderItemDTO.setImage(productRepository.findById(orderItemDTO.getProductId()).get().getImage());
+                // Danh sách Order Item Options
+                List<OrderItemOptionDTO> orderItemOptionDTOList = new ArrayList<>();
+                BigDecimal orderItemOptionTotal = BigDecimal.ZERO;
+                for (OrderItemOption orderItemOption : orderItem.getOrderItemOptions()) {
+                    OrderItemOptionDTO orderItemOptionDTO = new OrderItemOptionDTO();
+                    orderItemOptionDTO.setId(orderItemOption.getId());
+                    orderItemOptionDTO.setOptionId(orderItemOption.getFoodOption().getId());
+                    orderItemOptionDTO.setQuantity(orderItemOption.getQuantity());
+                    orderItemOptionDTO.setOrderItemId(orderItem.getId());
+                    orderItemOptionDTO.setPrice(foodOptionRepository.findById(orderItemOptionDTO.getOptionId()).get().getPrice());
+                    orderItemOptionDTO.setTypeId(orderItemOption.getFoodOption().getType().getId());
+                    if (orderItemOptionDTO.getTypeId() == 2) {
+                        BigDecimal unitPrice = foodOptionRepository.findById(orderItemOptionDTO.getOptionId())
+                                .orElseThrow(() -> new RuntimeException("Food Option not found"))
+                                .getPrice();
+                        orderItemDTO.setPrice(unitPrice);
+                        orderItemDTO.setTotal(unitPrice.multiply(BigDecimal.valueOf(orderItemDTO.getQuantity())));
+                        orderItemTotal=orderItemTotal.add(orderItemDTO.getTotal());
+                        orderItemOptionDTO.setQuantity(orderItemDTO.getQuantity());
+                    }
+                    // Kiểm tra null trước khi lấy optionId
+
+                    orderItemOptionDTO.setOptionName(orderItemOption.getFoodOption().getName());
+                    orderItemOptionDTO.setImage(orderItemOption.getFoodOption().getImage());
+                    if(orderItemOptionDTO.getTypeId() != 2){
+                        orderItemOptionDTO.setTotal(orderItemOptionDTO.getPrice().multiply(BigDecimal.valueOf(orderItemOptionDTO.getQuantity())));
+                        orderItemOptionTotal=orderItemOptionTotal.add(orderItemOptionDTO.getTotal());
+                    }
+                    orderItemOptionDTOList.add(orderItemOptionDTO);
+                }
+                orderItemTotal = orderItemTotal.add(orderItemOptionTotal);
+                orderItemDTO.setTotal(orderItemTotal.multiply(BigDecimal.ONE.subtract(orderItemDTO.getDiscount())));
+                orderItemTotal=orderItemDTO.getTotal();
+                orderItemDTO.setOrderItemOptions(orderItemOptionDTOList);
+                orderItemDTOList.add(orderItemDTO);
+            }
+            orderTotal = orderTotal.add(orderItemTotal);
+            orderDTO.setTotal(orderTotal.multiply(BigDecimal.ONE.subtract(orderDTO.getVoucherAmount())));
+            orderDTO.setOrderItem(orderItemDTOList);
+            orderDTOs.add(orderDTO);
+        }
+        return orderDTOs;
+    }
+
+    @Override
+    public void cancelOrder(Long id) {
+        Order order = orderRepository.findById(id).get();
+        order.setStatus(OrderStatus.CANCELLED);
+        orderRepository.save(order);
+    }
+
+    @Override
+    public List<OrderDTO> findAllByShopAndStatus(Long id, OrderStatus status) {
+        List<Order> orderList=orderRepository.findOrdersByShopIdAndStatus(id, status);
+        List<OrderDTO> orderDTOs = new ArrayList<>();
+        BigDecimal orderTotal = BigDecimal.ZERO;
+
+        for (Order order : orderList) {
+            OrderDTO orderDTO = new OrderDTO();
+            orderDTO.setId(order.getId());
+            orderDTO.setAddress(order.getShipping_address());
+            orderDTO.setTotal(order.getTotal());
+            orderDTO.setOwnerId(order.getOwner().getId());
+            // Kiểm tra null trước khi lấy ID
+            if(order.getVoucher() != null) {
+                orderDTO.setVoucherId(order.getVoucher().getId());
+                orderDTO.setVoucherAmount(order.getVoucher().getDiscount_percentage());
+            }else orderDTO.setVoucherAmount(BigDecimal.ZERO);
+
+            orderDTO.setShipperId(order.getShipper() != null ? order.getShipper().getId() : null);
+            orderDTO.setPaymentMethodId(order.getPaymentMethod() != null ? order.getPaymentMethod().getId() : null);
+            orderDTO.setShipMethodId(order.getDeliveryMethod() != null ? order.getDeliveryMethod().getId() : null);
+
+            // Danh sách Order Items
+            List<OrderItemDTO> orderItemDTOList = new ArrayList<>();
+            BigDecimal orderItemTotal = BigDecimal.ZERO;
+            for (OrderItem orderItem : order.getOrderItems()) {
+                OrderItemDTO orderItemDTO = new OrderItemDTO();
+                orderItemDTO.setId(orderItem.getId());
+                orderItemDTO.setQuantity(orderItem.getQuantity());
+                orderItemDTO.setProductId(orderItem.getProduct().getId());
+                orderItemDTO.setTotal(orderItem.getTotalPrice());
+                if(orderItem.getProduct().getDiscount() != null){
+                    orderItemDTO.setDiscoundId(orderItem.getProduct().getDiscount().getId());
+                    orderItemDTO.setDiscount(orderItem.getProduct().getDiscount().getDiscount_percentage());
+                }else orderItemDTO.setDiscount(BigDecimal.ZERO);
+
+                orderItemDTO.setCreatedAt(orderItem.getCreatedAt());
+                orderItemDTO.setOrderId(order.getId());
+                orderDTO.setShopName(shopRepository.findByProduct(orderItemDTO.getProductId()).getName());
+                orderDTO.setImage(shopRepository.findByProduct(orderItemDTO.getProductId()).getBackgroundImage());
+                orderItemDTO.setProductName(productRepository.findById(orderItemDTO.getProductId()).get().getName());
+                orderItemDTO.setImage(productRepository.findById(orderItemDTO.getProductId()).get().getImage());
+                // Danh sách Order Item Options
+                List<OrderItemOptionDTO> orderItemOptionDTOList = new ArrayList<>();
+                BigDecimal orderItemOptionTotal = BigDecimal.ZERO;
+                for (OrderItemOption orderItemOption : orderItem.getOrderItemOptions()) {
+                    OrderItemOptionDTO orderItemOptionDTO = new OrderItemOptionDTO();
+                    orderItemOptionDTO.setId(orderItemOption.getId());
+                    orderItemOptionDTO.setOptionId(orderItemOption.getFoodOption().getId());
+                    orderItemOptionDTO.setQuantity(orderItemOption.getQuantity());
+                    orderItemOptionDTO.setOrderItemId(orderItem.getId());
+                    orderItemOptionDTO.setPrice(foodOptionRepository.findById(orderItemOptionDTO.getOptionId()).get().getPrice());
+                    orderItemOptionDTO.setTypeId(orderItemOption.getFoodOption().getType().getId());
+                    if (orderItemOptionDTO.getTypeId() == 2) {
+                        BigDecimal unitPrice = foodOptionRepository.findById(orderItemOptionDTO.getOptionId())
+                                .orElseThrow(() -> new RuntimeException("Food Option not found"))
+                                .getPrice();
+                        orderItemDTO.setPrice(unitPrice);
+                        orderItemDTO.setTotal(unitPrice.multiply(BigDecimal.valueOf(orderItemDTO.getQuantity())));
+                        orderItemTotal=orderItemTotal.add(orderItemDTO.getTotal());
+                        orderItemOptionDTO.setQuantity(orderItemDTO.getQuantity());
+                    }
+                    // Kiểm tra null trước khi lấy optionId
+
+                    orderItemOptionDTO.setOptionName(orderItemOption.getFoodOption().getName());
+                    orderItemOptionDTO.setImage(orderItemOption.getFoodOption().getImage());
+                    if(orderItemOptionDTO.getTypeId() != 2){
+                        orderItemOptionDTO.setTotal(orderItemOptionDTO.getPrice().multiply(BigDecimal.valueOf(orderItemOptionDTO.getQuantity())));
+                        orderItemOptionTotal=orderItemOptionTotal.add(orderItemOptionDTO.getTotal());
+                    }
+                    orderItemOptionDTOList.add(orderItemOptionDTO);
+                }
+                orderItemTotal = orderItemTotal.add(orderItemOptionTotal);
+                orderItemDTO.setTotal(orderItemTotal.multiply(BigDecimal.ONE.subtract(orderItemDTO.getDiscount())));
+                orderItemTotal=orderItemDTO.getTotal();
+                orderItemDTO.setOrderItemOptions(orderItemOptionDTOList);
+                orderItemDTOList.add(orderItemDTO);
+            }
+            orderTotal = orderTotal.add(orderItemTotal);
+            orderDTO.setTotal(orderTotal.multiply(BigDecimal.ONE.subtract(orderDTO.getVoucherAmount())));
+            orderDTO.setOrderItem(orderItemDTOList);
+            orderDTOs.add(orderDTO);
+        }
+        return orderDTOs;
+    }
+
+    @Override
+    public void acceptOrder(Long id) {
+        Order order=orderRepository.findById(id).get();
+        order.setStatus(OrderStatus.PROCESSING);
+        orderRepository.save(order);
+    }
+
+    @Override
+    public void rejectOrder(Long id) {
+        Order order=orderRepository.findById(id).get();
+        order.setStatus(OrderStatus.REJECTED);
+        orderRepository.save(order);
+    }
+
+    @Override
+    public void changeStatus(Long id, OrderStatus status, MultipartFile avatar) throws IOException {
+        Order order=orderRepository.findById(id).get();
+        Image image=new Image();
+        if (avatar != null && !avatar.isEmpty()) {
+            System.out.println("Uploading Avatar: " + avatar.getOriginalFilename());
+            String url = cloudinaryUpload.uploadFile(avatar);
+            image.setUrl(url);
+            image.setRelatedId(order.getId());
+            image.setType(typesRepository.findById(3l).get());
+            imageRepository.save(image);
+            System.out.println("Avatar URL: " + url);
+        }
+        order.setStatus(status);
+        orderRepository.save(order);
+    }
 
 }
