@@ -1,6 +1,9 @@
 package org.ffb_be.repository;
 
+import org.ffb_be.entity.Role;
 import org.ffb_be.entity.User;
+import org.ffb_be.utils.enums.ShipperStatus;
+import org.ffb_be.utils.enums.Status;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,5 +24,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByEmail(String email);
     Optional<User> findByPhone(String phone);
+
+    Page<User> findByRoleAndShipperStatus(Role role, ShipperStatus status, Pageable pageable);
 }
 

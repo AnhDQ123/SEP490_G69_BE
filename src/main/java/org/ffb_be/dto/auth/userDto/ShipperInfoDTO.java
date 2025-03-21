@@ -1,4 +1,4 @@
-package org.ffb_be.dto.auth.ProfileDto;
+package org.ffb_be.dto.auth.userDto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -6,14 +6,15 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
-@AllArgsConstructor
-@NoArgsConstructor
 @Data
-public class BusinessProfileDTO {
-    private Long id;
+@NoArgsConstructor
+@AllArgsConstructor
+public class ShipperInfoDTO {
     private String name;
-    private String avatar;
-    private String taxCode;
+    private String gender;
+    private LocalDate dob;
+    private String phone;
+    private String email;
     private String citizenIDNumber;
     private String citizenIDCardFront;
     private String citizenIDCardBack;

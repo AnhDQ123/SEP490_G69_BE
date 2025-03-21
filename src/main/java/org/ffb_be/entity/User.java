@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.ffb_be.utils.enums.DeliveryStatus;
+import org.ffb_be.utils.enums.ShipperStatus;
 import org.ffb_be.utils.enums.Status;
 
 import java.util.List;
@@ -36,6 +38,14 @@ public class User extends BaseEntity{
 
     @Enumerated(EnumType.STRING)
     private Status status;
+
+    @Enumerated(EnumType.STRING)
+    private ShipperStatus shipperStatus;
+
+    @Enumerated(EnumType.STRING)
+    private DeliveryStatus deliveryStatus;
+
+    private String rejectReason;
 
     @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.ALL)
     @JoinColumn(name = "role_id")
