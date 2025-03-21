@@ -214,7 +214,52 @@ public class CartServiceImpl implements CartService {
         return cartDTO;
     }
 
-
+    @Override
+    public void updateCart(CartDTO cartDTO) {
+        Cart cart=cartRepository.findById(cartDTO.getId()).get();
+        cartDTO.setUserId(cart.getOwner().getId());
+        cartDTO.setId(cart.getId());
+        cartDTO.setPrice(cart.getTotal());
+        List<CartItemDTO> cartItemDTOList=cartDTO.getCartItemDTOList();
+        List<CartItem> cartItems=new ArrayList<>();
+        BigDecimal cartTotal=BigDecimal.ZERO;
+        for(CartItemDTO cartItemDTO:cartItemDTOList){
+            BigDecimal itemTotal=BigDecimal.ZERO;
+            CartItem cartItem=new CartItem();
+            cartItem.setId(cartItemDTO.getId());
+            cartItem.setProduct(productRepository.findById(cartItemDTO.getProductId()).get());
+            cartItem.setQuantity(cartItemDTO.getQuantity());
+            cartItem.setUpdatedAt(LocalDateTime.now());
+            cartItem.setCart(cart);
+            List<CartItemOptionDTO> cartItemOptionDTO=cartItemDTO.getCartItemOptionDTOList();
+            List<CartItemOption> cartItemOptions=new ArrayList<>();
+            for(CartItemOptionDTO cartItemOptionDTO1:cartItemOptionDTO){
+                BigDecimal optionTotal=BigDecimal.ZERO;
+                CartItemOption cartItemOption=new CartItemOption();
+                cartItemOption.setId(cartItemOptionDTO1.getId());
+                cartItemOption.setQuantity(cartItemOptionDTO1.getQuantity());
+                cartItemOption.setUpdatedAt(LocalDateTime.now());
+                cartItemOption.setFoodOption(foodOptionRepository.findById(cartItemOptionDTO1.getOptionId()).get());
+                if(cartItemOptionDTO1.getTypeId()==2){
+                    cartItemOption.setQuantity(cartItem.getQuantity());
+                }
+                cartItemOption.setTotalPrice(cartItemOption.getUnitPrice().multiply(BigDecimal.valueOf(cartItemOption.getQuantity())));
+                optionTotal=optionTotal.add(cartItemOption.getTotalPrice());
+                cartItemOption.setCartItem(cartItem);
+                cartItemOptions.add(cartItemOption);
+                itemTotal=itemTotal.add(optionTotal);
+                cartItemOptionRepository.save(cartItemOption);
+            }
+            cartTotal=cartTotal.add(itemTotal);
+            cartItem.setTotalPrice(itemTotal);
+            cartItem.setCartItemOptions(cartItemOptions);
+            cartItems.add(cartItem);
+            cartItemRepository.save(cartItem);
+    }
+        cart.setTotal(cartTotal);
+        cart.setCartItems(cartItems);
+        cartRepository.save(cart);
+}
 }
 //@Override
 //public void save(CartDTO cartDTO) throws IOException {

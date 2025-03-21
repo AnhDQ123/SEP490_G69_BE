@@ -38,4 +38,8 @@ public class CartController {
     public ResponseEntity<?> getCartById(@PathVariable Long id) {
         return ResponseEntity.ok(cartService.findById(id));
     }
+    @PutMapping
+    public void updateCart(@RequestBody CartDTO cartDTO) throws IOException {
+        cartService.updateCart(cartDTO);
+    }
 }
