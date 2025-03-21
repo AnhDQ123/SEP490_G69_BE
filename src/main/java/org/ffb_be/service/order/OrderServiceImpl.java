@@ -321,6 +321,11 @@ public class OrderServiceImpl implements OrderService {
         orderRepository.save(order);
     }
 
-    
+    @Override
+    public Page<OrderDTO> findAllByShipper(Long id, Pageable pageable) {
+        Page<Order> orders = orderRepository.findAllByShipper_Id(id, pageable);
+        return toDTO(orders,pageable);
+    }
+
 
 }

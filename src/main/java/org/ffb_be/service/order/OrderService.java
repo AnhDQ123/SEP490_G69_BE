@@ -22,4 +22,5 @@ public interface OrderService {
     void rejectOrder(Long id);
     void changeStatus(Long id, OrderStatus status, MultipartFile avatar) throws IOException;
     void accecptShipping(Long id,Long userId);
+    Page<OrderDTO>findAllByShipper(Long id, Pageable pageable);
 }

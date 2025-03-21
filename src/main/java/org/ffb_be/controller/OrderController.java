@@ -89,4 +89,8 @@ public class OrderController {
         return ResponseEntity.ok(orderService.findAllByShopAndStatus(id,status,pageable));
     }
 
+    @GetMapping("/shipper")
+    public ResponseEntity<?> findByShipper(@RequestParam Long id,@RequestParam Pageable pageable) throws IOException {
+        return ResponseEntity.ok(orderService.findAllByShipper(id,pageable));
+    }
 }
