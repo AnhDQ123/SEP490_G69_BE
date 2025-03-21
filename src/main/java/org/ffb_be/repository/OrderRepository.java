@@ -21,4 +21,11 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findAllByOwner_IdAndStatus(Long ownerId, OrderStatus status);
     @Override
     Optional<Order> findById(Long aLong);
+
+    @Query("SELECT DISTINCT o FROM Order o " +
+            "JOIN o.orderItems oi " +
+            "JOIN oi.product p " +
+            "WHERE p.shop.id = :shopId AND o.status = :status")
+    List<Order> findOrdersByShopIdAndStatus( Long shopId, OrderStatus status);
+
 }
