@@ -33,7 +33,7 @@ public class Profile extends BaseEntity {
     private String gender;
 
     @Column(name="tax_code")
-    private String tax_code;
+    private String taxCode;
 
     @Column(name="citizenIDNumber")
     private String citizenIDNumber;
