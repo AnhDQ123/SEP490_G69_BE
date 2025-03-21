@@ -93,6 +93,18 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.findAllByShop_Id(id,pageable).map(product -> {
             ProductResponseDTO productResponseDTO = new ProductResponseDTO();
             productResponseDTO.setShopName(product.getShop().getName());
+            BigDecimal defaultprice = null;
+            List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product);
+
+            for (FoodOption foodOption : foodOptions) {
+                if (foodOption.getType().getId() == 2) {
+                    if (defaultprice == null || foodOption.getPrice().compareTo(defaultprice) < 0) {
+                        defaultprice = foodOption.getPrice();
+                    }
+                }
+            }
+
+            productResponseDTO.setDefaultPrice(defaultprice != null ? defaultprice : BigDecimal.ZERO);
             BeanUtils.copyProperties(product, productResponseDTO);
             return productResponseDTO;
         });
@@ -110,6 +122,8 @@ public class ProductServiceImpl implements ProductService {
             productResponseDTO.setManufacturer(product.getManufacturer());
             productResponseDTO.setSupplier(product.getSupplier());
             productResponseDTO.setImage(product.getImage());
+            productResponseDTO.setQuantity(product.getQuantity());
+            productResponseDTO.setRate(product.getRate());
             productResponseDTO.setCategory(product.getCategory().getName());
             productResponseDTOList.add(productResponseDTO);
         }
@@ -128,6 +142,15 @@ public class ProductServiceImpl implements ProductService {
             productResponseDTO.setImage(product.getImage());
             productResponseDTO.setCategory(product.getCategory().getName());
             productResponseDTO.setSupplier(product.getSupplier());
+            productResponseDTO.setRate(product.getRate()); // them rate
+            productResponseDTO.setQuantity(product.getQuantity()); // them quantity
+            productResponseDTO.setShopName(product.getShop().getName()); //them shop
+            if (product.getDiscount() != null && product.getDiscount().getId() != null) {
+                Discount d = discountRepository.findById(product.getDiscount().getId());
+                productResponseDTO.setDiscount(d.getDiscount_percentage());
+            } else {
+                productResponseDTO.setDiscount(BigDecimal.ZERO);
+            }//them discount
             productResponseDTOList.add(productResponseDTO);
         }
         return productResponseDTOList;
@@ -144,6 +167,15 @@ public class ProductServiceImpl implements ProductService {
             productResponseDTO.setManufacturer(product.getManufacturer());
             productResponseDTO.setImage(product.getImage());
             productResponseDTO.setCategory(product.getCategory().getName());
+            productResponseDTO.setRate(product.getRate()); // them rate
+            productResponseDTO.setQuantity(product.getQuantity()); // them quantity
+            productResponseDTO.setShopName(product.getShop().getName()); //them shop
+            if (product.getDiscount() != null && product.getDiscount().getId() != null) {
+                Discount d = discountRepository.findById(product.getDiscount().getId());
+                productResponseDTO.setDiscount(d.getDiscount_percentage());
+            } else {
+                productResponseDTO.setDiscount(BigDecimal.ZERO);
+            }//them discount
             productResponseDTO.setSupplier(product.getSupplier());
             productResponseDTOList.add(productResponseDTO);
         }
@@ -164,7 +196,7 @@ public class ProductServiceImpl implements ProductService {
             } else {
                 productResponseDTO.setDiscount(BigDecimal.ZERO);
             }
-
+            productResponseDTO.setShopName(product.getShop().getName());
             productResponseDTO.setCategory(product.getCategory().getName());
             productResponseDTOList.add(productResponseDTO);
         }
@@ -201,7 +233,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<ProductResponseDTO> findSimimlarProduct(String name) {
         String[] words = name.split("\\s+");
-        String substring = words[0].concat(words[1]);
+        String substring = words[0];
         List<Product> products=productRepository.findSimilarProducts(substring);
         List<ProductResponseDTO> productResponseDTOList = new ArrayList<>();
         for (Product product : products) {
@@ -213,6 +245,8 @@ public class ProductServiceImpl implements ProductService {
             productResponseDTO.setCategory(product.getCategory().getName());
             productResponseDTO.setSupplier(product.getSupplier());
             productResponseDTO.setShopName(product.getShop().getName());
+            productResponseDTO.setDiscount(product.getDiscount().getDiscount_percentage());
+            productResponseDTO.setQuantity(product.getQuantity());
             productResponseDTOList.add(productResponseDTO);
         }
         return productResponseDTOList;
@@ -222,12 +256,26 @@ public class ProductServiceImpl implements ProductService {
     public Page<ProductResponseDTO> findAll(Pageable pageable) {
         return productRepository.findAll(pageable).map(product -> {
             ProductResponseDTO productResponseDTO = new ProductResponseDTO();
+
             if (product.getDiscount() != null && product.getDiscount().getId() != null) {
                 Discount d = discountRepository.findById(product.getDiscount().getId());
                 productResponseDTO.setDiscount(d.getDiscount_percentage());
             } else {
                 productResponseDTO.setDiscount(BigDecimal.ZERO);
             }
+
+            BigDecimal defaultprice = null;
+            List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product);
+
+            for (FoodOption foodOption : foodOptions) {
+                if (foodOption.getType().getId() == 2) {
+                    if (defaultprice == null || foodOption.getPrice().compareTo(defaultprice) < 0) {
+                        defaultprice = foodOption.getPrice();
+                    }
+                }
+            }
+
+            productResponseDTO.setDefaultPrice(defaultprice != null ? defaultprice : BigDecimal.ZERO);
             productResponseDTO.setCategory(product.getCategory().getName());
             BeanUtils.copyProperties(product, productResponseDTO);
             return productResponseDTO;

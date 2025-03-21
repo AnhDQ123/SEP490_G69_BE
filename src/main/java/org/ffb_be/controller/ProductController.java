@@ -40,6 +40,18 @@ public class ProductController {
     public ResponseEntity<?> getProductById(@PathVariable Long id) {
         return ResponseEntity.ok(productService.findById(id));
     }
+
+    @PutMapping()
+    public ResponseEntity<?> update(@Validated @ModelAttribute() ProductCreateDTO productCreateDTO,
+                                        BindingResult bindingResult,
+                                        @RequestParam("avatar") MultipartFile avatar,
+                                        @RequestParam("option")  List<MultipartFile> option) throws IOException {
+        if(bindingResult.hasErrors()) {
+            return ResponseEntity.badRequest().body(bindingResult.getAllErrors());
+        }
+        productService.save(productCreateDTO, avatar, option);
+        return ResponseEntity.ok().body(productCreateDTO);
+    }
     @PostMapping("/add")
     public ResponseEntity<?> addProduct(@Validated @ModelAttribute() ProductCreateDTO productCreateDTO,
                                          BindingResult bindingResult,
@@ -55,6 +67,7 @@ public class ProductController {
     public ResponseEntity<?> getByCategory(@RequestParam String cat) {
         return ResponseEntity.ok(productService.findByCategory(cat));
     }
+
     @GetMapping("/getFresh/{userId}")
     public ResponseEntity<?> getProductByFreshType(
             @PathVariable Long userId,
@@ -94,4 +107,11 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
+
+    @GetMapping("/all")
+    public ResponseEntity<?> getAll(@RequestParam(value = "page", defaultValue = "1", required = false) Integer page,
+                                    @RequestParam(value = "size", defaultValue = "20", required = false) Integer size) {
+        Pageable pageable = PageRequest.of(page-1, size);
+        return ResponseEntity.ok( productService.findAll(pageable));
+    }
 }
