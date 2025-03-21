@@ -34,21 +34,15 @@ public class QrServiceImpl implements QrService {
 
     @Override
     public String generateQrCode(Long orderId, Long shopId) {
-//        Order order = orderRepository.findById(orderId).orElseThrow (() -> new NotFoundException("Order"));
-//        Shop shop = shopRepository.findById(shopId).orElseThrow(() -> new NotFoundException("Shop"));
+        Order order = orderRepository.findById(orderId).orElseThrow (() -> new NotFoundException("Order"));
+        Shop shop = shopRepository.findById(shopId).orElseThrow(() -> new NotFoundException("Shop"));
         Map<String, Object> requestBody = new HashMap<>();
-//        requestBody.put("accountNo", shop.getAccountNumber());
-//        requestBody.put("acqId", shop.getBankCode());
-//        requestBody.put("amount", order.getTotal());
-//        requestBody.put("addInfo", "ORDER" + orderId);
-//        requestBody.put("template", "compact");
-        requestBody.put("accountNo", "113366668888");
+        requestBody.put("accountNo", shop.getAccountNumber());
         requestBody.put("accountName", "Công ty TNHH ABC");
-        requestBody.put("acqId", "970415");
-        requestBody.put("amount", 79000);
-        requestBody.put("addInfo", "ORDER" + "123");
+        requestBody.put("acqId", shop.getBankCode());
+        requestBody.put("amount", order.getTotal());
+        requestBody.put("addInfo", "ORDER" + orderId);
         requestBody.put("template", "compact");
-
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("x-client-id", clientId);
