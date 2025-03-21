@@ -1,7 +1,6 @@
 package org.ffb_be.controller;
 
 import org.ffb_be.service.user.EmailService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
