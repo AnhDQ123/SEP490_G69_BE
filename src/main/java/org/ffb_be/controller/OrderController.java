@@ -4,6 +4,8 @@ import org.ffb_be.dto.order.OrderDTO;
 import org.ffb_be.entity.Order;
 import org.ffb_be.service.order.OrderService;
 import org.ffb_be.utils.enums.OrderStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -45,10 +47,10 @@ public class OrderController {
         return ResponseEntity.ok(responseList);
     }
     @GetMapping("/checkout")
-    public ResponseEntity<?> checkout(@RequestParam List<Long> ids) throws IOException {
-        List<OrderDTO> orders = orderService.viewOrder(ids);
+    public ResponseEntity<?> checkout(@RequestParam Long id) throws IOException {
+        OrderDTO orders = orderService.viewOrder(id);
 
-        if (orders.isEmpty()) {
+        if (orders==null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Map.of("error", "Không tìm thấy sản phẩm nào với danh sách ID đã cung cấp"));
         }
@@ -56,13 +58,12 @@ public class OrderController {
         return ResponseEntity.ok(orders);
     }
     @GetMapping("/status")
-    public ResponseEntity<?> findByStatus(@RequestParam Long id ,@RequestParam OrderStatus status) throws IOException {
-        List<OrderDTO> orders = orderService.findAllByOwnerAndStatus(id,status);
+    public ResponseEntity<?> findByStatus(@RequestParam Long id ,@RequestParam OrderStatus status,@RequestParam Pageable pageable) throws IOException {
+        Page<OrderDTO> orders = orderService.findAllByOwnerAndStatus(id,status,pageable);
         if (orders.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Map.of("error", "Không tìm thấy sản phẩm nào với danh sách ID đã cung cấp"));
         }
-
         return ResponseEntity.ok(orders);
     }
 
@@ -84,8 +85,8 @@ public class OrderController {
     }
 
     @GetMapping("/shop/status")
-    public ResponseEntity<?> findByShopStatus(@RequestParam Long id ,@RequestParam OrderStatus status) throws IOException {
-        return ResponseEntity.ok(orderService.findAllByShopAndStatus(id,status));
+    public ResponseEntity<?> findByShopStatus(@RequestParam Long id ,@RequestParam OrderStatus status,@RequestParam Pageable pageable) throws IOException {
+        return ResponseEntity.ok(orderService.findAllByShopAndStatus(id,status,pageable));
     }
 
 }
