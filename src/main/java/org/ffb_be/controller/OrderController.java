@@ -69,8 +69,8 @@ public class OrderController {
     }
 
     @PostMapping("/cancel")
-    public void cancelOrder(@RequestParam Long id) throws IOException {
-        orderService.cancelOrder(id);
+    public void cancelOrder(@RequestParam Long id,@RequestParam String reason) throws IOException {
+        orderService.cancelOrder(id,reason);
     }
     @PostMapping("/accept")
     public void acceptOrder(@RequestParam Long id) throws IOException {

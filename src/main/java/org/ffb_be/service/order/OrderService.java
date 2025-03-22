@@ -17,7 +17,7 @@ public interface OrderService {
     List<Order> save(OrderDTO oderDTO) throws IOException;
     OrderDTO viewOrder(Long id) throws IOException;
     Page<OrderDTO> findAllByOwnerAndStatus(Long id, OrderStatus status, Pageable pageable);
-    void cancelOrder(Long id);
+    void cancelOrder(Long id,String reason);
     Page<OrderDTO> findAllByShopAndStatus(Long id,OrderStatus status,Pageable pageable);
     void acceptOrder(Long id);
     void rejectOrder(Long id);

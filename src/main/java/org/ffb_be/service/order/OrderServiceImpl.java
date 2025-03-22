@@ -68,7 +68,7 @@ public class OrderServiceImpl implements OrderService {
                 orderItemDTO.setProductId(orderItem.getProduct().getId());
                 orderItemDTO.setTotal(orderItem.getTotalPrice());
                 if (orderItem.getProduct().getDiscount() != null) {
-                    orderItemDTO.setDiscoundId(orderItem.getProduct().getDiscount().getId());
+                    orderItemDTO.setDiscountId(orderItem.getProduct().getDiscount().getId());
                     orderItemDTO.setDiscount(orderItem.getProduct().getDiscount().getDiscount_percentage());
                 } else {
                     orderItemDTO.setDiscount(BigDecimal.ZERO);
@@ -216,7 +216,7 @@ public class OrderServiceImpl implements OrderService {
                 orderItemDTO.setProductId(orderItem.getProduct().getId());
                 orderItemDTO.setTotal(orderItem.getTotalPrice());
                 if(orderItem.getProduct().getDiscount() != null){
-                    orderItemDTO.setDiscoundId(orderItem.getProduct().getDiscount().getId());
+                    orderItemDTO.setDiscountId(orderItem.getProduct().getDiscount().getId());
                     orderItemDTO.setDiscount(orderItem.getProduct().getDiscount().getDiscount_percentage());
                 }else orderItemDTO.setDiscount(BigDecimal.ZERO);
                 orderItemDTO.setCreatedAt(orderItem.getCreatedAt());
@@ -274,8 +274,9 @@ public class OrderServiceImpl implements OrderService {
 
 
     @Override
-    public void cancelOrder(Long id) {
+    public void cancelOrder(Long id,String reason) {
         Order order = orderRepository.findById(id).get();
+        order.setReason(reason);
         order.setStatus(OrderStatus.CANCELLED);
         orderRepository.save(order);
     }
