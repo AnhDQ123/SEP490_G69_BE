@@ -74,6 +74,7 @@ public class OrderController {
     @PostMapping("/accept")
     public void acceptOrder(@RequestParam Long id) throws IOException {
         orderService.acceptOrder(id);
+        orderService.assignShipper();
     }
     @PostMapping("/reject")
     public void rejectOrder(@RequestParam Long id) throws IOException {
@@ -85,12 +86,12 @@ public class OrderController {
     }
 
     @GetMapping("/shop/status")
-    public ResponseEntity<?> findByShopStatus(@RequestParam Long id ,@RequestParam OrderStatus status,@RequestParam Pageable pageable) throws IOException {
+    public ResponseEntity<?> findByShopStatus(@RequestParam Long id ,@RequestParam OrderStatus status, Pageable pageable) throws IOException {
         return ResponseEntity.ok(orderService.findAllByShopAndStatus(id,status,pageable));
     }
 
     @GetMapping("/shipper")
-    public ResponseEntity<?> findByShipper(@RequestParam Long id,@RequestParam Pageable pageable) throws IOException {
+    public ResponseEntity<?> findByShipper(@RequestParam Long id, Pageable pageable) throws IOException {
         return ResponseEntity.ok(orderService.findAllByShipper(id,pageable));
     }
 }

@@ -39,5 +39,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     ORDER BY totalOrders ASC
 """)
     List<Object[]> findShipperWithLeastOrdersToday();
+    
     Page<Order> findAllByShipper_Id(Long shipperId, Pageable pageable);
+
+    List<Order> findAllByStatus(OrderStatus status);
 }

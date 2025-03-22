@@ -4,10 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.ffb_be.dto.order.OrderDTO;
 import org.ffb_be.dto.order.OrderItemDTO;
 import org.ffb_be.dto.order.OrderItemOptionDTO;
-import org.ffb_be.entity.Image;
-import org.ffb_be.entity.Order;
-import org.ffb_be.entity.OrderItem;
-import org.ffb_be.entity.OrderItemOption;
+import org.ffb_be.entity.*;
 import org.ffb_be.repository.*;
 import org.ffb_be.utils.enums.OrderStatus;
 import org.ffb_be.utils.enums.upload.CloudinaryUpload;
@@ -15,16 +12,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RequiredArgsConstructor
 @Service
@@ -325,6 +320,27 @@ public class OrderServiceImpl implements OrderService {
     public Page<OrderDTO> findAllByShipper(Long id, Pageable pageable) {
         Page<Order> orders = orderRepository.findAllByShipper_Id(id, pageable);
         return toDTO(orders,pageable);
+    }
+
+    @Override
+    @Transactional
+    public void assignShipper() {
+        List<Order> orders = orderRepository.findAllByStatus(OrderStatus.PROCESSING);
+        List<User> availableShippers = userRepository.findAllAvailableShippers();
+
+        if (orders.isEmpty() || availableShippers.isEmpty()) return;
+
+        int shipperIndex = 0;
+        int totalShippers = availableShippers.size();
+
+        for (Order order : orders) {
+            User shipper = availableShippers.get(shipperIndex);
+            order.setShipper(shipper);
+            orderRepository.save(order);
+
+            // Gán tiếp cho shipper tiếp theo
+            shipperIndex = (shipperIndex + 1) % totalShippers;
+        }
     }
 
 
