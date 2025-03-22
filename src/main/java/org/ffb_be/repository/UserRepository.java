@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 
+import java.util.List;
 import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -26,5 +27,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByPhone(String phone);
 
     Page<User> findByRoleAndShipperStatus(Role role, ShipperStatus status, Pageable pageable);
+
+    @Query("""
+    SELECT u FROM User u
+    WHERE u.role.name = 'SHIPPER'
+      AND u.status = org.ffb_be.utils.enums.Status.ACTIVE
+       AND u.deliveryStatus = org.ffb_be.utils.enums.DeliveryStatus.AVAILABLE
+""")
+    List<User> findAllAvailableShippers();
 }
 
