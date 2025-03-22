@@ -3,9 +3,9 @@ package org.ffb_be.repository;
 import org.ffb_be.entity.Role;
 import org.ffb_be.entity.User;
 import org.ffb_be.utils.enums.ShipperStatus;
-import org.ffb_be.utils.enums.Status;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -21,7 +21,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "OR lower(e.email) LIKE lower(concat('%', :search, '%')) " +
             "OR lower(e.status) LIKE lower(concat('%', :search, '%')) " +
             "OR lower(e.role.name) LIKE lower(concat('%', :search, '%')) ")
-    Page<User> findByAllField( String search, Pageable pageable);
+    Page<User>findByAllField( String search, Pageable pageable);
 
     Optional<User> findByEmail(String email);
     Optional<User> findByPhone(String phone);
@@ -35,5 +35,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
        AND u.deliveryStatus = org.ffb_be.utils.enums.DeliveryStatus.AVAILABLE
 """)
     List<User> findAllAvailableShippers();
+
+    Page<User> findAll(Specification<User> spec, Pageable pageable);
 }
 

@@ -1,9 +1,13 @@
 package org.ffb_be.service.shipper;
 
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.ffb_be.dto.auth.userDto.ShipperInfoDTO;
 import org.ffb_be.dto.auth.userDto.ShipperRegisterDTO;
 import org.ffb_be.entity.Profile;
+import org.ffb_be.entity.Role;
 import org.ffb_be.entity.User;
 import org.ffb_be.exception.BadRequestException;
 import org.ffb_be.exception.NotFoundException;
@@ -17,6 +21,7 @@ import org.ffb_be.utils.enums.upload.CloudinaryUpload;
 import org.ffb_be.utils.mapping.ShipperMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -91,8 +96,9 @@ public class ShipperServiceImpl implements ShipperService {
         if (!Objects.equals(user.getRole().getName(), "shipper")) {
             throw new BadRequestException("User đã là shipper.");
         }
-
-        user.setRole(roleRepository.getByName("shipper"));
+        Role role = roleRepository.getByName("shipper")
+                .orElseThrow(() ->new NotFoundException("Role"));
+        user.setRole(role);
         user.setShipperStatus(ShipperStatus.ACTIVE);
         user.setDeliveryStatus(DeliveryStatus.AVAILABLE);
         userRepository.save(user);
@@ -106,7 +112,9 @@ public class ShipperServiceImpl implements ShipperService {
         if (user.getShipperStatus() != ShipperStatus.PENDING) {
             throw new IllegalStateException("Chỉ có thể từ chối shipper đang ở trạng thái chờ.");
         }
-        user.setRole(roleRepository.getByName("user"));
+        Role role = roleRepository.getByName("user")
+                .orElseThrow(() ->new NotFoundException("Role"));
+        user.setRole(role);
         userRepository.save(user);
     }
 
@@ -186,8 +194,26 @@ public class ShipperServiceImpl implements ShipperService {
     }
 
     @Override
-    public Page<ShipperInfoDTO> getShippersByStatus(String status, Pageable pageable) {
-        Page<User> shippers = userRepository.findByRoleAndShipperStatus(roleRepository.getByName("shipper"), ShipperStatus.valueOf(status), pageable);
+    public Page<ShipperInfoDTO> getShippersByStatus(String status, String search, Pageable pageable) {
+        Specification<User> spec = Specification.where((root, query, cb) -> {
+            Join<User, Role> roleJoin = root.join("role", JoinType.INNER);
+            return cb.equal(roleJoin.get("name"), "shipper");
+        });
+
+        if (status != null && !status.isEmpty()) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("shipperStatus"), status));
+        }
+
+        if (search != null && !search.isEmpty()) {
+            spec = spec.and((root, query, cb) -> {
+                Join<User, Profile> profileJoin = root.join("profile", JoinType.LEFT);
+                Predicate phonePredicate = cb.like(root.get("phone"), "%" + search + "%");
+                Predicate namePredicate = cb.like(cb.lower(profileJoin.get("name")), "%" + search.toLowerCase() + "%");
+                return cb.or(phonePredicate, namePredicate);
+            });
+        }
+
+        Page<User> shippers = userRepository.findAll(spec, pageable);
         return shippers.map(this::decryptDTO);
     }
 
