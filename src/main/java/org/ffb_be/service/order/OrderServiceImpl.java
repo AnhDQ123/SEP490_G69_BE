@@ -48,6 +48,7 @@ public class OrderServiceImpl implements OrderService {
             orderDTO.setAddress(order.getShipping_address());
             orderDTO.setTotal(order.getTotal());
             orderDTO.setOwnerId(order.getOwner().getId());
+            orderDTO.setOwnerName(userRepository.findById(orderDTO.getOwnerId()).get().getProfile().getName());
             orderDTO.setStatus(order.getStatus().toString());
             orderDTO.setReason(order.getReason());
             if (order.getVoucher() != null) {
@@ -198,6 +199,7 @@ public class OrderServiceImpl implements OrderService {
             orderDTO.setAddress(order.getShipping_address());
             orderDTO.setTotal(order.getTotal());
             orderDTO.setOwnerId(order.getOwner().getId());
+            orderDTO.setOwnerName(userRepository.findById(orderDTO.getOwnerId()).get().getProfile().getName());
             orderDTO.setReason(order.getReason());
             if(order.getVoucher() != null) {
                 orderDTO.setVoucherId(order.getVoucher().getId());
