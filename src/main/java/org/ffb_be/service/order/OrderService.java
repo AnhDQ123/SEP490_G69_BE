@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -27,4 +28,6 @@ public interface OrderService {
     void assignShipper();
     void returnOrder(Long id,Long userId,String reason,MultipartFile avatar) throws IOException;
     ReturnOrderDTO viewReturnOrder(Long id) throws IOException;
+
+    Page<OrderDTO> findAllByStatusAndDateRange(OrderStatus status, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
 }

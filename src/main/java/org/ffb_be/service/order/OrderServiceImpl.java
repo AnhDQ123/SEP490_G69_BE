@@ -10,6 +10,7 @@ import org.ffb_be.entity.*;
 import org.ffb_be.repository.*;
 import org.ffb_be.utils.enums.OrderStatus;
 import org.ffb_be.utils.enums.upload.CloudinaryUpload;
+import org.ffb_be.utils.mapping.OrderMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -38,6 +39,7 @@ public class OrderServiceImpl implements OrderService {
     private final CloudinaryUpload cloudinaryUpload;
     private final TypesRepository typesRepository;
     private final ImageRepository imageRepository;
+    private final OrderMapper orderMapper;
 
 
     public Page<OrderDTO> toDTO(Page<Order> orders,Pageable pageable) {
@@ -119,6 +121,7 @@ public class OrderServiceImpl implements OrderService {
         }
         return new PageImpl<>(orderDTOs, pageable, orders.getTotalElements());
     }
+
     @Override
     public List<Order> save(OrderDTO orderDTO) throws IOException {
         Map<Long, List<OrderItemDTO>> shopOrderItems = new HashMap<>();
@@ -393,5 +396,10 @@ public class OrderServiceImpl implements OrderService {
         return returnOrderDTO;
     }
 
+    @Override
+    public Page<OrderDTO> findAllByStatusAndDateRange(OrderStatus status, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
+        Page<Order> orders = orderRepository.findAllByStatusAndCreatedAtBetween(status, startDate, endDate, pageable);
+        return orders.map(orderMapper::toDTO);
+    }
 
 }
