@@ -51,6 +51,8 @@ public class Order extends BaseEntity {
     @JoinColumn(name = "voucher_id")
     private Voucher voucher;
 
+    private String reason;
+
     @OneToMany(mappedBy = "order")
     private List<OrderItem> orderItems;
 }

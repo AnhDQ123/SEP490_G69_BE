@@ -21,8 +21,12 @@ public class OrderDTO {
     private BigDecimal voucherAmount;
     private String address;
     private String shopName;
+    private Long shopId;
+    private String status;
     private String image;
     private BigDecimal total;
     private LocalDateTime createdAt;
     private List<OrderItemDTO> orderItem;
+    private String reason;
+
 }
