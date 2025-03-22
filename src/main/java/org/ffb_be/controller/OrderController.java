@@ -108,5 +108,13 @@ public class OrderController {
     public ReturnOrderDTO viewReturn(@RequestParam Long id) throws IOException {
         return orderService.viewReturnOrder(id);
     }
+    @PostMapping("/acceptReturn")
+    public void acceptReturn(@RequestParam Long id) throws IOException {
+        orderService.acceptReturnOrder(id);
+    }
+    @PostMapping("/rejectReturn")
+    public void rejectReturn(@RequestParam Long id) throws IOException {
+        orderService.rejectReturnOrder(id);
+    }
 
 }

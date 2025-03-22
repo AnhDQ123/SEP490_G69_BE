@@ -278,6 +278,7 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderRepository.findById(id).get();
         order.setReason(reason);
         order.setStatus(OrderStatus.CANCELLED);
+        order.setUpdatedAt(LocalDateTime.now());
         orderRepository.save(order);
     }
 
@@ -291,6 +292,7 @@ public class OrderServiceImpl implements OrderService {
     public void acceptOrder(Long id) {
         Order order=orderRepository.findById(id).get();
         order.setStatus(OrderStatus.PROCESSING);
+        order.setUpdatedAt(LocalDateTime.now());
         orderRepository.save(order);
     }
 
@@ -298,6 +300,7 @@ public class OrderServiceImpl implements OrderService {
     public void rejectOrder(Long id) {
         Order order=orderRepository.findById(id).get();
         order.setStatus(OrderStatus.REJECTED);
+        order.setUpdatedAt(LocalDateTime.now());
         orderRepository.save(order);
     }
 
@@ -316,6 +319,7 @@ public class OrderServiceImpl implements OrderService {
             System.out.println("Avatar URL: " + url);
         }
         order.setStatus(status);
+        order.setUpdatedAt(LocalDateTime.now());
         orderRepository.save(order);
     }
 
@@ -324,6 +328,7 @@ public class OrderServiceImpl implements OrderService {
         Order order=orderRepository.findById(id).get();
         order.setShipper(userRepository.findById(userId).get());
         order.setStatus(OrderStatus.SHIPPING);
+        order.setUpdatedAt(LocalDateTime.now());
         orderRepository.save(order);
     }
 
@@ -370,6 +375,7 @@ public class OrderServiceImpl implements OrderService {
             System.out.println("Avatar URL: " + url);
         }
         order.setStatus(OrderStatus.RETURN_PENDING);
+        order.setUpdatedAt(LocalDateTime.now());
         orderRepository.save(order);
     }
 
@@ -391,6 +397,22 @@ public class OrderServiceImpl implements OrderService {
         returnOrderDTO.setImage(imageDTOList);
         returnOrderDTO.setOrder(orderDTO);
         return returnOrderDTO;
+    }
+
+    @Override
+    public void acceptReturnOrder(Long id) {
+        Order order=orderRepository.findById(id).get();
+        order.setStatus(OrderStatus.RETURNED);
+        order.setUpdatedAt(LocalDateTime.now());
+        orderRepository.save(order);
+    }
+
+    @Override
+    public void rejectReturnOrder(Long id) {
+        Order order=orderRepository.findById(id).get();
+        order.setStatus(OrderStatus.RETURN_REJECTED);
+        order.setUpdatedAt(LocalDateTime.now());
+        orderRepository.save(order);
     }
 
 

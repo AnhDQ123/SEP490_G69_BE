@@ -27,4 +27,6 @@ public interface OrderService {
     void assignShipper();
     void returnOrder(Long id,Long userId,String reason,MultipartFile avatar) throws IOException;
     ReturnOrderDTO viewReturnOrder(Long id) throws IOException;
+    void acceptReturnOrder(Long id);
+    void rejectReturnOrder(Long id);
 }
