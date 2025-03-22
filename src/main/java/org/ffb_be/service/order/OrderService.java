@@ -1,6 +1,7 @@
 package org.ffb_be.service.order;
 
 import org.ffb_be.dto.order.OrderDTO;
+import org.ffb_be.dto.order.ReturnOrderDTO;
 import org.ffb_be.entity.Order;
 import org.ffb_be.utils.enums.OrderStatus;
 import org.springframework.data.domain.Page;
@@ -20,8 +21,10 @@ public interface OrderService {
     Page<OrderDTO> findAllByShopAndStatus(Long id,OrderStatus status,Pageable pageable);
     void acceptOrder(Long id);
     void rejectOrder(Long id);
-    void changeStatus(Long id, OrderStatus status, MultipartFile avatar) throws IOException;
-    void accecptShipping(Long id,Long userId);
+    void changeStatus(Long id,Long userId, OrderStatus status, MultipartFile avatar) throws IOException;
+    void acceptShipping(Long id,Long userId);
     Page<OrderDTO>findAllByShipper(Long id, Pageable pageable);
     void assignShipper();
+    void returnOrder(Long id,Long userId,String reason,MultipartFile avatar) throws IOException;
+    ReturnOrderDTO viewReturnOrder(Long id) throws IOException;
 }

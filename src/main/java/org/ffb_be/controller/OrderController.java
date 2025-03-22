@@ -1,6 +1,7 @@
 package org.ffb_be.controller;
 
 import org.ffb_be.dto.order.OrderDTO;
+import org.ffb_be.dto.order.ReturnOrderDTO;
 import org.ffb_be.entity.Order;
 import org.ffb_be.service.order.OrderService;
 import org.ffb_be.utils.enums.OrderStatus;
@@ -80,9 +81,9 @@ public class OrderController {
     public void rejectOrder(@RequestParam Long id) throws IOException {
         orderService.rejectOrder(id);
     }
-    @PutMapping("/changeStatus")
-    public void changeStatus(@RequestParam Long id, OrderStatus status,@RequestParam("avatar") MultipartFile avatar) throws IOException {
-        orderService.changeStatus(id, status, avatar);
+    @PostMapping("/changeStatus")
+    public void changeStatus(@RequestParam Long id,@RequestParam Long userId,@RequestParam OrderStatus status,@RequestParam("avatar") MultipartFile avatar) throws IOException {
+        orderService.changeStatus(id,userId, status, avatar);
     }
 
     @GetMapping("/shop/status")
@@ -94,4 +95,18 @@ public class OrderController {
     public ResponseEntity<?> findByShipper(@RequestParam Long id, Pageable pageable) throws IOException {
         return ResponseEntity.ok(orderService.findAllByShipper(id,pageable));
     }
+    @PostMapping("/acceptShip")
+    public void acceptShip(@RequestParam Long id,@RequestParam Long userId) throws IOException {
+        orderService.acceptShipping(id,userId);
+    }
+    @PostMapping("/returnOrder")
+    public void returnOrder(@RequestParam Long id,@RequestParam Long userId,@RequestParam String reason,@RequestParam("avatar") MultipartFile avatar) throws IOException {
+        orderService.returnOrder(id,userId,reason, avatar);
+    }
+
+    @GetMapping("/viewReturn")
+    public ReturnOrderDTO viewReturn(@RequestParam Long id) throws IOException {
+        return orderService.viewReturnOrder(id);
+    }
+
 }

@@ -33,4 +33,8 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
     @Query(value = "INSERT INTO images (url, type_id, related_id) VALUES (:url, :typeId, :blogId)", nativeQuery = true)
     void saveBlogImages(@Param("url") String url, @Param("typeId") Long typeId, @Param("blogId") Long blogId);
 
+
+    List<Image> findAllByType_Id(Long typeId);
+
+    List<Image> findAllByRelatedIdAndType_Id(Long relatedId, Long typeId);
 }

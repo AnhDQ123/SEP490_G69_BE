@@ -1,9 +1,11 @@
 package org.ffb_be.service.order;
 
 import lombok.RequiredArgsConstructor;
+import org.ffb_be.dto.image.ImageDTO;
 import org.ffb_be.dto.order.OrderDTO;
 import org.ffb_be.dto.order.OrderItemDTO;
 import org.ffb_be.dto.order.OrderItemOptionDTO;
+import org.ffb_be.dto.order.ReturnOrderDTO;
 import org.ffb_be.entity.*;
 import org.ffb_be.repository.*;
 import org.ffb_be.utils.enums.OrderStatus;
@@ -46,6 +48,8 @@ public class OrderServiceImpl implements OrderService {
             orderDTO.setAddress(order.getShipping_address());
             orderDTO.setTotal(order.getTotal());
             orderDTO.setOwnerId(order.getOwner().getId());
+            orderDTO.setStatus(order.getStatus().toString());
+            orderDTO.setReason(order.getReason());
             if (order.getVoucher() != null) {
                 orderDTO.setVoucherId(order.getVoucher().getId());
                 orderDTO.setVoucherAmount(order.getVoucher().getDiscount_percentage());
@@ -72,6 +76,7 @@ public class OrderServiceImpl implements OrderService {
                 orderItemDTO.setCreatedAt(orderItem.getCreatedAt());
                 orderItemDTO.setOrderId(order.getId());
                 orderDTO.setShopName(shopRepository.findByProduct(orderItemDTO.getProductId()).getName());
+                orderDTO.setShopId(shopRepository.findByProduct(orderItemDTO.getProductId()).getId());
                 orderDTO.setImage(shopRepository.findByProduct(orderItemDTO.getProductId()).getBackgroundImage());
                 orderItemDTO.setProductName(productRepository.findById(orderItemDTO.getProductId()).get().getName());
                 orderItemDTO.setImage(productRepository.findById(orderItemDTO.getProductId()).get().getImage());
@@ -193,11 +198,13 @@ public class OrderServiceImpl implements OrderService {
             orderDTO.setAddress(order.getShipping_address());
             orderDTO.setTotal(order.getTotal());
             orderDTO.setOwnerId(order.getOwner().getId());
+            orderDTO.setReason(order.getReason());
             if(order.getVoucher() != null) {
                 orderDTO.setVoucherId(order.getVoucher().getId());
                 orderDTO.setVoucherAmount(order.getVoucher().getDiscount_percentage());
             }else orderDTO.setVoucherAmount(BigDecimal.ZERO);
             orderDTO.setShipperId(order.getShipper() != null ? order.getShipper().getId() : null);
+            orderDTO.setStatus(order.getStatus().toString());
             orderDTO.setPaymentMethodId(order.getPaymentMethod() != null ? order.getPaymentMethod().getId() : null);
             orderDTO.setShipMethodId(order.getDeliveryMethod() != null ? order.getDeliveryMethod().getId() : null);
             List<OrderItemDTO> orderItemDTOList = new ArrayList<>();
@@ -215,6 +222,7 @@ public class OrderServiceImpl implements OrderService {
                 orderItemDTO.setCreatedAt(orderItem.getCreatedAt());
                 orderItemDTO.setOrderId(order.getId());
                 orderDTO.setShopName(shopRepository.findByProduct(orderItemDTO.getProductId()).getName());
+                orderDTO.setShopId(shopRepository.findByProduct(orderItemDTO.getProductId()).getId());
                 orderDTO.setImage(shopRepository.findByProduct(orderItemDTO.getProductId()).getBackgroundImage());
                 orderItemDTO.setProductName(productRepository.findById(orderItemDTO.getProductId()).get().getName());
                 orderItemDTO.setImage(productRepository.findById(orderItemDTO.getProductId()).get().getImage());
@@ -293,7 +301,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void changeStatus(Long id, OrderStatus status, MultipartFile avatar) throws IOException {
+    public void changeStatus(Long id,Long userId, OrderStatus status, MultipartFile avatar) throws IOException {
         Order order=orderRepository.findById(id).get();
         Image image=new Image();
         if (avatar != null && !avatar.isEmpty()) {
@@ -301,6 +309,7 @@ public class OrderServiceImpl implements OrderService {
             String url = cloudinaryUpload.uploadFile(avatar);
             image.setUrl(url);
             image.setRelatedId(order.getId());
+            image.setOwner_id(userId);
             image.setType(typesRepository.findById(3l).get());
             imageRepository.save(image);
             System.out.println("Avatar URL: " + url);
@@ -310,9 +319,10 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void accecptShipping(Long id,Long userId) {
+    public void acceptShipping(Long id,Long userId) {
         Order order=orderRepository.findById(id).get();
         order.setShipper(userRepository.findById(userId).get());
+        order.setStatus(OrderStatus.SHIPPING);
         orderRepository.save(order);
     }
 
@@ -341,6 +351,45 @@ public class OrderServiceImpl implements OrderService {
             // Gán tiếp cho shipper tiếp theo
             shipperIndex = (shipperIndex + 1) % totalShippers;
         }
+    }
+
+    @Override
+    public void returnOrder(Long id,Long userId,String reason, MultipartFile avatar) throws IOException {
+        Order order=orderRepository.findById(id).get();
+        order.setReason(reason);
+        Image image=new Image();
+        if (avatar != null && !avatar.isEmpty()) {
+            System.out.println("Uploading Avatar: " + avatar.getOriginalFilename());
+            String url = cloudinaryUpload.uploadFile(avatar);
+            image.setUrl(url);
+            image.setRelatedId(order.getId());
+            image.setOwner_id(userId);
+            image.setType(typesRepository.findById(3l).get());
+            imageRepository.save(image);
+            System.out.println("Avatar URL: " + url);
+        }
+        order.setStatus(OrderStatus.RETURN_PENDING);
+        orderRepository.save(order);
+    }
+
+    @Override
+    public ReturnOrderDTO viewReturnOrder(Long id) throws IOException {
+        OrderDTO orderDTO=viewOrder(id);
+        List<Image> imageList=imageRepository.findAllByRelatedIdAndType_Id(orderDTO.getId(),3l);
+        List<ImageDTO> imageDTOList=new ArrayList<>();
+        for (Image image : imageList) {
+            ImageDTO imageDTO=new ImageDTO();
+            imageDTO.setUrl(image.getUrl());
+            imageDTO.setRelatedId(orderDTO.getId());
+            imageDTO.setId(image.getId());
+            imageDTO.setOwnerId(image.getOwner_id());
+            imageDTO.setTypeId(3l);
+            imageDTOList.add(imageDTO);
+        }
+        ReturnOrderDTO returnOrderDTO=new ReturnOrderDTO();
+        returnOrderDTO.setImage(imageDTOList);
+        returnOrderDTO.setOrder(orderDTO);
+        return returnOrderDTO;
     }
 
 

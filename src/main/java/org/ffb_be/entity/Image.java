@@ -24,5 +24,7 @@ public class Image extends BaseEntity {
     @JoinColumn(name = "type_id")
     private Types type;
 
+    private Long owner_id;
+
     private Long relatedId;
 }
