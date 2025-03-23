@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -107,6 +108,11 @@ public class OrderController {
     @GetMapping("/viewReturn")
     public ReturnOrderDTO viewReturn(@RequestParam Long id) throws IOException {
         return orderService.viewReturnOrder(id);
+    }
+
+    @GetMapping
+    public ResponseEntity<?> findAllByStatusAndCreatedAtBetween(@RequestParam OrderStatus status, @RequestParam LocalDateTime startDate, @RequestParam LocalDateTime endDate, Pageable pageable) {
+        return ResponseEntity.ok(orderService.findAllByStatusAndDateRange(status,startDate,endDate,pageable));
     }
 
 }

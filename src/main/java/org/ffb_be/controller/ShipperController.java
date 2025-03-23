@@ -81,9 +81,12 @@ public class ShipperController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/status/{status}")
-    public ResponseEntity<Page<ShipperInfoDTO>> getShippersByStatus(@PathVariable String status, Pageable pageable) {
-        return ResponseEntity.ok(shipperService.getShippersByStatus(status, pageable));
+    @GetMapping
+    public ResponseEntity<Page<ShipperInfoDTO>> getShippersByStatus(
+            @RequestParam(value = "status", required = false) String status,
+            @RequestParam(value = "search", required = false) String search,
+            Pageable pageable) {
+        return ResponseEntity.ok(shipperService.getShippersByStatus(status, search, pageable));
     }
 
     @GetMapping("/{userId}")
