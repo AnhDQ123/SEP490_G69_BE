@@ -10,6 +10,8 @@ import java.io.IOException;
 public interface BannerService {
     Page<ImageDTO> getBanners(Pageable pageable);
 
+    ImageDTO getBannerById(Long id);
+
     void createBanner(ImageDTO banner, MultipartFile file) throws IOException;
 
     void updateBanner(Long id, ImageDTO image, MultipartFile file) throws IOException;

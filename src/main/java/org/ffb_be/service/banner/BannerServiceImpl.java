@@ -33,6 +33,13 @@ public class BannerServiceImpl implements BannerService {
     }
 
     @Override
+    public ImageDTO getBannerById(Long id) {
+        Image banner = imageRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Banner"));
+        return imageMapper.toDTO(banner);
+    }
+
+    @Override
     public void createBanner(ImageDTO image, MultipartFile file) throws IOException {
         Types type = typesRepository.findByCategory(TypesCategory.BANNER)
                 .orElseThrow(() -> new NotFoundException("Type"));
@@ -61,6 +68,8 @@ public class BannerServiceImpl implements BannerService {
 
     @Override
     public void delete(Long id) {
+        Image banner = imageRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Banner"));
         imageRepository.deleteById(id);
     }
 }
