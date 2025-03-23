@@ -23,6 +23,7 @@ public class ProductResponseDTO {
     private BigDecimal discount;
     private String image;
     private List<FoodOptionDTO> foodOption;
+    private String description;
     private Float rate;
     private BigDecimal defaultPrice;
 }
