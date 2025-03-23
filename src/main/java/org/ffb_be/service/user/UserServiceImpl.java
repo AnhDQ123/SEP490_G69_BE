@@ -123,8 +123,8 @@ public class UserServiceImpl implements UserService {
         if(profile.getGender() != null) {
             profileDTO.setGender(profile.getGender());
         }
-        if(profile.getTax_code() != null) {
-            profileDTO.setTax_code(profile.getTax_code());
+        if(profile.getTaxCode() != null) {
+            profileDTO.setTax_code(profile.getTaxCode());
         }
         if(userRepository.findById(id).get().getPhone()!=null) {
             profileDTO.setPhone(userRepository.findById(id).get().getPhone());
@@ -136,6 +136,13 @@ public class UserServiceImpl implements UserService {
     public void inactiveUser(Long id) {
         User user=userRepository.findById(id).orElse(null);
         user.setStatus(Status.INACTIVE);
+        userRepository.save(user);
+    }
+
+    @Override
+    public void activeUser(Long id) {
+        User user=userRepository.findById(id).orElse(null);
+        user.setStatus(Status.ACTIVE);
         userRepository.save(user);
     }
 
