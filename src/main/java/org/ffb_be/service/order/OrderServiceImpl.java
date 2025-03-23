@@ -313,7 +313,7 @@ public class OrderServiceImpl implements OrderService {
             String url = cloudinaryUpload.uploadFile(avatar);
             image.setUrl(url);
             image.setRelatedId(order.getId());
-            image.setOwner_id(userId);
+            image.setOwnerId(userId);
             image.setType(typesRepository.findById(3l).get());
             imageRepository.save(image);
             System.out.println("Avatar URL: " + url);
@@ -367,7 +367,7 @@ public class OrderServiceImpl implements OrderService {
             String url = cloudinaryUpload.uploadFile(avatar);
             image.setUrl(url);
             image.setRelatedId(order.getId());
-            image.setOwner_id(userId);
+            image.setOwnerId(userId);
             image.setType(typesRepository.findById(3l).get());
             imageRepository.save(image);
             System.out.println("Avatar URL: " + url);
@@ -386,7 +386,7 @@ public class OrderServiceImpl implements OrderService {
             imageDTO.setUrl(image.getUrl());
             imageDTO.setRelatedId(orderDTO.getId());
             imageDTO.setId(image.getId());
-            imageDTO.setOwnerId(image.getOwner_id());
+            imageDTO.setOwnerId(image.getOwnerId());
             imageDTO.setTypeId(3l);
             imageDTOList.add(imageDTO);
         }
