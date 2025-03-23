@@ -23,6 +23,11 @@ public class BannerController {
         return ResponseEntity.ok(bannerService.getBanners(pageable));
     }
 
+    @GetMapping("/{bannerId}")
+    public ResponseEntity<?> getBannerById(@PathVariable Long bannerId) {
+        return ResponseEntity.ok(bannerService.getBannerById(bannerId));
+    }
+
     @PostMapping("/create")
     public ResponseEntity<?> createBanner(
             @Validated @ModelAttribute ImageDTO banner,
