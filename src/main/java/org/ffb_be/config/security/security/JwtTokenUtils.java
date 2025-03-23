@@ -49,8 +49,10 @@ public class JwtTokenUtils {
 
     //generate token for user
     public String generateToken(UserDetails userDetails) {
+        UserSecurity userSecurity = (UserSecurity) userDetails; // Đúng kiểu UserSecurity
         Map<String, Object> claims = new HashMap<>();
-        return doGenerateToken(claims, userDetails.getUsername());
+        claims.put("userId", userSecurity.getUserId()); // Lấy ID từ UserSecurity
+        return doGenerateToken(claims, userSecurity.getUsername());
     }
 
     //while creating the token -
