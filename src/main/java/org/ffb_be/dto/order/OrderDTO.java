@@ -29,6 +29,8 @@ public class OrderDTO {
     private List<OrderItemDTO> orderItem;
     private String reason;
     private String ownerName;
+    private String phone;
+    private String shopAddress;
 
 
 }

@@ -49,6 +49,7 @@ public class OrderServiceImpl implements OrderService {
             orderDTO.setTotal(order.getTotal());
             orderDTO.setOwnerId(order.getOwner().getId());
             orderDTO.setOwnerName(userRepository.findById(orderDTO.getOwnerId()).get().getProfile().getName());
+            orderDTO.setPhone(userRepository.findById(orderDTO.getOwnerId()).get().getPhone());
             orderDTO.setStatus(order.getStatus().toString());
             orderDTO.setReason(order.getReason());
             if (order.getVoucher() != null) {
@@ -78,6 +79,7 @@ public class OrderServiceImpl implements OrderService {
                 orderItemDTO.setOrderId(order.getId());
                 orderDTO.setShopName(shopRepository.findByProduct(orderItemDTO.getProductId()).getName());
                 orderDTO.setShopId(shopRepository.findByProduct(orderItemDTO.getProductId()).getId());
+                orderDTO.setShopAddress(shopRepository.findByProduct(orderItemDTO.getProductId()).getAddress());
                 orderDTO.setImage(shopRepository.findByProduct(orderItemDTO.getProductId()).getBackgroundImage());
                 orderItemDTO.setProductName(productRepository.findById(orderItemDTO.getProductId()).get().getName());
                 orderItemDTO.setImage(productRepository.findById(orderItemDTO.getProductId()).get().getImage());
@@ -199,6 +201,7 @@ public class OrderServiceImpl implements OrderService {
             orderDTO.setAddress(order.getShipping_address());
             orderDTO.setTotal(order.getTotal());
             orderDTO.setOwnerId(order.getOwner().getId());
+            orderDTO.setPhone(userRepository.findById(orderDTO.getOwnerId()).get().getPhone());
             orderDTO.setOwnerName(userRepository.findById(orderDTO.getOwnerId()).get().getProfile().getName());
             orderDTO.setReason(order.getReason());
             if(order.getVoucher() != null) {
@@ -225,6 +228,7 @@ public class OrderServiceImpl implements OrderService {
                 orderItemDTO.setOrderId(order.getId());
                 orderDTO.setShopName(shopRepository.findByProduct(orderItemDTO.getProductId()).getName());
                 orderDTO.setShopId(shopRepository.findByProduct(orderItemDTO.getProductId()).getId());
+                orderDTO.setShopAddress(shopRepository.findByProduct(orderItemDTO.getProductId()).getAddress());
                 orderDTO.setImage(shopRepository.findByProduct(orderItemDTO.getProductId()).getBackgroundImage());
                 orderItemDTO.setProductName(productRepository.findById(orderItemDTO.getProductId()).get().getName());
                 orderItemDTO.setImage(productRepository.findById(orderItemDTO.getProductId()).get().getImage());
