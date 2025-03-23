@@ -13,4 +13,5 @@ public class FoodOptionDTO {
     private Long type_id;
     private String status;
     private Long product_id;
+    private int quantity;
 }

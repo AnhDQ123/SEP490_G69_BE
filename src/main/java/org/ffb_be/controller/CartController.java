@@ -4,6 +4,7 @@ import org.ffb_be.dto.cart.CartDTO;
 
 import org.ffb_be.service.cart.CartService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +21,7 @@ public class CartController {
     public CartController(CartService cartService) {
         this.cartService = cartService;
     }
-
+    @Transactional
     @PostMapping("/add")
     public ResponseEntity<?> addProduct(@Validated @RequestBody() CartDTO cartDTO,
                                         BindingResult bindingResult) throws IOException {
@@ -38,8 +39,5 @@ public class CartController {
     public ResponseEntity<?> getCartById(@PathVariable Long id) {
         return ResponseEntity.ok(cartService.findById(id));
     }
-    @PutMapping
-    public void updateCart(@RequestBody CartDTO cartDTO) throws IOException {
-        cartService.updateCart(cartDTO);
-    }
+
 }
