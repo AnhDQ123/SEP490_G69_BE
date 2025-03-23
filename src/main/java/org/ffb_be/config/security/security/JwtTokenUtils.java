@@ -51,7 +51,7 @@ public class JwtTokenUtils {
     public String generateToken(UserDetails userDetails) {
         UserSecurity userSecurity = (UserSecurity) userDetails; // Đúng kiểu UserSecurity
         Map<String, Object> claims = new HashMap<>();
-        claims.put("userId", userSecurity.getUserId()); // Lấy ID từ UserSecurity
+        claims.put("userId", userSecurity.getId()); // Lấy ID từ UserSecurity
         return doGenerateToken(claims, userSecurity.getUsername());
     }
 

@@ -17,7 +17,7 @@ public class UserSecurity implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of( new SimpleGrantedAuthority("ROLE_"+employee.getRole().getName()));
     }
-    public Long getUserId() { // Thêm phương thức lấy userId
+    public Long getId() { // Thêm phương thức lấy userId
         return employee.getId();
     }
     @Override
