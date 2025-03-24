@@ -40,6 +40,12 @@ public class Shop extends BaseEntity{
     @Column(name="address")
     private String address;
 
+    @Column(nullable = false)
+    private Double latitude;
+
+    @Column(nullable = false)
+    private Double longitude;
+
     @Column(name="registration_certificate")
     private String registrationCertificate;
 

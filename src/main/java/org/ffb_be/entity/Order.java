@@ -25,6 +25,12 @@ public class Order extends BaseEntity {
     @Column(name = "shipping_address")
     private String shipping_address;
 
+    @Column(name = "latitude")
+    private Double latitude;
+
+    @Column(name = "longitude")
+    private Double longitude;
+
     @Column(name = "total")
     private BigDecimal total;
 
