@@ -36,7 +36,7 @@ public interface ShipperService {
             MultipartFile judicialRecord
     ) throws IOException;
 
-    Page<ShipperInfoDTO> getShippersByStatus(String status, Pageable pageable);
+    Page<ShipperInfoDTO> getShippersByStatus(String status, String search, Pageable pageable);
 
     ShipperInfoDTO getShipperDetail(Long userId);
 }
