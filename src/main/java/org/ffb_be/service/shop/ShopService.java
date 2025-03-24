@@ -44,4 +44,6 @@ public interface ShopService {
     boolean isShopOpen(Long shopId);
 
     ShopDTO getShopById(Long shopId);
+
+    ShopDTO getShopByUserId(Long userId);
 }

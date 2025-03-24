@@ -40,6 +40,11 @@ public class ShopController {
         return ResponseEntity.ok(shopService.getShopById(shopId));
     }
 
+    @GetMapping("/byUser/{userId}")
+    public ResponseEntity<ShopDTO> getShopByUserId(@PathVariable Long userId) {
+        return ResponseEntity.ok(shopService.getShopByUserId(userId));
+    }
+
     @PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> registerShop(
             @RequestParam Long userId,

@@ -15,6 +15,7 @@ public class OrderDTO {
     private Long id;
     private Long ownerId;
     private Long shipperId;
+    private String shipperName;
     private Long shipMethodId;
     private Long paymentMethodId;
     private Long voucherId;
