@@ -248,6 +248,13 @@ public class ShopServiceImpl implements ShopService {
                 .orElseThrow(() -> new NotFoundException("Shop"));
     }
 
+    @Override
+    public ShopDTO getShopByUserId(Long userId) {
+        return shopRepository.findByOwnerId(userId)
+                .map(this::decryptShopDTO)
+                .orElseThrow(() -> new NotFoundException("Shop"));
+    }
+
 
     private ShopDTO decryptShopDTO(Shop shop) {
         ShopDTO shopDTO = shopMapper.toDTO(shop);
