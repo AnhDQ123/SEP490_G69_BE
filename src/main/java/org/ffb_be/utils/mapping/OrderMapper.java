@@ -10,6 +10,7 @@ public interface OrderMapper {
 
     @Mapping(target = "ownerId", source = "owner.id")
     @Mapping(target = "shipperId", source = "shipper.id")
+    @Mapping(target = "shipperName", source = "shipper.profile.name")
     @Mapping(target = "shipMethodId", source = "deliveryMethod.id")
     @Mapping(target = "paymentMethodId", source = "paymentMethod.id")
     @Mapping(target = "voucherId", source = "voucher.id")

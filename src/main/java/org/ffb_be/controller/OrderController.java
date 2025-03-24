@@ -111,8 +111,14 @@ public class OrderController {
     }
 
     @GetMapping
-    public ResponseEntity<?> findAllByStatusAndCreatedAtBetween(@RequestParam OrderStatus status, @RequestParam LocalDateTime startDate, @RequestParam LocalDateTime endDate, Pageable pageable) {
-        return ResponseEntity.ok(orderService.findAllByStatusAndDateRange(status,startDate,endDate,pageable));
+    public ResponseEntity<?> findAllByStatusAndCreatedAtBetween(
+            @RequestParam(value = "status", required = false) OrderStatus status,
+            @RequestParam(value = "startDate", required = false) LocalDateTime startDate,
+            @RequestParam(value = "endDate", required = false) LocalDateTime endDate,
+            @RequestParam(value = "shipperName", required = false ) String shipperName,
+            @RequestParam(value = "shopName", required = false) String shopName,
+            Pageable pageable) {
+        return ResponseEntity.ok(orderService.findAllByStatusAndDateRange(shipperName, shopName,status,startDate,endDate,pageable));
     }
 
 }

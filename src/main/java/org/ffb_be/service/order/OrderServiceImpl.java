@@ -397,8 +397,8 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Page<OrderDTO> findAllByStatusAndDateRange(OrderStatus status, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
-        Page<Order> orders = orderRepository.findAllByStatusAndCreatedAtBetween(status, startDate, endDate, pageable);
+    public Page<OrderDTO> findAllByStatusAndDateRange(String shipperName, String shopName, OrderStatus status, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
+        Page<Order> orders = orderRepository.findByStatusAndCreatedAtBetween(status, startDate, endDate, shipperName, shopName,pageable);
         return orders.map(orderMapper::toDTO);
     }
 
