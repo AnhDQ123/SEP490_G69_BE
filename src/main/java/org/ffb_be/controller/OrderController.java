@@ -118,8 +118,8 @@ public class OrderController {
         orderService.rejectReturnOrder(id);
     }
     @GetMapping("/count")
-    public CountDTO countOrderByStatus(@RequestParam OrderStatus status) {
-        return orderService.countOrderByStatus(status);
+    public CountDTO countOrderByStatus(@RequestParam Long id ) {
+        return orderService.countOrderByStatus(id);
     }
 
 }

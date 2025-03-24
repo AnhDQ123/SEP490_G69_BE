@@ -419,18 +419,26 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public CountDTO countOrderByStatus(OrderStatus status) {
+    public CountDTO countOrderByStatus(Long id) {
+        List<Object[]> results = orderRepository.countOrdersByStatusForShop(id);
         CountDTO dto = new CountDTO();
-        dto.setPending((int) orderRepository.countOrderByStatus(OrderStatus.PENDING));
-        dto.setProcessing((int) orderRepository.countOrderByStatus(OrderStatus.PROCESSING));
-        dto.setShipPending((int) orderRepository.countOrderByStatus(OrderStatus.SHIP_PENDING));
-        dto.setShipping((int) orderRepository.countOrderByStatus(OrderStatus.SHIPPING));
-        dto.setDelivered((int) orderRepository.countOrderByStatus(OrderStatus.DELIVERED));
-        dto.setCancelled((int) orderRepository.countOrderByStatus(OrderStatus.CANCELLED));
-        dto.setReturned((int) orderRepository.countOrderByStatus(OrderStatus.RETURNED));
-        dto.setRejected((int) orderRepository.countOrderByStatus(OrderStatus.REJECTED));
-        dto.setReturnPending((int) orderRepository.countOrderByStatus(OrderStatus.RETURN_PENDING));
-        dto.setReturnRejected((int) orderRepository.countOrderByStatus(OrderStatus.RETURN_REJECTED));
+        for (Object[] row : results) {
+            OrderStatus status = (OrderStatus) row[0];
+            int count = ((Long) row[1]).intValue();
+            switch (status) {
+                case PENDING -> dto.setPending(count);
+                case PROCESSING -> dto.setProcessing(count);
+                case SHIP_PENDING -> dto.setShipPending(count);
+                case SHIPPING -> dto.setShipping(count);
+                case DELIVERED -> dto.setDelivered(count);
+                case CANCELLED -> dto.setCancelled(count);
+                case RETURNED -> dto.setReturned(count);
+                case REJECTED -> dto.setRejected(count);
+                case RETURN_PENDING -> dto.setReturnPending(count);
+                case RETURN_REJECTED -> dto.setReturnRejected(count);
+            }
+        }
+
         return dto;
     }
 }

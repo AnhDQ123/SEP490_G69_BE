@@ -43,6 +43,14 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     Page<Order> findAllByShipper_Id(Long shipperId, Pageable pageable);
 
     List<Order> findAllByStatus(OrderStatus status);
-    
-    long countOrderByStatus(OrderStatus status);
+
+    @Query("""
+        SELECT o.status, COUNT(DISTINCT o.id)
+        FROM Order o
+        JOIN o.orderItems oi
+        JOIN oi.product p
+        WHERE p.shop.id = :shopId
+        GROUP BY o.status
+    """)
+    List<Object[]> countOrdersByStatusForShop( Long shopId);
 }
