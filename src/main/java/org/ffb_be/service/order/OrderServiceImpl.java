@@ -2,10 +2,7 @@ package org.ffb_be.service.order;
 
 import lombok.RequiredArgsConstructor;
 import org.ffb_be.dto.image.ImageDTO;
-import org.ffb_be.dto.order.OrderDTO;
-import org.ffb_be.dto.order.OrderItemDTO;
-import org.ffb_be.dto.order.OrderItemOptionDTO;
-import org.ffb_be.dto.order.ReturnOrderDTO;
+import org.ffb_be.dto.order.*;
 import org.ffb_be.entity.*;
 import org.ffb_be.repository.*;
 import org.ffb_be.utils.enums.OrderStatus;
@@ -421,5 +418,22 @@ public class OrderServiceImpl implements OrderService {
         orderRepository.save(order);
     }
 
-
+    @Override
+    public CountDTO countOrderByStatus(OrderStatus status) {
+        CountDTO dto = new CountDTO();
+        dto.setPending((int) orderRepository.countOrderByStatus(OrderStatus.PENDING));
+        dto.setProcessing((int) orderRepository.countOrderByStatus(OrderStatus.PROCESSING));
+        dto.setShipPending((int) orderRepository.countOrderByStatus(OrderStatus.SHIP_PENDING));
+        dto.setShipping((int) orderRepository.countOrderByStatus(OrderStatus.SHIPPING));
+        dto.setDelivered((int) orderRepository.countOrderByStatus(OrderStatus.DELIVERED));
+        dto.setCancelled((int) orderRepository.countOrderByStatus(OrderStatus.CANCELLED));
+        dto.setReturned((int) orderRepository.countOrderByStatus(OrderStatus.RETURNED));
+        dto.setRejected((int) orderRepository.countOrderByStatus(OrderStatus.REJECTED));
+        dto.setReturnPending((int) orderRepository.countOrderByStatus(OrderStatus.RETURN_PENDING));
+        dto.setReturnRejected((int) orderRepository.countOrderByStatus(OrderStatus.RETURN_REJECTED));
+        return dto;
+    }
 }
+
+
+

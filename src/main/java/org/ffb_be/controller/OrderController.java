@@ -1,5 +1,6 @@
 package org.ffb_be.controller;
 
+import org.ffb_be.dto.order.CountDTO;
 import org.ffb_be.dto.order.OrderDTO;
 import org.ffb_be.dto.order.ReturnOrderDTO;
 import org.ffb_be.entity.Order;
@@ -115,6 +116,10 @@ public class OrderController {
     @PostMapping("/rejectReturn")
     public void rejectReturn(@RequestParam Long id) throws IOException {
         orderService.rejectReturnOrder(id);
+    }
+    @GetMapping("/count")
+    public CountDTO countOrderByStatus(@RequestParam OrderStatus status) {
+        return orderService.countOrderByStatus(status);
     }
 
 }

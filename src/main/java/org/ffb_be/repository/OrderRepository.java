@@ -43,4 +43,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     Page<Order> findAllByShipper_Id(Long shipperId, Pageable pageable);
 
     List<Order> findAllByStatus(OrderStatus status);
+    
+    long countOrderByStatus(OrderStatus status);
 }

@@ -1,5 +1,6 @@
 package org.ffb_be.service.order;
 
+import org.ffb_be.dto.order.CountDTO;
 import org.ffb_be.dto.order.OrderDTO;
 import org.ffb_be.dto.order.ReturnOrderDTO;
 import org.ffb_be.entity.Order;
@@ -29,4 +30,5 @@ public interface OrderService {
     ReturnOrderDTO viewReturnOrder(Long id) throws IOException;
     void acceptReturnOrder(Long id);
     void rejectReturnOrder(Long id);
+    CountDTO countOrderByStatus(OrderStatus status);
 }
