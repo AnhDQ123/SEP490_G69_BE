@@ -47,9 +47,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findAllByStatus(OrderStatus status);
 
     @Query("SELECT o FROM Order o " +
-            "LEFT JOIN o.owner owner " + // Join với chủ shop
-            "LEFT JOIN o.shipper shipper " + // Join với shipper
-            "WHERE o.status = :status " +
+            "WHERE (:status IS NULL OR o.status = :status) " +
             "AND (:startDate IS NULL OR o.createdAt >= :startDate) " +
             "AND (:endDate IS NULL OR o.createdAt <= :endDate) " +
             "AND (:orderCode IS NULL OR LOWER(o.orderCode) LIKE LOWER(CONCAT('%', :orderCode, '%')))")
