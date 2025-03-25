@@ -52,7 +52,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "WHERE o.status = :status " +
             "AND (:startDate IS NULL OR o.createdAt >= :startDate) " +
             "AND (:endDate IS NULL OR o.createdAt <= :endDate) " +
-            "AND (:orderCode IS NULL OR LOWER(o.orderCode) LIKE LOWER(CONCAT('%', :search, '%')))")
+            "AND (:orderCode IS NULL OR LOWER(o.orderCode) LIKE LOWER(CONCAT('%', :orderCode, '%')))")
     Page<Order> findByStatusAndCreatedAtBetween(
             @Param("status") OrderStatus status,
             @Param("startDate") LocalDateTime startDate,
