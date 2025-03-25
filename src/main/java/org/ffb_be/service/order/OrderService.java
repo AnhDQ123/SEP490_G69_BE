@@ -29,5 +29,5 @@ public interface OrderService {
     void returnOrder(Long id,Long userId,String reason,MultipartFile avatar) throws IOException;
     ReturnOrderDTO viewReturnOrder(Long id) throws IOException;
 
-    Page<OrderDTO> findAllByStatusAndDateRange(String shipperName, String shopName, OrderStatus status, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
+    Page<OrderDTO> findAllByFilter(String orderCode, OrderStatus status, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
 }

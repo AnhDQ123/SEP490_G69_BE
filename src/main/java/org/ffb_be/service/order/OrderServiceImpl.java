@@ -47,7 +47,7 @@ public class OrderServiceImpl implements OrderService {
         for (Order order : orders.getContent()) {
             OrderDTO orderDTO = new OrderDTO();
             orderDTO.setId(order.getId());
-            orderDTO.setAddress(order.getShipping_address());
+            orderDTO.setAddress(order.getShippingAddress());
             orderDTO.setTotal(order.getTotal());
             orderDTO.setOwnerId(order.getOwner().getId());
             orderDTO.setStatus(order.getStatus().toString());
@@ -198,7 +198,7 @@ public class OrderServiceImpl implements OrderService {
         OrderDTO orderDTO = new OrderDTO();
         BigDecimal orderTotal = BigDecimal.ZERO;
             orderDTO.setId(order.getId());
-            orderDTO.setAddress(order.getShipping_address());
+            orderDTO.setAddress(order.getShippingAddress());
             orderDTO.setTotal(order.getTotal());
             orderDTO.setOwnerId(order.getOwner().getId());
             orderDTO.setReason(order.getReason());
@@ -397,8 +397,8 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Page<OrderDTO> findAllByStatusAndDateRange(String shipperName, String shopName, OrderStatus status, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
-        Page<Order> orders = orderRepository.findByStatusAndCreatedAtBetween(status, startDate, endDate, shipperName, shopName,pageable);
+    public Page<OrderDTO> findAllByFilter(String orderCode, OrderStatus status, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
+        Page<Order> orders = orderRepository.findByStatusAndCreatedAtBetween(status, startDate, endDate, orderCode, pageable);
         return orders.map(orderMapper::toDTO);
     }
 

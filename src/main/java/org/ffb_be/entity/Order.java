@@ -22,8 +22,10 @@ public class Order extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String orderCode;
+
     @Column(name = "shipping_address")
-    private String shipping_address;
+    private String shippingAddress;
 
     @Column(name = "latitude")
     private Double latitude;
