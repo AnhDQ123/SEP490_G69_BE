@@ -13,7 +13,9 @@ import java.util.List;
 @NoArgsConstructor
 public class OrderDTO {
     private Long id;
+    private String orderCode;
     private Long ownerId;
+    private String ownerName;
     private Long shipperId;
     private String shipperName;
     private Long shipMethodId;

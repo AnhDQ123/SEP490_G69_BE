@@ -9,6 +9,7 @@ import org.mapstruct.Mapping;
 public interface OrderMapper {
 
     @Mapping(target = "ownerId", source = "owner.id")
+    @Mapping(target = "ownerName", source = "owner.profile.name")
     @Mapping(target = "shipperId", source = "shipper.id")
     @Mapping(target = "shipperName", source = "shipper.profile.name")
     @Mapping(target = "shipMethodId", source = "deliveryMethod.id")
@@ -20,6 +21,5 @@ public interface OrderMapper {
     @Mapping(target = "shopId", source = "voucher.shop.id")
     @Mapping(target = "status", source = "status")
     @Mapping(target = "orderItem", source = "orderItems")
-    OrderDTO
-    toDTO(Order order);
+    OrderDTO toDTO(Order order);
 }
