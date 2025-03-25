@@ -70,14 +70,18 @@ public class ShipperController {
     }
 
     @PutMapping("/{userId}/active")
-    public ResponseEntity<?> shipperActive(@PathVariable Long userId) {
-        shipperService.shipperStatus(userId, ShipperStatus.ACTIVE);
+    public ResponseEntity<?> shipperActive(
+            @PathVariable Long userId) {
+        shipperService.shipperStatus(userId, ShipperStatus.ACTIVE, "");
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/{userId}/inactive")
-    public ResponseEntity<?> shipperInactive(@PathVariable Long userId) {
-        shipperService.shipperStatus(userId, ShipperStatus.INACTIVE);
+    public ResponseEntity<?> shipperInactive(
+            @PathVariable Long userId,
+            @RequestParam(value = "reason") String reason
+    ) {
+        shipperService.shipperStatus(userId, ShipperStatus.INACTIVE, reason);
         return ResponseEntity.ok().build();
     }
 

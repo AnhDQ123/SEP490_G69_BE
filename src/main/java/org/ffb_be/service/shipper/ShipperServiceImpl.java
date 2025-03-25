@@ -96,6 +96,9 @@ public class ShipperServiceImpl implements ShipperService {
         if (!Objects.equals(user.getRole().getName(), "shipper")) {
             throw new BadRequestException("User đã là shipper.");
         }
+        if (user.getShipperStatus() != ShipperStatus.PENDING) {
+            throw new BadRequestException("Chỉ có thể duyệt shipper đang ở trạng thái chờ.");
+        }
         Role role = roleRepository.getByName("shipper")
                 .orElseThrow(() ->new NotFoundException("Role"));
         user.setRole(role);
@@ -115,13 +118,20 @@ public class ShipperServiceImpl implements ShipperService {
         Role role = roleRepository.getByName("user")
                 .orElseThrow(() ->new NotFoundException("Role"));
         user.setRole(role);
+        user.setRejectReason(reason);
         userRepository.save(user);
     }
 
     @Override
-    public void shipperStatus(Long userId, ShipperStatus status) {
+    public void shipperStatus(Long userId, ShipperStatus status, String reason) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User"));
+        if(status == ShipperStatus.INACTIVE) {
+            user.setRejectReason(reason);
+        }
+        if(status == ShipperStatus.ACTIVE) {
+            user.setRejectReason(null);
+        }
         user.setShipperStatus(status);
         userRepository.save(user);
     }
@@ -188,6 +198,7 @@ public class ShipperServiceImpl implements ShipperService {
         profile.setCitizenIDNumber(encryptSafe(shipperRegisterDTO.getCitizenIDNumber()));
         profile.setCitizenIDExpiredDate(shipperRegisterDTO.getCitizenIDExpiredDate());
         profile.setDrivingLicenseExpiredDate(shipperRegisterDTO.getDrivingLicenseExpiredDate());
+        user.setRejectReason(null);
         user.setShipperStatus(ShipperStatus.PENDING);
         profileRepository.save(profile);
         userRepository.save(user);

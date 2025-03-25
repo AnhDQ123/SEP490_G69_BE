@@ -37,6 +37,8 @@ public class Shop extends BaseEntity{
     @Column(name="phone")
     private String phone;
 
+    private String reason;
+
     @Column(name="address")
     private String address;
 

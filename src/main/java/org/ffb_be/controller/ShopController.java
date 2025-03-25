@@ -90,11 +90,33 @@ public class ShopController {
         return ResponseEntity.ok(isOpen);
     }
 
-    @PutMapping("/{shopId}/status")
-    public ResponseEntity<Void> updateShopStatus(
+    @PutMapping("/{shopId}/active")
+    public ResponseEntity<Void> activeShop(@PathVariable Long shopId) {
+        shopService.updateShopStatus(shopId, Status.ACTIVE, "");
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{shopId}/inactive")
+    public ResponseEntity<Void> inactiveShop(
             @PathVariable Long shopId,
-            @RequestParam Status status) {
-        shopService.updateShopStatus(shopId, status);
+            @RequestParam String reason
+    ) {
+        shopService.updateShopStatus(shopId, Status.INACTIVE, reason);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{shopId}/reject")
+    public ResponseEntity<Void> rejectShop(
+            @PathVariable Long shopId,
+            @RequestParam String reason
+    ) {
+        shopService.rejectShop(shopId, reason);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{shopId}/approve")
+    public ResponseEntity<Void> approveShop(@PathVariable Long shopId) {
+        shopService.approveShop(shopId);
         return ResponseEntity.ok().build();
     }
 
