@@ -10,7 +10,6 @@ import org.ffb_be.utils.enums.Status;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "products")
@@ -49,7 +48,7 @@ public class Product extends BaseEntity {
     private Float rate;
 
     @Enumerated(EnumType.STRING)
-    private Status is_active;
+    private Status status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")

@@ -1,5 +1,6 @@
 package org.ffb_be.controller;
 
+import org.ffb_be.dto.order.CountDTO;
 import org.ffb_be.dto.order.OrderDTO;
 import org.ffb_be.dto.order.ReturnOrderDTO;
 import org.ffb_be.entity.Order;
@@ -108,6 +109,18 @@ public class OrderController {
     @GetMapping("/viewReturn")
     public ReturnOrderDTO viewReturn(@RequestParam Long id) throws IOException {
         return orderService.viewReturnOrder(id);
+    }
+    @PostMapping("/acceptReturn")
+    public void acceptReturn(@RequestParam Long id) throws IOException {
+        orderService.acceptReturnOrder(id);
+    }
+    @PostMapping("/rejectReturn")
+    public void rejectReturn(@RequestParam Long id) throws IOException {
+        orderService.rejectReturnOrder(id);
+    }
+    @GetMapping("/count")
+    public CountDTO countOrderByStatus(@RequestParam Long id ) {
+        return orderService.countOrderByStatus(id);
     }
 
     @GetMapping
