@@ -27,8 +27,8 @@ public interface OrderMapper {
     @Mapping(target = "status", source = "status")
     @Mapping(target = "orderItem", source = "orderItems")
     OrderDTO toDTO(Order order);
-    @Mapping(source = "owner.id", target = "userId")
-    OrderDataDTO toDTO(Order order);
+
+    OrderDataDTO toDTOData(Order order);
 
     @Mapping(source = "order.id", target = "orderId")
     @Mapping(source = "order.owner.id", target = "userId")

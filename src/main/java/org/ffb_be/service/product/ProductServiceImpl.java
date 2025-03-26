@@ -126,13 +126,12 @@ public class ProductServiceImpl implements ProductService {
             productResponseDTO.setQuantity(product.getQuantity()); // thêm quantity
             productResponseDTO.setCategory(product.getCategory().getName());
             productResponseDTO.setShopName(product.getShop().getName());
-            // ✅ Gán giảm giá (nếu có)
-            if (product.getDiscount() != null && product.getDiscount().getId() != null) {
-                Discount d = discountRepository.findById(product.getDiscount().getId());
-                productResponseDTO.setDiscount(d.getDiscount_percentage());
-            } else {
-                productResponseDTO.setDiscount(BigDecimal.ZERO);
-            }
+//            if (product.getDiscount() != null && product.getDiscount().getId() != null) {
+//                Discount d = discountRepository.findById(product.getDiscount().getId());
+//                productResponseDTO.setDiscount(d.getDiscount_percentage());
+//            } else {
+//                productResponseDTO.setDiscount(BigDecimal.ZERO);
+//            }
 
             // Tính defaultPrice từ các FoodOption có type id = 2
             BigDecimal defaultprice = null;
@@ -164,7 +163,6 @@ public class ProductServiceImpl implements ProductService {
             productResponseDTO.setImage(product.getImage());
             productResponseDTO.setCategory(product.getCategory().getName());
             productResponseDTO.setShopName(product.getShop().getName());
-            productResponseDTO.setDiscount(product.getDiscount().getDiscount_percentage());
             productResponseDTO.setRate(product.getRate());
             productResponseDTO.setQuantity(product.getQuantity());
 
@@ -205,7 +203,6 @@ public class ProductServiceImpl implements ProductService {
             productResponseDTO.setRate(product.getRate());
             productResponseDTO.setQuantity(product.getQuantity());
             productResponseDTO.setShopName(product.getShop().getName());
-            productResponseDTO.setDiscount(product.getDiscount().getDiscount_percentage());
 
             BigDecimal defaultprice = null;
             List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product);
@@ -291,7 +288,6 @@ public class ProductServiceImpl implements ProductService {
             productResponseDTO.setCategory(product.getCategory().getName());
             productResponseDTO.setSupplier(product.getShop() != null ? product.getShop().getName() : "");
             productResponseDTO.setRate(product.getRate());
-            productResponseDTO.setDiscount(product.getDiscount().getDiscount_percentage());
             productResponseDTO.setQuantity(product.getQuantity());
 
             // Tính defaultPrice từ các FoodOption có type id = 2

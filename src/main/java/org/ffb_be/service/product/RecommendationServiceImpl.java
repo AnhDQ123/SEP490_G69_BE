@@ -76,7 +76,7 @@ public class RecommendationServiceImpl implements RecommendationService {
 
         List<OrderDataDTO> orderDataDTOS = orderRepository.findAll()
                 .stream()
-                .map(orderMapper::toDTO)
+                .map(orderMapper::toDTOData)
                 .toList();
 
         List<FoodDataDTO> foodDataDTOS = productRepository.findAll()

@@ -121,13 +121,3 @@ public class ShopController {
     }
 
 }
-
-    @PutMapping("/{shopId}/status")
-    public ResponseEntity<Void> updateShopStatus(
-            @PathVariable Long shopId,
-            @RequestParam Status status) {
-        shopService.updateShopStatus(shopId, status);
-        return ResponseEntity.ok().build();
-    }
-
-}
