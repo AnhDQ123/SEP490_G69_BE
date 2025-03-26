@@ -38,6 +38,8 @@ public class OrderItem  extends BaseEntity {
     @JoinColumn(name = "product_id")
     private Product product;
 
+    private BigDecimal discountValue;
+
     @OneToMany(mappedBy = "orderItem")
     private List<OrderItemOption> orderItemOptions;
 }

@@ -52,6 +52,16 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     List<Order> findAllByStatus(OrderStatus status);
 
+    @Query("""
+        SELECT o.status, COUNT(DISTINCT o.id)
+        FROM Order o
+        JOIN o.orderItems oi
+        JOIN oi.product p
+        WHERE p.shop.id = :shopId
+        GROUP BY o.status
+    """)
+    List<Object[]> countOrdersByStatusForShop( Long shopId);
+
     @Query("SELECT o FROM Order o " +
             "WHERE (:status IS NULL OR o.status = :status) " +
             "AND (:startDate IS NULL OR o.createdAt >= :startDate) " +

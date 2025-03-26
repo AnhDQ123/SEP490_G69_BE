@@ -1,5 +1,6 @@
 package org.ffb_be.service.order;
 
+import org.ffb_be.dto.order.CountDTO;
 import org.ffb_be.dto.order.OrderDTO;
 import org.ffb_be.dto.order.ReturnOrderDTO;
 import org.ffb_be.entity.Order;
@@ -28,6 +29,9 @@ public interface OrderService {
     void assignShipper();
     void returnOrder(Long id,Long userId,String reason,MultipartFile avatar) throws IOException;
     ReturnOrderDTO viewReturnOrder(Long id) throws IOException;
+    void acceptReturnOrder(Long id);
+    void rejectReturnOrder(Long id);
+    CountDTO countOrderByStatus(Long id);
 
     Page<OrderDTO> findAllByFilter(String orderCode, OrderStatus status, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
 

@@ -2,6 +2,7 @@ package org.ffb_be.service.product;
 
 
 
+import lombok.RequiredArgsConstructor;
 import org.ffb_be.dto.product.FoodOptionDTO;
 import org.ffb_be.dto.product.ProductCreateDTO;
 import org.ffb_be.dto.product.ProductResponseDTO;
@@ -11,6 +12,7 @@ import org.ffb_be.entity.Discount;
 import org.ffb_be.entity.FoodOption;
 import org.ffb_be.entity.Product;
 import org.ffb_be.repository.*;
+import org.ffb_be.utils.enums.Status;
 import org.ffb_be.utils.enums.upload.CloudinaryUpload;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
@@ -25,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-
+@RequiredArgsConstructor
 @Service
 public class ProductServiceImpl implements ProductService {
 
@@ -36,15 +38,8 @@ public class ProductServiceImpl implements ProductService {
     private final DiscountRepository discountRepository;
     private final TypesRepository typesRepository;
     private final OrderRepository orderRepository;
-    public ProductServiceImpl(ProductRepository productRepository, CategoryRepository categoryRepository, CloudinaryUpload cloudinaryUpload, FoodOptionRepository foodOptionRepository, DiscountRepository discountRepository, TypesRepository typesRepository, OrderRepository orderRepository) {
-        this.productRepository = productRepository;
-        this.categoryRepository = categoryRepository;
-        this.cloudinaryUpload = cloudinaryUpload;
-        this.foodOptionRepository = foodOptionRepository;
-        this.discountRepository = discountRepository;
-        this.typesRepository = typesRepository;
-        this.orderRepository = orderRepository;
-    }
+
+
 
     public void save(ProductCreateDTO productCreateDTO,MultipartFile avatar, List<MultipartFile>option) throws IOException {
         Product product = new Product();
@@ -161,13 +156,12 @@ public class ProductServiceImpl implements ProductService {
         for (Product product : productList) {
             ProductResponseDTO productResponseDTO = new ProductResponseDTO();
             BeanUtils.copyProperties(product, productResponseDTO);
-//            if (product.getDiscount() != null && product.getDiscount().getId() != null) {
-//                Discount d = discountRepository.findById(product.getDiscount().getId());
-//                productResponseDTO.setDiscount(d.getDiscount_percentage());
-//            } else {
-//                productResponseDTO.setDiscount(BigDecimal.ZERO);
-//            }
-
+            Discount discount=discountRepository.findByProduct(product);
+            if(discount!=null) {
+                productResponseDTO.setDiscount(discount.getDiscount_percentage());
+            }else {
+                productResponseDTO.setDiscount(BigDecimal.ZERO);
+            }
             productResponseDTO.setCategory(product.getCategory().getName());
             productResponseDTOList.add(productResponseDTO);
         }
@@ -188,12 +182,12 @@ public class ProductServiceImpl implements ProductService {
             foodOptionDTOs.add(dto);
         }
         BeanUtils.copyProperties(product, productResponseDTO);
-//        if (product.getDiscount() != null && product.getDiscount().getId() != null) {
-//            Discount d = discountRepository.findById(product.getDiscount().getId());
-//            productResponseDTO.setDiscount(d.getDiscount_percentage());
-//        } else {
-//            productResponseDTO.setDiscount(BigDecimal.ZERO);
-//        }
+        Discount discount=discountRepository.findByProduct(product);
+        if(discount!=null) {
+            productResponseDTO.setDiscount(discount.getDiscount_percentage());
+        }else {
+            productResponseDTO.setDiscount(BigDecimal.ZERO);
+        }
         Optional<Category> c=categoryRepository.findById(product.getCategory().getId());
         Category category = c.get();
         productResponseDTO.setFoodOption(foodOptionDTOs);
@@ -222,18 +216,26 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public void update(Long id,ProductCreateDTO productCreateDTO,MultipartFile avatar, List<MultipartFile>option) throws IOException {
+        Product product=productRepository.findById(id).get();
+        product.setStatus(Status.INACTIVE);
+        save( productCreateDTO,avatar, option);
+    }
+
+    @Override
     public Page<ProductResponseDTO> findAll(Pageable pageable) {
         return productRepository.findAll(pageable).map(product -> {
             ProductResponseDTO productResponseDTO = new ProductResponseDTO();
-//            if (product.getDiscount() != null && product.getDiscount().getId() != null) {
-//                Discount d = discountRepository.findById(product.getDiscount().getId());
-//                productResponseDTO.setDiscount(d.getDiscount_percentage());
-//            } else {
-//                productResponseDTO.setDiscount(BigDecimal.ZERO);
-//            }
+            Discount discount=discountRepository.findByProduct(product);
+            if(discount!=null) {
+                productResponseDTO.setDiscount(discount.getDiscount_percentage());
+            }else {
+                productResponseDTO.setDiscount(BigDecimal.ZERO);
+            }
             productResponseDTO.setCategory(product.getCategory().getName());
             BeanUtils.copyProperties(product, productResponseDTO);
             return productResponseDTO;
         });
     }
+
 }
