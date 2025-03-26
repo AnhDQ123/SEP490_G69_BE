@@ -54,9 +54,8 @@ public class Product extends BaseEntity {
     @JoinColumn(name = "category_id")
     private Category category;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "discount_id")
-    private Discount discount;
+    @OneToMany(mappedBy = "product")
+    private List<Discount> discounts;
 
     @OneToMany(mappedBy = "product")
     private List<Feedback> feedbacks;

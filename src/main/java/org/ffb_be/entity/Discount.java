@@ -35,6 +35,7 @@ public class Discount extends BaseEntity{
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    @OneToMany(mappedBy = "discount")
-    private List<Product> products;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id")
+    private Product product;
 }
