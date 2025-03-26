@@ -89,7 +89,12 @@ public class ProductServiceImpl implements ProductService {
             productResponseDTO.setShopName(product.getShop().getName());
             BigDecimal defaultprice = null;
             List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product);
-
+            Discount discount=discountRepository.findByProduct(product);
+            if(discount!=null) {
+                productResponseDTO.setDiscount(discount.getDiscount_percentage());
+            }else {
+                productResponseDTO.setDiscount(BigDecimal.ZERO);
+            }
             for (FoodOption foodOption : foodOptions) {
                 if (foodOption.getType().getId() == 2) {
                     if (defaultprice == null || foodOption.getPrice().compareTo(defaultprice) < 0) {
