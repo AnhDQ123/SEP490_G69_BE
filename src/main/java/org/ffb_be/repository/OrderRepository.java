@@ -4,6 +4,7 @@ import org.ffb_be.entity.Order;
 import org.ffb_be.utils.enums.OrderStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.ffb_be.entity.Voucher;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -26,6 +27,11 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Override
     Optional<Order> findById(Long aLong);
 
+    int countByOwnerIdAndVoucher(Long ownerId, Voucher voucher);
+
+    @Query("SELECT v.code, COUNT(o) FROM Order o JOIN o.voucher v GROUP BY v.code")
+    List<Object[]> getVoucherUsageStatistics();
+
     @Query("SELECT DISTINCT o FROM Order o " +
             "JOIN o.orderItems oi " +
             "JOIN oi.product p " +
@@ -41,7 +47,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     ORDER BY totalOrders ASC
 """)
     List<Object[]> findShipperWithLeastOrdersToday();
-    
+
     Page<Order> findAllByShipper_Id(Long shipperId, Pageable pageable);
 
     List<Order> findAllByStatus(OrderStatus status);

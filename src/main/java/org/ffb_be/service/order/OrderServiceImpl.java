@@ -53,7 +53,7 @@ public class OrderServiceImpl implements OrderService {
             orderDTO.setReason(order.getReason());
             if (order.getVoucher() != null) {
                 orderDTO.setVoucherId(order.getVoucher().getId());
-                orderDTO.setVoucherAmount(order.getVoucher().getDiscount_percentage());
+                orderDTO.setVoucherAmount(order.getVoucher().getDiscountValue());
             } else {
                 orderDTO.setVoucherAmount(BigDecimal.ZERO);
             }
@@ -207,7 +207,7 @@ public class OrderServiceImpl implements OrderService {
             orderDTO.setReason(order.getReason());
             if(order.getVoucher() != null) {
                 orderDTO.setVoucherId(order.getVoucher().getId());
-                orderDTO.setVoucherAmount(order.getVoucher().getDiscount_percentage());
+                orderDTO.setVoucherAmount(order.getVoucher().getDiscountValue());
             }else orderDTO.setVoucherAmount(BigDecimal.ZERO);
             orderDTO.setShipperId(order.getShipper() != null ? order.getShipper().getId() : null);
             orderDTO.setStatus(order.getStatus().toString());
