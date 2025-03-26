@@ -4,6 +4,7 @@ package org.ffb_be.service.product;
 
 import lombok.RequiredArgsConstructor;
 import org.ffb_be.dto.discount.DiscountDTO;
+import org.ffb_be.dto.discount.DiscountDTO2;
 import org.ffb_be.dto.product.FoodOptionDTO;
 import org.ffb_be.dto.product.ProductCreateDTO;
 import org.ffb_be.dto.product.ProductResponseDTO;
@@ -92,22 +93,14 @@ public class ProductServiceImpl implements ProductService {
             List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product);
             List<Discount> discount=discountRepository.findAllByProduct_Id((product.getId()));
             if(discount!=null) {
-                List<DiscountDTO> discountDTOs=new ArrayList<>();
+                List<DiscountDTO2> discountDTOs=new ArrayList<>();
                 for (Discount discount1:discount) {
-                    DiscountDTO discountDTO=new DiscountDTO();
-                    ProductResponseDTO productResponseDTO1=new ProductResponseDTO();
-                    productResponseDTO1.setId(product.getId());
-                    productResponseDTO1.setName(product.getName());
-                    productResponseDTO1.setManufacturer(product.getManufacturer());
-                    productResponseDTO1.setSupplier(product.getSupplier());
-                    productResponseDTO1.setImage(product.getImage());
-                    productResponseDTO1.setCategory(product.getCategory().getName());
+                    DiscountDTO2 discountDTO=new DiscountDTO2();
                     discountDTO.setAmount(discount1.getDiscount_percentage());
                     discountDTO.setId(discount1.getId());
                     discountDTO.setStartDate(discount1.getStartDate());
                     discountDTO.setEndDate(discount1.getEndDate());
                     discountDTO.setStatus(discount1.getStatus().toString());
-                    discountDTO.setProductResponseDTO(productResponseDTO);
                     discountDTOs.add(discountDTO);
                 }
                 productResponseDTO.setDiscount(discountDTOs);
@@ -147,22 +140,14 @@ public class ProductServiceImpl implements ProductService {
             // Tính defaultPrice từ các FoodOption có type id = 2
             List<Discount> discount=discountRepository.findAllByProduct_Id((product.getId()));
             if(discount!=null) {
-                List<DiscountDTO> discountDTOs=new ArrayList<>();
+                List<DiscountDTO2> discountDTOs=new ArrayList<>();
                 for (Discount discount1:discount) {
-                    DiscountDTO discountDTO=new DiscountDTO();
-                    ProductResponseDTO productResponseDTO1=new ProductResponseDTO();
-                    productResponseDTO1.setId(product.getId());
-                    productResponseDTO1.setName(product.getName());
-                    productResponseDTO1.setManufacturer(product.getManufacturer());
-                    productResponseDTO1.setSupplier(product.getSupplier());
-                    productResponseDTO1.setImage(product.getImage());
-                    productResponseDTO1.setCategory(product.getCategory().getName());
+                    DiscountDTO2 discountDTO=new DiscountDTO2();
                     discountDTO.setAmount(discount1.getDiscount_percentage());
                     discountDTO.setId(discount1.getId());
                     discountDTO.setStartDate(discount1.getStartDate());
                     discountDTO.setEndDate(discount1.getEndDate());
                     discountDTO.setStatus(discount1.getStatus().toString());
-                    discountDTO.setProductResponseDTO(productResponseDTO);
                     discountDTOs.add(discountDTO);
                 }
                 productResponseDTO.setDiscount(discountDTOs);
@@ -270,22 +255,15 @@ public class ProductServiceImpl implements ProductService {
             BeanUtils.copyProperties(product, productResponseDTO);
             List<Discount> discount=discountRepository.findAllByProduct_Id((product.getId()));
             if(discount!=null) {
-                List<DiscountDTO> discountDTOs=new ArrayList<>();
+                List<DiscountDTO2> discountDTOs=new ArrayList<>();
                 for (Discount discount1:discount) {
-                    DiscountDTO discountDTO=new DiscountDTO();
-                    ProductResponseDTO productResponseDTO1=new ProductResponseDTO();
-                    productResponseDTO1.setId(product.getId());
-                    productResponseDTO1.setName(product.getName());
-                    productResponseDTO1.setManufacturer(product.getManufacturer());
-                    productResponseDTO1.setSupplier(product.getSupplier());
-                    productResponseDTO1.setImage(product.getImage());
-                    productResponseDTO1.setCategory(product.getCategory().getName());
+                    DiscountDTO2 discountDTO=new DiscountDTO2();;
                     discountDTO.setAmount(discount1.getDiscount_percentage());
                     discountDTO.setId(discount1.getId());
                     discountDTO.setStartDate(discount1.getStartDate());
                     discountDTO.setEndDate(discount1.getEndDate());
                     discountDTO.setStatus(discount1.getStatus().toString());
-                    discountDTO.setProductResponseDTO(productResponseDTO);
+
                     discountDTOs.add(discountDTO);
                 }
                 productResponseDTO.setDiscount(discountDTOs);
@@ -314,22 +292,14 @@ public class ProductServiceImpl implements ProductService {
         BeanUtils.copyProperties(product, productResponseDTO);
         List<Discount> discount=discountRepository.findAllByProduct_Id((product.getId()));
         if(discount!=null) {
-            List<DiscountDTO> discountDTOs=new ArrayList<>();
+            List<DiscountDTO2> discountDTOs=new ArrayList<>();
             for (Discount discount1:discount) {
-                DiscountDTO discountDTO=new DiscountDTO();
-                ProductResponseDTO productResponseDTO1=new ProductResponseDTO();
-                productResponseDTO1.setId(product.getId());
-                productResponseDTO1.setName(product.getName());
-                productResponseDTO1.setManufacturer(product.getManufacturer());
-                productResponseDTO1.setSupplier(product.getSupplier());
-                productResponseDTO1.setImage(product.getImage());
-                productResponseDTO1.setCategory(product.getCategory().getName());
+                DiscountDTO2 discountDTO=new DiscountDTO2();
                 discountDTO.setAmount(discount1.getDiscount_percentage());
                 discountDTO.setId(discount1.getId());
                 discountDTO.setStartDate(discount1.getStartDate());
                 discountDTO.setEndDate(discount1.getEndDate());
                 discountDTO.setStatus(discount1.getStatus().toString());
-                discountDTO.setProductResponseDTO(productResponseDTO);
                 discountDTOs.add(discountDTO);
             }
             productResponseDTO.setDiscount(discountDTOs);
@@ -391,22 +361,14 @@ public class ProductServiceImpl implements ProductService {
             ProductResponseDTO productResponseDTO = new ProductResponseDTO();
             List<Discount> discount=discountRepository.findAllByProduct_Id((product.getId()));
             if(discount!=null) {
-                List<DiscountDTO> discountDTOs=new ArrayList<>();
+                List<DiscountDTO2> discountDTOs=new ArrayList<>();
                 for (Discount discount1:discount) {
-                    DiscountDTO discountDTO=new DiscountDTO();
-                    ProductResponseDTO productResponseDTO1=new ProductResponseDTO();
-                    productResponseDTO1.setId(product.getId());
-                    productResponseDTO1.setName(product.getName());
-                    productResponseDTO1.setManufacturer(product.getManufacturer());
-                    productResponseDTO1.setSupplier(product.getSupplier());
-                    productResponseDTO1.setImage(product.getImage());
-                    productResponseDTO1.setCategory(product.getCategory().getName());
+                    DiscountDTO2 discountDTO=new DiscountDTO2();
                     discountDTO.setAmount(discount1.getDiscount_percentage());
                     discountDTO.setId(discount1.getId());
                     discountDTO.setStartDate(discount1.getStartDate());
                     discountDTO.setEndDate(discount1.getEndDate());
                     discountDTO.setStatus(discount1.getStatus().toString());
-                    discountDTO.setProductResponseDTO(productResponseDTO);
                     discountDTOs.add(discountDTO);
                 }
                 productResponseDTO.setDiscount(discountDTOs);
