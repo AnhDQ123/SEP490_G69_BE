@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.ffb_be.utils.enums.SellType;
 import org.ffb_be.utils.enums.Status;
 
 import java.time.LocalDate;
@@ -58,6 +59,9 @@ public class Product extends BaseEntity {
 
     @OneToMany(mappedBy = "product")
     private List<Feedback> feedbacks;
+
+    @Enumerated(EnumType.STRING)
+    private SellType type;
 
     @OneToMany(mappedBy = "product")
     private List<CartItem> cartItems;

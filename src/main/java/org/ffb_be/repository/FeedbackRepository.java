@@ -1,10 +1,9 @@
 package org.ffb_be.repository;
 
-import org.ffb_be.entity.OrderItem;
+import org.ffb_be.entity.Feedback;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
-
+public interface FeedbackRepository extends JpaRepository<Feedback, Long> {
 }

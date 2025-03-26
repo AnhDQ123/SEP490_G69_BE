@@ -19,13 +19,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
-
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @RequiredArgsConstructor
 @Service
@@ -91,6 +87,18 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.findAllByShop_Id(id,pageable).map(product -> {
             ProductResponseDTO productResponseDTO = new ProductResponseDTO();
             productResponseDTO.setShopName(product.getShop().getName());
+            BigDecimal defaultprice = null;
+            List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product);
+
+            for (FoodOption foodOption : foodOptions) {
+                if (foodOption.getType().getId() == 2) {
+                    if (defaultprice == null || foodOption.getPrice().compareTo(defaultprice) < 0) {
+                        defaultprice = foodOption.getPrice();
+                    }
+                }
+            }
+
+            productResponseDTO.setDefaultPrice(defaultprice != null ? defaultprice : BigDecimal.ZERO);
             BeanUtils.copyProperties(product, productResponseDTO);
             return productResponseDTO;
         });
@@ -98,17 +106,38 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<ProductResponseDTO> findPopularProducts() {
-        List<Object[]> products=orderRepository.findTopSellingProducts();
+        List<Object[]> products = orderRepository.findTopSellingProducts();
         List<ProductResponseDTO> productResponseDTOList = new ArrayList<>();
         for (Object[] objects : products) {
-            Product product=productRepository.findById((Long) objects[0]).get();
+            Product product = productRepository.findById((Long) objects[0]).get();
             ProductResponseDTO productResponseDTO = new ProductResponseDTO();
             productResponseDTO.setId(product.getId());
             productResponseDTO.setName(product.getName());
             productResponseDTO.setManufacturer(product.getManufacturer());
             productResponseDTO.setSupplier(product.getSupplier());
             productResponseDTO.setImage(product.getImage());
+            productResponseDTO.setRate(product.getRate()); // thêm rate
+            productResponseDTO.setQuantity(product.getQuantity()); // thêm quantity
             productResponseDTO.setCategory(product.getCategory().getName());
+            productResponseDTO.setShopName(product.getShop().getName());
+            // Tính defaultPrice từ các FoodOption có type id = 2
+            Discount discount=discountRepository.findByProduct(product);
+            if(discount!=null) {
+                productResponseDTO.setDiscount(discount.getDiscount_percentage());
+            }else {
+                productResponseDTO.setDiscount(BigDecimal.ZERO);
+            }
+            BigDecimal defaultprice = null;
+            List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product);
+            for (FoodOption foodOption : foodOptions) {
+                if (foodOption.getType().getId() == 2) {
+                    if (defaultprice == null || foodOption.getPrice().compareTo(defaultprice) < 0) {
+                        defaultprice = foodOption.getPrice();
+                    }
+                }
+            }
+            productResponseDTO.setDefaultPrice(defaultprice != null ? defaultprice : BigDecimal.ZERO);
+
             productResponseDTOList.add(productResponseDTO);
         }
         return productResponseDTOList;
@@ -118,6 +147,7 @@ public class ProductServiceImpl implements ProductService {
     public List<ProductResponseDTO> findFreshProducts() {
         List<Product> products = productRepository.findFreshProducts();
         List<ProductResponseDTO> productResponseDTOList = new ArrayList<>();
+
         for (Product product : products) {
             ProductResponseDTO productResponseDTO = new ProductResponseDTO();
             productResponseDTO.setId(product.getId());
@@ -125,9 +155,28 @@ public class ProductServiceImpl implements ProductService {
             productResponseDTO.setManufacturer(product.getManufacturer());
             productResponseDTO.setImage(product.getImage());
             productResponseDTO.setCategory(product.getCategory().getName());
-            productResponseDTO.setSupplier(product.getSupplier());
+            productResponseDTO.setShopName(product.getShop().getName());
+            productResponseDTO.setRate(product.getRate());
+            productResponseDTO.setQuantity(product.getQuantity());
+
+            // Tính defaultPrice cho sản phẩm fresh
+            BigDecimal defaultprice = null;
+            List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product);
+
+            for (FoodOption foodOption : foodOptions) {
+                if (foodOption.getType().getId() == 2) { // điều kiện tùy theo nghiệp vụ thực tế
+                    if (defaultprice == null || foodOption.getPrice().compareTo(defaultprice) < 0) {
+                        defaultprice = foodOption.getPrice();
+                    }
+                }
+            }
+
+            productResponseDTO.setDefaultPrice(defaultprice); // set giá vừa tính được
+            productResponseDTO.setImage(product.getImage());
+
             productResponseDTOList.add(productResponseDTO);
         }
+
         return productResponseDTOList;
     }
 
@@ -135,6 +184,7 @@ public class ProductServiceImpl implements ProductService {
     public List<ProductResponseDTO> findCookedProducts() {
         List<Product> products = productRepository.findCookedProducts();
         List<ProductResponseDTO> productResponseDTOList = new ArrayList<>();
+
         for (Product product : products) {
             ProductResponseDTO productResponseDTO = new ProductResponseDTO();
             productResponseDTO.setId(product.getId());
@@ -143,16 +193,36 @@ public class ProductServiceImpl implements ProductService {
             productResponseDTO.setImage(product.getImage());
             productResponseDTO.setCategory(product.getCategory().getName());
             productResponseDTO.setSupplier(product.getSupplier());
+            productResponseDTO.setRate(product.getRate());
+            productResponseDTO.setQuantity(product.getQuantity());
+            productResponseDTO.setShopName(product.getShop().getName());
+
+            BigDecimal defaultprice = null;
+            List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product);
+
+            for (FoodOption foodOption : foodOptions) {
+                if (foodOption.getType().getId() == 2) {
+                    if (defaultprice == null || foodOption.getPrice().compareTo(defaultprice) < 0) {
+                        defaultprice = foodOption.getPrice();
+                    }
+                }
+            }
+
+            // Thêm dòng này để set giá defaultPrice vào DTO
+            productResponseDTO.setDefaultPrice(defaultprice);
+
             productResponseDTOList.add(productResponseDTO);
         }
+
         return productResponseDTOList;
     }
 
     @Override
     public List<ProductResponseDTO> findByCategory(String cat) {
         Category category = categoryRepository.findByName(cat);
-        List<Product> productList=productRepository.findAllByCategory(category);
+        List<Product> productList = productRepository.findAllByCategory(category);
         List<ProductResponseDTO> productResponseDTOList = new ArrayList<>();
+
         for (Product product : productList) {
             ProductResponseDTO productResponseDTO = new ProductResponseDTO();
             BeanUtils.copyProperties(product, productResponseDTO);
@@ -198,9 +268,10 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<ProductResponseDTO> findSimimlarProduct(String name) {
         String[] words = name.split("\\s+");
-        String substring = words[0].concat(words[1]);
-        List<Product> products=productRepository.findSimilarProducts(substring);
+        String substring = words[0];
+        List<Product> products = productRepository.findSimilarProducts(substring);
         List<ProductResponseDTO> productResponseDTOList = new ArrayList<>();
+
         for (Product product : products) {
             ProductResponseDTO productResponseDTO = new ProductResponseDTO();
             productResponseDTO.setId(product.getId());
@@ -208,8 +279,22 @@ public class ProductServiceImpl implements ProductService {
             productResponseDTO.setManufacturer(product.getManufacturer());
             productResponseDTO.setImage(product.getImage());
             productResponseDTO.setCategory(product.getCategory().getName());
-            productResponseDTO.setSupplier(product.getSupplier());
-            productResponseDTO.setShopName(product.getShop().getName());
+            productResponseDTO.setSupplier(product.getShop() != null ? product.getShop().getName() : "");
+            productResponseDTO.setRate(product.getRate());
+            productResponseDTO.setQuantity(product.getQuantity());
+
+            // Tính defaultPrice từ các FoodOption có type id = 2
+            BigDecimal defaultprice = null;
+            List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product);
+            for (FoodOption foodOption : foodOptions) {
+                if (foodOption.getType().getId() == 2) {
+                    if (defaultprice == null || foodOption.getPrice().compareTo(defaultprice) < 0) {
+                        defaultprice = foodOption.getPrice();
+                    }
+                }
+            }
+            productResponseDTO.setDefaultPrice(defaultprice != null ? defaultprice : BigDecimal.ZERO);
+
             productResponseDTOList.add(productResponseDTO);
         }
         return productResponseDTOList;

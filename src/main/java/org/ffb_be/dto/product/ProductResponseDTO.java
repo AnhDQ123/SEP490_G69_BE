@@ -1,6 +1,7 @@
 package org.ffb_be.dto.product;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,6 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
+@Builder
 public class ProductResponseDTO {
     private Long id;
     private String name;
@@ -23,4 +25,7 @@ public class ProductResponseDTO {
     private BigDecimal discount;
     private String image;
     private List<FoodOptionDTO> foodOption;
+    private String description;
+    private Float rate;
+    private BigDecimal defaultPrice;
 }
