@@ -110,6 +110,7 @@ public class ProductServiceImpl implements ProductService {
                     discountDTO.setProductResponseDTO(productResponseDTO);
                     discountDTOs.add(discountDTO);
                 }
+                productResponseDTO.setDiscount(discountDTOs);
             }else {
                 productResponseDTO.setDiscount(null);
             }
@@ -164,6 +165,7 @@ public class ProductServiceImpl implements ProductService {
                     discountDTO.setProductResponseDTO(productResponseDTO);
                     discountDTOs.add(discountDTO);
                 }
+                productResponseDTO.setDiscount(discountDTOs);
             }else {
                 productResponseDTO.setDiscount(null);
             }
@@ -286,6 +288,7 @@ public class ProductServiceImpl implements ProductService {
                     discountDTO.setProductResponseDTO(productResponseDTO);
                     discountDTOs.add(discountDTO);
                 }
+                productResponseDTO.setDiscount(discountDTOs);
             }else {
                 productResponseDTO.setDiscount(null);
             }
@@ -329,6 +332,7 @@ public class ProductServiceImpl implements ProductService {
                 discountDTO.setProductResponseDTO(productResponseDTO);
                 discountDTOs.add(discountDTO);
             }
+            productResponseDTO.setDiscount(discountDTOs);
         }else {
             productResponseDTO.setDiscount(null);
         }
@@ -405,6 +409,7 @@ public class ProductServiceImpl implements ProductService {
                     discountDTO.setProductResponseDTO(productResponseDTO);
                     discountDTOs.add(discountDTO);
                 }
+                productResponseDTO.setDiscount(discountDTOs);
             }else {
                 productResponseDTO.setDiscount(null);
             }
