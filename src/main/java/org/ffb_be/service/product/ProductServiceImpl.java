@@ -235,37 +235,15 @@ public class ProductServiceImpl implements ProductService {
 
         for (Product product : productList) {
             ProductResponseDTO productResponseDTO = new ProductResponseDTO();
-            BeanUtils.copyProperties(product, productResponseDTO); // Sao chép dữ liệu cơ bản
-
-            // ✅ Gán tên cửa hàng nếu có
-            if (product.getShop() != null) {
-                productResponseDTO.setShopName(product.getShop().getName());
-            } else {
-                productResponseDTO.setShopName("Không xác định");
-            }
-
-            // ✅ Gán giảm giá (nếu có)
-            if (product.getDiscount() != null && product.getDiscount().getId() != null) {
-                Discount d = discountRepository.findById(product.getDiscount().getId());
-                productResponseDTO.setDiscount(d.getDiscount_percentage());
-            } else {
-                productResponseDTO.setDiscount(BigDecimal.ZERO);
-            }
+            BeanUtils.copyProperties(product, productResponseDTO);
+//            if (product.getDiscount() != null && product.getDiscount().getId() != null) {
+//                Discount d = discountRepository.findById(product.getDiscount().getId());
+//                productResponseDTO.setDiscount(d.getDiscount_percentage());
+//            } else {
+//                productResponseDTO.setDiscount(BigDecimal.ZERO);
+//            }
 
             productResponseDTO.setCategory(product.getCategory().getName());
-
-            // ✅ Tính toán defaultPrice dựa trên các FoodOption có type id = 2
-            BigDecimal defaultprice = null;
-            List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product);
-            for (FoodOption foodOption : foodOptions) {
-                if (foodOption.getType().getId() == 2) {
-                    if (defaultprice == null || foodOption.getPrice().compareTo(defaultprice) < 0) {
-                        defaultprice = foodOption.getPrice();
-                    }
-                }
-            }
-            productResponseDTO.setDefaultPrice(defaultprice != null ? defaultprice : BigDecimal.ZERO);
-
             productResponseDTOList.add(productResponseDTO);
         }
         return productResponseDTOList;
@@ -285,12 +263,12 @@ public class ProductServiceImpl implements ProductService {
             foodOptionDTOs.add(dto);
         }
         BeanUtils.copyProperties(product, productResponseDTO);
-        if (product.getDiscount() != null && product.getDiscount().getId() != null) {
-            Discount d = discountRepository.findById(product.getDiscount().getId());
-            productResponseDTO.setDiscount(d.getDiscount_percentage());
-        } else {
-            productResponseDTO.setDiscount(BigDecimal.ZERO);
-        }
+//        if (product.getDiscount() != null && product.getDiscount().getId() != null) {
+//            Discount d = discountRepository.findById(product.getDiscount().getId());
+//            productResponseDTO.setDiscount(d.getDiscount_percentage());
+//        } else {
+//            productResponseDTO.setDiscount(BigDecimal.ZERO);
+//        }
         Optional<Category> c=categoryRepository.findById(product.getCategory().getId());
         Category category = c.get();
         productResponseDTO.setFoodOption(foodOptionDTOs);
@@ -338,26 +316,12 @@ public class ProductServiceImpl implements ProductService {
     public Page<ProductResponseDTO> findAll(Pageable pageable) {
         return productRepository.findAll(pageable).map(product -> {
             ProductResponseDTO productResponseDTO = new ProductResponseDTO();
-
-            if (product.getDiscount() != null && product.getDiscount().getId() != null) {
-                Discount d = discountRepository.findById(product.getDiscount().getId());
-                productResponseDTO.setDiscount(d.getDiscount_percentage());
-            } else {
-                productResponseDTO.setDiscount(BigDecimal.ZERO);
-            }
-
-            BigDecimal defaultprice = null;
-            List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product);
-
-            for (FoodOption foodOption : foodOptions) {
-                if (foodOption.getType().getId() == 2) {
-                    if (defaultprice == null || foodOption.getPrice().compareTo(defaultprice) < 0) {
-                        defaultprice = foodOption.getPrice();
-                    }
-                }
-            }
-
-            productResponseDTO.setDefaultPrice(defaultprice != null ? defaultprice : BigDecimal.ZERO);
+//            if (product.getDiscount() != null && product.getDiscount().getId() != null) {
+//                Discount d = discountRepository.findById(product.getDiscount().getId());
+//                productResponseDTO.setDiscount(d.getDiscount_percentage());
+//            } else {
+//                productResponseDTO.setDiscount(BigDecimal.ZERO);
+//            }
             productResponseDTO.setCategory(product.getCategory().getName());
             BeanUtils.copyProperties(product, productResponseDTO);
             return productResponseDTO;

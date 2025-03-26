@@ -19,3 +19,4 @@ public interface ShopMapper {
     @Mapping(target = "bankCode", ignore = true)
     void updateShopFromDTO(ShopRegisterDTO dto, @MappingTarget Shop shop);
 }
+
