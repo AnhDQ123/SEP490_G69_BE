@@ -30,4 +30,6 @@ public interface OrderService {
     ReturnOrderDTO viewReturnOrder(Long id) throws IOException;
 
     Page<OrderDTO> findAllByFilter(String orderCode, OrderStatus status, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
+
+    OrderDTO getOrder(Long id);
 }

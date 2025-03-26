@@ -120,4 +120,9 @@ public class OrderController {
         return ResponseEntity.ok(orderService.findAllByFilter(orderCode, status,startDate,endDate,pageable));
     }
 
+    @GetMapping("/{orderId}")
+    public ResponseEntity<?> findById(@PathVariable Long orderId) {
+        return ResponseEntity.ok(orderService.getOrder(orderId));
+    }
+
 }

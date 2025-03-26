@@ -161,12 +161,12 @@ public class ProductServiceImpl implements ProductService {
         for (Product product : productList) {
             ProductResponseDTO productResponseDTO = new ProductResponseDTO();
             BeanUtils.copyProperties(product, productResponseDTO);
-            if (product.getDiscount() != null && product.getDiscount().getId() != null) {
-                Discount d = discountRepository.findById(product.getDiscount().getId());
-                productResponseDTO.setDiscount(d.getDiscount_percentage());
-            } else {
-                productResponseDTO.setDiscount(BigDecimal.ZERO);
-            }
+//            if (product.getDiscount() != null && product.getDiscount().getId() != null) {
+//                Discount d = discountRepository.findById(product.getDiscount().getId());
+//                productResponseDTO.setDiscount(d.getDiscount_percentage());
+//            } else {
+//                productResponseDTO.setDiscount(BigDecimal.ZERO);
+//            }
 
             productResponseDTO.setCategory(product.getCategory().getName());
             productResponseDTOList.add(productResponseDTO);
@@ -188,12 +188,12 @@ public class ProductServiceImpl implements ProductService {
             foodOptionDTOs.add(dto);
         }
         BeanUtils.copyProperties(product, productResponseDTO);
-        if (product.getDiscount() != null && product.getDiscount().getId() != null) {
-            Discount d = discountRepository.findById(product.getDiscount().getId());
-            productResponseDTO.setDiscount(d.getDiscount_percentage());
-        } else {
-            productResponseDTO.setDiscount(BigDecimal.ZERO);
-        }
+//        if (product.getDiscount() != null && product.getDiscount().getId() != null) {
+//            Discount d = discountRepository.findById(product.getDiscount().getId());
+//            productResponseDTO.setDiscount(d.getDiscount_percentage());
+//        } else {
+//            productResponseDTO.setDiscount(BigDecimal.ZERO);
+//        }
         Optional<Category> c=categoryRepository.findById(product.getCategory().getId());
         Category category = c.get();
         productResponseDTO.setFoodOption(foodOptionDTOs);
@@ -225,12 +225,12 @@ public class ProductServiceImpl implements ProductService {
     public Page<ProductResponseDTO> findAll(Pageable pageable) {
         return productRepository.findAll(pageable).map(product -> {
             ProductResponseDTO productResponseDTO = new ProductResponseDTO();
-            if (product.getDiscount() != null && product.getDiscount().getId() != null) {
-                Discount d = discountRepository.findById(product.getDiscount().getId());
-                productResponseDTO.setDiscount(d.getDiscount_percentage());
-            } else {
-                productResponseDTO.setDiscount(BigDecimal.ZERO);
-            }
+//            if (product.getDiscount() != null && product.getDiscount().getId() != null) {
+//                Discount d = discountRepository.findById(product.getDiscount().getId());
+//                productResponseDTO.setDiscount(d.getDiscount_percentage());
+//            } else {
+//                productResponseDTO.setDiscount(BigDecimal.ZERO);
+//            }
             productResponseDTO.setCategory(product.getCategory().getName());
             BeanUtils.copyProperties(product, productResponseDTO);
             return productResponseDTO;
