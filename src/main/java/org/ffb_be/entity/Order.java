@@ -67,6 +67,8 @@ public class Order extends BaseEntity {
 
     private String reason;
 
+    private String paymentQrCode;
+
     @OneToMany(mappedBy = "order")
     private List<OrderItem> orderItems;
 }

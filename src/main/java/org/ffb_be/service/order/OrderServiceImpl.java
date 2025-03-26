@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.ffb_be.dto.image.ImageDTO;
 import org.ffb_be.dto.order.*;
 import org.ffb_be.entity.*;
+import org.ffb_be.exception.NotFoundException;
 import org.ffb_be.repository.*;
 import org.ffb_be.utils.enums.OrderStatus;
 import org.ffb_be.utils.enums.upload.CloudinaryUpload;
@@ -418,10 +419,26 @@ public class OrderServiceImpl implements OrderService {
         order.setUpdatedAt(LocalDateTime.now());
         orderRepository.save(order);
     }
+
     @Override
     public Page<OrderDTO> findAllByFilter(String orderCode, OrderStatus status, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
         Page<Order> orders = orderRepository.findByStatusAndCreatedAtBetween(status, startDate, endDate, orderCode, pageable);
-        return orders.map(orderMapper::toDTO);
+        return orders.map(this::toDTO);
+    }
+
+    @Override
+    public OrderDTO getOrder(Long id) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Order"));
+        return toDTO(order);
+    }
+
+    public OrderDTO toDTO(Order order) {
+        OrderDTO orderDTO = orderMapper.toDTO(order);
+        orderDTO.setShopName(shopRepository.findByProduct(order.getOrderItems().get(0).getProduct().getId()).getName());
+        orderDTO.setShopId(shopRepository.findByProduct(order.getOrderItems().get(0).getProduct().getId()).getId());
+        orderDTO.setImage(shopRepository.findByProduct(order.getOrderItems().get(0).getProduct().getId()).getBackgroundImage());
+        return orderDTO;
     }
 
     @Override

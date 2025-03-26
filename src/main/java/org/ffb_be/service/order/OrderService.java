@@ -34,4 +34,6 @@ public interface OrderService {
     CountDTO countOrderByStatus(Long id);
 
     Page<OrderDTO> findAllByFilter(String orderCode, OrderStatus status, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
+
+    OrderDTO getOrder(Long id);
 }
