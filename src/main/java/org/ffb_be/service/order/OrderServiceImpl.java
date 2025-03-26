@@ -136,7 +136,7 @@ public class OrderServiceImpl implements OrderService {
             List<OrderItemDTO> orderItemDTOList = entry.getValue();
 
             Order order = new Order();
-            order.setShipping_address(orderDTO.getAddress());
+            order.setShippingAddress(orderDTO.getAddress());
             order.setOwner(userRepository.findById(orderDTO.getOwnerId())
                     .orElseThrow(() -> new RuntimeException("User not found")));
             order.setShipper(userRepository.findById(orderDTO.getShipperId())

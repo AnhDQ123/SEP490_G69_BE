@@ -31,7 +31,6 @@ public class OrderDTO {
     private LocalDateTime createdAt;
     private List<OrderItemDTO> orderItem;
     private String reason;
-    private String ownerName;
     private String phone;
     private String shopAddress;
 
