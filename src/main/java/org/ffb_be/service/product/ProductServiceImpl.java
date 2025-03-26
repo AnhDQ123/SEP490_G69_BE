@@ -226,10 +226,10 @@ public class ProductServiceImpl implements ProductService {
         for (Product product : productList) {
             ProductResponseDTO productResponseDTO = new ProductResponseDTO();
             BeanUtils.copyProperties(product, productResponseDTO);
-            Discount discount=discountRepository.findByProduct(product);
-            if(discount!=null) {
+            Discount discount = discountRepository.findByProduct(product);
+            if (discount != null) {
                 productResponseDTO.setDiscount(discount.getDiscount_percentage());
-            }else {
+            } else {
                 productResponseDTO.setDiscount(BigDecimal.ZERO);
             }
             productResponseDTO.setCategory(product.getCategory().getName());
