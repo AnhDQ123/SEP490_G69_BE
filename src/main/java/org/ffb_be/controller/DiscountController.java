@@ -17,14 +17,9 @@ public class DiscountController {
     private final DiscountService discountService;
 
     @PostMapping("/add")
-    public void addDiscount(@RequestBody DiscountDTO discountDTO) {
-        discountService.save(discountDTO);
+    public void addDiscount(@RequestBody DiscountDTO discountDTO,@RequestParam Long productId) {
+        discountService.save(discountDTO,productId);
     }
-    @PostMapping("/addToProduct") //filter
-    public void getByCategory(@RequestParam Long id, @RequestParam Long productId) {
-         discountService.addToProducts(id, productId);
-    }
-
     @GetMapping
     public DiscountDTO findById(@RequestParam Long id) {
         return discountService.findById(id);

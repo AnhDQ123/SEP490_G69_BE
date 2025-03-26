@@ -8,10 +8,7 @@ import java.util.List;
 
 @Service
 public interface DiscountService {
-    void save(DiscountDTO discount);
-
-    void addToProducts(Long id, Long productId);
-
+    void save(DiscountDTO discount,Long productId);
     DiscountDTO findById(Long id);
 
     List<DiscountDTO> findAllByShopIdAndStatus(Long shopId,Status status);

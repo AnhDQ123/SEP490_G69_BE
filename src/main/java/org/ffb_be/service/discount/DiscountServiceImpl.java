@@ -21,7 +21,7 @@ public class DiscountServiceImpl implements DiscountService{
     private final DiscountRepository discountRepository;
     private final ProductRepository productRepository;
     @Override
-    public void save(DiscountDTO discount) {
+    public void save(DiscountDTO discount,Long productId) {
         Discount discountEntity = new Discount();
         discountEntity.setId(discount.getId());
         discountEntity.setDiscount_percentage(discount.getAmount());
@@ -32,15 +32,9 @@ public class DiscountServiceImpl implements DiscountService{
                 discount.getStartDate().isBefore(LocalDateTime.now())) {
             discountEntity.setStatus(Status.ACTIVE);
         }
-        discountRepository.save(discountEntity);
-    }
-
-    @Override
-    public void addToProducts(Long id, Long productId) {
-        Discount discount=discountRepository.findById(id);
         Product product=productRepository.findById(productId).get();
-        discount.setProduct(product);
-        discountRepository.save(discount);
+        discountEntity.setProduct(product);
+        discountRepository.save(discountEntity);
     }
 
     @Override
