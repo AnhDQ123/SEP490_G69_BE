@@ -134,6 +134,7 @@ public class OrderServiceImpl implements OrderService {
             List<OrderItemDTO> orderItemDTOList = entry.getValue();
 
             Order order = new Order();
+            order.setShipping_address(orderDTO.getAddress());
             order.setOwner(userRepository.findById(orderDTO.getOwnerId())
                     .orElseThrow(() -> new RuntimeException("User not found")));
             order.setShipper(userRepository.findById(orderDTO.getShipperId())
@@ -144,6 +145,7 @@ public class OrderServiceImpl implements OrderService {
             order.setPaymentMethod(paymentRepository.findById(orderDTO.getPaymentMethodId())
                     .orElseThrow(() -> new RuntimeException("Payment method not found")));
             order.setTotal(BigDecimal.ZERO);
+            order.setStatus(OrderStatus.PENDING);
             order.setCreatedAt(LocalDateTime.now());
             orderRepository.save(order);
 
@@ -438,7 +440,6 @@ public class OrderServiceImpl implements OrderService {
                 case RETURN_REJECTED -> dto.setReturnRejected(count);
             }
         }
-
         return dto;
     }
 }
