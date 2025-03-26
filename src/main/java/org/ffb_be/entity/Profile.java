@@ -35,7 +35,7 @@ public class Profile extends BaseEntity {
     @Column(name="tax_code")
     private String taxCode;
 
-    @Column(name="citizenIDNumber")
+    @Column(name="citizen_id_number")
     private String citizenIDNumber;
 
     @Column(name="citizen_id_card_front")

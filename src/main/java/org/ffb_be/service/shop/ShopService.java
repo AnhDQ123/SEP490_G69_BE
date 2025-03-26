@@ -38,10 +38,16 @@ public interface ShopService {
             MultipartFile citizenIDBack
     ) throws IOException;
 
+    void approveShop(Long id);
+
+    void rejectShop(Long id, String reason);
+
     @Transactional
-    void updateShopStatus(Long shopId, Status newStatus);
+    void updateShopStatus(Long shopId, Status newStatus, String reason);
 
     boolean isShopOpen(Long shopId);
 
     ShopDTO getShopById(Long shopId);
+
+    ShopDTO getShopByUserId(Long userId);
 }

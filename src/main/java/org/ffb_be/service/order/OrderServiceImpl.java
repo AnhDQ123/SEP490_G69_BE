@@ -7,6 +7,7 @@ import org.ffb_be.entity.*;
 import org.ffb_be.repository.*;
 import org.ffb_be.utils.enums.OrderStatus;
 import org.ffb_be.utils.enums.upload.CloudinaryUpload;
+import org.ffb_be.utils.mapping.OrderMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -35,6 +36,7 @@ public class OrderServiceImpl implements OrderService {
     private final CloudinaryUpload cloudinaryUpload;
     private final TypesRepository typesRepository;
     private final ImageRepository imageRepository;
+    private final OrderMapper orderMapper;
 
 
     public Page<OrderDTO> toDTO(Page<Order> orders,Pageable pageable) {
@@ -42,7 +44,7 @@ public class OrderServiceImpl implements OrderService {
         for (Order order : orders.getContent()) {
             OrderDTO orderDTO = new OrderDTO();
             orderDTO.setId(order.getId());
-            orderDTO.setAddress(order.getShipping_address());
+            orderDTO.setAddress(order.getShippingAddress());
             orderDTO.setTotal(order.getTotal());
             orderDTO.setOwnerId(order.getOwner().getId());
             orderDTO.setOwnerName(userRepository.findById(orderDTO.getOwnerId()).get().getProfile().getName());
@@ -197,7 +199,7 @@ public class OrderServiceImpl implements OrderService {
         OrderDTO orderDTO = new OrderDTO();
         BigDecimal orderTotal = BigDecimal.ZERO;
             orderDTO.setId(order.getId());
-            orderDTO.setAddress(order.getShipping_address());
+            orderDTO.setAddress(order.getShippingAddress());
             orderDTO.setTotal(order.getTotal());
             orderDTO.setOwnerId(order.getOwner().getId());
             orderDTO.setPhone(userRepository.findById(orderDTO.getOwnerId()).get().getPhone());
@@ -318,7 +320,7 @@ public class OrderServiceImpl implements OrderService {
             String url = cloudinaryUpload.uploadFile(avatar);
             image.setUrl(url);
             image.setRelatedId(order.getId());
-            image.setOwner_id(userId);
+            image.setOwnerId(userId);
             image.setType(typesRepository.findById(3l).get());
             imageRepository.save(image);
             System.out.println("Avatar URL: " + url);
@@ -374,7 +376,7 @@ public class OrderServiceImpl implements OrderService {
             String url = cloudinaryUpload.uploadFile(avatar);
             image.setUrl(url);
             image.setRelatedId(order.getId());
-            image.setOwner_id(userId);
+            image.setOwnerId(userId);
             image.setType(typesRepository.findById(3l).get());
             imageRepository.save(image);
             System.out.println("Avatar URL: " + url);
@@ -394,7 +396,7 @@ public class OrderServiceImpl implements OrderService {
             imageDTO.setUrl(image.getUrl());
             imageDTO.setRelatedId(orderDTO.getId());
             imageDTO.setId(image.getId());
-            imageDTO.setOwnerId(image.getOwner_id());
+            imageDTO.setOwnerId(image.getOwnerId());
             imageDTO.setTypeId(3l);
             imageDTOList.add(imageDTO);
         }
@@ -410,6 +412,11 @@ public class OrderServiceImpl implements OrderService {
         order.setStatus(OrderStatus.RETURNED);
         order.setUpdatedAt(LocalDateTime.now());
         orderRepository.save(order);
+    }
+    @Override
+    public Page<OrderDTO> findAllByFilter(String orderCode, OrderStatus status, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
+        Page<Order> orders = orderRepository.findByStatusAndCreatedAtBetween(status, startDate, endDate, orderCode, pageable);
+        return orders.map(orderMapper::toDTO);
     }
 
     @Override

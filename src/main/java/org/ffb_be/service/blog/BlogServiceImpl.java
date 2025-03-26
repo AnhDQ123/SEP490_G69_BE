@@ -109,6 +109,8 @@ class BlogServiceImpl implements BlogService {
     }
 
     private void updateBlogImages(Long blogId, List<String> imageUrls) {
+        Blog blog = blogRepository.findById(blogId)
+                .orElseThrow(() -> new NotFoundException("Blog"));
         List<String> existingUrls = imageRepository.findImageUrlsByBlogId(blogId);
 
         // Tìm ảnh cần xóa (có trong DB nhưng không có trong danh sách mới)
@@ -129,7 +131,7 @@ class BlogServiceImpl implements BlogService {
         List<Image> newImages = imageUrls.stream()
                 .filter(url -> !existingUrls.contains(url)) // Chỉ thêm ảnh chưa có
                 .limit(5)
-                .map(url -> new Image(null, url, blogType, blogId))
+                .map(url -> new Image(null, url, blogType, blog.getWriter().getId() ,blogId))
                 .collect(Collectors.toList());
 
         if (!newImages.isEmpty()) {

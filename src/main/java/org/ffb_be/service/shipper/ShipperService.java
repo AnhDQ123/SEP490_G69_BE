@@ -24,7 +24,7 @@ public interface ShipperService {
 
     void rejectShipper(Long userId, String reason);
 
-    void shipperStatus(Long userId, ShipperStatus status);
+    void shipperStatus(Long userId, ShipperStatus status, String reason);
 
     void updateShipperInfo(
             Long userId,
@@ -36,7 +36,7 @@ public interface ShipperService {
             MultipartFile judicialRecord
     ) throws IOException;
 
-    Page<ShipperInfoDTO> getShippersByStatus(String status, Pageable pageable);
+    Page<ShipperInfoDTO> getShippersByStatus(String status, String search, Pageable pageable);
 
     ShipperInfoDTO getShipperDetail(Long userId);
 }

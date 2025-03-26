@@ -47,6 +47,10 @@ public class User extends BaseEntity{
 
     private String rejectReason;
 
+    private Double currentLatitude;
+
+    private Double currentLongitude;
+
     @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.ALL)
     @JoinColumn(name = "role_id")
     private Role role;

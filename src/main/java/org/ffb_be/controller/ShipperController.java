@@ -70,20 +70,27 @@ public class ShipperController {
     }
 
     @PutMapping("/{userId}/active")
-    public ResponseEntity<?> shipperActive(@PathVariable Long userId) {
-        shipperService.shipperStatus(userId, ShipperStatus.ACTIVE);
+    public ResponseEntity<?> shipperActive(
+            @PathVariable Long userId) {
+        shipperService.shipperStatus(userId, ShipperStatus.ACTIVE, "");
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/{userId}/inactive")
-    public ResponseEntity<?> shipperInactive(@PathVariable Long userId) {
-        shipperService.shipperStatus(userId, ShipperStatus.INACTIVE);
+    public ResponseEntity<?> shipperInactive(
+            @PathVariable Long userId,
+            @RequestParam(value = "reason") String reason
+    ) {
+        shipperService.shipperStatus(userId, ShipperStatus.INACTIVE, reason);
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/status/{status}")
-    public ResponseEntity<Page<ShipperInfoDTO>> getShippersByStatus(@PathVariable String status, Pageable pageable) {
-        return ResponseEntity.ok(shipperService.getShippersByStatus(status, pageable));
+    @GetMapping
+    public ResponseEntity<Page<ShipperInfoDTO>> getShippersByStatus(
+            @RequestParam(value = "status", required = false) String status,
+            @RequestParam(value = "search", required = false) String search,
+            Pageable pageable) {
+        return ResponseEntity.ok(shipperService.getShippersByStatus(status, search, pageable));
     }
 
     @GetMapping("/{userId}")

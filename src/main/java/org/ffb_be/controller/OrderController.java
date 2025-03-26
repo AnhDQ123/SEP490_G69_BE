@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -120,6 +121,16 @@ public class OrderController {
     @GetMapping("/count")
     public CountDTO countOrderByStatus(@RequestParam Long id ) {
         return orderService.countOrderByStatus(id);
+    }
+
+    @GetMapping
+    public ResponseEntity<?> findAllByFilter(
+            @RequestParam(value = "status", required = false) OrderStatus status,
+            @RequestParam(value = "startDate", required = false) LocalDateTime startDate,
+            @RequestParam(value = "endDate", required = false) LocalDateTime endDate,
+            @RequestParam(value = "orderCode", required = false ) String orderCode,
+            Pageable pageable) {
+        return ResponseEntity.ok(orderService.findAllByFilter(orderCode, status,startDate,endDate,pageable));
     }
 
 }

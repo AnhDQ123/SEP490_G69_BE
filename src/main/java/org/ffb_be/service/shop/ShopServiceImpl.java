@@ -192,6 +192,7 @@ public class ShopServiceImpl implements ShopService {
 
         // Nếu có thay đổi yêu cầu phê duyệt, cập nhật trạng thái shop
         if (requireApproval) {
+            shop.setReason(null);
             shop.setIsActive(Status.PENDING);
         }
 
@@ -199,11 +200,40 @@ public class ShopServiceImpl implements ShopService {
         shopRepository.save(shop);
     }
 
+    @Override
+    public void approveShop(Long id) {
+        Shop shop = shopRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Shop"));
+        if(shop.getIsActive() == Status.ACTIVE){
+            throw new BadRequestException("Shop đã được duyệt rồi");
+        }
+        if(shop.getIsActive() != Status.PENDING){
+            throw new BadRequestException("Shop không ở trạng thái chờ duyệt");
+        }
+        shop.setIsActive(Status.ACTIVE);
+        shopRepository.save(shop);
+    }
+
+    @Override
+    public void rejectShop(Long id, String reason) {
+        Shop shop = shopRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Shop"));
+        if(shop.getIsActive() == Status.REJECTED){
+            throw new BadRequestException("Shop đã bị từ chối rồi");
+        }
+        if(shop.getIsActive() != Status.PENDING){
+            throw new BadRequestException("Shop không ở trạng thái chờ duyệt");
+        }
+        shop.setIsActive(Status.REJECTED);
+        shop.setReason(reason);
+        shopRepository.save(shop);
+    }
+
     @Transactional
     @Override
-    public void updateShopStatus(Long shopId, Status newStatus) {
+    public void updateShopStatus(Long shopId, Status newStatus, String reason) {
         Shop shop = shopRepository.findById(shopId)
-                .orElseThrow(() -> new NotFoundException("Shop không tồn tại"));
+                .orElseThrow(() -> new NotFoundException("Shop"));
 
         if (shop.getIsActive() == newStatus) {
             throw new BadRequestException("Shop đã ở trạng thái này rồi");
@@ -248,6 +278,13 @@ public class ShopServiceImpl implements ShopService {
                 .orElseThrow(() -> new NotFoundException("Shop"));
     }
 
+    @Override
+    public ShopDTO getShopByUserId(Long userId) {
+        return shopRepository.findByOwnerId(userId)
+                .map(this::decryptShopDTO)
+                .orElseThrow(() -> new NotFoundException("Shop"));
+    }
+
 
     private ShopDTO decryptShopDTO(Shop shop) {
         ShopDTO shopDTO = shopMapper.toDTO(shop);
@@ -255,8 +292,8 @@ public class ShopServiceImpl implements ShopService {
         if (ownerDTO != null) {
             BusinessProfileDTO profile = ownerDTO.getProfile();
             if (profile != null) {
-                profile.setTaxCode(decryptSafe(profile.getTaxCode()));
-                profile.setCitizenIDNumber(decryptSafe(profile.getCitizenIDNumber()));
+                profile.setTaxCode((profile.getTaxCode()));
+                profile.setCitizenIDNumber((profile.getCitizenIDNumber()));
             }
         }
         return shopDTO;
