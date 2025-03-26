@@ -24,4 +24,6 @@ public interface DiscountRepository extends JpaRepository<Discount, Integer> {
     List<Discount> findAllByShop_Id(Long shopId);
 
     List<Discount> findAllByShop_IdAndStatus(Long shopId, Status status);
+
+    List<Discount> findAllByProduct_Id(Long productId);
 }

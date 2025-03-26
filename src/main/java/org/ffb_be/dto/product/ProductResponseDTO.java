@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.ffb_be.dto.discount.DiscountDTO;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -22,7 +23,7 @@ public class ProductResponseDTO {
     private String shopName;
     private String category;
     private String status;
-    private BigDecimal discount;
+    private List<DiscountDTO> discount;
     private String image;
     private List<FoodOptionDTO> foodOption;
     private String description;
