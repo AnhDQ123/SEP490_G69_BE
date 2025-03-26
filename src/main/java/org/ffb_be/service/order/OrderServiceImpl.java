@@ -37,6 +37,7 @@ public class OrderServiceImpl implements OrderService {
     private final TypesRepository typesRepository;
     private final ImageRepository imageRepository;
     private final OrderMapper orderMapper;
+    private final DiscountRepository discountRepository;
 
 
     public Page<OrderDTO> toDTO(Page<Order> orders,Pageable pageable) {
@@ -68,9 +69,10 @@ public class OrderServiceImpl implements OrderService {
                 orderItemDTO.setQuantity(orderItem.getQuantity());
                 orderItemDTO.setProductId(orderItem.getProduct().getId());
                 orderItemDTO.setTotal(orderItem.getTotalPrice());
-                if (orderItem.getProduct().getDiscount() != null) {
-                    orderItemDTO.setDiscountId(orderItem.getProduct().getDiscount().getId());
-                    orderItemDTO.setDiscount(orderItem.getProduct().getDiscount().getDiscount_percentage());
+                Discount discount=discountRepository.findByProduct(orderItem.getProduct());
+                if (discount!=null) {
+                    orderItemDTO.setDiscountId(discount.getId());
+                    orderItemDTO.setDiscount(discount.getDiscount_percentage());
                 } else {
                     orderItemDTO.setDiscount(BigDecimal.ZERO);
                 }
@@ -221,10 +223,13 @@ public class OrderServiceImpl implements OrderService {
                 orderItemDTO.setQuantity(orderItem.getQuantity());
                 orderItemDTO.setProductId(orderItem.getProduct().getId());
                 orderItemDTO.setTotal(orderItem.getTotalPrice());
-                if(orderItem.getProduct().getDiscount() != null){
-                    orderItemDTO.setDiscountId(orderItem.getProduct().getDiscount().getId());
-                    orderItemDTO.setDiscount(orderItem.getProduct().getDiscount().getDiscount_percentage());
-                }else orderItemDTO.setDiscount(BigDecimal.ZERO);
+              Discount discount=discountRepository.findByProduct(orderItem.getProduct());
+                if (discount!=null) {
+                    orderItemDTO.setDiscountId(discount.getId());
+                    orderItemDTO.setDiscount(discount.getDiscount_percentage());
+                } else {
+                    orderItemDTO.setDiscount(BigDecimal.ZERO);
+                }
                 orderItemDTO.setCreatedAt(orderItem.getCreatedAt());
                 orderItemDTO.setOrderId(order.getId());
                 orderDTO.setShopName(shopRepository.findByProduct(orderItemDTO.getProductId()).getName());

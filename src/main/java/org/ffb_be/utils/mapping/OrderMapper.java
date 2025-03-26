@@ -15,7 +15,7 @@ public interface OrderMapper {
     @Mapping(target = "shipMethodId", source = "deliveryMethod.id")
     @Mapping(target = "paymentMethodId", source = "paymentMethod.id")
     @Mapping(target = "voucherId", source = "voucher.id")
-    @Mapping(target = "voucherAmount", source = "voucher.discount_percentage")
+//    @Mapping(target = "voucherAmount", source = "voucher.discount_percentage")
     @Mapping(target = "address", source = "shippingAddress")
     @Mapping(target = "shopName", source = "voucher.shop.name")
     @Mapping(target = "shopId", source = "voucher.shop.id")
