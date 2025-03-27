@@ -38,8 +38,7 @@ class BlogServiceImpl implements BlogService {
     private final CloudinaryUpload cloudinaryUpload;
 
     @Override
-    public List<BlogDTO> getBlogs(int page, int limit) {
-        Pageable pageable = PageRequest.of(page, 10000, Sort.by("id").ascending());
+    public List<BlogDTO> getBlogs(Pageable pageable) {
         Page<Blog> blogPage = blogRepository.findAll(pageable);
         return blogPage.getContent().stream()
                 .map(this::mapBlogToDTO)
