@@ -1,16 +1,16 @@
 package org.ffb_be.service.product;
 
 import lombok.RequiredArgsConstructor;
+import org.ffb_be.dto.discount.DiscountDTO2;
 import org.ffb_be.dto.product.ProductResponseDTO;
 import org.ffb_be.dto.product.recommendation.FeedbackDataDTO;
 import org.ffb_be.dto.product.recommendation.FoodDataDTO;
 import org.ffb_be.dto.product.recommendation.OrderDataDTO;
 import org.ffb_be.dto.product.recommendation.OrderItemDataDTO;
+import org.ffb_be.entity.Discount;
+import org.ffb_be.entity.FoodOption;
 import org.ffb_be.entity.Product;
-import org.ffb_be.repository.FeedbackRepository;
-import org.ffb_be.repository.OrderItemRepository;
-import org.ffb_be.repository.OrderRepository;
-import org.ffb_be.repository.ProductRepository;
+import org.ffb_be.repository.*;
 import org.ffb_be.utils.mapping.FeedbackMapper;
 import org.ffb_be.utils.mapping.OrderMapper;
 import org.ffb_be.utils.mapping.ProductMapper;
@@ -19,6 +19,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -29,6 +31,8 @@ public class RecommendationServiceImpl implements RecommendationService {
     private final OrderItemRepository orderItemRepository;
     private final OrderRepository orderRepository;
     private final FeedbackRepository feedbackRepository;
+    private final DiscountRepository discountRepository;
+    private final FoodOptionRepository foodOptionRepository;
     private final ProductMapper productMapper;
     private final OrderMapper orderMapper;
     private final FeedbackMapper feedbackMapper;
@@ -107,11 +111,39 @@ public class RecommendationServiceImpl implements RecommendationService {
         productResponseDTO.setId(product.getId());
         productResponseDTO.setName(product.getName());
         productResponseDTO.setManufacturer(product.getManufacturer());
-        productResponseDTO.setImage(product.getImage());
-        if (product.getCategory() != null) {
-            productResponseDTO.setCategory(product.getCategory().getName());
-        }
         productResponseDTO.setSupplier(product.getSupplier());
+        productResponseDTO.setImage(product.getImage());
+        productResponseDTO.setRate(product.getRate()); // thêm rate
+        productResponseDTO.setQuantity(product.getQuantity()); // thêm quantity
+        productResponseDTO.setCategory(product.getCategory().getName());
+        productResponseDTO.setShopName(product.getShop().getName());
+        // Tính defaultPrice từ các FoodOption có type id = 2
+        List<Discount> discount=discountRepository.findAllByProduct_Id((product.getId()));
+        if(discount!=null) {
+            List<DiscountDTO2> discountDTOs=new ArrayList<>();
+            for (Discount discount1:discount) {
+                DiscountDTO2 discountDTO=new DiscountDTO2();
+                discountDTO.setAmount(discount1.getDiscount_percentage());
+                discountDTO.setId(discount1.getId());
+                discountDTO.setStartDate(discount1.getStartDate());
+                discountDTO.setEndDate(discount1.getEndDate());
+                discountDTO.setStatus(discount1.getStatus().toString());
+                discountDTOs.add(discountDTO);
+            }
+            productResponseDTO.setDiscount(discountDTOs);
+        }else {
+            productResponseDTO.setDiscount(null);
+        }
+        BigDecimal defaultprice = null;
+        List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product);
+        for (FoodOption foodOption : foodOptions) {
+            if (foodOption.getType().getId() == 2) {
+                if (defaultprice == null || foodOption.getPrice().compareTo(defaultprice) < 0) {
+                    defaultprice = foodOption.getPrice();
+                }
+            }
+        }
+        productResponseDTO.setDefaultPrice(defaultprice != null ? defaultprice : BigDecimal.ZERO);
         return productResponseDTO;
     }
 }
