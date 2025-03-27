@@ -3,6 +3,8 @@ package org.ffb_be.service.product;
 
 
 import lombok.RequiredArgsConstructor;
+import org.ffb_be.dto.discount.DiscountDTO;
+import org.ffb_be.dto.discount.DiscountDTO2;
 import org.ffb_be.dto.product.FoodOptionDTO;
 import org.ffb_be.dto.product.ProductCreateDTO;
 import org.ffb_be.dto.product.ProductResponseDTO;
@@ -36,7 +38,7 @@ public class ProductServiceImpl implements ProductService {
     private final OrderRepository orderRepository;
 
 
-
+@Override
     public void save(ProductCreateDTO productCreateDTO,MultipartFile avatar, List<MultipartFile>option) throws IOException {
         Product product = new Product();
         Category category = categoryRepository.findByName(productCreateDTO.getCategory());
@@ -89,7 +91,22 @@ public class ProductServiceImpl implements ProductService {
             productResponseDTO.setShopName(product.getShop().getName());
             BigDecimal defaultprice = null;
             List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product);
-
+            List<Discount> discount=discountRepository.findAllByProduct_Id((product.getId()));
+            if(discount!=null) {
+                List<DiscountDTO2> discountDTOs=new ArrayList<>();
+                for (Discount discount1:discount) {
+                    DiscountDTO2 discountDTO=new DiscountDTO2();
+                    discountDTO.setAmount(discount1.getDiscount_percentage());
+                    discountDTO.setId(discount1.getId());
+                    discountDTO.setStartDate(discount1.getStartDate());
+                    discountDTO.setEndDate(discount1.getEndDate());
+                    discountDTO.setStatus(discount1.getStatus().toString());
+                    discountDTOs.add(discountDTO);
+                }
+                productResponseDTO.setDiscount(discountDTOs);
+            }else {
+                productResponseDTO.setDiscount(null);
+            }
             for (FoodOption foodOption : foodOptions) {
                 if (foodOption.getType().getId() == 2) {
                     if (defaultprice == null || foodOption.getPrice().compareTo(defaultprice) < 0) {
@@ -121,11 +138,21 @@ public class ProductServiceImpl implements ProductService {
             productResponseDTO.setCategory(product.getCategory().getName());
             productResponseDTO.setShopName(product.getShop().getName());
             // Tính defaultPrice từ các FoodOption có type id = 2
-            Discount discount=discountRepository.findByProduct(product);
+            List<Discount> discount=discountRepository.findAllByProduct_Id((product.getId()));
             if(discount!=null) {
-                productResponseDTO.setDiscount(discount.getDiscount_percentage());
+                List<DiscountDTO2> discountDTOs=new ArrayList<>();
+                for (Discount discount1:discount) {
+                    DiscountDTO2 discountDTO=new DiscountDTO2();
+                    discountDTO.setAmount(discount1.getDiscount_percentage());
+                    discountDTO.setId(discount1.getId());
+                    discountDTO.setStartDate(discount1.getStartDate());
+                    discountDTO.setEndDate(discount1.getEndDate());
+                    discountDTO.setStatus(discount1.getStatus().toString());
+                    discountDTOs.add(discountDTO);
+                }
+                productResponseDTO.setDiscount(discountDTOs);
             }else {
-                productResponseDTO.setDiscount(BigDecimal.ZERO);
+                productResponseDTO.setDiscount(null);
             }
             BigDecimal defaultprice = null;
             List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product);
@@ -226,11 +253,22 @@ public class ProductServiceImpl implements ProductService {
         for (Product product : productList) {
             ProductResponseDTO productResponseDTO = new ProductResponseDTO();
             BeanUtils.copyProperties(product, productResponseDTO);
-            Discount discount=discountRepository.findByProduct(product);
+            List<Discount> discount=discountRepository.findAllByProduct_Id((product.getId()));
             if(discount!=null) {
-                productResponseDTO.setDiscount(discount.getDiscount_percentage());
+                List<DiscountDTO2> discountDTOs=new ArrayList<>();
+                for (Discount discount1:discount) {
+                    DiscountDTO2 discountDTO=new DiscountDTO2();;
+                    discountDTO.setAmount(discount1.getDiscount_percentage());
+                    discountDTO.setId(discount1.getId());
+                    discountDTO.setStartDate(discount1.getStartDate());
+                    discountDTO.setEndDate(discount1.getEndDate());
+                    discountDTO.setStatus(discount1.getStatus().toString());
+
+                    discountDTOs.add(discountDTO);
+                }
+                productResponseDTO.setDiscount(discountDTOs);
             }else {
-                productResponseDTO.setDiscount(BigDecimal.ZERO);
+                productResponseDTO.setDiscount(null);
             }
             productResponseDTO.setCategory(product.getCategory().getName());
             productResponseDTOList.add(productResponseDTO);
@@ -252,11 +290,21 @@ public class ProductServiceImpl implements ProductService {
             foodOptionDTOs.add(dto);
         }
         BeanUtils.copyProperties(product, productResponseDTO);
-        Discount discount=discountRepository.findByProduct(product);
+        List<Discount> discount=discountRepository.findAllByProduct_Id((product.getId()));
         if(discount!=null) {
-            productResponseDTO.setDiscount(discount.getDiscount_percentage());
+            List<DiscountDTO2> discountDTOs=new ArrayList<>();
+            for (Discount discount1:discount) {
+                DiscountDTO2 discountDTO=new DiscountDTO2();
+                discountDTO.setAmount(discount1.getDiscount_percentage());
+                discountDTO.setId(discount1.getId());
+                discountDTO.setStartDate(discount1.getStartDate());
+                discountDTO.setEndDate(discount1.getEndDate());
+                discountDTO.setStatus(discount1.getStatus().toString());
+                discountDTOs.add(discountDTO);
+            }
+            productResponseDTO.setDiscount(discountDTOs);
         }else {
-            productResponseDTO.setDiscount(BigDecimal.ZERO);
+            productResponseDTO.setDiscount(null);
         }
         Optional<Category> c=categoryRepository.findById(product.getCategory().getId());
         Category category = c.get();
@@ -311,11 +359,21 @@ public class ProductServiceImpl implements ProductService {
     public Page<ProductResponseDTO> findAll(Pageable pageable) {
         return productRepository.findAll(pageable).map(product -> {
             ProductResponseDTO productResponseDTO = new ProductResponseDTO();
-            Discount discount=discountRepository.findByProduct(product);
+            List<Discount> discount=discountRepository.findAllByProduct_Id((product.getId()));
             if(discount!=null) {
-                productResponseDTO.setDiscount(discount.getDiscount_percentage());
+                List<DiscountDTO2> discountDTOs=new ArrayList<>();
+                for (Discount discount1:discount) {
+                    DiscountDTO2 discountDTO=new DiscountDTO2();
+                    discountDTO.setAmount(discount1.getDiscount_percentage());
+                    discountDTO.setId(discount1.getId());
+                    discountDTO.setStartDate(discount1.getStartDate());
+                    discountDTO.setEndDate(discount1.getEndDate());
+                    discountDTO.setStatus(discount1.getStatus().toString());
+                    discountDTOs.add(discountDTO);
+                }
+                productResponseDTO.setDiscount(discountDTOs);
             }else {
-                productResponseDTO.setDiscount(BigDecimal.ZERO);
+                productResponseDTO.setDiscount(null);
             }
             productResponseDTO.setCategory(product.getCategory().getName());
             BeanUtils.copyProperties(product, productResponseDTO);
