@@ -2,6 +2,7 @@ package org.ffb_be.controller;
 
 import org.ffb_be.dto.category.CategoryDTO;
 import org.ffb_be.service.category.CategoryService;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -21,11 +22,11 @@ public class CategoryController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getAllCategory(
-            @RequestParam(value = "name", required = false) String name,
-            Pageable pageable
-    ) {
-        return ResponseEntity.ok( categoryService.findAll(name, pageable));
+    public ResponseEntity<?> getAllCategory(@RequestParam(value = "search", defaultValue = "", required = false) String search,
+                                            @RequestParam(value = "page", defaultValue = "1", required = false) Integer page,
+                                            @RequestParam(value = "size", defaultValue = "20", required = false) Integer size) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+        return ResponseEntity.ok(categoryService.findAll(search, pageable));
     }
 
     @GetMapping("/{categoryId}")
