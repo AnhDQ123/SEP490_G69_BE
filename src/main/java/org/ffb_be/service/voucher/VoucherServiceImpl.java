@@ -58,7 +58,6 @@ public class VoucherServiceImpl implements VoucherService {
         voucher.setEndDate(dto.getEndDate());
         voucher.setStatus(dto.getStatus());
         voucher.setMaxUsagePerCustomer(dto.getMaxUsagePerCustomer());
-        voucher.setIsStackable(dto.getIsStackable());
 
         voucher = voucherRepository.save(voucher);
         return voucherMapper.toDTO(voucher);
