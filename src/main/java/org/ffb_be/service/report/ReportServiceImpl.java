@@ -151,4 +151,12 @@ public class ReportServiceImpl implements ReportService {
         // Chuyển đổi từ Page<Report> sang Page<ReportViewDTO>
         return reports.map(this::convertToDTO);  // Sử dụng phương thức convertToDTO mà bạn đã tạo trước đó
     }
+
+    @Override
+    public Page<ReportViewDTO> findAll( int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<Report> reports = reportRepository.findAll(pageable);
+        return reports.map(this::convertToDTO);
+    }
 }

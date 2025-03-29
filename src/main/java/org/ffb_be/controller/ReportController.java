@@ -44,4 +44,11 @@ public class ReportController {
         return ResponseEntity.ok( reportService.findAllByShop(id,page,size));
     }
 
+    @GetMapping("/all")
+    public ResponseEntity<?> getAllByShop(
+                                          @RequestParam(value = "page", defaultValue = "1", required = false) Integer page,
+                                          @RequestParam(value = "size", defaultValue = "20", required = false) Integer size) {
+        return ResponseEntity.ok( reportService.findAll(page,size));
+    }
+
 }

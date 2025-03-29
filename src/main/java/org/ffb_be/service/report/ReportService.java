@@ -15,5 +15,6 @@ public interface ReportService {
     ReportViewDTO viewReport(Long id);
     void addToReport(Long id,List<MultipartFile> option) throws IOException;
     Page<ReportViewDTO> findAllByShop(Long id,int page,int size);
+    Page<ReportViewDTO> findAll(int page,int size);
 
 }
