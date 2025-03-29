@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import org.ffb_be.utils.enums.Status;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "discounts")
@@ -26,10 +26,10 @@ public class Discount extends BaseEntity{
     private BigDecimal discount_percentage;
 
     @Column(name="start_date")
-    private LocalDateTime startDate;
+    private LocalDate startDate;
 
     @Column(name="end_date")
-    private LocalDateTime endDate ;
+    private LocalDate endDate ;
 
     @Enumerated(EnumType.STRING)
     private Status status;
