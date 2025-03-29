@@ -71,7 +71,7 @@ public class ShopController {
             @PathVariable Long shopId,
             @Validated @ModelAttribute ShopRegisterDTO shopDTO,
             @RequestPart(value = "logo", required = false) MultipartFile logo,
-            @RequestPart(value = "background", required = false) MultipartFile background,
+            @RequestParam(value = "background", required = false) MultipartFile background,
             @RequestPart(value = "citizenIDFront", required = false) MultipartFile citizenIDFront,
             @RequestPart(value = "citizenIDBack", required = false) MultipartFile citizenIDBack,
             @RequestPart(value = "registrationCert", required = false) MultipartFile registrationCert,
@@ -82,7 +82,7 @@ public class ShopController {
         if (result.hasErrors()) {
             return ResponseEntity.badRequest().body(result.getAllErrors());
         }
-        shopService.updateShop(shopId, shopDTO, logo, background, citizenIDFront, citizenIDBack, registrationCert, foodSafetyCert, menu);
+        shopService.updateShop(shopId, shopDTO, logo, background,citizenIDFront, citizenIDBack, registrationCert, foodSafetyCert, menu);
         return ResponseEntity.ok().build();
     }
 

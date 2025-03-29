@@ -11,7 +11,7 @@ import org.ffb_be.utils.enums.Status;
 import org.springframework.stereotype.Service;
 
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +29,7 @@ public class DiscountServiceImpl implements DiscountService{
         discountEntity.setEndDate(discount.getEndDate());
         discountEntity.setStatus(Status.PENDING);
         if (discount.getStartDate() != null &&
-                discount.getStartDate().isBefore(LocalDateTime.now())) {
+                discount.getStartDate().isBefore(LocalDate.now())) {
             discountEntity.setStatus(Status.ACTIVE);
         }
         Product product=productRepository.findById(productId).get();

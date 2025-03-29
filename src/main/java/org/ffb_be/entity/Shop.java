@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.ffb_be.utils.enums.SellType;
 import org.ffb_be.utils.enums.Status;
 
 
@@ -88,10 +87,6 @@ public class Shop extends BaseEntity{
 
     @OneToMany(mappedBy = "shop")
     private List<Product> products;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name="sell_type")
-    private SellType sellType;
 
     @OneToMany(mappedBy = "shop")
     private List<Feedback> feedbacks;
