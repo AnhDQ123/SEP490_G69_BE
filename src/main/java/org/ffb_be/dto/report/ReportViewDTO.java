@@ -11,6 +11,7 @@ public class ReportViewDTO {
     private Long id;
     private String reportName;
     private String reportType;
+    private Long reportedId;
     private String reason;
     private LocalDateTime createdAt;
     private String status;
