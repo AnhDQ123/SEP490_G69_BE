@@ -12,6 +12,8 @@ public interface VoucherService {
 
     VoucherDTO getVoucherByCode(String code);
 
+    VoucherDTO getVoucherById(Long id);
+
     VoucherDTO addVoucher(VoucherDTO dto);
 
     VoucherDTO updateVoucher(Long id, VoucherDTO dto);
