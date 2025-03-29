@@ -62,16 +62,19 @@ public class ReportServiceImpl implements ReportService {
         reportViewDTO.setId(id);
         if(report.getType().getId()==4l){
             reportViewDTO.setReportName(blogRepository.findById(report.getRelatedId()).get().getWriter().getUsername());
-            reportViewDTO.setReportedId(blogRepository.findById(report.getRelatedId()).get().getWriter().getId());
+            reportViewDTO.setReportedUserId(blogRepository.findById(report.getRelatedId()).get().getWriter().getId());
+            reportViewDTO.setReportItemId(report.getRelatedId());
             reportViewDTO.setReportType("BLOG");
         }
         if(report.getType().getId()==5l){
             reportViewDTO.setReportName(shopRepository.findById(report.getRelatedId()).get().getName());
-            reportViewDTO.setReportedId(shopRepository.findById(report.getRelatedId()).get().getOwner().getId());
+            reportViewDTO.setReportedUserId(shopRepository.findById(report.getRelatedId()).get().getOwner().getId());
+            reportViewDTO.setReportItemId(report.getRelatedId());
             reportViewDTO.setReportType("SHOP");
         }if(report.getType().getId()==6l){
             reportViewDTO.setReportName(productRepository.findById(report.getRelatedId()).get().getName());
-            reportViewDTO.setReportedId(shopRepository.findByProduct(report.getRelatedId()).getOwner().getId());
+            reportViewDTO.setReportedUserId(shopRepository.findByProduct(report.getRelatedId()).getOwner().getId());
+            reportViewDTO.setReportItemId(report.getRelatedId());
             reportViewDTO.setReportType("PRODUCT");
         }
         List<Image> imageList=imageRepository.findAllByRelatedIdAndType_Id(id,7l);
