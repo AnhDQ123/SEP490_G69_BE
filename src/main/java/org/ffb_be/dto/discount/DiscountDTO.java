@@ -4,14 +4,14 @@ import lombok.Data;
 import org.ffb_be.dto.product.ProductResponseDTO;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Data
 public class DiscountDTO {
     private Long id;
     private BigDecimal amount;
-    private LocalDateTime startDate;
-    private LocalDateTime endDate;
+    private LocalDate startDate;
+    private LocalDate endDate;
     private String status;
     private ProductResponseDTO productResponseDTO;
 

@@ -3,7 +3,7 @@ package org.ffb_be.service.product;
 
 
 import lombok.RequiredArgsConstructor;
-import org.ffb_be.dto.discount.DiscountDTO;
+
 import org.ffb_be.dto.discount.DiscountDTO2;
 import org.ffb_be.dto.product.FoodOptionDTO;
 import org.ffb_be.dto.product.ProductCreateDTO;
@@ -14,7 +14,7 @@ import org.ffb_be.entity.Discount;
 import org.ffb_be.entity.FoodOption;
 import org.ffb_be.entity.Product;
 import org.ffb_be.repository.*;
-import org.ffb_be.utils.enums.Status;
+
 import org.ffb_be.utils.enums.upload.CloudinaryUpload;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
@@ -44,7 +44,6 @@ public class ProductServiceImpl implements ProductService {
         Category category = categoryRepository.findByName(productCreateDTO.getCategory());
         List<FoodOption> foodOptions = new ArrayList<>();
         List<FoodOptionDTO> foodOptionDTOs = productCreateDTO.getFoodOption();
-
         product.setName(productCreateDTO.getName());
         product.setDescription(productCreateDTO.getDescription());
         product.setExpired_date(productCreateDTO.getExpiryDate());
@@ -52,7 +51,6 @@ public class ProductServiceImpl implements ProductService {
         product.setManufacturer(productCreateDTO.getManufacturer());
         product.setSupplier(productCreateDTO.getSupplier());
         product.setCategory(category);
-
         if (avatar != null && !avatar.isEmpty()) {
             System.out.println("Uploading Avatar: " + avatar.getOriginalFilename());
             String url = cloudinaryUpload.uploadFile(avatar);
@@ -316,43 +314,33 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<ProductResponseDTO> findSimimlarProduct(String name) {
         String[] words = name.split("\\s+");
-        String substring = words[0];
-        List<Product> products = productRepository.findSimilarProducts(substring);
         List<ProductResponseDTO> productResponseDTOList = new ArrayList<>();
-
-        for (Product product : products) {
-            ProductResponseDTO productResponseDTO = new ProductResponseDTO();
-            productResponseDTO.setId(product.getId());
-            productResponseDTO.setName(product.getName());
-            productResponseDTO.setManufacturer(product.getManufacturer());
-            productResponseDTO.setImage(product.getImage());
-            productResponseDTO.setCategory(product.getCategory().getName());
-            productResponseDTO.setSupplier(product.getShop() != null ? product.getShop().getName() : "");
-            productResponseDTO.setRate(product.getRate());
-            productResponseDTO.setQuantity(product.getQuantity());
-
-            // Tính defaultPrice từ các FoodOption có type id = 2
-            BigDecimal defaultprice = null;
-            List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product);
-            for (FoodOption foodOption : foodOptions) {
-                if (foodOption.getType().getId() == 2) {
-                    if (defaultprice == null || foodOption.getPrice().compareTo(defaultprice) < 0) {
-                        defaultprice = foodOption.getPrice();
+        for(String word:words) {
+            List<Product> products = productRepository.findSimilarProducts(word);
+            for (Product product : products) {
+                ProductResponseDTO productResponseDTO = new ProductResponseDTO();
+                productResponseDTO.setId(product.getId());
+                productResponseDTO.setName(product.getName());
+                productResponseDTO.setManufacturer(product.getManufacturer());
+                productResponseDTO.setImage(product.getImage());
+                productResponseDTO.setCategory(product.getCategory().getName());
+                productResponseDTO.setSupplier(product.getShop() != null ? product.getShop().getName() : "");
+                productResponseDTO.setRate(product.getRate());
+                productResponseDTO.setQuantity(product.getQuantity());
+                BigDecimal defaultprice = null;
+                List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product);
+                for (FoodOption foodOption : foodOptions) {
+                    if (foodOption.getType().getId() == 2) {
+                        if (defaultprice == null || foodOption.getPrice().compareTo(defaultprice) < 0) {
+                            defaultprice = foodOption.getPrice();
+                        }
                     }
                 }
+                productResponseDTO.setDefaultPrice(defaultprice != null ? defaultprice : BigDecimal.ZERO);
+                productResponseDTOList.add(productResponseDTO);
             }
-            productResponseDTO.setDefaultPrice(defaultprice != null ? defaultprice : BigDecimal.ZERO);
-
-            productResponseDTOList.add(productResponseDTO);
         }
         return productResponseDTOList;
-    }
-
-    @Override
-    public void update(Long id,ProductCreateDTO productCreateDTO,MultipartFile avatar, List<MultipartFile>option) throws IOException {
-        Product product=productRepository.findById(id).get();
-        product.setStatus(Status.INACTIVE);
-        save( productCreateDTO,avatar, option);
     }
 
     @Override

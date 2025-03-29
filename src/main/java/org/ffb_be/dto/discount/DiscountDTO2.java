@@ -3,12 +3,12 @@ package org.ffb_be.dto.discount;
 import lombok.Data;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 @Data
 public class DiscountDTO2 {
     private Long id;
     private BigDecimal amount;
-    private LocalDateTime startDate;
-    private LocalDateTime endDate;
+    private LocalDate startDate;
+    private LocalDate endDate;
     private String status;
 }

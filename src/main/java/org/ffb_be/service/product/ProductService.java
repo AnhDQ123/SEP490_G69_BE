@@ -23,6 +23,5 @@ public interface ProductService {
     List<ProductResponseDTO> findByCategory(String cat);
     ProductResponseDTO findById(Long id);
     List<ProductResponseDTO> findSimimlarProduct(String name);
-    void update(Long id,ProductCreateDTO productCreateDTO,MultipartFile avatar, List<MultipartFile>option) throws IOException;
 }
 
