@@ -1,6 +1,7 @@
 package org.ffb_be.service.report;
 
 import lombok.RequiredArgsConstructor;
+import org.ffb_be.dto.image.ImageDTO;
 import org.ffb_be.dto.report.ReportCreateDTO;
 import org.ffb_be.dto.report.ReportViewDTO;
 import org.ffb_be.entity.Image;
@@ -14,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -69,6 +71,18 @@ public class ReportServiceImpl implements ReportService {
             reportViewDTO.setReportName(productRepository.findById(report.getRelatedId()).get().getName());
             reportViewDTO.setReportType("PRODUCT");
         }
+        List<Image> imageList=imageRepository.findAllByRelatedIdAndType_Id(id,7l);
+        List<ImageDTO> imageDTOList=new ArrayList<>();
+        for (Image image : imageList) {
+            ImageDTO imageDTO=new ImageDTO();
+            imageDTO.setUrl(image.getUrl());
+            imageDTO.setRelatedId(id);
+            imageDTO.setId(image.getId());
+            imageDTO.setOwnerId(image.getOwnerId());
+            imageDTO.setTypeId(7l);
+            imageDTOList.add(imageDTO);
+        }
+        reportViewDTO.setImage(imageDTOList);
         reportViewDTO.setReason(report.getReason());
         reportViewDTO.setStatus(report.getStatus().toString());
         reportViewDTO.setCreatedAt(report.getCreatedAt());

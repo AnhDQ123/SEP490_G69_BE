@@ -1,8 +1,11 @@
 package org.ffb_be.dto.report;
 
 import lombok.Data;
+import org.ffb_be.dto.image.ImageDTO;
 
 import java.time.LocalDateTime;
+import java.util.List;
+
 @Data
 public class ReportViewDTO {
     private Long id;
@@ -11,4 +14,5 @@ public class ReportViewDTO {
     private String reason;
     private LocalDateTime createdAt;
     private String status;
+    private List<ImageDTO> image;
 }
