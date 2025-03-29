@@ -11,6 +11,7 @@ public class ReportViewDTO {
     private Long id;
     private String reportName;
     private String reportType;
+    private Long reporterId;
     private Long reportedUserId;
     private Long reportItemId;
     private String reason;

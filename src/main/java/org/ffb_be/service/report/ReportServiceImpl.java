@@ -60,6 +60,7 @@ public class ReportServiceImpl implements ReportService {
         Report report=reportRepository.findById(id).orElse(null);
         ReportViewDTO reportViewDTO=new ReportViewDTO();
         reportViewDTO.setId(id);
+        reportViewDTO.setReporterId(report.getReporter().getId());
         if(report.getType().getId()==4l){
             reportViewDTO.setReportName(blogRepository.findById(report.getRelatedId()).get().getWriter().getUsername());
             reportViewDTO.setReportedUserId(blogRepository.findById(report.getRelatedId()).get().getWriter().getId());
