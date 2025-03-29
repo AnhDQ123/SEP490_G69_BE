@@ -17,6 +17,9 @@ public class BusinessProfileDTO {
     private String citizenIDNumber;
     private String citizenIDCardFront;
     private String citizenIDCardBack;
-    private String drivingLicense;
+    private String drivingLicenseFront;
+    private String drivingLicenseBack;
+    private String judicialRecord;
     private LocalDate citizenIDExpiredDate;
+    private LocalDate drivingLicenseExpiredDate;
 }

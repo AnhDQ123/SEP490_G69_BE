@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.ffb_be.dto.blog.BlogDTO;
 import org.ffb_be.service.blog.BlogService;
 import org.ffb_be.utils.constants.PagingConstant;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -24,9 +25,8 @@ public class BlogController {
 
     @GetMapping
     public ResponseEntity<List<BlogDTO>> getBlogs(
-            @RequestParam(defaultValue = "" + PagingConstant.PAGE_NUMBER) int page,
-            @RequestParam(defaultValue = "" + PagingConstant.PAGE_SIZE) int limit) {
-        return ResponseEntity.ok(blogService.getBlogs(page, limit));
+            Pageable pageable) {
+        return ResponseEntity.ok(blogService.getBlogs(pageable));
     }
 
     @GetMapping("/{id}")

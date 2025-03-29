@@ -8,8 +8,7 @@ import lombok.NoArgsConstructor;
 import org.ffb_be.utils.enums.Status;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.List;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "discounts")
@@ -27,14 +26,19 @@ public class Discount extends BaseEntity{
     private BigDecimal discount_percentage;
 
     @Column(name="start_date")
-    private LocalDate start_date;
+    private LocalDateTime startDate;
 
     @Column(name="end_date")
-    private LocalDate end_date ;
+    private LocalDateTime endDate ;
 
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    @OneToMany(mappedBy = "discount")
-    private List<Product> products;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id")
+    private Product product;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shop_id")
+    private Shop shop;
 }

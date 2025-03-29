@@ -38,8 +38,7 @@ class BlogServiceImpl implements BlogService {
     private final CloudinaryUpload cloudinaryUpload;
 
     @Override
-    public List<BlogDTO> getBlogs(int page, int limit) {
-        Pageable pageable = PageRequest.of(page, limit, Sort.by("id").ascending());
+    public List<BlogDTO> getBlogs(Pageable pageable) {
         Page<Blog> blogPage = blogRepository.findAll(pageable);
         return blogPage.getContent().stream()
                 .map(this::mapBlogToDTO)
@@ -109,6 +108,8 @@ class BlogServiceImpl implements BlogService {
     }
 
     private void updateBlogImages(Long blogId, List<String> imageUrls) {
+        Blog blog = blogRepository.findById(blogId)
+                .orElseThrow(() -> new NotFoundException("Blog"));
         List<String> existingUrls = imageRepository.findImageUrlsByBlogId(blogId);
 
         // Tìm ảnh cần xóa (có trong DB nhưng không có trong danh sách mới)
@@ -129,7 +130,7 @@ class BlogServiceImpl implements BlogService {
         List<Image> newImages = imageUrls.stream()
                 .filter(url -> !existingUrls.contains(url)) // Chỉ thêm ảnh chưa có
                 .limit(5)
-                .map(url -> new Image(null, url, blogType, blogId))
+                .map(url -> new Image(null, url, blogType, blog.getWriter().getId() ,blogId))
                 .collect(Collectors.toList());
 
         if (!newImages.isEmpty()) {

@@ -14,6 +14,10 @@ public class OrderItemDTO {
     private Long id;
     private Long orderId;
     private Long productId;
+    private String productName;
+    private Long discountId;
+    private BigDecimal discount;
+    private String image;
     private BigDecimal price;
     private LocalDateTime createdAt;
     private int quantity;
