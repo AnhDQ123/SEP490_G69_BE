@@ -18,8 +18,6 @@ public interface ProductService {
     Page<ProductResponseDTO> findAll(Pageable pageable);
     Page<ProductResponseDTO> findAllByShop(Long id,Pageable pageable);
     List<ProductResponseDTO> findPopularProducts();
-    List<ProductResponseDTO> findFreshProducts();
-    List<ProductResponseDTO> findCookedProducts();
     List<ProductResponseDTO> findByCategory(String cat);
     ProductResponseDTO findById(Long id);
     List<ProductResponseDTO> findSimimlarProduct(String name);
