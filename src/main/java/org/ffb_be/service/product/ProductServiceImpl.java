@@ -168,79 +168,79 @@ public class ProductServiceImpl implements ProductService {
         return productResponseDTOList;
     }
 
-    @Override
-    public List<ProductResponseDTO> findFreshProducts() {
-        List<Product> products = productRepository.findFreshProducts();
-        List<ProductResponseDTO> productResponseDTOList = new ArrayList<>();
-
-        for (Product product : products) {
-            ProductResponseDTO productResponseDTO = new ProductResponseDTO();
-            productResponseDTO.setId(product.getId());
-            productResponseDTO.setName(product.getName());
-            productResponseDTO.setManufacturer(product.getManufacturer());
-            productResponseDTO.setImage(product.getImage());
-            productResponseDTO.setCategory(product.getCategory().getName());
-            productResponseDTO.setShopName(product.getShop().getName());
-            productResponseDTO.setRate(product.getRate());
-            productResponseDTO.setQuantity(product.getQuantity());
-
-            // Tính defaultPrice cho sản phẩm fresh
-            BigDecimal defaultprice = null;
-            List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product);
-
-            for (FoodOption foodOption : foodOptions) {
-                if (foodOption.getType().getId() == 2) { // điều kiện tùy theo nghiệp vụ thực tế
-                    if (defaultprice == null || foodOption.getPrice().compareTo(defaultprice) < 0) {
-                        defaultprice = foodOption.getPrice();
-                    }
-                }
-            }
-
-            productResponseDTO.setDefaultPrice(defaultprice); // set giá vừa tính được
-            productResponseDTO.setImage(product.getImage());
-
-            productResponseDTOList.add(productResponseDTO);
-        }
-
-        return productResponseDTOList;
-    }
-
-    @Override
-    public List<ProductResponseDTO> findCookedProducts() {
-        List<Product> products = productRepository.findCookedProducts();
-        List<ProductResponseDTO> productResponseDTOList = new ArrayList<>();
-
-        for (Product product : products) {
-            ProductResponseDTO productResponseDTO = new ProductResponseDTO();
-            productResponseDTO.setId(product.getId());
-            productResponseDTO.setName(product.getName());
-            productResponseDTO.setManufacturer(product.getManufacturer());
-            productResponseDTO.setImage(product.getImage());
-            productResponseDTO.setCategory(product.getCategory().getName());
-            productResponseDTO.setSupplier(product.getSupplier());
-            productResponseDTO.setRate(product.getRate());
-            productResponseDTO.setQuantity(product.getQuantity());
-            productResponseDTO.setShopName(product.getShop().getName());
-
-            BigDecimal defaultprice = null;
-            List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product);
-
-            for (FoodOption foodOption : foodOptions) {
-                if (foodOption.getType().getId() == 2) {
-                    if (defaultprice == null || foodOption.getPrice().compareTo(defaultprice) < 0) {
-                        defaultprice = foodOption.getPrice();
-                    }
-                }
-            }
-
-            // Thêm dòng này để set giá defaultPrice vào DTO
-            productResponseDTO.setDefaultPrice(defaultprice);
-
-            productResponseDTOList.add(productResponseDTO);
-        }
-
-        return productResponseDTOList;
-    }
+//    @Override
+//    public List<ProductResponseDTO> findFreshProducts() {
+//        List<Product> products = productRepository.findFreshProducts();
+//        List<ProductResponseDTO> productResponseDTOList = new ArrayList<>();
+//
+//        for (Product product : products) {
+//            ProductResponseDTO productResponseDTO = new ProductResponseDTO();
+//            productResponseDTO.setId(product.getId());
+//            productResponseDTO.setName(product.getName());
+//            productResponseDTO.setManufacturer(product.getManufacturer());
+//            productResponseDTO.setImage(product.getImage());
+//            productResponseDTO.setCategory(product.getCategory().getName());
+//            productResponseDTO.setShopName(product.getShop().getName());
+//            productResponseDTO.setRate(product.getRate());
+//            productResponseDTO.setQuantity(product.getQuantity());
+//
+//            // Tính defaultPrice cho sản phẩm fresh
+//            BigDecimal defaultprice = null;
+//            List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product);
+//
+//            for (FoodOption foodOption : foodOptions) {
+//                if (foodOption.getType().getId() == 2) { // điều kiện tùy theo nghiệp vụ thực tế
+//                    if (defaultprice == null || foodOption.getPrice().compareTo(defaultprice) < 0) {
+//                        defaultprice = foodOption.getPrice();
+//                    }
+//                }
+//            }
+//
+//            productResponseDTO.setDefaultPrice(defaultprice); // set giá vừa tính được
+//            productResponseDTO.setImage(product.getImage());
+//
+//            productResponseDTOList.add(productResponseDTO);
+//        }
+//
+//        return productResponseDTOList;
+//    }
+//
+//    @Override
+//    public List<ProductResponseDTO> findCookedProducts() {
+//        List<Product> products = productRepository.findCookedProducts();
+//        List<ProductResponseDTO> productResponseDTOList = new ArrayList<>();
+//
+//        for (Product product : products) {
+//            ProductResponseDTO productResponseDTO = new ProductResponseDTO();
+//            productResponseDTO.setId(product.getId());
+//            productResponseDTO.setName(product.getName());
+//            productResponseDTO.setManufacturer(product.getManufacturer());
+//            productResponseDTO.setImage(product.getImage());
+//            productResponseDTO.setCategory(product.getCategory().getName());
+//            productResponseDTO.setSupplier(product.getSupplier());
+//            productResponseDTO.setRate(product.getRate());
+//            productResponseDTO.setQuantity(product.getQuantity());
+//            productResponseDTO.setShopName(product.getShop().getName());
+//
+//            BigDecimal defaultprice = null;
+//            List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product);
+//
+//            for (FoodOption foodOption : foodOptions) {
+//                if (foodOption.getType().getId() == 2) {
+//                    if (defaultprice == null || foodOption.getPrice().compareTo(defaultprice) < 0) {
+//                        defaultprice = foodOption.getPrice();
+//                    }
+//                }
+//            }
+//
+//            // Thêm dòng này để set giá defaultPrice vào DTO
+//            productResponseDTO.setDefaultPrice(defaultprice);
+//
+//            productResponseDTOList.add(productResponseDTO);
+//        }
+//
+//        return productResponseDTOList;
+//    }
 
     @Override
     public List<ProductResponseDTO> findByCategory(String cat) {

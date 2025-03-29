@@ -18,11 +18,13 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Page<Product> findAllByShop_Id(Long shopId,Pageable pageable);
 
     Optional<Product> findById(Long id);
-    @Query("SELECT p FROM Product p JOIN p.shop s WHERE s.sellType = 'Fresh'")
-    List<Product> findFreshProducts();
 
-    @Query("SELECT p FROM Product p JOIN p.shop s WHERE s.sellType = 'Cooked'")
-    List<Product> findCookedProducts();
+//    @Query("SELECT p FROM Product p JOIN p.shop s WHERE p.sellType = 'Fresh'")
+//    List<Product> findFreshProducts();
+//
+//    @Query("SELECT p FROM Product p JOIN p.shop s WHERE s.sellType = 'Cooked'")
+//    List<Product> findCookedProducts();
+
     @Query("SELECT p FROM Product p WHERE p.name LIKE %:product%")
     List<Product> findSimilarProducts(String product);
 
