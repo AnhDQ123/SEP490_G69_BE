@@ -10,6 +10,9 @@ import org.ffb_be.repository.*;
 import org.ffb_be.utils.enums.ReportStatus;
 
 import org.ffb_be.utils.enums.upload.CloudinaryUpload;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -94,5 +97,58 @@ public class ReportServiceImpl implements ReportService {
         reportViewDTO.setStatus(report.getStatus().toString());
         reportViewDTO.setCreatedAt(report.getCreatedAt());
         return reportViewDTO;
+    }
+
+    @Override
+    public void addToReport(Long id, List<MultipartFile> option) throws IOException {
+        Report report=reportRepository.findById(id).orElse(null);
+        if (option != null && !option.isEmpty()) {
+            System.out.println("Uploading " + option.size() + " option images");
+            for (int i = 0; i < option.size(); i++) {
+                Image image=new Image();
+                System.out.println("Uploading Avatar: " + option.get(i).getOriginalFilename());
+                String url = cloudinaryUpload.uploadFile(option.get(i));
+                image.setUrl(url);
+                image.setRelatedId(id);
+                image.setOwnerId(report.getReporter().getId());
+                image.setType(typesRepository.findById(7l).get());
+                imageRepository.save(image);
+            }
+        }
+    }
+    private ReportViewDTO convertToDTO(Report report) {
+        ReportViewDTO reportViewDTO = new ReportViewDTO();
+        reportViewDTO.setId(report.getId());
+        reportViewDTO.setReportName(report.getType().getDescription());  // Giả sử bạn muốn lấy mô tả từ Type
+        reportViewDTO.setReportType(report.getType().getCategory().toString());  // Hoặc loại enum của type
+        reportViewDTO.setReporterId(report.getReporter().getId());
+        reportViewDTO.setReportedUserId(report.getRelatedId());
+        reportViewDTO.setReportItemId(report.getRelatedId());
+        reportViewDTO.setReason(report.getReason());
+        reportViewDTO.setCreatedAt(report.getCreatedAt());
+        reportViewDTO.setStatus(report.getStatus().name());
+        List<Image> imageList=imageRepository.findAllByRelatedIdAndType_Id(report.getId(),7l);
+        List<ImageDTO> imageDTOList=new ArrayList<>();
+        for (Image image : imageList) {
+            ImageDTO imageDTO=new ImageDTO();
+            imageDTO.setUrl(image.getUrl());
+            imageDTO.setRelatedId(report.getId());
+            imageDTO.setId(image.getId());
+            imageDTO.setOwnerId(image.getOwnerId());
+            imageDTO.setTypeId(7l);
+            imageDTOList.add(imageDTO);
+        }
+        reportViewDTO.setImage(imageDTOList);
+        return reportViewDTO;
+    }
+    public Page<ReportViewDTO> findAllByShop(Long shopId, int page, int size) {
+        // Tạo đối tượng Pageable để phân trang
+        Pageable pageable = PageRequest.of(page, size);
+
+        // Gọi phương thức repository để lấy kết quả phân trang
+        Page<Report> reports = reportRepository.findReportsByShopId(shopId, pageable);
+
+        // Chuyển đổi từ Page<Report> sang Page<ReportViewDTO>
+        return reports.map(this::convertToDTO);  // Sử dụng phương thức convertToDTO mà bạn đã tạo trước đó
     }
 }

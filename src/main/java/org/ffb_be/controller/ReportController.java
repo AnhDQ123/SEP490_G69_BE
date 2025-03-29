@@ -23,7 +23,7 @@ public class ReportController {
         return ResponseEntity.ok(reportService.viewReport(id));
     }
 
-    @PostMapping("/add")
+    @PostMapping("/create")
     public ResponseEntity<?> addReport(@Validated @ModelAttribute() ReportCreateDTO reportCreateDTO,
                                         BindingResult bindingResult,
                                         @RequestParam("option") List<MultipartFile> option) throws IOException {
@@ -32,4 +32,16 @@ public class ReportController {
         reportService.createReport(reportCreateDTO, option);
         return ResponseEntity.ok().body(reportCreateDTO);
     }
+    @PostMapping("/add/{id}")
+    public void addToReport(@PathVariable Long id,
+                                       @RequestParam("option") List<MultipartFile> option) throws IOException {
+        reportService.addToReport(id, option);
+    }
+    @GetMapping("/shop/{id}")
+    public ResponseEntity<?> getAllByShop(@PathVariable Long id,
+                                          @RequestParam(value = "page", defaultValue = "1", required = false) Integer page,
+                                          @RequestParam(value = "size", defaultValue = "20", required = false) Integer size) {
+        return ResponseEntity.ok( reportService.findAllByShop(id,page,size));
+    }
+
 }
