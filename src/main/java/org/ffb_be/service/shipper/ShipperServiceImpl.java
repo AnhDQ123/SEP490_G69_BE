@@ -238,6 +238,7 @@ public class ShipperServiceImpl implements ShipperService {
     private ShipperInfoDTO decryptDTO(User user) {
         ShipperInfoDTO shipperInfoDTO = shipperMapper.toDTO(user);
         shipperInfoDTO.setCitizenIDNumber((shipperInfoDTO.getCitizenIDNumber()));
+        shipperInfoDTO.setId(user.getId());
         return shipperInfoDTO;
     }
 

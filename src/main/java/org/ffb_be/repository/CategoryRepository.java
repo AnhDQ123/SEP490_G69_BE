@@ -15,8 +15,8 @@ import java.util.Optional;
 public interface CategoryRepository extends JpaRepository<Category, Long> {
     Optional<Category> findById(Long id);
 
-    @Query("SELECT c FROM Category c WHERE :name IS NULL OR c.name = :name")
-    Page<Category> findAllByName(@Param("name") String name, Pageable pageable);
+    @Query("SELECT c FROM Category c WHERE :search IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT('%', :search, '%'))")
+    Page<Category> findAllByName(@Param("search") String search, Pageable pageable);
 
     Category findByName(String name);
 }

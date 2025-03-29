@@ -76,9 +76,14 @@ public class UserServiceImpl implements UserService {
             BeanUtils.copyProperties(user, userResponseDTO);
             userResponseDTO.setId(user.getId());
             userResponseDTO.setStatus(user.getStatus().toString());
-            userResponseDTO.setAvatar(user.getProfile().getAvatar());
+            if (user.getProfile() != null) {
+                userResponseDTO.setAvatar(user.getProfile().getAvatar());
+            } else {
+                userResponseDTO.setAvatar(null);
+            }
             userResponseDTO.setName(user.getProfile().getName());
             userResponseDTO.setRole(user.getRole().getName());
+            userResponseDTO.setCreated_at(user.getCreatedAt().toString());
             return userResponseDTO;
         });
     }
@@ -128,6 +133,9 @@ public class UserServiceImpl implements UserService {
         }
         if(userRepository.findById(id).get().getPhone()!=null) {
             profileDTO.setPhone(userRepository.findById(id).get().getPhone());
+        }
+        if(userRepository.findById(id).get().getCreatedAt() != null) {
+            profileDTO.setCreatedAt(userRepository.findById(id).get().getCreatedAt());
         }
         return profileDTO;
     }
