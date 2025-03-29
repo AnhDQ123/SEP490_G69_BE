@@ -15,6 +15,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/config")
 @RequiredArgsConstructor
+@CrossOrigin("*")
 public class ConfigController {
     private final ConfigService configService;
 

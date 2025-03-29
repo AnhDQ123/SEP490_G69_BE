@@ -2,8 +2,10 @@ package org.ffb_be.service.config;
 
 import lombok.RequiredArgsConstructor;
 import org.ffb_be.entity.Config;
+import org.ffb_be.exception.NotFoundException;
 import org.ffb_be.repository.ConfigRepository;
 import org.ffb_be.utils.enums.ConfigCategory;
+import org.ffb_be.utils.enums.Status;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -15,7 +17,7 @@ public class ConfigServiceImpl implements ConfigService {
 
     @Override
     public Page<Config> getConfigsByCategory(ConfigCategory category, Pageable pageable) {
-        return configRepository.findByCategory(category, pageable);
+        return configRepository.findByCategoryAndStatus(category, Status.ACTIVE , pageable);
     }
 
     @Override
@@ -29,7 +31,7 @@ public class ConfigServiceImpl implements ConfigService {
         if (configRepository.findByKey(key).isPresent()) {
             throw new IllegalArgumentException("Config đã tồn tại");
         }
-        return configRepository.save(new Config(null, category, key, value));
+        return configRepository.save(new Config(null, category, key, value, Status.ACTIVE));
     }
 
     @Override
@@ -41,7 +43,9 @@ public class ConfigServiceImpl implements ConfigService {
 
     @Override
     public void deleteConfig(Long id) {
-        Config config = getConfigById(id);
-        configRepository.delete(config);
+        Config config = configRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Config"));
+        config.setStatus(Status.DELETED);
+        configRepository.save(config);
     }
 }

@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.ffb_be.utils.enums.ConfigCategory;
+import org.ffb_be.utils.enums.Status;
 
 @Entity
 @AllArgsConstructor
@@ -25,4 +26,8 @@ public class Config extends BaseEntity{
 
     @Column(nullable = false)
     private String value;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private Status status;
 }
