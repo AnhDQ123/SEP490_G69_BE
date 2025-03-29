@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 public class ReportViewDTO {
     private Long id;
     private String reportName;
+    private String reportType;
     private String reason;
     private LocalDateTime createdAt;
     private String status;

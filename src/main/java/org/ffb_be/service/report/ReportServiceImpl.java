@@ -30,7 +30,8 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public void createReport(ReportCreateDTO reportCreateDTO, List<MultipartFile> option) throws IOException {
         Report report = new Report();
-        report.setReporter(userRepository.findById(reportCreateDTO.getUserId()).get());
+        report.setReporter(userRepository.findById(reportCreateDTO.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found")));
         report.setStatus(ReportStatus.PENDING);
         report.setType(typesRepository.findById(reportCreateDTO.getTypeId()).get());
         report.setReason(reportCreateDTO.getReason());
@@ -57,13 +58,16 @@ public class ReportServiceImpl implements ReportService {
         Report report=reportRepository.findById(id).orElse(null);
         ReportViewDTO reportViewDTO=new ReportViewDTO();
         reportViewDTO.setId(id);
-        if(report.getType().getId()==3l){
+        if(report.getType().getId()==4l){
             reportViewDTO.setReportName(blogRepository.findById(report.getRelatedId()).get().getWriter().getUsername());
+            reportViewDTO.setReportType("BLOG");
         }
         if(report.getType().getId()==5l){
             reportViewDTO.setReportName(shopRepository.findById(report.getRelatedId()).get().getName());
+            reportViewDTO.setReportType("SHOP");
         }if(report.getType().getId()==6l){
             reportViewDTO.setReportName(productRepository.findById(report.getRelatedId()).get().getName());
+            reportViewDTO.setReportType("PRODUCT");
         }
         reportViewDTO.setReason(report.getReason());
         reportViewDTO.setStatus(report.getStatus().toString());
