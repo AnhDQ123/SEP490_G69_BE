@@ -37,7 +37,7 @@ public class Order extends BaseEntity {
     private BigDecimal total;
 
     @Enumerated(EnumType.STRING)
-    private OrderStatus status;
+    private OrderStatus status = OrderStatus.PENDING;
 
     private BigDecimal voucherValue;
 
