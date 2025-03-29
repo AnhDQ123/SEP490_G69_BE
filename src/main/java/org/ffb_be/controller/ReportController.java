@@ -32,9 +32,9 @@ public class ReportController {
         reportService.createReport(reportCreateDTO, option);
         return ResponseEntity.ok().body(reportCreateDTO);
     }
-    @PostMapping("/add/{id}")
-    public void addToReport(@PathVariable Long id,
-                                       @RequestParam("option") List<MultipartFile> option) throws IOException {
+    @PostMapping("/add")
+    public void addToReport(@RequestParam Long id,
+                            @RequestParam("option") List<MultipartFile> option) throws IOException {
         reportService.addToReport(id, option);
     }
     @GetMapping("/shop/{id}")
