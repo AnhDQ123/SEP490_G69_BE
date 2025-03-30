@@ -42,7 +42,10 @@ public class Order extends BaseEntity {
     private BigDecimal voucherValue;
 
     @Column(name="qr_code")
-    private String QrCode;
+    private String qrCode;
+
+    @Column(name="payment_proof")
+    private String paymentProof;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id")

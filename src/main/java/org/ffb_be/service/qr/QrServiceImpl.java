@@ -6,12 +6,15 @@ import org.ffb_be.entity.Shop;
 import org.ffb_be.exception.NotFoundException;
 import org.ffb_be.repository.OrderRepository;
 import org.ffb_be.repository.ShopRepository;
+import org.ffb_be.utils.enums.upload.CloudinaryUpload;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,6 +32,8 @@ public class QrServiceImpl implements QrService {
     private final OrderRepository orderRepository;
 
     private final ShopRepository shopRepository;
+
+    private final CloudinaryUpload cloudinaryUpload;
 
     private final RestTemplate restTemplate = new RestTemplate();
 
@@ -68,6 +73,15 @@ public class QrServiceImpl implements QrService {
             return null;
         }
         return null;
+    }
+
+    @Override
+    public void updatePaymentProof(Long orderId, MultipartFile paymentProof) throws IOException {
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new NotFoundException("Order"));
+        if (paymentProof != null && !paymentProof.isEmpty()) {
+            order.setPaymentProof(cloudinaryUpload.uploadFile(paymentProof));
+        }
+        orderRepository.save(order);
     }
 
 }
