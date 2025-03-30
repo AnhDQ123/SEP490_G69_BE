@@ -2,6 +2,7 @@ package org.ffb_be.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.ffb_be.dto.delivery.DeliveryDTO;
 import org.ffb_be.entity.DeliveryMethod;
 import org.ffb_be.service.delivery.DeliveryMethodService;
 import org.springframework.data.domain.Page;
@@ -17,22 +18,22 @@ public class DeliveryController {
     private final DeliveryMethodService deliveryMethodService;
 
     @GetMapping
-    public ResponseEntity<Page<DeliveryMethod>> getAll(Pageable pageable) {
+    public ResponseEntity<Page<DeliveryDTO>> getAll(Pageable pageable) {
         return ResponseEntity.ok(deliveryMethodService.getAll(pageable));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<DeliveryMethod> getById(@PathVariable Long id) {
+    public ResponseEntity<DeliveryDTO> getById(@PathVariable Long id) {
         return ResponseEntity.ok(deliveryMethodService.getById(id));
     }
 
     @PostMapping
-    public ResponseEntity<DeliveryMethod> create(@RequestBody @Valid DeliveryMethod deliveryMethod) {
+    public ResponseEntity<DeliveryMethod> create(@RequestBody @Valid DeliveryDTO deliveryMethod) {
         return ResponseEntity.ok(deliveryMethodService.create(deliveryMethod));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<DeliveryMethod> update(@PathVariable Long id, @RequestBody @Valid DeliveryMethod deliveryMethod) {
+    public ResponseEntity<DeliveryMethod> update(@PathVariable Long id, @RequestBody @Valid DeliveryDTO deliveryMethod) {
         return ResponseEntity.ok(deliveryMethodService.update(id, deliveryMethod));
     }
 

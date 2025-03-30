@@ -1,10 +1,12 @@
 package org.ffb_be.service.delivery;
 
 import lombok.RequiredArgsConstructor;
+import org.ffb_be.dto.delivery.DeliveryDTO;
 import org.ffb_be.entity.DeliveryMethod;
 import org.ffb_be.exception.NotFoundException;
 import org.ffb_be.repository.DeliveryMethodRepository;
 import org.ffb_be.utils.enums.Status;
+import org.ffb_be.utils.mapping.DeliveryMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -15,20 +17,23 @@ import java.math.BigDecimal;
 @RequiredArgsConstructor
 public class DeliveryMethodServiceImpl implements DeliveryMethodService {
     private final DeliveryMethodRepository deliveryMethodRepository;
+    private final DeliveryMapper deliveryMapper;
 
     @Override
-    public Page<DeliveryMethod> getAll(Pageable pageable) {
-        return deliveryMethodRepository.findByStatus(Status.ACTIVE, pageable);
+    public Page<DeliveryDTO> getAll(Pageable pageable) {
+        Page<DeliveryMethod> deliveryMethods = deliveryMethodRepository.findByStatus(Status.ACTIVE, pageable);
+        return deliveryMethods.map(deliveryMapper::toDTO);
     }
 
     @Override
-    public DeliveryMethod getById(Long id) {
-        return deliveryMethodRepository.findById(id)
+    public DeliveryDTO getById(Long id) {
+        DeliveryMethod deliveryMethod = deliveryMethodRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Phương thức giao hàng"));
+        return deliveryMapper.toDTO(deliveryMethod);
     }
 
     @Override
-    public DeliveryMethod create(DeliveryMethod deliveryMethod) {
+    public DeliveryMethod create(DeliveryDTO deliveryMethod) {
         if (deliveryMethod.getName() == null || deliveryMethod.getName().isEmpty()) {
             throw new IllegalArgumentException("Tên phương thức giao hàng không được để trống");
         }
@@ -36,11 +41,12 @@ public class DeliveryMethodServiceImpl implements DeliveryMethodService {
             throw new IllegalArgumentException("Phí giao hàng không hợp lệ");
         }
         deliveryMethod.setStatus(Status.ACTIVE);
-        return deliveryMethodRepository.save(deliveryMethod);
+        DeliveryMethod delivery = deliveryMapper.toEntity(deliveryMethod);
+        return deliveryMethodRepository.save(delivery);
     }
 
     @Override
-    public DeliveryMethod update(Long id, DeliveryMethod updatedDeliveryMethod) {
+    public DeliveryMethod update(Long id, DeliveryDTO updatedDeliveryMethod) {
         DeliveryMethod deliveryMethod = deliveryMethodRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Phương thức giao hàng"));
 
@@ -54,10 +60,7 @@ public class DeliveryMethodServiceImpl implements DeliveryMethodService {
         if (updatedDeliveryMethod.getFee() == null || updatedDeliveryMethod.getFee().compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException("Phí giao hàng không hợp lệ");
         }
-
-        deliveryMethod.setName(updatedDeliveryMethod.getName());
-        deliveryMethod.setDescription(updatedDeliveryMethod.getDescription());
-        deliveryMethod.setFee(updatedDeliveryMethod.getFee());
+        deliveryMethod = deliveryMapper.toEntity(updatedDeliveryMethod);
 
         return deliveryMethodRepository.save(deliveryMethod);
     }

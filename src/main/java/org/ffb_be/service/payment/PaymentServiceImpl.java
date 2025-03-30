@@ -2,10 +2,12 @@ package org.ffb_be.service.payment;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.ffb_be.dto.payment.PaymentDTO;
 import org.ffb_be.entity.Payment;
 import org.ffb_be.exception.NotFoundException;
 import org.ffb_be.repository.PaymentRepository;
 import org.ffb_be.utils.enums.Status;
+import org.ffb_be.utils.mapping.PaymentMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -16,32 +18,37 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class PaymentServiceImpl implements PaymentService {
     private final PaymentRepository paymentRepository;
+    private final PaymentMapper paymentMapper;
+
 
     @Override
-    public Page<Payment> getAll(Pageable pageable) {
-        return paymentRepository.findByStatus(Status.ACTIVE, pageable);
+    public Page<PaymentDTO> getAll(Pageable pageable) {
+        Page<Payment> payments = paymentRepository.findByStatus(Status.ACTIVE, pageable);
+        return payments.map(paymentMapper::toDTO);
     }
 
     @Override
-    public Payment getById(Long id) {
-        return paymentRepository.findById(id)
+    public PaymentDTO getById(Long id) {
+        Payment payment = paymentRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Phương thức thanh toán"));
+        return paymentMapper.toDTO(payment);
     }
 
     @Override
-    public Payment create(@Valid Payment paymentMethod) {
+    public Payment create(PaymentDTO paymentMethod) {
         if (paymentMethod.getName() == null || paymentMethod.getName().isEmpty()) {
             throw new IllegalArgumentException("Tên phương thức thanh toán không được để trống");
         }
         if (paymentMethod.getFee() == null || paymentMethod.getFee().compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException("Phí thanh toán không hợp lệ");
         }
-        paymentMethod.setStatus(Status.ACTIVE);
-        return paymentRepository.save(paymentMethod);
+        Payment payment = paymentMapper.toEntity(paymentMethod);
+        payment.setStatus(Status.ACTIVE);
+        return paymentRepository.save(payment);
     }
 
     @Override
-    public Payment update(Long id, @Valid Payment updatedPaymentMethod) {
+    public Payment update(Long id, PaymentDTO updatedPaymentMethod) {
         Payment paymentMethod = paymentRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Phương thức thanh toán"));
 
@@ -56,10 +63,7 @@ public class PaymentServiceImpl implements PaymentService {
             throw new IllegalArgumentException("Phí thanh toán không hợp lệ");
         }
 
-        paymentMethod.setName(updatedPaymentMethod.getName());
-        paymentMethod.setDescription(updatedPaymentMethod.getDescription());
-        paymentMethod.setFee(updatedPaymentMethod.getFee());
-
+        paymentMethod = paymentMapper.toEntity(updatedPaymentMethod);
         return paymentRepository.save(paymentMethod);
     }
 

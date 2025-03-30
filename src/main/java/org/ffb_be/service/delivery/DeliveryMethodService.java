@@ -1,17 +1,18 @@
 package org.ffb_be.service.delivery;
 
+import org.ffb_be.dto.delivery.DeliveryDTO;
 import org.ffb_be.entity.DeliveryMethod;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface DeliveryMethodService {
-    Page<DeliveryMethod> getAll(Pageable pageable);
+    Page<DeliveryDTO> getAll(Pageable pageable);
 
-    DeliveryMethod getById(Long id);
+    DeliveryDTO getById(Long id);
 
-    DeliveryMethod create(DeliveryMethod deliveryMethod);
+    DeliveryMethod create(DeliveryDTO deliveryMethod);
 
-    DeliveryMethod update(Long id, DeliveryMethod updatedDeliveryMethod);
+    DeliveryMethod update(Long id, DeliveryDTO updatedDeliveryMethod);
 
     void delete(Long id);
 }
