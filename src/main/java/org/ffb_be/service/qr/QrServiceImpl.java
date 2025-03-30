@@ -34,21 +34,17 @@ public class QrServiceImpl implements QrService {
 
     @Override
     public String generateQrCode(Long orderId, Long shopId) {
-//        Order order = orderRepository.findById(orderId).orElseThrow (() -> new NotFoundException("Order"));
-//        Shop shop = shopRepository.findById(shopId).orElseThrow(() -> new NotFoundException("Shop"));
+        Order order = orderRepository.findById(orderId).orElseThrow (() -> new NotFoundException("Order"));
+        Shop shop = shopRepository.findById(shopId).orElseThrow(() -> new NotFoundException("Shop"));
+        if (order.getQrCode() != null) {
+            return order.getQrCode();
+        }
         Map<String, Object> requestBody = new HashMap<>();
-//        requestBody.put("accountNo", shop.getAccountNumber());
-//        requestBody.put("accountName", "Công ty TNHH ABC");
-//        requestBody.put("acqId", shop.getBankCode());
-//        requestBody.put("amount", order.getTotal());
-//        requestBody.put("addInfo", "ORDER" + order.getOrderCode());
-
-        requestBody.put("accountNo", "113366668888");
-        requestBody.put("accountName", "QUY VAC XIN PHONG CHONG COVID");
-        requestBody.put("acqId", 970415);
-        requestBody.put("amount", 79000);
-        requestBody.put("addInfo", "Ung Ho Quy Vac Xin");
-
+        requestBody.put("accountNo", shop.getAccountNumber());
+        requestBody.put("accountName", shop.getName());
+        requestBody.put("acqId", shop.getBankCode());
+        requestBody.put("amount", order.getTotal());
+        requestBody.put("addInfo", "ORDER" + order.getOrderCode());
         requestBody.put("template", "compact2");
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -63,8 +59,15 @@ public class QrServiceImpl implements QrService {
         System.out.println("Response: " + response.getBody());
         if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
             Map<String, Object> data = (Map<String, Object>) response.getBody().get("data");
-            return data != null ? (String) data.get("qrDataURL") : null;
+            if (data != null) {
+                String qrDataURL = (String) data.get("qrDataURL");
+                order.setQrCode(qrDataURL);
+                orderRepository.save(order);
+                return qrDataURL;
+            }
+            return null;
         }
         return null;
     }
+
 }
