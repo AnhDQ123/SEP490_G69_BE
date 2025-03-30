@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Service
 @AllArgsConstructor
@@ -44,6 +45,7 @@ public class PaymentServiceImpl implements PaymentService {
         }
         Payment payment = paymentMapper.toEntity(paymentMethod);
         payment.setStatus(Status.ACTIVE);
+        payment.setCreatedAt(LocalDateTime.now());
         return paymentRepository.save(payment);
     }
 
@@ -64,6 +66,7 @@ public class PaymentServiceImpl implements PaymentService {
         }
 
         paymentMethod = paymentMapper.toEntity(updatedPaymentMethod);
+        paymentMethod.setUpdatedAt(LocalDateTime.now());
         return paymentRepository.save(paymentMethod);
     }
 

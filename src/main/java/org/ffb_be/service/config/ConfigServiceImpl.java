@@ -10,6 +10,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class ConfigServiceImpl implements ConfigService {
@@ -31,13 +33,16 @@ public class ConfigServiceImpl implements ConfigService {
         if (configRepository.findByKey(key).isPresent()) {
             throw new IllegalArgumentException("Config đã tồn tại");
         }
-        return configRepository.save(new Config(null, category, key, value, Status.ACTIVE));
+        Config config = new Config(null, category, key, value, Status.ACTIVE);
+        config.setCreatedAt(LocalDateTime.now());
+        return configRepository.save(config);
     }
 
     @Override
     public Config updateConfig(Long id, String value) {
         Config config = getConfigById(id);
         config.setValue(value);
+        config.setUpdatedAt(LocalDateTime.now());
         return configRepository.save(config);
     }
 

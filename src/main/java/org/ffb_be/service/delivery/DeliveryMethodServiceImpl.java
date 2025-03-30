@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -42,6 +43,7 @@ public class DeliveryMethodServiceImpl implements DeliveryMethodService {
         }
         deliveryMethod.setStatus(Status.ACTIVE);
         DeliveryMethod delivery = deliveryMapper.toEntity(deliveryMethod);
+        delivery.setCreatedAt(LocalDateTime.now());
         return deliveryMethodRepository.save(delivery);
     }
 
@@ -61,7 +63,7 @@ public class DeliveryMethodServiceImpl implements DeliveryMethodService {
             throw new IllegalArgumentException("Phí giao hàng không hợp lệ");
         }
         deliveryMethod = deliveryMapper.toEntity(updatedDeliveryMethod);
-
+        deliveryMethod.setUpdatedAt(LocalDateTime.now());
         return deliveryMethodRepository.save(deliveryMethod);
     }
 
