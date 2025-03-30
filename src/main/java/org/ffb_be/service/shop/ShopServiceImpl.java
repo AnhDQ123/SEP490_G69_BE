@@ -205,7 +205,7 @@ public class ShopServiceImpl implements ShopService {
             shop.setReason(null);
             shop.setIsActive(Status.PENDING);
         }
-
+        shop.setIsActive(Status.ACTIVE);
         profileRepository.save(profile);
         shopRepository.save(shop);
     }

@@ -32,14 +32,14 @@ public class VoucherController {
         return ResponseEntity.ok(voucherService.addVoucher(dto));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<VoucherDTO> updateVoucher(@PathVariable Long id, @RequestBody VoucherDTO dto) {
-        return ResponseEntity.ok(voucherService.updateVoucher(id, dto));
+    @PutMapping("/{code}")
+    public ResponseEntity<VoucherDTO> updateVoucher(@PathVariable String code, @RequestBody VoucherDTO dto) {
+        return ResponseEntity.ok(voucherService.updateVoucher(code, dto));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteVoucher(@PathVariable Long id) {
-        voucherService.deleteVoucher(id);
+    @DeleteMapping("/{code}")
+    public ResponseEntity<Void> deleteVoucher(@PathVariable String code) {
+        voucherService.deleteVoucher(code);
         return ResponseEntity.noContent().build();
     }
 
