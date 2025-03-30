@@ -29,8 +29,7 @@ public class DiscountServiceImpl implements DiscountService{
         discountEntity.setStartDate(discount.getStartDate());
         discountEntity.setEndDate(discount.getEndDate());
         discountEntity.setStatus(Status.PENDING);
-        if (discount.getStartDate() != null &&
-                discount.getStartDate().isBefore(LocalDate.now())) {
+        if (discount.getStartDate().isEqual(LocalDate.now())) {
             discountEntity.setStatus(Status.ACTIVE);
         }
         Product product=productRepository.findById(productId).get();
@@ -86,12 +85,10 @@ public class DiscountServiceImpl implements DiscountService{
             if (discount.getStartDate().equals(today) && !discount.getStatus().equals(Status.ACTIVE)) {
                 discount.setStatus(Status.ACTIVE);
                 discountRepository.save(discount);
-                System.out.println("Discount " + discount.getId() + " activated.");
             }
             if (discount.getEndDate().equals(today) && !discount.getStatus().equals(Status.INACTIVE)) {
                 discount.setStatus(Status.INACTIVE);
                 discountRepository.save(discount);
-                System.out.println("Discount " + discount.getId() + " deactivated.");
             }
         }
     }

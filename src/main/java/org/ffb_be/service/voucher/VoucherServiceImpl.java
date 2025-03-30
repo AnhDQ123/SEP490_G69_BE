@@ -44,6 +44,9 @@ public class VoucherServiceImpl implements VoucherService {
     public VoucherDTO addVoucher(VoucherDTO dto) {
         Voucher voucher = voucherMapper.toEntity(dto);
         voucher.setUsedVouchers(0);
+        if (voucher.getStartDate().isEqual(LocalDate.now())) {
+            voucher.setStatus(Status.ACTIVE);
+        }
         voucher = voucherRepository.save(voucher);
         return voucherMapper.toDTO(voucher);
     }
