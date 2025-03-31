@@ -41,9 +41,6 @@ public class QrServiceImpl implements QrService {
     public String generateQrCode(Long orderId, Long shopId) {
         Order order = orderRepository.findById(orderId).orElseThrow (() -> new NotFoundException("Order"));
         Shop shop = shopRepository.findById(shopId).orElseThrow(() -> new NotFoundException("Shop"));
-        if (order.getQrCode() != null) {
-            return order.getQrCode();
-        }
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("accountNo", shop.getAccountNumber());
         requestBody.put("accountName", shop.getName());
@@ -65,10 +62,7 @@ public class QrServiceImpl implements QrService {
         if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
             Map<String, Object> data = (Map<String, Object>) response.getBody().get("data");
             if (data != null) {
-                String qrDataURL = (String) data.get("qrDataURL");
-                order.setQrCode(qrDataURL);
-                orderRepository.save(order);
-                return qrDataURL;
+                return (String) data.get("qrDataURL");
             }
             return null;
         }

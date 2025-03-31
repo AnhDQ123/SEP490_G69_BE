@@ -41,9 +41,6 @@ public class Order extends BaseEntity {
 
     private BigDecimal voucherValue;
 
-    @Column(name="qr_code")
-    private String qrCode;
-
     @Column(name="payment_proof")
     private String paymentProof;
 
