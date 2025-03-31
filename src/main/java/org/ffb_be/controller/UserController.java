@@ -9,6 +9,7 @@ import org.ffb_be.entity.User;
 import org.ffb_be.repository.ProfileRepository;
 import org.ffb_be.repository.ShopRepository;
 import org.ffb_be.repository.UserRepository;
+import org.ffb_be.service.shop.ShopService;
 import org.ffb_be.service.user.UserService;
 import org.ffb_be.utils.enums.Status;
 import org.springframework.data.domain.PageRequest;
@@ -33,6 +34,7 @@ public class UserController {
     private final ProfileRepository profileRepository;
     private final UserService userService;
     private final ShopRepository shopRepository;
+    private final ShopService shopService;
     @GetMapping("/{id}")
     public ResponseEntity<?> getUserById(@PathVariable Long id) {
         return ResponseEntity.ok( userService.findById(id));
@@ -132,7 +134,7 @@ public class UserController {
             return ResponseEntity.ok().body("Shop has been inactived");
         }
         if(status.equals("active")) {
-            return ResponseEntity.ok().body(shop.getId());
+            return ResponseEntity.ok(shopService.getShopById(shop.getId()));
         }
         if(status.equals("pending")) {
             return ResponseEntity.ok().body("Shop is pending");
