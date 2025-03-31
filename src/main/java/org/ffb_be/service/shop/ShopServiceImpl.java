@@ -319,7 +319,7 @@ public class ShopServiceImpl implements ShopService {
     private String encryptSafe(String data) {
         return data != null ? encryptUtil.encrypt(data) : null;
     }
-    public Map<Integer, Long> getShopCountByMonth(String status, LocalDate startDate, LocalDate endDate) {
+    public Map<Integer, Long> getShopCountByMonth(Status status, LocalDate startDate, LocalDate endDate) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         List<Object[]> results = shopRepository.countShopsByStatusAndMonth(status, startDateTime, endDateTime);
@@ -338,7 +338,7 @@ public class ShopServiceImpl implements ShopService {
     }
 
     // Đếm số lượng shop theo trạng thái và năm
-    public Map<Integer, Long> getShopCountByYear(String status, LocalDate startDate, LocalDate endDate) {
+    public Map<Integer, Long> getShopCountByYear(Status status, LocalDate startDate, LocalDate endDate) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         List<Object[]> results = shopRepository.countShopsByStatusAndYear(status, startDateTime, endDateTime);
@@ -356,7 +356,7 @@ public class ShopServiceImpl implements ShopService {
         return shopCountPerYear;
     }
 
-    public Map<LocalDate, Long> getShopCountByDayAndStatus(String status, LocalDate startDate, LocalDate endDate) {
+    public Map<LocalDate, Long> getShopCountByDayAndStatus(Status status, LocalDate startDate, LocalDate endDate) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         List<Object[]> results = shopRepository.countShopsByStatusAndDay(status, startDateTime, endDateTime);

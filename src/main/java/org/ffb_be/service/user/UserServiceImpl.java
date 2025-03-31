@@ -177,7 +177,7 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
-    public Map<LocalDate, Long> getUserCountByDayAndStatus(LocalDate startDate, LocalDate endDate, String status) {
+    public Map<LocalDate, Long> getUserCountByDayAndStatus(LocalDate startDate, LocalDate endDate, Status status) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         List<Object[]> results = userRepository.countUsersByDayAndStatus(startDateTime, endDateTime, status);
@@ -195,7 +195,7 @@ public class UserServiceImpl implements UserService {
         return usersCountPerDay;
     }
 
-    public Map<String, Long> getUserCountByMonthAndStatus(LocalDate startDate, LocalDate endDate, String status) {
+    public Map<String, Long> getUserCountByMonthAndStatus(LocalDate startDate, LocalDate endDate, Status status) {
 
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
@@ -215,7 +215,7 @@ public class UserServiceImpl implements UserService {
         return usersCountPerMonth;
     }
 
-    public Map<Integer, Long> getUserCountByYearAndStatus(LocalDate startDate, LocalDate endDate, String status) {
+    public Map<Integer, Long> getUserCountByYearAndStatus(LocalDate startDate, LocalDate endDate, Status status) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         List<Object[]> results = userRepository.countUsersByYearAndStatus(startDateTime, endDateTime, status);

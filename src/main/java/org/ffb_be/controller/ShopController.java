@@ -127,37 +127,31 @@ public class ShopController {
     }
     @GetMapping("/count/day")
     public Map<LocalDate, Long> getShopCountByDayAndStatus(
-            @RequestParam("status") String status,
-            @RequestParam("startDate") String startDate,
-            @RequestParam("endDate") String endDate) {
+            @RequestParam("status") String status) {
+        Status status1=Status.valueOf(status);
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusDays(7);
 
-        LocalDate start = LocalDate.parse(startDate);
-        LocalDate end = LocalDate.parse(endDate);
-
-        return shopService.getShopCountByDayAndStatus(status, start, end);
+        return shopService.getShopCountByDayAndStatus(status1, startDate, endDate);
     }
 
     @GetMapping("/count/year")
     public Map<Integer, Long> getShopCountByYear(
-            @RequestParam("status") String status,
-            @RequestParam("startDate") String startDate,
-            @RequestParam("endDate") String endDate) {
+            @RequestParam("status") String status) {
+        Status status1=Status.valueOf(status);
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusYears(3);
 
-        LocalDate start = LocalDate.parse(startDate);
-        LocalDate end = LocalDate.parse(endDate);
-
-        return shopService.getShopCountByYear(status, start, end);
+        return shopService.getShopCountByYear(status1, startDate, endDate);
     }
     @GetMapping("/count/month")
     public Map<Integer, Long> getShopCountByMonth(
-            @RequestParam("status") String status,
-            @RequestParam("startDate") String startDate,
-            @RequestParam("endDate") String endDate) {
+            @RequestParam("status") String status) {
+        Status status1=Status.valueOf(status);
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusMonths(7);
 
-        LocalDate start = LocalDate.parse(startDate);
-        LocalDate end = LocalDate.parse(endDate);
-
-        return shopService.getShopCountByMonth(status, start, end);
+        return shopService.getShopCountByMonth(status1, startDate, endDate);
     }
     @GetMapping("/count/pending")
     public long getShopPending() {
