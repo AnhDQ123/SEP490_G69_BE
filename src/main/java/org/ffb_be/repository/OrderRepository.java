@@ -100,7 +100,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("SELECT oi.product.id, oi.product.name, SUM(oi.quantity) as totalQuantity " +
             "FROM OrderItem oi " +
             "JOIN oi.order o " +
-            "WHERE o.createdAt = CURRENT_DATE " +  // Lọc theo ngày hôm nay// Đảm bảo là trước ngày mai
+            "WHERE o.createdAt >= CAST(CURRENT_DATE AS timestamp) " +
+            "AND o.createdAt < CAST(CURRENT_DATE + 1 AS timestamp) " +
             "GROUP BY oi.product.id, oi.product.name " +
             "ORDER BY totalQuantity DESC")
     List<Object[]> findTopSellingProductsToday();
