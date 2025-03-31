@@ -89,7 +89,7 @@ public class ReportController {
         return reportService.getReportCountByYear(status, start, end,type);
     }
     @GetMapping("count/pending")
-    public Long countAllPendinReports() {
+    public Long countAllPendingReports() {
         return reportService.countAllReports();
     }
 }
