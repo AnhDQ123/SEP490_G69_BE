@@ -3,6 +3,7 @@ package org.ffb_be.controller;
 import lombok.AllArgsConstructor;
 import org.ffb_be.dto.shop.ShopDTO;
 import org.ffb_be.dto.shop.ShopRegisterDTO;
+import org.ffb_be.service.order.OrderService;
 import org.ffb_be.service.shop.ShopService;
 import org.ffb_be.utils.enums.Status;
 import org.springframework.data.domain.Page;
@@ -17,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -25,7 +27,7 @@ import java.util.Map;
 @AllArgsConstructor
 public class ShopController {
     private final ShopService shopService;
-
+    private final OrderService orderService;
     @GetMapping
     public ResponseEntity<Page<ShopDTO>> getShops(
             @RequestParam(value = "status", required = false) String status,
@@ -160,5 +162,82 @@ public class ShopController {
     @GetMapping("/count/pending")
     public long getShopPending() {
         return shopService.countPendingShop();
+    }
+    @GetMapping("/revenue/day")
+    public Map<Long, Double> calculateShopRevenueByDay(
+            @RequestParam("startDate") String startDate,
+            @RequestParam("endDate") String endDate,
+            @RequestParam("shopId") Long shopId) {
+
+        LocalDate start = LocalDate.parse(startDate);
+        LocalDate end = LocalDate.parse(endDate);
+
+        return orderService.calculateShopRevenueByDay(start, end, shopId);
+    }
+
+    // API để tính tổng doanh thu theo tháng cho cửa hàng cụ thể
+    @GetMapping("/revenue/month")
+    public Map<String, Double> calculateShopRevenueByMonth(
+            @RequestParam("startDate") String startDate,
+            @RequestParam("endDate") String endDate,
+            @RequestParam("shopId") Long shopId) {
+
+        LocalDate start = LocalDate.parse(startDate);
+        LocalDate end = LocalDate.parse(endDate);
+
+        return orderService.calculateShopRevenueByMonth(start, end, shopId);
+    }
+
+    // API để tính tổng doanh thu theo năm cho cửa hàng cụ thể
+    @GetMapping("/revenue/year")
+    public Map<Integer, Double> calculateShopRevenueByYear(
+            @RequestParam("startDate") String startDate,
+            @RequestParam("endDate") String endDate,
+            @RequestParam("shopId") Long shopId) {
+
+        LocalDate start = LocalDate.parse(startDate);
+        LocalDate end = LocalDate.parse(endDate);
+
+        return orderService.calculateShopRevenueByYear(start, end, shopId);
+    }
+    @GetMapping("/count/order/day")
+    public List<Object[]> countOrdersByStatusAndDay(
+            @RequestParam("status") String status,
+            @RequestParam("startDate") String startDate,
+            @RequestParam("endDate") String endDate,
+            @RequestParam("shopId") Long shopId) {
+
+        LocalDate start = LocalDate.parse(startDate);
+        LocalDate end = LocalDate.parse(endDate);
+
+        return orderService.countShopOrdersByStatusAndDay(status, start, end, shopId);
+    }
+
+    // API để đếm số lượng đơn hàng theo tháng cho cửa hàng cụ thể
+    @GetMapping("/count/order/month")
+    public List<Object[]> countOrdersByStatusAndMonth(
+            @RequestParam("status") String status,
+            @RequestParam("startDate") String startDate,
+            @RequestParam("endDate") String endDate,
+            @RequestParam("shopId") Long shopId) {
+
+        LocalDate start = LocalDate.parse(startDate);
+        LocalDate end = LocalDate.parse(endDate);
+
+        return orderService.countShopOrdersByStatusAndMonth(status, start, end, shopId);
+    }
+
+    // API để đếm số lượng đơn hàng theo năm cho cửa hàng cụ thể
+    @GetMapping("/count/order/year")
+    public List<Object[]> countOrdersByStatusAndYear(
+            @RequestParam("status") String status,
+            @RequestParam("startDate") String startDate,
+            @RequestParam("endDate") String endDate,
+            @RequestParam("shopId") Long shopId) {
+
+        LocalDate start = LocalDate.parse(startDate);
+        LocalDate end = LocalDate.parse(endDate);
+
+        return orderService.countShopOrdersByStatusAndYear(status, start, end, shopId);
     }
 }

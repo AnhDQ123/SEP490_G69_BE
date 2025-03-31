@@ -122,4 +122,65 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Object[]> findTopSellingProductsThisYear();
     @Query("SELECT COUNT(o) FROM Order o")
     Long countAllOrders();
+
+    @Query("SELECT o.createdAt, COUNT(o) FROM Order o " +
+            "WHERE o.status = :status " +
+            "AND o.createdAt BETWEEN :startDate AND :endDate " +
+            "AND o.shop.id = :shopId " +
+            "GROUP BY o.createdAt ORDER BY o.createdAt")
+    List<Object[]> countShopOrdersByStatusAndDay( String status,
+                                              LocalDateTime startDate,
+                                              LocalDateTime endDate,
+                                              Long shopId);
+    @Query("SELECT FUNCTION('MONTH', o.createdAt), FUNCTION('YEAR', o.createdAt), COUNT(o) " +
+            "FROM Order o WHERE o.status = :status " +
+            "AND o.createdAt BETWEEN :startDate AND :endDate " +
+            "AND o.shop.id = :shopId " +
+            "GROUP BY FUNCTION('YEAR', o.createdAt), FUNCTION('MONTH', o.createdAt) " +
+            "ORDER BY FUNCTION('YEAR', o.createdAt), FUNCTION('MONTH', o.createdAt)")
+    List<Object[]> countShopOrdersByStatusAndMonth( String status,
+                                                LocalDateTime startDate,
+                                               LocalDateTime endDate,
+                                                Long shopId);
+    @Query("SELECT FUNCTION('YEAR', o.createdAt), COUNT(o) " +
+            "FROM Order o WHERE o.status = :status " +
+            "AND o.createdAt BETWEEN :startDate AND :endDate " +
+            "AND o.shop.id = :shopId " +
+            "GROUP BY FUNCTION('YEAR', o.createdAt) " +
+            "ORDER BY FUNCTION('YEAR', o.createdAt)")
+    List<Object[]> countShopOrdersByStatusAndYear( String status,
+                                               LocalDateTime startDate,
+                                               LocalDateTime endDate,
+                                               Long shopId);
+
+    @Query("SELECT o.shop.id, SUM(o.total) " +
+            "FROM Order o " +
+            "WHERE FUNCTION('DATE', o.createdAt) BETWEEN FUNCTION('DATE', :startDate) AND FUNCTION('DATE', :endDate) " +  // Lọc theo ngày
+            "AND o.shop.id = :shopId " +
+            "GROUP BY o.shop.id")
+    List<Object[]> calculateShopRevenueByDay( LocalDateTime startDate,
+                                             LocalDateTime endDate,
+                                              Long shopId);
+
+    @Query("SELECT FUNCTION('YEAR', o.createdAt), FUNCTION('MONTH', o.createdAt), SUM(o.total) " +
+            "FROM Order o " +
+            "WHERE o.createdAt BETWEEN :startDate AND :endDate " +
+            "AND o.shop.id = :shopId " +
+            "GROUP BY FUNCTION('YEAR', o.createdAt), FUNCTION('MONTH', o.createdAt) " +
+            "ORDER BY FUNCTION('YEAR', o.createdAt), FUNCTION('MONTH', o.createdAt)")
+    List<Object[]> calculateShopRevenueByMonth( LocalDateTime startDate,
+                                                LocalDateTime endDate,
+                                                Long shopId);
+
+    @Query("SELECT FUNCTION('YEAR', o.createdAt), SUM(o.total) " +
+            "FROM Order o " +
+            "WHERE o.createdAt BETWEEN :startDate AND :endDate " +
+            "AND o.shop.id = :shopId " +
+            "GROUP BY FUNCTION('YEAR', o.createdAt) " +
+            "ORDER BY FUNCTION('YEAR', o.createdAt)")
+    List<Object[]> calculateShopRevenueByYear( LocalDateTime startDate,
+                                              LocalDateTime endDate,
+                                               Long shopId);
+
+
 }

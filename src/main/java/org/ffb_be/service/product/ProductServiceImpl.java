@@ -368,5 +368,17 @@ public class ProductServiceImpl implements ProductService {
             return productResponseDTO;
         });
     }
+    public List<Object[]> findTopSellingProductsToday(Long shopId) {
+        return productRepository.findTopSellingProductsToday(shopId);
+    }
 
+    // Tính danh sách sản phẩm bán chạy nhất trong tháng này cho cửa hàng cụ thể
+    public List<Object[]> findTopSellingProductsThisMonth(Long shopId) {
+        return productRepository.findTopSellingProductsThisMonth(shopId);
+    }
+
+    // Tính danh sách sản phẩm bán chạy nhất trong năm này cho cửa hàng cụ thể
+    public List<Object[]> findTopSellingProductsThisYear(Long shopId) {
+        return productRepository.findTopSellingProductsThisYear(shopId);
+    }
 }

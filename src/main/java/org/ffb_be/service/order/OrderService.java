@@ -45,4 +45,10 @@ public interface OrderService {
     Map<String, Long> getTopSellingProductsThisYear();
     Map<String, Long> getTopSellingProductsToday();
     Long countAllOrders();
+    List<Object[]> countShopOrdersByStatusAndYear(String status, LocalDate startDate, LocalDate endDate, Long shopId);
+    List<Object[]> countShopOrdersByStatusAndMonth(String status, LocalDate startDate, LocalDate endDate, Long shopId);
+    List<Object[]> countShopOrdersByStatusAndDay(String status, LocalDate startDate, LocalDate endDate, Long shopId);
+    Map<Integer, Double> calculateShopRevenueByYear(LocalDate startDate, LocalDate endDate, Long shopId);
+    Map<String, Double> calculateShopRevenueByMonth(LocalDate startDate, LocalDate endDate, Long shopId);
+    Map<Long, Double> calculateShopRevenueByDay(LocalDate startDate, LocalDate endDate, Long shopId);
 }

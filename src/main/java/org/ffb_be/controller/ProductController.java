@@ -114,4 +114,20 @@ public class ProductController {
         Pageable pageable = PageRequest.of(page-1, size);
         return ResponseEntity.ok( productService.findAll(pageable));
     }
+    @GetMapping("/top-selling/today")
+    public List<Object[]> findTopSellingProductsToday(@RequestParam("shopId") Long shopId) {
+        return productService.findTopSellingProductsToday(shopId);
+    }
+
+    // API để lấy sản phẩm bán chạy nhất trong tháng này cho cửa hàng cụ thể
+    @GetMapping("/top-selling/month")
+    public List<Object[]> findTopSellingProductsThisMonth(@RequestParam("shopId") Long shopId) {
+        return productService.findTopSellingProductsThisMonth(shopId);
+    }
+
+    // API để lấy sản phẩm bán chạy nhất trong năm này cho cửa hàng cụ thể
+    @GetMapping("/top-selling/year")
+    public List<Object[]> findTopSellingProductsThisYear(@RequestParam("shopId") Long shopId) {
+        return productService.findTopSellingProductsThisYear(shopId);
+    }
 }

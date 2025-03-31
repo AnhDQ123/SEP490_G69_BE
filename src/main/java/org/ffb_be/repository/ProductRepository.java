@@ -31,4 +31,32 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findAllByCategory(Category category);
 
     List<Product> findByIdIn(List<Long> ids);
+    @Query("SELECT oi.product.id, oi.product.name, SUM(oi.quantity) as totalQuantity " +
+            "FROM OrderItem oi " +
+            "JOIN oi.order o " +
+            "WHERE FUNCTION('DATE', o.createdAt) = FUNCTION('CURRENT_DATE', CURRENT_DATE) " + // Lọc theo ngày hôm nay
+            "AND o.shop.id = :shopId " +  // Lọc theo shopId
+            "GROUP BY oi.product.id, oi.product.name " +
+            "ORDER BY totalQuantity DESC")
+    List<Object[]> findTopSellingProductsToday( Long shopId);
+
+    @Query("SELECT oi.product.id, oi.product.name, SUM(oi.quantity) as totalQuantity " +
+            "FROM OrderItem oi " +
+            "JOIN oi.order o " +
+            "WHERE FUNCTION('YEAR', o.createdAt) = FUNCTION('YEAR', CURRENT_DATE) " +  // Lọc theo năm hiện tại
+            "AND FUNCTION('MONTH', o.createdAt) = FUNCTION('MONTH', CURRENT_DATE) " +  // Lọc theo tháng hiện tại
+            "AND o.shop.id = :shopId " +  // Lọc theo shopId
+            "GROUP BY oi.product.id, oi.product.name " +
+            "ORDER BY totalQuantity DESC")
+    List<Object[]> findTopSellingProductsThisMonth( Long shopId);
+
+    @Query("SELECT oi.product.id, oi.product.name, SUM(oi.quantity) as totalQuantity " +
+            "FROM OrderItem oi " +
+            "JOIN oi.order o " +
+            "WHERE FUNCTION('YEAR', o.createdAt) = FUNCTION('YEAR', CURRENT_DATE) " +  // Lọc theo năm hiện tại
+            "AND o.shop.id = :shopId " +  // Lọc theo shopId
+            "GROUP BY oi.product.id, oi.product.name " +
+            "ORDER BY totalQuantity DESC")
+    List<Object[]> findTopSellingProductsThisYear( Long shopId);
 }
+

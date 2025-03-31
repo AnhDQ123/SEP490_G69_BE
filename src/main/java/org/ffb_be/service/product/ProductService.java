@@ -21,5 +21,8 @@ public interface ProductService {
     List<ProductResponseDTO> findByCategory(String cat);
     ProductResponseDTO findById(Long id);
     List<ProductResponseDTO> findSimimlarProduct(String name);
+    List<Object[]> findTopSellingProductsToday(Long shopId);
+    List<Object[]> findTopSellingProductsThisMonth(Long shopId);
+    List<Object[]> findTopSellingProductsThisYear(Long shopId);
 }
 
