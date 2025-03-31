@@ -4,7 +4,10 @@ package org.ffb_be.controller;
 import lombok.RequiredArgsConstructor;
 import org.ffb_be.dto.auth.userDto.UserCreateDTO;
 import org.ffb_be.dto.auth.userDto.UserUpdateDTO;
+import org.ffb_be.entity.Shop;
+import org.ffb_be.entity.User;
 import org.ffb_be.repository.ProfileRepository;
+import org.ffb_be.repository.ShopRepository;
 import org.ffb_be.repository.UserRepository;
 import org.ffb_be.service.user.UserService;
 import org.ffb_be.utils.enums.Status;
@@ -29,7 +32,7 @@ public class UserController {
     private final UserRepository userRepository;
     private final ProfileRepository profileRepository;
     private final UserService userService;
-
+    private final ShopRepository shopRepository;
     @GetMapping("/{id}")
     public ResponseEntity<?> getUserById(@PathVariable Long id) {
         return ResponseEntity.ok( userService.findById(id));
@@ -115,5 +118,25 @@ public class UserController {
     @GetMapping("/count/all")
     public long getAllUserCount() {
         return userService.countAllUser();
+    }
+
+    @GetMapping("/shop")
+    public ResponseEntity<?> getUserShop(@RequestParam("id") Long id) {
+        User user=userRepository.findById(id).orElse(null);
+        Shop shop=shopRepository.findByOwnerId(user.getId()).orElse(null);
+        String status=userService.hasShop(id);
+        if(status==null) {
+            return ResponseEntity.badRequest().body("No such user");
+        }
+        if(status.equals("inactive")) {
+            return ResponseEntity.ok().body("Shop has been inactived");
+        }
+        if(status.equals("active")) {
+            return ResponseEntity.ok().body(shop.getId());
+        }
+        if(status.equals("pending")) {
+            return ResponseEntity.ok().body("Shop is pending");
+        }
+        return ResponseEntity.ok().body("");
     }
 }

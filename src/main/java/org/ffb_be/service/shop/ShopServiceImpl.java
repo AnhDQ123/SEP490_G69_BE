@@ -6,11 +6,13 @@ import org.ffb_be.dto.auth.userDto.OwnerDTO;
 import org.ffb_be.dto.shop.ShopDTO;
 import org.ffb_be.dto.shop.ShopRegisterDTO;
 import org.ffb_be.entity.Profile;
+import org.ffb_be.entity.Role;
 import org.ffb_be.entity.Shop;
 import org.ffb_be.entity.User;
 import org.ffb_be.exception.BadRequestException;
 import org.ffb_be.exception.NotFoundException;
 import org.ffb_be.repository.ProfileRepository;
+import org.ffb_be.repository.RoleRepository;
 import org.ffb_be.repository.ShopRepository;
 import org.ffb_be.repository.UserRepository;
 import org.ffb_be.utils.EncryptUtil;
@@ -42,6 +44,7 @@ public class ShopServiceImpl implements ShopService {
     private final ProfileRepository profileRepository;
     private final CloudinaryUpload cloudinaryUpload;
     private final EncryptUtil encryptUtil;
+    private final RoleRepository roleRepository;
 
     @Override
     public Page<ShopDTO> getShops(String type, String status, String search, Pageable pageable) {
@@ -223,6 +226,10 @@ public class ShopServiceImpl implements ShopService {
         if(shop.getIsActive() != Status.PENDING){
             throw new BadRequestException("Shop không ở trạng thái chờ duyệt");
         }
+        User user=userRepository.findById(shop.getOwner().getId()).get();
+        Role role=roleRepository.findById(2L).get();
+        user.setRole(role);
+        userRepository.save(user);
         shop.setIsActive(Status.ACTIVE);
         shopRepository.save(shop);
     }
