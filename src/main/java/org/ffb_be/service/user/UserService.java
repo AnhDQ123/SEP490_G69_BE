@@ -28,5 +28,6 @@ public interface UserService {
     long countUsersAreShipper();
     long countUsersHaveShop();
     long countPendingShipper();
+    long countAllUser();
 }
 
