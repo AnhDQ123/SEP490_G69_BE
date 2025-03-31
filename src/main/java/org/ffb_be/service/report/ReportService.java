@@ -21,5 +21,6 @@ public interface ReportService {
     Map<Integer, Long> getReportCountByYear(String status, LocalDate startDate, LocalDate endDate,Long type);
     Map<String, Long> getReportCountByMonth(String status, LocalDate startDate, LocalDate endDate,Long type);
     Map<LocalDate, Long> getReportCountByDay(String status, LocalDate startDate, LocalDate endDate,Long type);
+    Long countAllReports();
 
 }

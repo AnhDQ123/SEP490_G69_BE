@@ -571,6 +571,10 @@ public class OrderServiceImpl implements OrderService {
 
         return topSellingProducts;
     }
+    // Đếm số lượng đơn hàng
+    public Long countAllOrders() {
+        return orderRepository.countAllOrders();
+    }
 }
 
 

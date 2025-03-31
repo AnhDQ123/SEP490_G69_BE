@@ -57,5 +57,5 @@ public interface ShopService {
     Map<Integer, Long> getShopCountByYear(String status, LocalDate startDate, LocalDate endDate);
     Map<Integer, Long> getShopCountByMonth(String status, LocalDate startDate, LocalDate endDate);
     Map<LocalDate, Long> getShopCountByDayAndStatus(String status, LocalDate startDate, LocalDate endDate);
-
+    long countPendingShop();
 }

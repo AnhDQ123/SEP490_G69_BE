@@ -50,4 +50,6 @@ public interface ShopRepository extends JpaRepository<Shop, Long>, JpaSpecificat
     List<Object[]> countShopsByStatusAndYear( String status,
                                               LocalDateTime startDate,
                                               LocalDateTime endDate);
+    @Query("SELECT COUNT(u) FROM Shop u WHERE u.isActive = 'PENDING'")
+    long countPendingShop();
 }

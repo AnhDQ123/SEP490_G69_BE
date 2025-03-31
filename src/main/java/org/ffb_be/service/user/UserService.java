@@ -27,5 +27,6 @@ public interface UserService {
     Map<Integer, Long> getUserCountByYearAndStatus(LocalDate startDate, LocalDate endDate,String status);
     long countUsersAreShipper();
     long countUsersHaveShop();
+    long countPendingShipper();
 }
 

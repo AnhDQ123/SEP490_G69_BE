@@ -214,4 +214,7 @@ public class ReportServiceImpl implements ReportService {
 
         return reportCountPerYear;
     }
+    public Long countAllReports() {
+        return reportRepository.countAllReports();
+    }
 }

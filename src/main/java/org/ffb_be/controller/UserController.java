@@ -114,4 +114,8 @@ public class UserController {
     public long getUserAreShipperCount() {
         return userService.countUsersAreShipper();
     }
+    @GetMapping("/count/pendingshipper")
+    public long getPendingShipper() {
+        return userService.countPendingShipper();
+    }
 }

@@ -44,4 +44,5 @@ public interface OrderService {
     Map<String, Long> getTopSellingProductsThisMonth();
     Map<String, Long> getTopSellingProductsThisYear();
     Map<String, Long> getTopSellingProductsToday();
+    Long countAllOrders();
 }

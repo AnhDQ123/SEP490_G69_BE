@@ -71,5 +71,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     long countUsersAreShipper();
     @Query("SELECT COUNT(u) FROM User u WHERE u.role.id = 2")
     long countUsersHaveShop();
+    @Query("SELECT COUNT(u) FROM User u WHERE u.shipperStatus = 'PENDING'")
+    long countPendingShipper();
 }
 

@@ -88,4 +88,8 @@ public class ReportController {
 
         return reportService.getReportCountByYear(status, start, end,type);
     }
+    @GetMapping("count/reports")
+    public Long countAllReports() {
+        return reportService.countAllReports();
+    }
 }

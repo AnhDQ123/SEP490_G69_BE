@@ -120,4 +120,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "GROUP BY oi.product.id, oi.product.name " +
             "ORDER BY totalQuantity DESC")
     List<Object[]> findTopSellingProductsThisYear();
+    @Query("SELECT COUNT(o) FROM Order o")
+    Long countAllOrders();
 }

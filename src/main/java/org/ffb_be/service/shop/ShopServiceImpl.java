@@ -373,4 +373,7 @@ public class ShopServiceImpl implements ShopService {
 
         return shopCountPerDay;
     }
+    public long countPendingShop() {
+        return shopRepository.countPendingShop();
+    }
 }

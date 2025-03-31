@@ -186,4 +186,9 @@ public class OrderController {
     public Map<String, Long> getTopSellingProductsThisYear() {
         return orderService.getTopSellingProductsThisYear();
     }
+    @GetMapping("/count/orders")
+    public Long countAllOrders() {
+        return orderService.countAllOrders();
+    }
+
 }

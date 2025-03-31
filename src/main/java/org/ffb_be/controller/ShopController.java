@@ -157,4 +157,8 @@ public class ShopController {
 
         return shopService.getShopCountByMonth(status, start, end);
     }
+    @GetMapping("/count/pending")
+    public long getShopPending() {
+        return shopService.countPendingShop();
+    }
 }

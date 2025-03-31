@@ -239,5 +239,7 @@ public class UserServiceImpl implements UserService {
     public long countUsersHaveShop() {
         return userRepository.countUsersHaveShop();
     }
-
+    public long countPendingShipper() {
+        return userRepository.countPendingShipper();
+    }
 }
