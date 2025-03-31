@@ -104,7 +104,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "AND o.createdAt < :endDate " +
             "GROUP BY oi.product.id, oi.product.name " +
             "ORDER BY totalQuantity DESC")
-    List<Object[]> findTopSellingProductsToday(LocalDateTime startDate, LocalDateTime endDate);
+    List<Object[]> findTopSellingProductsToday(LocalDateTime startDate, LocalDateTime endDate,Pageable pageable);
     @Query("SELECT oi.product.id, oi.product.name, SUM(oi.quantity) as totalQuantity, SUM(oi.unitPrice) AS totalValue " +
             "FROM OrderItem oi " +
             "JOIN oi.order o " +
@@ -112,7 +112,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "AND FUNCTION('MONTH', o.createdAt) = FUNCTION('MONTH', CURRENT_DATE) " +  // Lọc theo tháng hiện tại
             "GROUP BY oi.product.id, oi.product.name " +
             "ORDER BY totalQuantity DESC")
-    List<Object[]> findTopSellingProductsThisMonth();
+    List<Object[]> findTopSellingProductsThisMonth(Pageable pageable);
 
     @Query("SELECT oi.product.id, oi.product.name, SUM(oi.quantity) as totalQuantity, SUM(oi.unitPrice) AS totalValue " +
             "FROM OrderItem oi " +
@@ -120,7 +120,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "WHERE FUNCTION('YEAR', o.createdAt) = FUNCTION('YEAR', CURRENT_DATE) " +  // Lọc theo năm hiện tại
             "GROUP BY oi.product.id, oi.product.name " +
             "ORDER BY totalQuantity DESC")
-    List<Object[]> findTopSellingProductsThisYear();
+    List<Object[]> findTopSellingProductsThisYear(Pageable pageable);
     @Query("SELECT COUNT(o) FROM Order o")
     Long countAllOrders();
 
