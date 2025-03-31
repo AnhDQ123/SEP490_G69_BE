@@ -23,6 +23,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 
 @RequiredArgsConstructor
@@ -383,7 +386,14 @@ public class ProductServiceImpl implements ProductService {
 
     // Tính danh sách sản phẩm bán chạy nhất trong tháng này cho cửa hàng cụ thể
     public List<Object[]> findTopSellingProductsThisMonth(Long shopId) {
-        return productRepository.findTopSellingProductsThisMonth(shopId);
+        LocalDate currentDate = LocalDate.now();
+        LocalDate firstDayOfMonth = currentDate.with(TemporalAdjusters.firstDayOfMonth());  // Ngày đầu tháng
+        LocalDate lastDayOfMonth = currentDate.with(TemporalAdjusters.lastDayOfMonth());    // Ngày cuối tháng
+
+        // Chuyển các ngày thành LocalDateTime
+        LocalDateTime startOfMonth = firstDayOfMonth.atStartOfDay();
+        LocalDateTime endOfMonth = lastDayOfMonth.atTime(23, 59, 59);
+        return productRepository.findTopSellingProductsThisMonth(shopId,startOfMonth,endOfMonth);
     }
 
     // Tính danh sách sản phẩm bán chạy nhất trong năm này cho cửa hàng cụ thể
