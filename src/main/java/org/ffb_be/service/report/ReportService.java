@@ -18,8 +18,8 @@ public interface ReportService {
     void addToReport(Long id,List<MultipartFile> option) throws IOException;
     Page<ReportViewDTO> findAllByShop(Long id,int page,int size);
     Page<ReportViewDTO> findAll(int page,int size);
-    Map<Integer, Long> getReportCountByYear(String status, LocalDate startDate, LocalDate endDate);
-    Map<String, Long> getReportCountByMonth(String status, LocalDate startDate, LocalDate endDate);
-    Map<LocalDate, Long> getReportCountByDay(String status, LocalDate startDate, LocalDate endDate);
+    Map<Integer, Long> getReportCountByYear(String status, LocalDate startDate, LocalDate endDate,Long type);
+    Map<String, Long> getReportCountByMonth(String status, LocalDate startDate, LocalDate endDate,Long type);
+    Map<LocalDate, Long> getReportCountByDay(String status, LocalDate startDate, LocalDate endDate,Long type);
 
 }

@@ -19,26 +19,31 @@ public interface ReportRepository extends JpaRepository<Report,Long> {
     Page<Report> findReportsByShopId(Long shopId, Pageable pageable);
 
     @Query("SELECT r.createdAt, COUNT(r) FROM Report r WHERE r.status = :status " +
-            "AND r.type.id = 5 AND r.createdAt BETWEEN :startDate AND :endDate " +
+            "AND r.type.id =:type AND r.createdAt BETWEEN :startDate AND :endDate " +
             "GROUP BY r.createdAt ORDER BY r.createdAt")
     List<Object[]> countShopReportsByStatusAndDay(String status,
                                                        LocalDateTime startDate,
-                                                       LocalDateTime endDate);
+                                                       LocalDateTime endDate,
+                                                       Long type);
     @Query("SELECT FUNCTION('MONTH', r.createdAt), FUNCTION('YEAR', r.createdAt), COUNT(r) FROM Report r " +
-            "WHERE r.status = :status AND r.type.id = 5 " +
+            "WHERE r.status = :status AND r.type.id = :type " +
             "AND r.createdAt BETWEEN :startDate AND :endDate " +
             "GROUP BY FUNCTION('YEAR', r.createdAt), FUNCTION('MONTH', r.createdAt) " +
             "ORDER BY FUNCTION('YEAR', r.createdAt), FUNCTION('MONTH', r.createdAt)")
     List<Object[]> countReportsByStatusAndTypeIdAndMonth( String status,
                                                           LocalDateTime startDate,
-                                                          LocalDateTime endDate);
+                                                          LocalDateTime endDate,
+                                                            Long type);
 
     @Query("SELECT FUNCTION('YEAR', r.createdAt), COUNT(r) FROM Report r " +
-            "WHERE r.status = :status AND r.type.id = 5 " +
+            "WHERE r.status = :status AND r.type.id = :type " +
             "AND r.createdAt BETWEEN :startDate AND :endDate " +
             "GROUP BY FUNCTION('YEAR', r.createdAt) " +
             "ORDER BY FUNCTION('YEAR', r.createdAt)")
     List<Object[]> countReportsByStatusAndTypeIdAndYear(String status,
                                                         LocalDateTime startDate,
-                                                        LocalDateTime endDate);
+                                                        LocalDateTime endDate,
+                                                        Long type);
+
+
 }

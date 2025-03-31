@@ -56,33 +56,36 @@ public class ReportController {
     public Map<LocalDate, Long> getReportCountByDay(
             @RequestParam("status") String status,
             @RequestParam("startDate") String startDate,
-            @RequestParam("endDate") String endDate) {
+            @RequestParam("endDate") String endDate,
+            @RequestParam("type") Long type) {
 
         LocalDate start = LocalDate.parse(startDate);
         LocalDate end = LocalDate.parse(endDate);
 
-        return reportService.getReportCountByDay(status, start, end);
+        return reportService.getReportCountByDay(status, start, end,type);
     }
     @GetMapping("/count/month")
     public Map<String, Long> getReportCountByMonth(
             @RequestParam("status") String status,
             @RequestParam("startDate") String startDate,
-            @RequestParam("endDate") String endDate) {
+            @RequestParam("endDate") String endDate,
+            @RequestParam("type") Long type) {
 
         LocalDate start = LocalDate.parse(startDate);
         LocalDate end = LocalDate.parse(endDate);
 
-        return reportService.getReportCountByMonth(status, start, end);
+        return reportService.getReportCountByMonth(status, start, end,type);
     }
     @GetMapping("/count/year")
     public Map<Integer, Long> getReportCountByYear(
             @RequestParam("status") String status,
             @RequestParam("startDate") String startDate,
-            @RequestParam("endDate") String endDate) {
+            @RequestParam("endDate") String endDate,
+            @RequestParam("type") Long type) {
 
         LocalDate start = LocalDate.parse(startDate);
         LocalDate end = LocalDate.parse(endDate);
 
-        return reportService.getReportCountByYear(status, start, end);
+        return reportService.getReportCountByYear(status, start, end,type);
     }
 }
