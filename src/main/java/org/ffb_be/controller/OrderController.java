@@ -1,6 +1,7 @@
 package org.ffb_be.controller;
 
 import org.ffb_be.dto.CountDTOBy.CountByDateDTO;
+import org.ffb_be.dto.CountDTOBy.CountByMonthDTO;
 import org.ffb_be.dto.order.CountDTO;
 import org.ffb_be.dto.order.OrderDTO;
 import org.ffb_be.dto.order.ReturnOrderDTO;
@@ -151,7 +152,7 @@ public class OrderController {
         return orderService.getOrderCountByStatusAndDay(orderStatus, startDate, endDate);
     }
     @GetMapping("/count/month")
-    public List<CountByDateDTO> getOrderCountByStatusAndMonth(
+    public List<CountByMonthDTO> getOrderCountByStatusAndMonth(
             @RequestParam("status") String status) {
         OrderStatus orderStatus = OrderStatus.valueOf(status);
         LocalDate endDate = LocalDate.now();
@@ -161,7 +162,7 @@ public class OrderController {
     }
 
     @GetMapping("/count/year")
-    public List<CountByDateDTO> getOrderCountByStatusAndYear(
+    public List<CountByMonthDTO> getOrderCountByStatusAndYear(
             @RequestParam("status") String status) {
         OrderStatus orderStatus = OrderStatus.valueOf(status);
         LocalDate endDate = LocalDate.now();

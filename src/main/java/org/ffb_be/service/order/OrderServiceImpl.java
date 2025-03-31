@@ -3,6 +3,7 @@ package org.ffb_be.service.order;
 
 import lombok.RequiredArgsConstructor;
 import org.ffb_be.dto.CountDTOBy.CountByDateDTO;
+import org.ffb_be.dto.CountDTOBy.CountByMonthDTO;
 import org.ffb_be.dto.image.ImageDTO;
 import org.ffb_be.dto.order.*;
 import org.ffb_be.dto.product.TopProductDTO;
@@ -474,31 +475,36 @@ public class OrderServiceImpl implements OrderService {
         }
         return dto;
     }
-        public List<CountByDateDTO> getOrderCountByStatusAndYear(OrderStatus status, LocalDate startDate, LocalDate endDate) {
+        public List<CountByMonthDTO> getOrderCountByStatusAndYear(OrderStatus status, LocalDate startDate, LocalDate endDate) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         List<Object[]> results = orderRepository.countOrdersByStatusAndYear(status, startDateTime, endDateTime);
-            List<CountByDateDTO> countByDateDTOS = new ArrayList<>();
-        for (Object[] result : results) {
-                CountByDateDTO countByDateDTO = new CountByDateDTO();
-                countByDateDTO.setDate((LocalDateTime) result[0]);
-                countByDateDTO.setCount((Long) result[1]);
-            countByDateDTOS.add(countByDateDTO);
+            List<CountByMonthDTO> countByMonthDTOS = new ArrayList<>();
+
+            // Chuyển đổi kết quả thành Map với tháng là key và số lượng shop là value
+            for (Object[] result : results) {
+                CountByMonthDTO countByMonthDTO = new CountByMonthDTO();
+                countByMonthDTO.setMonth((Integer) result[0]);
+                countByMonthDTO.setCount((Long) result[1]);
+                countByMonthDTOS.add(countByMonthDTO);
             }
-        return countByDateDTOS;
+            return countByMonthDTOS;
     }
-    public List<CountByDateDTO> getOrderCountByStatusAndMonth(OrderStatus status, LocalDate startDate, LocalDate endDate) {
+    public List<CountByMonthDTO> getOrderCountByStatusAndMonth(OrderStatus status, LocalDate startDate, LocalDate endDate) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         List<Object[]> results = orderRepository.countOrdersByStatusAndMonth(status, startDateTime, endDateTime);
-        List<CountByDateDTO> countByDateDTOS = new ArrayList<>();
+        List<CountByMonthDTO> countByMonthDTOS = new ArrayList<>();
+
+        // Chuyển đổi kết quả thành Map với tháng là key và số lượng shop là value
         for (Object[] result : results) {
-            CountByDateDTO countByDateDTO = new CountByDateDTO();
-            countByDateDTO.setDate((LocalDateTime) result[0]);
-            countByDateDTO.setCount((Long) result[1]);
-            countByDateDTOS.add(countByDateDTO);
+            CountByMonthDTO countByMonthDTO = new CountByMonthDTO();
+            countByMonthDTO.setMonth((Integer) result[0]);
+            countByMonthDTO.setCount((Long) result[1]);
+            countByMonthDTOS.add(countByMonthDTO);
         }
-        return countByDateDTOS;
+
+        return countByMonthDTOS;
     }
     public List<CountByDateDTO> getOrderCountByStatusAndDay(OrderStatus status, LocalDate startDate, LocalDate endDate) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
