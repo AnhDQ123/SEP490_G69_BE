@@ -474,56 +474,26 @@ public class OrderServiceImpl implements OrderService {
         }
         return dto;
     }
-        public Map<Integer, Long> getOrderCountByStatusAndYear(OrderStatus status, LocalDate startDate, LocalDate endDate) {
+        public List<Object[]> getOrderCountByStatusAndYear(OrderStatus status, LocalDate startDate, LocalDate endDate) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         List<Object[]> results = orderRepository.countOrdersByStatusAndYear(status, startDateTime, endDateTime);
 
-        Map<Integer, Long> orderCountPerYear = new TreeMap<>();
-
-        for (Object[] result : results) {
-            int year = (Integer) result[0];  // Năm
-            Long count = (Long) result[1];   // Số lượng đơn hàng
-
-            orderCountPerYear.put(year, count);
-        }
-
-        return orderCountPerYear;
+        return results;
     }
-    public Map<String, Long> getOrderCountByStatusAndMonth(OrderStatus status, LocalDate startDate, LocalDate endDate) {
+    public List<Object[]> getOrderCountByStatusAndMonth(OrderStatus status, LocalDate startDate, LocalDate endDate) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         List<Object[]> results = orderRepository.countOrdersByStatusAndMonth(status, startDateTime, endDateTime);
-
-        Map<String, Long> orderCountPerMonth = new TreeMap<>();
-
-        // Chuyển đổi kết quả thành Map với "YYYY-MM" là key và số lượng đơn hàng là value
-        for (Object[] result : results) {
-            int month = (Integer) result[0];  // Tháng
-            int year = (Integer) result[1];   // Năm
-            Long count = (Long) result[2];    // Số lượng đơn hàng
-
-            String monthYear = year + "-" + String.format("%02d", month);  // Định dạng "YYYY-MM"
-            orderCountPerMonth.put(monthYear, count);
-        }
-
-        return orderCountPerMonth;
+        return results;
     }
-    public Map<LocalDateTime, Long> getOrderCountByStatusAndDay(OrderStatus status, LocalDate startDate, LocalDate endDate) {
+    public List<Object[]> getOrderCountByStatusAndDay(OrderStatus status, LocalDate startDate, LocalDate endDate) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         List<Object[]> results = orderRepository.countOrdersByStatusAndDay(status, startDateTime, endDateTime);
 
-        Map<LocalDateTime, Long> orderCountPerDay = new TreeMap<>();
 
-        for (Object[] result : results) {
-            LocalDateTime date = (LocalDateTime) result[0];  // Ngày
-            Long count = (Long) result[1];                   // Số lượng đơn hàng
-
-            orderCountPerDay.put(date, count);
-        }
-
-        return orderCountPerDay;
+        return results;
     }
     public  List<TopProductDTO> getTopSellingProductsToday() {
         LocalDate currentDate = LocalDate.now();
