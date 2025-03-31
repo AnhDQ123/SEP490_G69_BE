@@ -11,6 +11,7 @@ import org.ffb_be.utils.enums.upload.CloudinaryUpload;
 import org.ffb_be.utils.mapping.OrderMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -530,7 +531,8 @@ public class OrderServiceImpl implements OrderService {
         // Lấy thời gian bắt đầu và kết thúc của ngày hôm nay
         LocalDateTime startOfDay = currentDate.atStartOfDay();  // 00:00:00
         LocalDateTime endOfDay = currentDate.atTime(23, 59, 59);
-        List<Object[]> results = orderRepository.findTopSellingProductsToday(startOfDay,endOfDay);
+        Pageable pageable = PageRequest.of(0, 10);
+        List<Object[]> results = orderRepository.findTopSellingProductsToday(startOfDay,endOfDay,pageable);
 
         Map<String, Long> topSellingProducts = new TreeMap<>();
 

@@ -97,14 +97,14 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Object[]> countOrdersByStatusAndYear( String status,
                                                LocalDateTime startDate,
                                                LocalDateTime endDate);
-    @Query("SELECT oi.product.id, oi.product.name, SUM(oi.quantity) as totalQuantity " +
+    @Query("SELECT oi.product.id, oi.product.name, SUM(oi.quantity) AS totalQuantity, SUM(oi.quantity * oi.unitPrice) AS totalValue " +
             "FROM OrderItem oi " +
             "JOIN oi.order o " +
             "WHERE o.createdAt >= :startDate " +
             "AND o.createdAt < :endDate " +
             "GROUP BY oi.product.id, oi.product.name " +
             "ORDER BY totalQuantity DESC")
-    List<Object[]> findTopSellingProductsToday(LocalDateTime startDate, LocalDateTime endDate);
+    List<Object[]> findTopSellingProductsToday(LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
     @Query("SELECT oi.product.id, oi.product.name, SUM(oi.quantity) as totalQuantity " +
             "FROM OrderItem oi " +
             "JOIN oi.order o " +
