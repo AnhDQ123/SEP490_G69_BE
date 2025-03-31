@@ -145,8 +145,9 @@ public class OrderController {
     public Map<LocalDateTime, Long> getOrderCountByStatusAndDay(
             @RequestParam("status") String status) {
         OrderStatus orderStatus = OrderStatus.valueOf(status);
-        LocalDate startDate = LocalDate.now();
-        LocalDate endDate = startDate.minusDays(7);
+
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusDays(7);
 
         return orderService.getOrderCountByStatusAndDay(orderStatus, startDate, endDate);
     }
@@ -154,8 +155,8 @@ public class OrderController {
     public Map<String, Long> getOrderCountByStatusAndMonth(
             @RequestParam("status") String status) {
 
-        LocalDate startDate = LocalDate.now();
-        LocalDate endDate = startDate.minusMonths(7);
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusMonths(7);
 
         return orderService.getOrderCountByStatusAndMonth(status, startDate, endDate);
     }
@@ -164,8 +165,8 @@ public class OrderController {
     public Map<Integer, Long> getOrderCountByStatusAndYear(
             @RequestParam("status") String status) {
 
-        LocalDate startDate = LocalDate.now();
-        LocalDate endDate = startDate.minusYears(3);
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusYears(3);
 
         return orderService.getOrderCountByStatusAndYear(status, startDate, endDate);
     }
