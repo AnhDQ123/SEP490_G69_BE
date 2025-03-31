@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.tuple.Pair;
 import org.ffb_be.dto.image.ImageDTO;
 import org.ffb_be.dto.order.*;
+import org.ffb_be.dto.product.TopProductDTO;
 import org.ffb_be.entity.*;
 import org.ffb_be.exception.NotFoundException;
 import org.ffb_be.repository.*;
@@ -524,7 +525,7 @@ public class OrderServiceImpl implements OrderService {
 
         return orderCountPerDay;
     }
-    public  Map<String, Pair<Long, BigDecimal>> getTopSellingProductsToday() {
+    public  List<TopProductDTO> getTopSellingProductsToday() {
         LocalDate currentDate = LocalDate.now();
 
         // Lấy thời gian bắt đầu và kết thúc của ngày hôm nay
@@ -533,49 +534,49 @@ public class OrderServiceImpl implements OrderService {
         Pageable pageable = PageRequest.of(0, 5);
         List<Object[]> results = orderRepository.findTopSellingProductsToday(startOfDay,endOfDay,pageable);
 
-        Map<String, Pair<Long, BigDecimal>> topSellingProducts = new TreeMap<>();
+        List<TopProductDTO> topSellingProducts = new ArrayList<>();
 
         // Chuyển đổi kết quả thành Map với key là "productName" và value là "totalQuantity"
         for (Object[] result : results) {
-            String productKey = (String) result[1];  // Tên sản phẩm
-            Long totalQuantity = (Long) result[2];  // Số lượng bán được
-            BigDecimal totalValue = (BigDecimal) result[3];
-            topSellingProducts.put(productKey,  Pair.of(totalQuantity, totalValue));
+            TopProductDTO topProductDTO = new TopProductDTO();
+            topProductDTO.setName((String) result[1]);
+            topProductDTO.setTotalQuantity((Long) result[2]);
+            topProductDTO.setTotalValue((BigDecimal) result[3]);
+            topSellingProducts.add(topProductDTO);
         }
 
         return topSellingProducts;
     }
-    public  Map<String, Pair<Long, BigDecimal>> getTopSellingProductsThisMonth() {
+    public  List<TopProductDTO> getTopSellingProductsThisMonth() {
         Pageable pageable = PageRequest.of(0, 5);
         List<Object[]> results = orderRepository.findTopSellingProductsThisMonth(pageable);
 
-        Map<String, Pair<Long, BigDecimal>> topSellingProducts = new TreeMap<>();
+        List<TopProductDTO> topSellingProducts = new ArrayList<>();
 
         // Chuyển đổi kết quả thành Map với key là "productName" và value là "totalQuantity"
         for (Object[] result : results) {
-            String productKey = (String) result[1];  // Tên sản phẩm
-            Long totalQuantity = (Long) result[2];
-            BigDecimal total=(BigDecimal) result[3]; // Số lượng bán được
-
-            topSellingProducts.put(productKey,  Pair.of(totalQuantity, total));
+            TopProductDTO topProductDTO = new TopProductDTO();
+            topProductDTO.setName((String) result[1]);
+            topProductDTO.setTotalQuantity((Long) result[2]);
+            topProductDTO.setTotalValue((BigDecimal) result[3]);
+            topSellingProducts.add(topProductDTO);
         }
 
         return topSellingProducts;
     }
 
     // Phương thức để lấy danh sách sản phẩm bán chạy nhất trong năm nay
-    public Map<String, Pair<Long, BigDecimal>> getTopSellingProductsThisYear() {
+    public List<TopProductDTO> getTopSellingProductsThisYear() {
         Pageable pageable = PageRequest.of(0, 5);
         List<Object[]> results = orderRepository.findTopSellingProductsThisYear(pageable);
-
-        Map<String, Pair<Long, BigDecimal>> topSellingProducts = new TreeMap<>();
-
+        List<TopProductDTO> topSellingProducts = new ArrayList<>();
         // Chuyển đổi kết quả thành Map với key là "productName" và value là "totalQuantity"
         for (Object[] result : results) {
-            String productKey = (String) result[1];  // Tên sản phẩm
-            Long totalQuantity = (Long) result[2];  // Số lượng bán được
-            BigDecimal total=(BigDecimal) result[3];
-            topSellingProducts.put(productKey, Pair.of(totalQuantity, total));
+            TopProductDTO topProductDTO = new TopProductDTO();
+            topProductDTO.setName((String) result[1]);
+            topProductDTO.setTotalQuantity((Long) result[2]);
+            topProductDTO.setTotalValue((BigDecimal) result[3]);
+            topSellingProducts.add(topProductDTO);
         }
 
         return topSellingProducts;

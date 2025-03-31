@@ -4,6 +4,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.ffb_be.dto.order.CountDTO;
 import org.ffb_be.dto.order.OrderDTO;
 import org.ffb_be.dto.order.ReturnOrderDTO;
+import org.ffb_be.dto.product.TopProductDTO;
 import org.ffb_be.entity.Order;
 import org.ffb_be.service.order.OrderService;
 import org.ffb_be.utils.enums.OrderStatus;
@@ -175,17 +176,17 @@ public class OrderController {
         return orderService.getOrderCountByStatusAndYear(status, start, end);
     }
     @GetMapping("/top-selling/today")
-    public Map<String, Pair<Long, BigDecimal>> getTopSellingProductsToday() {
+    public List<TopProductDTO> getTopSellingProductsToday() {
         return orderService.getTopSellingProductsToday();
     }
     @GetMapping("/top-selling/month")
-    public Map<String, Pair<Long, BigDecimal>> getTopSellingProductsThisMonth() {
+    public List<TopProductDTO> getTopSellingProductsThisMonth() {
         return orderService.getTopSellingProductsThisMonth();
     }
 
     // API để lấy sản phẩm bán chạy nhất trong năm nay
     @GetMapping("/top-selling/year")
-    public Map<String, Pair<Long, BigDecimal>> getTopSellingProductsThisYear() {
+    public List<TopProductDTO> getTopSellingProductsThisYear() {
         return orderService.getTopSellingProductsThisYear();
     }
     @GetMapping("/count/orders")
