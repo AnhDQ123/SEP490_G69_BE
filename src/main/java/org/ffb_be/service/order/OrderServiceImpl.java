@@ -1,6 +1,8 @@
 package org.ffb_be.service.order;
 
+
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.tuple.Pair;
 import org.ffb_be.dto.image.ImageDTO;
 import org.ffb_be.dto.order.*;
 import org.ffb_be.entity.*;
@@ -525,7 +527,7 @@ public class OrderServiceImpl implements OrderService {
 
         return orderCountPerDay;
     }
-    public Map<String, Long> getTopSellingProductsToday() {
+    public  Map<String, Pair<Long, BigDecimal>> getTopSellingProductsToday() {
         LocalDate currentDate = LocalDate.now();
 
         // Lấy thời gian bắt đầu và kết thúc của ngày hôm nay
@@ -534,46 +536,49 @@ public class OrderServiceImpl implements OrderService {
         Pageable pageable = PageRequest.of(0, 10);
         List<Object[]> results = orderRepository.findTopSellingProductsToday(startOfDay,endOfDay,pageable);
 
-        Map<String, Long> topSellingProducts = new TreeMap<>();
+        Map<String, Pair<Long, BigDecimal>> topSellingProducts = new TreeMap<>();
 
         // Chuyển đổi kết quả thành Map với key là "productName" và value là "totalQuantity"
         for (Object[] result : results) {
             String productKey = (String) result[1];  // Tên sản phẩm
             Long totalQuantity = (Long) result[2];  // Số lượng bán được
-
-            topSellingProducts.put(productKey, totalQuantity);
+            BigDecimal totalValue = (BigDecimal) result[3];
+            topSellingProducts.put(productKey,  Pair.of(totalQuantity, totalValue));
         }
 
         return topSellingProducts;
     }
-    public Map<String, Long> getTopSellingProductsThisMonth() {
-        List<Object[]> results = orderRepository.findTopSellingProductsThisMonth();
+    public  Map<String, Pair<Long, BigDecimal>> getTopSellingProductsThisMonth() {
+        Pageable pageable = PageRequest.of(0, 10);
+        List<Object[]> results = orderRepository.findTopSellingProductsThisMonth(pageable);
 
-        Map<String, Long> topSellingProducts = new TreeMap<>();
+        Map<String, Pair<Long, BigDecimal>> topSellingProducts = new TreeMap<>();
 
         // Chuyển đổi kết quả thành Map với key là "productName" và value là "totalQuantity"
         for (Object[] result : results) {
             String productKey = (String) result[1];  // Tên sản phẩm
-            Long totalQuantity = (Long) result[2];  // Số lượng bán được
+            Long totalQuantity = (Long) result[2];
+            BigDecimal total=(BigDecimal) result[3]; // Số lượng bán được
 
-            topSellingProducts.put(productKey, totalQuantity);
+            topSellingProducts.put(productKey,  Pair.of(totalQuantity, total));
         }
 
         return topSellingProducts;
     }
 
     // Phương thức để lấy danh sách sản phẩm bán chạy nhất trong năm nay
-    public Map<String, Long> getTopSellingProductsThisYear() {
-        List<Object[]> results = orderRepository.findTopSellingProductsThisYear();
+    public Map<String, Pair<Long, BigDecimal>> getTopSellingProductsThisYear() {
+        Pageable pageable = PageRequest.of(0, 10);
+        List<Object[]> results = orderRepository.findTopSellingProductsThisYear(pageable);
 
-        Map<String, Long> topSellingProducts = new TreeMap<>();
+        Map<String, Pair<Long, BigDecimal>> topSellingProducts = new TreeMap<>();
 
         // Chuyển đổi kết quả thành Map với key là "productName" và value là "totalQuantity"
         for (Object[] result : results) {
             String productKey = (String) result[1];  // Tên sản phẩm
             Long totalQuantity = (Long) result[2];  // Số lượng bán được
-
-            topSellingProducts.put(productKey, totalQuantity);
+            BigDecimal total=(BigDecimal) result[3];
+            topSellingProducts.put(productKey, Pair.of(totalQuantity, total));
         }
 
         return topSellingProducts;

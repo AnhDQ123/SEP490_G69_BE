@@ -1,5 +1,6 @@
 package org.ffb_be.service.order;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.ffb_be.dto.order.CountDTO;
 import org.ffb_be.dto.order.OrderDTO;
 import org.ffb_be.dto.order.ReturnOrderDTO;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -41,9 +43,9 @@ public interface OrderService {
     Map<Integer, Long> getOrderCountByStatusAndYear(String status, LocalDate startDate, LocalDate endDate);
     Map<String, Long> getOrderCountByStatusAndMonth(String status, LocalDate startDate, LocalDate endDate);
     Map<LocalDateTime, Long> getOrderCountByStatusAndDay(String status, LocalDate startDate, LocalDate endDate);
-    Map<String, Long> getTopSellingProductsThisMonth();
-    Map<String, Long> getTopSellingProductsThisYear();
-    Map<String, Long> getTopSellingProductsToday();
+    Map<String, Pair<Long, BigDecimal>> getTopSellingProductsThisMonth();
+    Map<String, Pair<Long, BigDecimal>> getTopSellingProductsThisYear();
+    Map<String, Pair<Long, BigDecimal>> getTopSellingProductsToday();
     Long countAllOrders();
     List<Object[]> countShopOrdersByStatusAndYear(String status, LocalDate startDate, LocalDate endDate, Long shopId);
     List<Object[]> countShopOrdersByStatusAndMonth(String status, LocalDate startDate, LocalDate endDate, Long shopId);

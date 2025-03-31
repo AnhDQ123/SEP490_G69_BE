@@ -1,5 +1,6 @@
 package org.ffb_be.controller;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.ffb_be.dto.order.CountDTO;
 import org.ffb_be.dto.order.OrderDTO;
 import org.ffb_be.dto.order.ReturnOrderDTO;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -173,17 +175,17 @@ public class OrderController {
         return orderService.getOrderCountByStatusAndYear(status, start, end);
     }
     @GetMapping("/top-selling/today")
-    public Map<String, Long> getTopSellingProductsToday() {
+    public Map<String, Pair<Long, BigDecimal>> getTopSellingProductsToday() {
         return orderService.getTopSellingProductsToday();
     }
     @GetMapping("/top-selling/month")
-    public Map<String, Long> getTopSellingProductsThisMonth() {
+    public Map<String, Pair<Long, BigDecimal>> getTopSellingProductsThisMonth() {
         return orderService.getTopSellingProductsThisMonth();
     }
 
     // API để lấy sản phẩm bán chạy nhất trong năm nay
     @GetMapping("/top-selling/year")
-    public Map<String, Long> getTopSellingProductsThisYear() {
+    public Map<String, Pair<Long, BigDecimal>> getTopSellingProductsThisYear() {
         return orderService.getTopSellingProductsThisYear();
     }
     @GetMapping("/count/orders")
