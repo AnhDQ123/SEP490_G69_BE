@@ -43,7 +43,7 @@ public interface OrderService {
     OrderDTO getOrder(Long id);
     Map<Integer, Long> getOrderCountByStatusAndYear(String status, LocalDate startDate, LocalDate endDate);
     Map<String, Long> getOrderCountByStatusAndMonth(String status, LocalDate startDate, LocalDate endDate);
-    Map<LocalDateTime, Long> getOrderCountByStatusAndDay(String status, LocalDate startDate, LocalDate endDate);
+    Map<LocalDateTime, Long> getOrderCountByStatusAndDay(OrderStatus status, LocalDate startDate, LocalDate endDate);
     List<TopProductDTO> getTopSellingProductsThisMonth();
     List<TopProductDTO> getTopSellingProductsThisYear();
     List<TopProductDTO> getTopSellingProductsToday();

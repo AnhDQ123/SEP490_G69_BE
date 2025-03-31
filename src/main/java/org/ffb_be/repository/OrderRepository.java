@@ -78,7 +78,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("SELECT o.createdAt, COUNT(o) FROM Order o WHERE o.status = :status " +
             "AND o.createdAt BETWEEN :startDate AND :endDate " +
             "GROUP BY o.createdAt ORDER BY o.createdAt")
-    List<Object[]> countOrdersByStatusAndDay( String status,
+    List<Object[]> countOrdersByStatusAndDay( OrderStatus status,
                                               LocalDateTime startDate,
                                               LocalDateTime endDate);
 

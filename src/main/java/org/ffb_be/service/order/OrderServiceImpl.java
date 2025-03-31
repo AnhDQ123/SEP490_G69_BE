@@ -509,7 +509,7 @@ public class OrderServiceImpl implements OrderService {
 
         return orderCountPerMonth;
     }
-    public Map<LocalDateTime, Long> getOrderCountByStatusAndDay(String status, LocalDate startDate, LocalDate endDate) {
+    public Map<LocalDateTime, Long> getOrderCountByStatusAndDay(OrderStatus status, LocalDate startDate, LocalDate endDate) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         List<Object[]> results = orderRepository.countOrdersByStatusAndDay(status, startDateTime, endDateTime);

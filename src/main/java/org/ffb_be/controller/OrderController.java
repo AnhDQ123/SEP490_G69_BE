@@ -144,11 +144,11 @@ public class OrderController {
     @GetMapping("/count/day")
     public Map<LocalDateTime, Long> getOrderCountByStatusAndDay(
             @RequestParam("status") String status) {
-
+        OrderStatus orderStatus = OrderStatus.valueOf(status);
         LocalDate startDate = LocalDate.now();
         LocalDate endDate = startDate.plusDays(7);
 
-        return orderService.getOrderCountByStatusAndDay(status, startDate, endDate);
+        return orderService.getOrderCountByStatusAndDay(orderStatus, startDate, endDate);
     }
     @GetMapping("/count/month")
     public Map<String, Long> getOrderCountByStatusAndMonth(
