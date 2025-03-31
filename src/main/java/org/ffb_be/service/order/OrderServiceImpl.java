@@ -11,10 +11,7 @@ import org.ffb_be.repository.*;
 import org.ffb_be.utils.enums.OrderStatus;
 import org.ffb_be.utils.enums.upload.CloudinaryUpload;
 import org.ffb_be.utils.mapping.OrderMapper;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -533,7 +530,7 @@ public class OrderServiceImpl implements OrderService {
         // Lấy thời gian bắt đầu và kết thúc của ngày hôm nay
         LocalDateTime startOfDay = currentDate.atStartOfDay();  // 00:00:00
         LocalDateTime endOfDay = currentDate.atTime(23, 59, 59);
-        Pageable pageable = PageRequest.of(0, 10);
+        Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Order.desc("totalQuantity")));
         List<Object[]> results = orderRepository.findTopSellingProductsToday(startOfDay,endOfDay,pageable);
 
         Map<String, Pair<Long, BigDecimal>> topSellingProducts = new TreeMap<>();
@@ -549,7 +546,7 @@ public class OrderServiceImpl implements OrderService {
         return topSellingProducts;
     }
     public  Map<String, Pair<Long, BigDecimal>> getTopSellingProductsThisMonth() {
-        Pageable pageable = PageRequest.of(0, 10);
+        Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Order.desc("totalQuantity")));
         List<Object[]> results = orderRepository.findTopSellingProductsThisMonth(pageable);
 
         Map<String, Pair<Long, BigDecimal>> topSellingProducts = new TreeMap<>();
@@ -568,7 +565,7 @@ public class OrderServiceImpl implements OrderService {
 
     // Phương thức để lấy danh sách sản phẩm bán chạy nhất trong năm nay
     public Map<String, Pair<Long, BigDecimal>> getTopSellingProductsThisYear() {
-        Pageable pageable = PageRequest.of(0, 10);
+        Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Order.desc("totalQuantity")));
         List<Object[]> results = orderRepository.findTopSellingProductsThisYear(pageable);
 
         Map<String, Pair<Long, BigDecimal>> topSellingProducts = new TreeMap<>();
