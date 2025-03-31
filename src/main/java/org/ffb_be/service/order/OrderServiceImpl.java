@@ -482,7 +482,7 @@ public class OrderServiceImpl implements OrderService {
         for (Object[] result : results) {
                 CountByDateDTO countByDateDTO = new CountByDateDTO();
                 countByDateDTO.setDate((LocalDateTime) result[0]);
-                countByDateDTO.setCount((int) result[1]);
+                countByDateDTO.setCount((Long) result[1]);
             countByDateDTOS.add(countByDateDTO);
             }
         return countByDateDTOS;
@@ -495,7 +495,7 @@ public class OrderServiceImpl implements OrderService {
         for (Object[] result : results) {
             CountByDateDTO countByDateDTO = new CountByDateDTO();
             countByDateDTO.setDate((LocalDateTime) result[0]);
-            countByDateDTO.setCount((int) result[1]);
+            countByDateDTO.setCount((Long) result[1]);
             countByDateDTOS.add(countByDateDTO);
         }
         return countByDateDTOS;
@@ -508,7 +508,7 @@ public class OrderServiceImpl implements OrderService {
         for (Object[] result : results) {
             CountByDateDTO countByDateDTO = new CountByDateDTO();
             countByDateDTO.setDate((LocalDateTime) result[0]);
-            countByDateDTO.setCount((int) result[1]);
+            countByDateDTO.setCount((Long) result[1]);
             countByDateDTOS.add(countByDateDTO);
         }
         return countByDateDTOS;
