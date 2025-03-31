@@ -13,6 +13,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Data
 public class VoucherDTO {
+    private Long id;
     private String code;
     private DiscountType discountType;
     private BigDecimal discountValue;

@@ -41,6 +41,9 @@ public class Order extends BaseEntity {
 
     private BigDecimal voucherValue;
 
+    @Column(name="payment_proof")
+    private String paymentProof;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id")
     private User owner;

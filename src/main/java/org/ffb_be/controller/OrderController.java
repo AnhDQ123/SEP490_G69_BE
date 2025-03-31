@@ -146,4 +146,11 @@ public class OrderController {
     public String generateQr(@PathVariable Long orderId, @PathVariable Long shopId) {
         return qrService.generateQrCode(orderId, shopId);
     }
+
+    @PostMapping("/updatePaymentProof/{orderId}")
+    public void updatePaymentProof(@PathVariable Long orderId,
+                                   @RequestParam("paymentProof") MultipartFile paymentProof
+    ) throws IOException {
+        qrService.updatePaymentProof(orderId, paymentProof);
+    }
 }

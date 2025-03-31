@@ -39,6 +39,13 @@ public class VoucherServiceImpl implements VoucherService {
     }
 
     @Override
+    public VoucherDTO getVoucherById(Long id) {
+        Voucher voucher = voucherRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Voucher"));
+        return voucherMapper.toDTO(voucher);
+    }
+
+    @Override
     public VoucherDTO addVoucher(VoucherDTO dto) {
         Voucher voucher = voucherMapper.toEntity(dto);
         voucher.setUsedVouchers(0);
