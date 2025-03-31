@@ -142,7 +142,7 @@ public class OrderController {
         return ResponseEntity.ok(orderService.getOrder(orderId));
     }
     @GetMapping("/count/day")
-    public Map<LocalDateTime, Long> getOrderCountByStatusAndDay(
+    public List<Object[]> getOrderCountByStatusAndDay(
             @RequestParam("status") String status) {
         OrderStatus orderStatus = OrderStatus.valueOf(status);
 
@@ -152,7 +152,7 @@ public class OrderController {
         return orderService.getOrderCountByStatusAndDay(orderStatus, startDate, endDate);
     }
     @GetMapping("/count/month")
-    public Map<String, Long> getOrderCountByStatusAndMonth(
+    public List<Object[]> getOrderCountByStatusAndMonth(
             @RequestParam("status") String status) {
         OrderStatus orderStatus = OrderStatus.valueOf(status);
         LocalDate endDate = LocalDate.now();
@@ -162,7 +162,7 @@ public class OrderController {
     }
 
     @GetMapping("/count/year")
-    public Map<Integer, Long> getOrderCountByStatusAndYear(
+    public List<Object[]> getOrderCountByStatusAndYear(
             @RequestParam("status") String status) {
         OrderStatus orderStatus = OrderStatus.valueOf(status);
         LocalDate endDate = LocalDate.now();
