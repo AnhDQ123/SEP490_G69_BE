@@ -146,7 +146,7 @@ public class OrderController {
             @RequestParam("status") String status) {
         OrderStatus orderStatus = OrderStatus.valueOf(status);
         LocalDate startDate = LocalDate.now();
-        LocalDate endDate = startDate.plusDays(7);
+        LocalDate endDate = startDate.minusDays(7);
 
         return orderService.getOrderCountByStatusAndDay(orderStatus, startDate, endDate);
     }
@@ -155,7 +155,7 @@ public class OrderController {
             @RequestParam("status") String status) {
 
         LocalDate startDate = LocalDate.now();
-        LocalDate endDate = startDate.plusMonths(7);
+        LocalDate endDate = startDate.minusMonths(7);
 
         return orderService.getOrderCountByStatusAndMonth(status, startDate, endDate);
     }
@@ -165,7 +165,7 @@ public class OrderController {
             @RequestParam("status") String status) {
 
         LocalDate startDate = LocalDate.now();
-        LocalDate endDate = startDate.plusYears(3);
+        LocalDate endDate = startDate.minusYears(3);
 
         return orderService.getOrderCountByStatusAndYear(status, startDate, endDate);
     }
