@@ -41,8 +41,8 @@ public interface OrderService {
     Page<OrderDTO> findAllByFilter(String orderCode, OrderStatus status, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
 
     OrderDTO getOrder(Long id);
-    Map<Integer, Long> getOrderCountByStatusAndYear(String status, LocalDate startDate, LocalDate endDate);
-    Map<String, Long> getOrderCountByStatusAndMonth(String status, LocalDate startDate, LocalDate endDate);
+    Map<Integer, Long> getOrderCountByStatusAndYear(OrderStatus status, LocalDate startDate, LocalDate endDate);
+    Map<String, Long> getOrderCountByStatusAndMonth(OrderStatus status, LocalDate startDate, LocalDate endDate);
     Map<LocalDateTime, Long> getOrderCountByStatusAndDay(OrderStatus status, LocalDate startDate, LocalDate endDate);
     List<TopProductDTO> getTopSellingProductsThisMonth();
     List<TopProductDTO> getTopSellingProductsThisYear();

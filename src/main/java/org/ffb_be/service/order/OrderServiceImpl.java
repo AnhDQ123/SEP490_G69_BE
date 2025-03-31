@@ -474,7 +474,7 @@ public class OrderServiceImpl implements OrderService {
         }
         return dto;
     }
-        public Map<Integer, Long> getOrderCountByStatusAndYear(String status, LocalDate startDate, LocalDate endDate) {
+        public Map<Integer, Long> getOrderCountByStatusAndYear(OrderStatus status, LocalDate startDate, LocalDate endDate) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         List<Object[]> results = orderRepository.countOrdersByStatusAndYear(status, startDateTime, endDateTime);
@@ -490,7 +490,7 @@ public class OrderServiceImpl implements OrderService {
 
         return orderCountPerYear;
     }
-    public Map<String, Long> getOrderCountByStatusAndMonth(String status, LocalDate startDate, LocalDate endDate) {
+    public Map<String, Long> getOrderCountByStatusAndMonth(OrderStatus status, LocalDate startDate, LocalDate endDate) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         List<Object[]> results = orderRepository.countOrdersByStatusAndMonth(status, startDateTime, endDateTime);
