@@ -82,12 +82,14 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
                                               LocalDateTime startDate,
                                               LocalDateTime endDate);
 
-    @Query("SELECT FUNCTION('MONTH', o.createdAt), FUNCTION('YEAR', o.createdAt), CAST(COUNT(o) AS LONG) " +
+    @Query("SELECT FUNCTION('MONTH', o.createdAt), FUNCTION('YEAR', o.createdAt), COUNT(o) " +
             "FROM Order o WHERE o.status = :status " +
             "AND o.createdAt BETWEEN :startDate AND :endDate " +
             "GROUP BY FUNCTION('YEAR', o.createdAt), FUNCTION('MONTH', o.createdAt) " +
             "ORDER BY FUNCTION('YEAR', o.createdAt), FUNCTION('MONTH', o.createdAt)")
-    List<Object[]> countOrdersByStatusAndMonth(OrderStatus status, LocalDateTime startDate, LocalDateTime endDate);
+    List<Object[]> countOrdersByStatusAndMonth( OrderStatus status,
+                                                LocalDateTime startDate,
+                                                LocalDateTime endDate);
     @Query("SELECT FUNCTION('YEAR', o.createdAt), COUNT(o) FROM Order o " +
             "WHERE o.status = :status AND o.createdAt BETWEEN :startDate AND :endDate " +
             "GROUP BY FUNCTION('YEAR', o.createdAt) " +
