@@ -474,26 +474,44 @@ public class OrderServiceImpl implements OrderService {
         }
         return dto;
     }
-        public List<Object[]> getOrderCountByStatusAndYear(OrderStatus status, LocalDate startDate, LocalDate endDate) {
+        public List<CountByDateDTO> getOrderCountByStatusAndYear(OrderStatus status, LocalDate startDate, LocalDate endDate) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         List<Object[]> results = orderRepository.countOrdersByStatusAndYear(status, startDateTime, endDateTime);
-
-        return results;
+            List<CountByDateDTO> countByDateDTOS = new ArrayList<>();
+        for (Object[] result : results) {
+                CountByDateDTO countByDateDTO = new CountByDateDTO();
+                countByDateDTO.setDate((LocalDateTime) result[0]);
+                countByDateDTO.setCount((Long) result[1]);
+            countByDateDTOS.add(countByDateDTO);
+            }
+        return countByDateDTOS;
     }
-    public List<Object[]> getOrderCountByStatusAndMonth(OrderStatus status, LocalDate startDate, LocalDate endDate) {
+    public List<CountByDateDTO> getOrderCountByStatusAndMonth(OrderStatus status, LocalDate startDate, LocalDate endDate) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         List<Object[]> results = orderRepository.countOrdersByStatusAndMonth(status, startDateTime, endDateTime);
-        return results;
+        List<CountByDateDTO> countByDateDTOS = new ArrayList<>();
+        for (Object[] result : results) {
+            CountByDateDTO countByDateDTO = new CountByDateDTO();
+            countByDateDTO.setDate((LocalDateTime) result[0]);
+            countByDateDTO.setCount((Long) result[1]);
+            countByDateDTOS.add(countByDateDTO);
+        }
+        return countByDateDTOS;
     }
-    public List<Object[]> getOrderCountByStatusAndDay(OrderStatus status, LocalDate startDate, LocalDate endDate) {
+    public List<CountByDateDTO> getOrderCountByStatusAndDay(OrderStatus status, LocalDate startDate, LocalDate endDate) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         List<Object[]> results = orderRepository.countOrdersByStatusAndDay(status, startDateTime, endDateTime);
-
-
-        return results;
+        List<CountByDateDTO> countByDateDTOS = new ArrayList<>();
+        for (Object[] result : results) {
+            CountByDateDTO countByDateDTO = new CountByDateDTO();
+            countByDateDTO.setDate((LocalDateTime) result[0]);
+            countByDateDTO.setCount((Long) result[1]);
+            countByDateDTOS.add(countByDateDTO);
+        }
+        return countByDateDTOS;
     }
     public  List<TopProductDTO> getTopSellingProductsToday() {
         LocalDate currentDate = LocalDate.now();

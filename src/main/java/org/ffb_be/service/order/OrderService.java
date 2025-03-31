@@ -1,6 +1,7 @@
 package org.ffb_be.service.order;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.ffb_be.dto.order.CountByDateDTO;
 import org.ffb_be.dto.order.CountDTO;
 import org.ffb_be.dto.order.OrderDTO;
 import org.ffb_be.dto.order.ReturnOrderDTO;
@@ -41,9 +42,9 @@ public interface OrderService {
     Page<OrderDTO> findAllByFilter(String orderCode, OrderStatus status, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
 
     OrderDTO getOrder(Long id);
-    List<Object[]> getOrderCountByStatusAndYear(OrderStatus status, LocalDate startDate, LocalDate endDate);
-    List<Object[]> getOrderCountByStatusAndMonth(OrderStatus status, LocalDate startDate, LocalDate endDate);
-    List<Object[]> getOrderCountByStatusAndDay(OrderStatus status, LocalDate startDate, LocalDate endDate);
+    List<CountByDateDTO> getOrderCountByStatusAndYear(OrderStatus status, LocalDate startDate, LocalDate endDate);
+    List<CountByDateDTO> getOrderCountByStatusAndMonth(OrderStatus status, LocalDate startDate, LocalDate endDate);
+    List<CountByDateDTO> getOrderCountByStatusAndDay(OrderStatus status, LocalDate startDate, LocalDate endDate);
     List<TopProductDTO> getTopSellingProductsThisMonth();
     List<TopProductDTO> getTopSellingProductsThisYear();
     List<TopProductDTO> getTopSellingProductsToday();
