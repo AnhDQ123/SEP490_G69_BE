@@ -4,6 +4,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.ffb_be.dto.order.CountDTO;
 import org.ffb_be.dto.order.OrderDTO;
 import org.ffb_be.dto.order.ReturnOrderDTO;
+import org.ffb_be.dto.product.TopProductDTO;
 import org.ffb_be.entity.Order;
 import org.ffb_be.utils.enums.OrderStatus;
 import org.springframework.data.domain.Page;
@@ -40,12 +41,12 @@ public interface OrderService {
     Page<OrderDTO> findAllByFilter(String orderCode, OrderStatus status, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
 
     OrderDTO getOrder(Long id);
-    Map<Integer, Long> getOrderCountByStatusAndYear(String status, LocalDate startDate, LocalDate endDate);
-    Map<String, Long> getOrderCountByStatusAndMonth(String status, LocalDate startDate, LocalDate endDate);
-    Map<LocalDateTime, Long> getOrderCountByStatusAndDay(String status, LocalDate startDate, LocalDate endDate);
-    Map<String, Pair<Long, BigDecimal>> getTopSellingProductsThisMonth();
-    Map<String, Pair<Long, BigDecimal>> getTopSellingProductsThisYear();
-    Map<String, Pair<Long, BigDecimal>> getTopSellingProductsToday();
+    List<Object[]> getOrderCountByStatusAndYear(OrderStatus status, LocalDate startDate, LocalDate endDate);
+    List<Object[]> getOrderCountByStatusAndMonth(OrderStatus status, LocalDate startDate, LocalDate endDate);
+    List<Object[]> getOrderCountByStatusAndDay(OrderStatus status, LocalDate startDate, LocalDate endDate);
+    List<TopProductDTO> getTopSellingProductsThisMonth();
+    List<TopProductDTO> getTopSellingProductsThisYear();
+    List<TopProductDTO> getTopSellingProductsToday();
     Long countAllOrders();
     List<Object[]> countShopOrdersByStatusAndYear(String status, LocalDate startDate, LocalDate endDate, Long shopId);
     List<Object[]> countShopOrdersByStatusAndMonth(String status, LocalDate startDate, LocalDate endDate, Long shopId);

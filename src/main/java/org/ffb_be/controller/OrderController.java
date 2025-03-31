@@ -4,6 +4,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.ffb_be.dto.order.CountDTO;
 import org.ffb_be.dto.order.OrderDTO;
 import org.ffb_be.dto.order.ReturnOrderDTO;
+import org.ffb_be.dto.product.TopProductDTO;
 import org.ffb_be.entity.Order;
 import org.ffb_be.service.order.OrderService;
 import org.ffb_be.utils.enums.OrderStatus;
@@ -141,51 +142,46 @@ public class OrderController {
         return ResponseEntity.ok(orderService.getOrder(orderId));
     }
     @GetMapping("/count/day")
-    public Map<LocalDateTime, Long> getOrderCountByStatusAndDay(
-            @RequestParam("status") String status,
-            @RequestParam("startDate") String startDate,
-            @RequestParam("endDate") String endDate) {
+    public List<Object[]> getOrderCountByStatusAndDay(
+            @RequestParam("status") String status) {
+        OrderStatus orderStatus = OrderStatus.valueOf(status);
 
-        LocalDate start = LocalDate.parse(startDate);
-        LocalDate end = LocalDate.parse(endDate);
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusDays(7);
 
-        return orderService.getOrderCountByStatusAndDay(status, start, end);
+        return orderService.getOrderCountByStatusAndDay(orderStatus, startDate, endDate);
     }
     @GetMapping("/count/month")
-    public Map<String, Long> getOrderCountByStatusAndMonth(
-            @RequestParam("status") String status,
-            @RequestParam("startDate") String startDate,
-            @RequestParam("endDate") String endDate) {
+    public List<Object[]> getOrderCountByStatusAndMonth(
+            @RequestParam("status") String status) {
+        OrderStatus orderStatus = OrderStatus.valueOf(status);
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusMonths(7);
 
-        LocalDate start = LocalDate.parse(startDate);
-        LocalDate end = LocalDate.parse(endDate);
-
-        return orderService.getOrderCountByStatusAndMonth(status, start, end);
+        return orderService.getOrderCountByStatusAndMonth(orderStatus, startDate, endDate);
     }
 
     @GetMapping("/count/year")
-    public Map<Integer, Long> getOrderCountByStatusAndYear(
-            @RequestParam("status") String status,
-            @RequestParam("startDate") String startDate,
-            @RequestParam("endDate") String endDate) {
+    public List<Object[]> getOrderCountByStatusAndYear(
+            @RequestParam("status") String status) {
+        OrderStatus orderStatus = OrderStatus.valueOf(status);
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusYears(3);
 
-        LocalDate start = LocalDate.parse(startDate);
-        LocalDate end = LocalDate.parse(endDate);
-
-        return orderService.getOrderCountByStatusAndYear(status, start, end);
+        return orderService.getOrderCountByStatusAndYear(orderStatus, startDate, endDate);
     }
     @GetMapping("/top-selling/today")
-    public Map<String, Pair<Long, BigDecimal>> getTopSellingProductsToday() {
+    public List<TopProductDTO> getTopSellingProductsToday() {
         return orderService.getTopSellingProductsToday();
     }
     @GetMapping("/top-selling/month")
-    public Map<String, Pair<Long, BigDecimal>> getTopSellingProductsThisMonth() {
+    public List<TopProductDTO> getTopSellingProductsThisMonth() {
         return orderService.getTopSellingProductsThisMonth();
     }
 
     // API để lấy sản phẩm bán chạy nhất trong năm nay
     @GetMapping("/top-selling/year")
-    public Map<String, Pair<Long, BigDecimal>> getTopSellingProductsThisYear() {
+    public List<TopProductDTO> getTopSellingProductsThisYear() {
         return orderService.getTopSellingProductsThisYear();
     }
     @GetMapping("/count/orders")

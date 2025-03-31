@@ -3,6 +3,7 @@ package org.ffb_be.controller;
 import lombok.RequiredArgsConstructor;
 import org.ffb_be.dto.report.ReportCreateDTO;
 import org.ffb_be.service.report.ReportService;
+import org.ffb_be.utils.enums.ReportStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
@@ -55,38 +56,31 @@ public class ReportController {
     @GetMapping("/count/day")
     public Map<LocalDate, Long> getReportCountByDay(
             @RequestParam("status") String status,
-            @RequestParam("startDate") String startDate,
-            @RequestParam("endDate") String endDate,
             @RequestParam("type") Long type) {
+        ReportStatus reportStatus = ReportStatus.valueOf(status);
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusDays(7);
 
-        LocalDate start = LocalDate.parse(startDate);
-        LocalDate end = LocalDate.parse(endDate);
-
-        return reportService.getReportCountByDay(status, start, end,type);
+        return reportService.getReportCountByDay(reportStatus, startDate, endDate,type);
     }
     @GetMapping("/count/month")
     public Map<String, Long> getReportCountByMonth(
             @RequestParam("status") String status,
-            @RequestParam("startDate") String startDate,
-            @RequestParam("endDate") String endDate,
             @RequestParam("type") Long type) {
-
-        LocalDate start = LocalDate.parse(startDate);
-        LocalDate end = LocalDate.parse(endDate);
-
-        return reportService.getReportCountByMonth(status, start, end,type);
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusMonths(7);
+        ReportStatus reportStatus = ReportStatus.valueOf(status);
+        return reportService.getReportCountByMonth(reportStatus, startDate, endDate,type);
     }
     @GetMapping("/count/year")
     public Map<Integer, Long> getReportCountByYear(
             @RequestParam("status") String status,
-            @RequestParam("startDate") String startDate,
-            @RequestParam("endDate") String endDate,
             @RequestParam("type") Long type) {
+        ReportStatus reportStatus = ReportStatus.valueOf(status);
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusYears(3);
 
-        LocalDate start = LocalDate.parse(startDate);
-        LocalDate end = LocalDate.parse(endDate);
-
-        return reportService.getReportCountByYear(status, start, end,type);
+        return reportService.getReportCountByYear(reportStatus, startDate, endDate,type);
     }
     @GetMapping("count/pending")
     public Long countAllPendingReports() {

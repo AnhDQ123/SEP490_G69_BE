@@ -4,9 +4,13 @@ package org.ffb_be.controller;
 import lombok.RequiredArgsConstructor;
 import org.ffb_be.dto.auth.userDto.UserCreateDTO;
 import org.ffb_be.dto.auth.userDto.UserUpdateDTO;
+import org.ffb_be.entity.Shop;
+import org.ffb_be.entity.User;
 import org.ffb_be.repository.ProfileRepository;
+import org.ffb_be.repository.ShopRepository;
 import org.ffb_be.repository.UserRepository;
 import org.ffb_be.service.user.UserService;
+import org.ffb_be.utils.enums.Status;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +32,7 @@ public class UserController {
     private final UserRepository userRepository;
     private final ProfileRepository profileRepository;
     private final UserService userService;
-
+    private final ShopRepository shopRepository;
     @GetMapping("/{id}")
     public ResponseEntity<?> getUserById(@PathVariable Long id) {
         return ResponseEntity.ok( userService.findById(id));
@@ -74,37 +78,30 @@ public class UserController {
 
     @GetMapping("/count/year")
     public Map<Integer, Long> getUserCountByYear(
-            @RequestParam("startDate") String startDate,
-            @RequestParam("endDate") String endDate,
             @RequestParam("status") String status) {
+        Status status1 = Status.valueOf(status);
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusYears(3);
 
-        LocalDate start = LocalDate.parse(startDate);
-        LocalDate end = LocalDate.parse(endDate);
-
-        return userService.getUserCountByYearAndStatus(start, end,status);
+        return userService.getUserCountByYearAndStatus(startDate, endDate,status1);
     }
 
     @GetMapping("/count/month")
     public Map<String, Long> getUserCountByMonth(
-            @RequestParam("startDate") String startDate,
-            @RequestParam("endDate") String endDate,
             @RequestParam("status") String status) {
+        Status status1 = Status.valueOf(status);
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusMonths(7);
 
-        LocalDate start = LocalDate.parse(startDate);
-        LocalDate end = LocalDate.parse(endDate);
-
-        return userService.getUserCountByMonthAndStatus(start, end,status);
+        return userService.getUserCountByMonthAndStatus(startDate, endDate,status1);
     }
     @GetMapping("/count/day")
     public Map<LocalDate, Long> getUserCountByDayAndStatus(
-            @RequestParam("startDate") String startDate,
-            @RequestParam("endDate") String endDate,
             @RequestParam("status") String status) {
-
-        LocalDate start = LocalDate.parse(startDate);
-        LocalDate end = LocalDate.parse(endDate);
-
-        return userService.getUserCountByDayAndStatus(start, end, status);
+        Status status1 = Status.valueOf(status);
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusDays(7);
+        return userService.getUserCountByDayAndStatus(startDate, endDate, status1);
     }
     @GetMapping("/count/shop")
     public long getUserHaveShopCount() {
@@ -121,5 +118,25 @@ public class UserController {
     @GetMapping("/count/all")
     public long getAllUserCount() {
         return userService.countAllUser();
+    }
+
+    @GetMapping("/shop")
+    public ResponseEntity<?> getUserShop(@RequestParam("id") Long id) {
+        User user=userRepository.findById(id).orElse(null);
+        Shop shop=shopRepository.findByOwnerId(user.getId()).orElse(null);
+        String status=userService.hasShop(id);
+        if(status==null) {
+            return ResponseEntity.badRequest().body("No such user");
+        }
+        if(status.equals("inactive")) {
+            return ResponseEntity.ok().body("Shop has been inactived");
+        }
+        if(status.equals("active")) {
+            return ResponseEntity.ok().body(shop.getId());
+        }
+        if(status.equals("pending")) {
+            return ResponseEntity.ok().body("Shop is pending");
+        }
+        return ResponseEntity.ok().body("");
     }
 }

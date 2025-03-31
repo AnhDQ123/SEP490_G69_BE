@@ -54,8 +54,8 @@ public interface ShopService {
     ShopDTO getShopById(Long shopId);
 
     ShopDTO getShopByUserId(Long userId);
-    Map<Integer, Long> getShopCountByYear(String status, LocalDate startDate, LocalDate endDate);
-    Map<Integer, Long> getShopCountByMonth(String status, LocalDate startDate, LocalDate endDate);
-    Map<LocalDate, Long> getShopCountByDayAndStatus(String status, LocalDate startDate, LocalDate endDate);
+    Map<Integer, Long> getShopCountByYear(Status status, LocalDate startDate, LocalDate endDate);
+    Map<Integer, Long> getShopCountByMonth(Status status, LocalDate startDate, LocalDate endDate);
+    Map<LocalDate, Long> getShopCountByDayAndStatus(Status status, LocalDate startDate, LocalDate endDate);
     long countPendingShop();
 }

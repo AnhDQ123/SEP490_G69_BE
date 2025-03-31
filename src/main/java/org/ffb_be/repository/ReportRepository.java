@@ -1,6 +1,7 @@
 package org.ffb_be.repository;
 
 import org.ffb_be.entity.Report;
+import org.ffb_be.utils.enums.ReportStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,16 +22,16 @@ public interface ReportRepository extends JpaRepository<Report,Long> {
     @Query("SELECT r.createdAt, COUNT(r) FROM Report r WHERE r.status = :status " +
             "AND r.type.id =:type AND r.createdAt BETWEEN :startDate AND :endDate " +
             "GROUP BY r.createdAt ORDER BY r.createdAt")
-    List<Object[]> countShopReportsByStatusAndDay(String status,
-                                                       LocalDateTime startDate,
-                                                       LocalDateTime endDate,
-                                                       Long type);
+    List<Object[]> countShopReportsByStatusAndDay(ReportStatus status,
+                                                  LocalDateTime startDate,
+                                                  LocalDateTime endDate,
+                                                  Long type);
     @Query("SELECT FUNCTION('MONTH', r.createdAt), FUNCTION('YEAR', r.createdAt), COUNT(r) FROM Report r " +
             "WHERE r.status = :status AND r.type.id = :type " +
             "AND r.createdAt BETWEEN :startDate AND :endDate " +
             "GROUP BY FUNCTION('YEAR', r.createdAt), FUNCTION('MONTH', r.createdAt) " +
             "ORDER BY FUNCTION('YEAR', r.createdAt), FUNCTION('MONTH', r.createdAt)")
-    List<Object[]> countReportsByStatusAndTypeIdAndMonth( String status,
+    List<Object[]> countReportsByStatusAndTypeIdAndMonth( ReportStatus status,
                                                           LocalDateTime startDate,
                                                           LocalDateTime endDate,
                                                             Long type);
@@ -40,7 +41,7 @@ public interface ReportRepository extends JpaRepository<Report,Long> {
             "AND r.createdAt BETWEEN :startDate AND :endDate " +
             "GROUP BY FUNCTION('YEAR', r.createdAt) " +
             "ORDER BY FUNCTION('YEAR', r.createdAt)")
-    List<Object[]> countReportsByStatusAndTypeIdAndYear(String status,
+    List<Object[]> countReportsByStatusAndTypeIdAndYear(ReportStatus status,
                                                         LocalDateTime startDate,
                                                         LocalDateTime endDate,
                                                         Long type);

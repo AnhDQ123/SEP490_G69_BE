@@ -3,6 +3,7 @@ package org.ffb_be.repository;
 import org.ffb_be.entity.Role;
 import org.ffb_be.entity.User;
 import org.ffb_be.utils.enums.ShipperStatus;
+import org.ffb_be.utils.enums.Status;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
@@ -47,7 +48,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "ORDER BY u.createdAt")
     List<Object[]> countUsersByDayAndStatus( LocalDateTime startDate,
                                              LocalDateTime endDate,
-                                             String status);
+                                             Status status);
 
     @Query("SELECT FUNCTION('MONTH', u.createdAt), FUNCTION('YEAR', u.createdAt), COUNT(u) " +
             "FROM User u WHERE u.createdAt BETWEEN :startDate AND :endDate " +
@@ -56,7 +57,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "ORDER BY FUNCTION('YEAR', u.createdAt), FUNCTION('MONTH', u.createdAt)")
     List<Object[]> countUsersByMonthAndStatus( LocalDateTime startDate,
                                                LocalDateTime endDate,
-                                               String status);
+                                               Status status);
 
     @Query("SELECT FUNCTION('YEAR', u.createdAt), COUNT(u) " +
             "FROM User u WHERE u.createdAt BETWEEN :startDate AND :endDate " +
@@ -65,7 +66,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "ORDER BY FUNCTION('YEAR', u.createdAt)")
     List<Object[]> countUsersByYearAndStatus( LocalDateTime startDate,
                                               LocalDateTime endDate,
-                                              String status);
+                                              Status status);
 
     @Query("SELECT COUNT(u) FROM User u WHERE u.role.id = 4")
     long countUsersAreShipper();

@@ -78,7 +78,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("SELECT o.createdAt, COUNT(o) FROM Order o WHERE o.status = :status " +
             "AND o.createdAt BETWEEN :startDate AND :endDate " +
             "GROUP BY o.createdAt ORDER BY o.createdAt")
-    List<Object[]> countOrdersByStatusAndDay( String status,
+    List<Object[]> countOrdersByStatusAndDay( OrderStatus status,
                                               LocalDateTime startDate,
                                               LocalDateTime endDate);
 
@@ -87,14 +87,14 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "AND o.createdAt BETWEEN :startDate AND :endDate " +
             "GROUP BY FUNCTION('YEAR', o.createdAt), FUNCTION('MONTH', o.createdAt) " +
             "ORDER BY FUNCTION('YEAR', o.createdAt), FUNCTION('MONTH', o.createdAt)")
-    List<Object[]> countOrdersByStatusAndMonth( String status,
+    List<Object[]> countOrdersByStatusAndMonth( OrderStatus status,
                                                 LocalDateTime startDate,
                                                 LocalDateTime endDate);
     @Query("SELECT FUNCTION('YEAR', o.createdAt), COUNT(o) FROM Order o " +
             "WHERE o.status = :status AND o.createdAt BETWEEN :startDate AND :endDate " +
             "GROUP BY FUNCTION('YEAR', o.createdAt) " +
             "ORDER BY FUNCTION('YEAR', o.createdAt)")
-    List<Object[]> countOrdersByStatusAndYear( String status,
+    List<Object[]> countOrdersByStatusAndYear( OrderStatus status,
                                                LocalDateTime startDate,
                                                LocalDateTime endDate);
     @Query("SELECT oi.product.id, oi.product.name, SUM(oi.quantity) AS totalQuantity, SUM(oi.unitPrice) AS totalValue " +
