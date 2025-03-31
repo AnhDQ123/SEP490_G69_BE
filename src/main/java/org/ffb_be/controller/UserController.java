@@ -1,6 +1,7 @@
 package org.ffb_be.controller;
 
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.ffb_be.dto.auth.userDto.UserCreateDTO;
 import org.ffb_be.dto.auth.userDto.UserUpdateDTO;
 import org.ffb_be.repository.ProfileRepository;
@@ -18,7 +19,7 @@ import java.io.IOException;
 @RestController
 @RequestMapping("/api/users")
 @CrossOrigin("*")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UserController {
     private final UserRepository userRepository;
     private final ProfileRepository profileRepository;
@@ -56,7 +57,7 @@ public class UserController {
 
     @PostMapping("/active")
     public void activeUser(@RequestParam Long id) throws IOException {
-        userService.inactiveUser(id);
+        userService.activeUser(id);
     }
 
     @GetMapping

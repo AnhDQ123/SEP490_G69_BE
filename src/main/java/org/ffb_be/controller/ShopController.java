@@ -50,6 +50,7 @@ public class ShopController {
             @RequestParam Long userId,
             @Validated @ModelAttribute ShopRegisterDTO shopDTO,
             @RequestParam(value = "logo", required = false) MultipartFile logo,
+            @RequestParam(value = "background", required = false) MultipartFile background,
             @RequestParam(value = "citizenIDFront", required = false) MultipartFile citizenIDFront,
             @RequestParam(value = "citizenIDBack", required = false) MultipartFile citizenIDBack,
             @RequestParam(value = "registrationCert", required = false) MultipartFile registrationCert,
@@ -61,7 +62,7 @@ public class ShopController {
             return ResponseEntity.badRequest().body(result.getAllErrors());
         }
         // Gửi toàn bộ file lên Service, kể cả file rỗng
-        shopService.registerShop(userId, shopDTO, logo, citizenIDFront, citizenIDBack, registrationCert, foodSafetyCert, menu);
+        shopService.registerShop(userId, shopDTO, logo, background, citizenIDFront, citizenIDBack, registrationCert, foodSafetyCert, menu);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
@@ -70,6 +71,7 @@ public class ShopController {
             @PathVariable Long shopId,
             @Validated @ModelAttribute ShopRegisterDTO shopDTO,
             @RequestPart(value = "logo", required = false) MultipartFile logo,
+            @RequestParam(value = "background", required = false) MultipartFile background,
             @RequestPart(value = "citizenIDFront", required = false) MultipartFile citizenIDFront,
             @RequestPart(value = "citizenIDBack", required = false) MultipartFile citizenIDBack,
             @RequestPart(value = "registrationCert", required = false) MultipartFile registrationCert,
@@ -80,7 +82,7 @@ public class ShopController {
         if (result.hasErrors()) {
             return ResponseEntity.badRequest().body(result.getAllErrors());
         }
-        shopService.updateShop(shopId, shopDTO, logo, citizenIDFront, citizenIDBack, registrationCert, foodSafetyCert, menu);
+        shopService.updateShop(shopId, shopDTO, logo, background,citizenIDFront, citizenIDBack, registrationCert, foodSafetyCert, menu);
         return ResponseEntity.ok().build();
     }
 
@@ -121,4 +123,3 @@ public class ShopController {
     }
 
 }
-

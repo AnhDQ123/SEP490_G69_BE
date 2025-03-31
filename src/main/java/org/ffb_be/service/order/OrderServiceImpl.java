@@ -2,11 +2,9 @@ package org.ffb_be.service.order;
 
 import lombok.RequiredArgsConstructor;
 import org.ffb_be.dto.image.ImageDTO;
-import org.ffb_be.dto.order.OrderDTO;
-import org.ffb_be.dto.order.OrderItemDTO;
-import org.ffb_be.dto.order.OrderItemOptionDTO;
-import org.ffb_be.dto.order.ReturnOrderDTO;
+import org.ffb_be.dto.order.*;
 import org.ffb_be.entity.*;
+import org.ffb_be.exception.NotFoundException;
 import org.ffb_be.repository.*;
 import org.ffb_be.utils.enums.OrderStatus;
 import org.ffb_be.utils.enums.upload.CloudinaryUpload;
@@ -40,6 +38,7 @@ public class OrderServiceImpl implements OrderService {
     private final TypesRepository typesRepository;
     private final ImageRepository imageRepository;
     private final OrderMapper orderMapper;
+    private final DiscountRepository discountRepository;
 
 
     public Page<OrderDTO> toDTO(Page<Order> orders,Pageable pageable) {
@@ -50,11 +49,13 @@ public class OrderServiceImpl implements OrderService {
             orderDTO.setAddress(order.getShippingAddress());
             orderDTO.setTotal(order.getTotal());
             orderDTO.setOwnerId(order.getOwner().getId());
+            orderDTO.setOwnerName(userRepository.findById(orderDTO.getOwnerId()).get().getProfile().getName());
+            orderDTO.setPhone(userRepository.findById(orderDTO.getOwnerId()).get().getPhone());
             orderDTO.setStatus(order.getStatus().toString());
             orderDTO.setReason(order.getReason());
             if (order.getVoucher() != null) {
                 orderDTO.setVoucherId(order.getVoucher().getId());
-                orderDTO.setVoucherAmount(order.getVoucher().getDiscount_percentage());
+                orderDTO.setVoucherAmount(order.getVoucher().getDiscountValue());
             } else {
                 orderDTO.setVoucherAmount(BigDecimal.ZERO);
             }
@@ -69,9 +70,10 @@ public class OrderServiceImpl implements OrderService {
                 orderItemDTO.setQuantity(orderItem.getQuantity());
                 orderItemDTO.setProductId(orderItem.getProduct().getId());
                 orderItemDTO.setTotal(orderItem.getTotalPrice());
-                if (orderItem.getProduct().getDiscount() != null) {
-                    orderItemDTO.setDiscountId(orderItem.getProduct().getDiscount().getId());
-                    orderItemDTO.setDiscount(orderItem.getProduct().getDiscount().getDiscount_percentage());
+                Discount discount=discountRepository.findByProduct(orderItem.getProduct());
+                if (discount!=null) {
+                    orderItemDTO.setDiscountId(discount.getId());
+                    orderItemDTO.setDiscount(discount.getDiscount_percentage());
                 } else {
                     orderItemDTO.setDiscount(BigDecimal.ZERO);
                 }
@@ -79,6 +81,7 @@ public class OrderServiceImpl implements OrderService {
                 orderItemDTO.setOrderId(order.getId());
                 orderDTO.setShopName(shopRepository.findByProduct(orderItemDTO.getProductId()).getName());
                 orderDTO.setShopId(shopRepository.findByProduct(orderItemDTO.getProductId()).getId());
+                orderDTO.setShopAddress(shopRepository.findByProduct(orderItemDTO.getProductId()).getAddress());
                 orderDTO.setImage(shopRepository.findByProduct(orderItemDTO.getProductId()).getBackgroundImage());
                 orderItemDTO.setProductName(productRepository.findById(orderItemDTO.getProductId()).get().getName());
                 orderItemDTO.setImage(productRepository.findById(orderItemDTO.getProductId()).get().getImage());
@@ -121,7 +124,6 @@ public class OrderServiceImpl implements OrderService {
         }
         return new PageImpl<>(orderDTOs, pageable, orders.getTotalElements());
     }
-
     @Override
     public List<Order> save(OrderDTO orderDTO) throws IOException {
         Map<Long, List<OrderItemDTO>> shopOrderItems = new HashMap<>();
@@ -137,6 +139,7 @@ public class OrderServiceImpl implements OrderService {
             List<OrderItemDTO> orderItemDTOList = entry.getValue();
 
             Order order = new Order();
+            order.setShippingAddress(orderDTO.getAddress());
             order.setOwner(userRepository.findById(orderDTO.getOwnerId())
                     .orElseThrow(() -> new RuntimeException("User not found")));
             order.setShipper(userRepository.findById(orderDTO.getShipperId())
@@ -147,6 +150,7 @@ public class OrderServiceImpl implements OrderService {
             order.setPaymentMethod(paymentRepository.findById(orderDTO.getPaymentMethodId())
                     .orElseThrow(() -> new RuntimeException("Payment method not found")));
             order.setTotal(BigDecimal.ZERO);
+            order.setStatus(OrderStatus.PENDING);
             order.setCreatedAt(LocalDateTime.now());
             orderRepository.save(order);
 
@@ -201,10 +205,13 @@ public class OrderServiceImpl implements OrderService {
             orderDTO.setAddress(order.getShippingAddress());
             orderDTO.setTotal(order.getTotal());
             orderDTO.setOwnerId(order.getOwner().getId());
+            orderDTO.setPhone(userRepository.findById(orderDTO.getOwnerId()).get().getPhone());
+            orderDTO.setOwnerName(userRepository.findById(orderDTO.getOwnerId()).get().getProfile().getName());
             orderDTO.setReason(order.getReason());
+            orderDTO.setPaymentProof(order.getPaymentProof());
             if(order.getVoucher() != null) {
                 orderDTO.setVoucherId(order.getVoucher().getId());
-                orderDTO.setVoucherAmount(order.getVoucher().getDiscount_percentage());
+                orderDTO.setVoucherAmount(order.getVoucher().getDiscountValue());
             }else orderDTO.setVoucherAmount(BigDecimal.ZERO);
             orderDTO.setShipperId(order.getShipper() != null ? order.getShipper().getId() : null);
             orderDTO.setStatus(order.getStatus().toString());
@@ -218,14 +225,18 @@ public class OrderServiceImpl implements OrderService {
                 orderItemDTO.setQuantity(orderItem.getQuantity());
                 orderItemDTO.setProductId(orderItem.getProduct().getId());
                 orderItemDTO.setTotal(orderItem.getTotalPrice());
-                if(orderItem.getProduct().getDiscount() != null){
-                    orderItemDTO.setDiscountId(orderItem.getProduct().getDiscount().getId());
-                    orderItemDTO.setDiscount(orderItem.getProduct().getDiscount().getDiscount_percentage());
-                }else orderItemDTO.setDiscount(BigDecimal.ZERO);
+              Discount discount=discountRepository.findByProduct(orderItem.getProduct());
+                if (discount!=null) {
+                    orderItemDTO.setDiscountId(discount.getId());
+                    orderItemDTO.setDiscount(discount.getDiscount_percentage());
+                } else {
+                    orderItemDTO.setDiscount(BigDecimal.ZERO);
+                }
                 orderItemDTO.setCreatedAt(orderItem.getCreatedAt());
                 orderItemDTO.setOrderId(order.getId());
                 orderDTO.setShopName(shopRepository.findByProduct(orderItemDTO.getProductId()).getName());
                 orderDTO.setShopId(shopRepository.findByProduct(orderItemDTO.getProductId()).getId());
+                orderDTO.setShopAddress(shopRepository.findByProduct(orderItemDTO.getProductId()).getAddress());
                 orderDTO.setImage(shopRepository.findByProduct(orderItemDTO.getProductId()).getBackgroundImage());
                 orderItemDTO.setProductName(productRepository.findById(orderItemDTO.getProductId()).get().getName());
                 orderItemDTO.setImage(productRepository.findById(orderItemDTO.getProductId()).get().getImage());
@@ -281,6 +292,7 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderRepository.findById(id).get();
         order.setReason(reason);
         order.setStatus(OrderStatus.CANCELLED);
+        order.setUpdatedAt(LocalDateTime.now());
         orderRepository.save(order);
     }
 
@@ -294,6 +306,7 @@ public class OrderServiceImpl implements OrderService {
     public void acceptOrder(Long id) {
         Order order=orderRepository.findById(id).get();
         order.setStatus(OrderStatus.PROCESSING);
+        order.setUpdatedAt(LocalDateTime.now());
         orderRepository.save(order);
     }
 
@@ -301,6 +314,7 @@ public class OrderServiceImpl implements OrderService {
     public void rejectOrder(Long id) {
         Order order=orderRepository.findById(id).get();
         order.setStatus(OrderStatus.REJECTED);
+        order.setUpdatedAt(LocalDateTime.now());
         orderRepository.save(order);
     }
 
@@ -319,6 +333,7 @@ public class OrderServiceImpl implements OrderService {
             System.out.println("Avatar URL: " + url);
         }
         order.setStatus(status);
+        order.setUpdatedAt(LocalDateTime.now());
         orderRepository.save(order);
     }
 
@@ -327,6 +342,7 @@ public class OrderServiceImpl implements OrderService {
         Order order=orderRepository.findById(id).get();
         order.setShipper(userRepository.findById(userId).get());
         order.setStatus(OrderStatus.SHIPPING);
+        order.setUpdatedAt(LocalDateTime.now());
         orderRepository.save(order);
     }
 
@@ -373,6 +389,7 @@ public class OrderServiceImpl implements OrderService {
             System.out.println("Avatar URL: " + url);
         }
         order.setStatus(OrderStatus.RETURN_PENDING);
+        order.setUpdatedAt(LocalDateTime.now());
         orderRepository.save(order);
     }
 
@@ -397,9 +414,65 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Page<OrderDTO> findAllByFilter(String orderCode, OrderStatus status, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
-        Page<Order> orders = orderRepository.findByStatusAndCreatedAtBetween(status, startDate, endDate, orderCode, pageable);
-        return orders.map(orderMapper::toDTO);
+    public void acceptReturnOrder(Long id) {
+        Order order=orderRepository.findById(id).get();
+        order.setStatus(OrderStatus.RETURNED);
+        order.setUpdatedAt(LocalDateTime.now());
+        orderRepository.save(order);
     }
 
+    @Override
+    public Page<OrderDTO> findAllByFilter(String orderCode, OrderStatus status, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
+        Page<Order> orders = orderRepository.findByStatusAndCreatedAtBetween(status, startDate, endDate, orderCode, pageable);
+        return orders.map(this::toDTO);
+    }
+
+    @Override
+    public OrderDTO getOrder(Long id) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Order"));
+        return toDTO(order);
+    }
+
+    public OrderDTO toDTO(Order order) {
+        OrderDTO orderDTO = orderMapper.toDTO(order);
+        orderDTO.setShopName(shopRepository.findByProduct(order.getOrderItems().get(0).getProduct().getId()).getName());
+        orderDTO.setShopId(shopRepository.findByProduct(order.getOrderItems().get(0).getProduct().getId()).getId());
+        orderDTO.setImage(shopRepository.findByProduct(order.getOrderItems().get(0).getProduct().getId()).getBackgroundImage());
+        return orderDTO;
+    }
+
+    @Override
+    public void rejectReturnOrder(Long id) {
+        Order order=orderRepository.findById(id).get();
+        order.setStatus(OrderStatus.RETURN_REJECTED);
+        order.setUpdatedAt(LocalDateTime.now());
+        orderRepository.save(order);
+    }
+
+    @Override
+    public CountDTO countOrderByStatus(Long id) {
+        List<Object[]> results = orderRepository.countOrdersByStatusForShop(id);
+        CountDTO dto = new CountDTO();
+        for (Object[] row : results) {
+            OrderStatus status = (OrderStatus) row[0];
+            int count = ((Long) row[1]).intValue();
+            switch (status) {
+                case PENDING -> dto.setPending(count);
+                case PROCESSING -> dto.setProcessing(count);
+                case SHIP_PENDING -> dto.setShipPending(count);
+                case SHIPPING -> dto.setShipping(count);
+                case DELIVERED -> dto.setDelivered(count);
+                case CANCELLED -> dto.setCancelled(count);
+                case RETURNED -> dto.setReturned(count);
+                case REJECTED -> dto.setRejected(count);
+                case RETURN_PENDING -> dto.setReturnPending(count);
+                case RETURN_REJECTED -> dto.setReturnRejected(count);
+            }
+        }
+        return dto;
+    }
 }
+
+
+

@@ -1,9 +1,11 @@
 package org.ffb_be.controller;
 
+import org.ffb_be.dto.order.CountDTO;
 import org.ffb_be.dto.order.OrderDTO;
 import org.ffb_be.dto.order.ReturnOrderDTO;
 import org.ffb_be.entity.Order;
 import org.ffb_be.service.order.OrderService;
+import org.ffb_be.service.qr.QrService;
 import org.ffb_be.utils.enums.OrderStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,9 +26,11 @@ import java.util.Map;
 @RequestMapping("/api/order")
 public class OrderController {
     private final OrderService orderService;
+    private final QrService qrService;
 
-    public OrderController(OrderService orderService) {
+    public OrderController(OrderService orderService, QrService qrService) {
         this.orderService = orderService;
+        this.qrService = qrService;
     }
 
     @PostMapping("/add")
@@ -109,6 +113,18 @@ public class OrderController {
     public ReturnOrderDTO viewReturn(@RequestParam Long id) throws IOException {
         return orderService.viewReturnOrder(id);
     }
+    @PostMapping("/acceptReturn")
+    public void acceptReturn(@RequestParam Long id) throws IOException {
+        orderService.acceptReturnOrder(id);
+    }
+    @PostMapping("/rejectReturn")
+    public void rejectReturn(@RequestParam Long id) throws IOException {
+        orderService.rejectReturnOrder(id);
+    }
+    @GetMapping("/count")
+    public CountDTO countOrderByStatus(@RequestParam Long id ) {
+        return orderService.countOrderByStatus(id);
+    }
 
     @GetMapping
     public ResponseEntity<?> findAllByFilter(
@@ -120,4 +136,21 @@ public class OrderController {
         return ResponseEntity.ok(orderService.findAllByFilter(orderCode, status,startDate,endDate,pageable));
     }
 
+    @GetMapping("/{orderId}")
+    public ResponseEntity<?> findById(@PathVariable Long orderId) {
+        return ResponseEntity.ok(orderService.getOrder(orderId));
+    }
+
+
+    @GetMapping("/generateQr/{orderId}/{shopId}")
+    public String generateQr(@PathVariable Long orderId, @PathVariable Long shopId) {
+        return qrService.generateQrCode(orderId, shopId);
+    }
+
+    @PostMapping("/updatePaymentProof/{orderId}")
+    public void updatePaymentProof(@PathVariable Long orderId,
+                                   @RequestParam("paymentProof") MultipartFile paymentProof
+    ) throws IOException {
+        qrService.updatePaymentProof(orderId, paymentProof);
+    }
 }

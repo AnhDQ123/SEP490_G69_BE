@@ -18,8 +18,11 @@ public class OrderDTO {
     private String ownerName;
     private Long shipperId;
     private String shipperName;
+    private String shipperPhone;
     private Long shipMethodId;
+    private String shipMethodName;
     private Long paymentMethodId;
+    private String paymentMethodName;
     private Long voucherId;
     private BigDecimal voucherAmount;
     private String address;
@@ -27,9 +30,14 @@ public class OrderDTO {
     private Long shopId;
     private String status;
     private String image;
+    private String paymentProof;
     private BigDecimal total;
+    private BigDecimal shippingFee;
     private LocalDateTime createdAt;
     private List<OrderItemDTO> orderItem;
     private String reason;
+    private String phone;
+    private String shopAddress;
+
 
 }

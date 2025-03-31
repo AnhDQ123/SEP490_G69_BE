@@ -11,6 +11,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ShipperInfoDTO {
+    private Long id;
     private String name;
     private String gender;
     private LocalDate dob;

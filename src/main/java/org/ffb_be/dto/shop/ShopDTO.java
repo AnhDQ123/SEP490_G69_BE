@@ -25,5 +25,10 @@ public class ShopDTO {
     private String foodSafetyCertificate;
     private String address;
     private Status isActive;
+    private Double rate;
+    private String reason;
+    private int viewCount;
+    private Boolean isShipping;
+    private Boolean isOpening;
     private OwnerDTO owner;
 }

@@ -18,6 +18,7 @@ import java.io.IOException;
 @RestController
 @RequestMapping("/api/shippers")
 @RequiredArgsConstructor
+@CrossOrigin("*")
 public class ShipperController {
     private final ShipperService shipperService;
 

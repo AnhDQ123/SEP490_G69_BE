@@ -70,6 +70,7 @@ public class ShopServiceImpl implements ShopService {
             Long userId,
             ShopRegisterDTO shopDTO,
             MultipartFile logo,
+            MultipartFile background,
             MultipartFile citizenIDFront,
             MultipartFile citizenIDBack,
             MultipartFile registrationCert,
@@ -91,6 +92,9 @@ public class ShopServiceImpl implements ShopService {
         shop.setCreatedAt(LocalDateTime.now());
         String logoUrl = cloudinaryUpload.uploadFile(logo);
         if (logoUrl != null) shop.setLogo(logoUrl);
+
+        String backgroundUrl = cloudinaryUpload.uploadFile(background);
+        if (backgroundUrl != null) shop.setBackgroundImage(backgroundUrl);
 
         String citizenIDFrontUrl = cloudinaryUpload.uploadFile(citizenIDFront);
         if (citizenIDFrontUrl != null) profile.setCitizenIDCardFront(citizenIDFrontUrl);
@@ -125,6 +129,7 @@ public class ShopServiceImpl implements ShopService {
             Long shopId,
             ShopRegisterDTO shopDTO,
             MultipartFile logo,
+            MultipartFile background,
             MultipartFile menu,
             MultipartFile registrationCert,
             MultipartFile foodSafetyCert,
@@ -146,6 +151,11 @@ public class ShopServiceImpl implements ShopService {
         if (logo != null && !logo.isEmpty()) {
             shop.setLogo(cloudinaryUpload.uploadFile(logo));
         }
+
+        if (background != null && !background.isEmpty()) {
+            shop.setBackgroundImage(cloudinaryUpload.uploadFile(background));
+        }
+
         if (menu != null && !menu.isEmpty()) {
             shop.setMenu(cloudinaryUpload.uploadFile(menu));
         }
