@@ -17,12 +17,12 @@ import java.util.Map;
 public class VoucherController {
     private final VoucherService voucherService;
 
-    @GetMapping("/{shopId}")
+    @GetMapping("/shop/{shopId}")
     public ResponseEntity<List<VoucherDTO>> getAllVouchers(@PathVariable Long shopId) {
         return ResponseEntity.ok(voucherService.getAllVouchers(shopId));
     }
 
-    @GetMapping("/{code}")
+    @GetMapping("/voucher/{code}")
     public ResponseEntity<VoucherDTO> getVoucherByCode(@PathVariable String code) {
         return ResponseEntity.ok(voucherService.getVoucherByCode(code));
     }
