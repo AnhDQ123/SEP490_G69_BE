@@ -86,9 +86,7 @@ public class ShopServiceImpl implements ShopService {
         User owner = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User"));
         Profile profile = profileRepository.getByUserId(userId)
-                .orElseThrow(() -> new NotFoundException("User"));
-
-
+                .orElseThrow(() -> new NotFoundException("Profile"));
         Shop shop = shopMapper.toEntity(shopDTO);
         shop.setOwner(owner);
         shop.setIsActive(Status.PENDING);
