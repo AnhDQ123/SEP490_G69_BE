@@ -2,6 +2,7 @@ package org.ffb_be.service.report;
 
 import org.ffb_be.dto.report.ReportCreateDTO;
 import org.ffb_be.dto.report.ReportViewDTO;
+import org.ffb_be.utils.enums.ReportStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,9 +19,9 @@ public interface ReportService {
     void addToReport(Long id,List<MultipartFile> option) throws IOException;
     Page<ReportViewDTO> findAllByShop(Long id,int page,int size);
     Page<ReportViewDTO> findAll(int page,int size);
-    Map<Integer, Long> getReportCountByYear(String status, LocalDate startDate, LocalDate endDate,Long type);
-    Map<String, Long> getReportCountByMonth(String status, LocalDate startDate, LocalDate endDate,Long type);
-    Map<LocalDate, Long> getReportCountByDay(String status, LocalDate startDate, LocalDate endDate,Long type);
+    Map<Integer, Long> getReportCountByYear(ReportStatus status, LocalDate startDate, LocalDate endDate, Long type);
+    Map<String, Long> getReportCountByMonth(ReportStatus status, LocalDate startDate, LocalDate endDate,Long type);
+    Map<LocalDate, Long> getReportCountByDay(ReportStatus status, LocalDate startDate, LocalDate endDate,Long type);
     Long countAllReports();
 
 }

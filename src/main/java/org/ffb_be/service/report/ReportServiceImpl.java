@@ -164,7 +164,7 @@ public class ReportServiceImpl implements ReportService {
         return reports.map(this::convertToDTO);
     }
 
-    public Map<LocalDate, Long> getReportCountByDay(String status, LocalDate startDate, LocalDate endDate,Long type) {
+    public Map<LocalDate, Long> getReportCountByDay(ReportStatus status, LocalDate startDate, LocalDate endDate,Long type) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         List<Object[]> results = reportRepository.countShopReportsByStatusAndDay(status, startDateTime, endDateTime,type);
@@ -180,7 +180,7 @@ public class ReportServiceImpl implements ReportService {
 
         return reportCountPerDay;
     }
-    public Map<String, Long> getReportCountByMonth(String status, LocalDate startDate, LocalDate endDate,Long type) {
+    public Map<String, Long> getReportCountByMonth(ReportStatus status, LocalDate startDate, LocalDate endDate,Long type) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         List<Object[]> results = reportRepository.countReportsByStatusAndTypeIdAndMonth(status, startDateTime, endDateTime,type);
@@ -198,7 +198,7 @@ public class ReportServiceImpl implements ReportService {
 
         return reportCountPerMonth;
     }
-    public Map<Integer, Long> getReportCountByYear(String status, LocalDate startDate, LocalDate endDate,Long type) {
+    public Map<Integer, Long> getReportCountByYear(ReportStatus status, LocalDate startDate, LocalDate endDate,Long type) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         List<Object[]> results = reportRepository.countReportsByStatusAndTypeIdAndYear(status, startDateTime, endDateTime,type);
