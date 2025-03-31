@@ -9,6 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.util.Map;
 
 public interface ShopService {
 
@@ -52,4 +54,8 @@ public interface ShopService {
     ShopDTO getShopById(Long shopId);
 
     ShopDTO getShopByUserId(Long userId);
+    Map<Integer, Long> getShopCountByYear(String status, LocalDate startDate, LocalDate endDate);
+    Map<Integer, Long> getShopCountByMonth(String status, LocalDate startDate, LocalDate endDate);
+    Map<LocalDate, Long> getShopCountByDayAndStatus(String status, LocalDate startDate, LocalDate endDate);
+
 }

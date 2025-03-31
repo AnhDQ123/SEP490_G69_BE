@@ -17,9 +17,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 @RequiredArgsConstructor
 @Service
@@ -158,5 +162,56 @@ public class ReportServiceImpl implements ReportService {
 
         Page<Report> reports = reportRepository.findAll(pageable);
         return reports.map(this::convertToDTO);
+    }
+
+    public Map<LocalDate, Long> getReportCountByDay(String status, LocalDate startDate, LocalDate endDate) {
+        LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+        List<Object[]> results = reportRepository.countShopReportsByStatusAndDay(status, startDateTime, endDateTime);
+
+        Map<LocalDate, Long> reportCountPerDay = new TreeMap<>();
+
+        for (Object[] result : results) {
+            LocalDate date = (LocalDate) result[0];  // Ngày
+            Long count = (Long) result[1];           // Số lượng báo cáo
+
+            reportCountPerDay.put(date, count);
+        }
+
+        return reportCountPerDay;
+    }
+    public Map<String, Long> getReportCountByMonth(String status, LocalDate startDate, LocalDate endDate) {
+        LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+        List<Object[]> results = reportRepository.countReportsByStatusAndTypeIdAndMonth(status, startDateTime, endDateTime);
+
+        Map<String, Long> reportCountPerMonth = new TreeMap<>();
+
+        for (Object[] result : results) {
+            int month = (Integer) result[0];  // Tháng
+            int year = (Integer) result[1];   // Năm
+            Long count = (Long) result[2];    // Số lượng báo cáo
+
+            String monthYear = year + "-" + String.format("%02d", month);  // Định dạng "YYYY-MM"
+            reportCountPerMonth.put(monthYear, count);
+        }
+
+        return reportCountPerMonth;
+    }
+    public Map<Integer, Long> getReportCountByYear(String status, LocalDate startDate, LocalDate endDate) {
+        LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+        List<Object[]> results = reportRepository.countReportsByStatusAndTypeIdAndYear(status, startDateTime, endDateTime);
+
+        Map<Integer, Long> reportCountPerYear = new TreeMap<>();
+
+        for (Object[] result : results) {
+            int year = (Integer) result[0];  // Năm
+            Long count = (Long) result[1];    // Số lượng báo cáo
+
+            reportCountPerYear.put(year, count);
+        }
+
+        return reportCountPerYear;
     }
 }

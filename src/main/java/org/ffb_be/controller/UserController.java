@@ -1,6 +1,6 @@
 package org.ffb_be.controller;
 
-import lombok.AllArgsConstructor;
+
 import lombok.RequiredArgsConstructor;
 import org.ffb_be.dto.auth.userDto.UserCreateDTO;
 import org.ffb_be.dto.auth.userDto.UserUpdateDTO;
@@ -16,6 +16,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
+
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/users")
 @CrossOrigin("*")
@@ -66,5 +70,48 @@ public class UserController {
                                     @RequestParam(value = "size", defaultValue = "20", required = false) Integer size) {
         Pageable pageable = PageRequest.of(page-1, size);
         return ResponseEntity.ok( userService.findAll(search,pageable));
+    }
+
+    @GetMapping("/count/year")
+    public Map<Integer, Long> getUserCountByYear(
+            @RequestParam("startDate") String startDate,
+            @RequestParam("endDate") String endDate,
+            @RequestParam("status") String status) {
+
+        LocalDate start = LocalDate.parse(startDate);
+        LocalDate end = LocalDate.parse(endDate);
+
+        return userService.getUserCountByYearAndStatus(start, end,status);
+    }
+
+    @GetMapping("/count/month")
+    public Map<String, Long> getUserCountByMonth(
+            @RequestParam("startDate") String startDate,
+            @RequestParam("endDate") String endDate,
+            @RequestParam("status") String status) {
+
+        LocalDate start = LocalDate.parse(startDate);
+        LocalDate end = LocalDate.parse(endDate);
+
+        return userService.getUserCountByMonthAndStatus(start, end,status);
+    }
+    @GetMapping("/count/day")
+    public Map<LocalDate, Long> getUserCountByDayAndStatus(
+            @RequestParam("startDate") String startDate,
+            @RequestParam("endDate") String endDate,
+            @RequestParam("status") String status) {
+
+        LocalDate start = LocalDate.parse(startDate);
+        LocalDate end = LocalDate.parse(endDate);
+
+        return userService.getUserCountByDayAndStatus(start, end, status);
+    }
+    @GetMapping("/count/shop")
+    public long getUserHaveShopCount() {
+        return userService.countUsersHaveShop();
+    }
+    @GetMapping("/count/shipper")
+    public long getUserAreShipperCount() {
+        return userService.countUsersAreShipper();
     }
 }

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -137,5 +138,52 @@ public class OrderController {
     public ResponseEntity<?> findById(@PathVariable Long orderId) {
         return ResponseEntity.ok(orderService.getOrder(orderId));
     }
+    @GetMapping("/count/day")
+    public Map<LocalDateTime, Long> getOrderCountByStatusAndDay(
+            @RequestParam("status") String status,
+            @RequestParam("startDate") String startDate,
+            @RequestParam("endDate") String endDate) {
 
+        LocalDate start = LocalDate.parse(startDate);
+        LocalDate end = LocalDate.parse(endDate);
+
+        return orderService.getOrderCountByStatusAndDay(status, start, end);
+    }
+    @GetMapping("/count/month")
+    public Map<String, Long> getOrderCountByStatusAndMonth(
+            @RequestParam("status") String status,
+            @RequestParam("startDate") String startDate,
+            @RequestParam("endDate") String endDate) {
+
+        LocalDate start = LocalDate.parse(startDate);
+        LocalDate end = LocalDate.parse(endDate);
+
+        return orderService.getOrderCountByStatusAndMonth(status, start, end);
+    }
+
+    @GetMapping("/count/year")
+    public Map<Integer, Long> getOrderCountByStatusAndYear(
+            @RequestParam("status") String status,
+            @RequestParam("startDate") String startDate,
+            @RequestParam("endDate") String endDate) {
+
+        LocalDate start = LocalDate.parse(startDate);
+        LocalDate end = LocalDate.parse(endDate);
+
+        return orderService.getOrderCountByStatusAndYear(status, start, end);
+    }
+    @GetMapping("/top-selling/today")
+    public Map<String, Long> getTopSellingProductsToday() {
+        return orderService.getTopSellingProductsToday();
+    }
+    @GetMapping("/top-selling/month")
+    public Map<String, Long> getTopSellingProductsThisMonth() {
+        return orderService.getTopSellingProductsThisMonth();
+    }
+
+    // API để lấy sản phẩm bán chạy nhất trong năm nay
+    @GetMapping("/top-selling/year")
+    public Map<String, Long> getTopSellingProductsThisYear() {
+        return orderService.getTopSellingProductsThisYear();
+    }
 }

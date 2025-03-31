@@ -21,6 +21,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -170,5 +177,67 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
+    public Map<LocalDate, Long> getUserCountByDayAndStatus(LocalDate startDate, LocalDate endDate, String status) {
+        LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+        List<Object[]> results = userRepository.countUsersByDayAndStatus(startDateTime, endDateTime, status);
+
+        Map<LocalDate, Long> usersCountPerDay = new TreeMap<>();
+
+        // Chuyển đổi kết quả thành Map với ngày là key và số lượng người dùng là value
+        for (Object[] result : results) {
+            LocalDate date = (LocalDate) result[0];  // Ngày
+            Long count = (Long) result[1];            // Số lượng người dùng
+
+            usersCountPerDay.put(date, count);
+        }
+
+        return usersCountPerDay;
+    }
+
+    public Map<String, Long> getUserCountByMonthAndStatus(LocalDate startDate, LocalDate endDate, String status) {
+
+        LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+        List<Object[]> results = userRepository.countUsersByMonthAndStatus(startDateTime, endDateTime, status);
+        Map<String, Long> usersCountPerMonth = new TreeMap<>();
+
+        // Chuyển đổi kết quả thành Map với tháng và năm là key (với định dạng "YYYY-MM") và số lượng người dùng là value
+        for (Object[] result : results) {
+            int month = (Integer) result[0];  // Tháng
+            int year = (Integer) result[1];   // Năm
+            Long count = (Long) result[2];     // Số lượng người dùng
+
+            String monthYear = year + "-" + String.format("%02d", month);  // Định dạng "YYYY-MM"
+            usersCountPerMonth.put(monthYear, count);
+        }
+
+        return usersCountPerMonth;
+    }
+
+    public Map<Integer, Long> getUserCountByYearAndStatus(LocalDate startDate, LocalDate endDate, String status) {
+        LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+        List<Object[]> results = userRepository.countUsersByYearAndStatus(startDateTime, endDateTime, status);
+
+        Map<Integer, Long> usersCountPerYear = new TreeMap<>();
+
+        // Chuyển đổi kết quả thành Map với năm là key và số lượng người dùng là value
+        for (Object[] result : results) {
+            int year = (Integer) result[0];  // Năm
+            Long count = (Long) result[1];    // Số lượng người dùng
+
+            usersCountPerYear.put(year, count);
+        }
+
+        return usersCountPerYear;
+    }
+
+    public long countUsersAreShipper() {
+        return userRepository.countUsersAreShipper();
+    }
+    public long countUsersHaveShop() {
+        return userRepository.countUsersHaveShop();
+    }
 
 }

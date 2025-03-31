@@ -9,6 +9,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
+
+import java.util.Map;
 
 public interface UserService {
     void create(UserCreateDTO employeeCreateDTO) throws IOException;
@@ -19,5 +22,10 @@ public interface UserService {
     Page<UserResponseDTO> findAll(String search, Pageable pageable);
     ProfileDTO findById(Long id);
     void inactiveUser(Long id);
+    Map<LocalDate, Long> getUserCountByDayAndStatus(LocalDate startDate, LocalDate endDate, String status);
+    Map<String, Long> getUserCountByMonthAndStatus(LocalDate startDate, LocalDate endDate, String status);
+    Map<Integer, Long> getUserCountByYearAndStatus(LocalDate startDate, LocalDate endDate,String status);
+    long countUsersAreShipper();
+    long countUsersHaveShop();
 }
 

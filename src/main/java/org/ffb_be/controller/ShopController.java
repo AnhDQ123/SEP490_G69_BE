@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/shops")
@@ -121,5 +123,38 @@ public class ShopController {
         shopService.approveShop(shopId);
         return ResponseEntity.ok().build();
     }
+    @GetMapping("/count/day")
+    public Map<LocalDate, Long> getShopCountByDayAndStatus(
+            @RequestParam("status") String status,
+            @RequestParam("startDate") String startDate,
+            @RequestParam("endDate") String endDate) {
 
+        LocalDate start = LocalDate.parse(startDate);
+        LocalDate end = LocalDate.parse(endDate);
+
+        return shopService.getShopCountByDayAndStatus(status, start, end);
+    }
+
+    @GetMapping("/count/year")
+    public Map<Integer, Long> getShopCountByYear(
+            @RequestParam("status") String status,
+            @RequestParam("startDate") String startDate,
+            @RequestParam("endDate") String endDate) {
+
+        LocalDate start = LocalDate.parse(startDate);
+        LocalDate end = LocalDate.parse(endDate);
+
+        return shopService.getShopCountByYear(status, start, end);
+    }
+    @GetMapping("/count/month")
+    public Map<Integer, Long> getShopCountByMonth(
+            @RequestParam("status") String status,
+            @RequestParam("startDate") String startDate,
+            @RequestParam("endDate") String endDate) {
+
+        LocalDate start = LocalDate.parse(startDate);
+        LocalDate end = LocalDate.parse(endDate);
+
+        return shopService.getShopCountByMonth(status, start, end);
+    }
 }

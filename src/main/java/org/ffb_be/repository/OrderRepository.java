@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -73,4 +74,50 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             @Param("endDate") LocalDateTime endDate,
             @Param("orderCode") String orderCode,
             Pageable pageable);
+
+    @Query("SELECT o.createdAt, COUNT(o) FROM Order o WHERE o.status = :status " +
+            "AND o.createdAt BETWEEN :startDate AND :endDate " +
+            "GROUP BY o.createdAt ORDER BY o.createdAt")
+    List<Object[]> countOrdersByStatusAndDay( String status,
+                                              LocalDateTime startDate,
+                                              LocalDateTime endDate);
+
+    @Query("SELECT FUNCTION('MONTH', o.createdAt), FUNCTION('YEAR', o.createdAt), COUNT(o) " +
+            "FROM Order o WHERE o.status = :status " +
+            "AND o.createdAt BETWEEN :startDate AND :endDate " +
+            "GROUP BY FUNCTION('YEAR', o.createdAt), FUNCTION('MONTH', o.createdAt) " +
+            "ORDER BY FUNCTION('YEAR', o.createdAt), FUNCTION('MONTH', o.createdAt)")
+    List<Object[]> countOrdersByStatusAndMonth( String status,
+                                                LocalDateTime startDate,
+                                                LocalDateTime endDate);
+    @Query("SELECT FUNCTION('YEAR', o.createdAt), COUNT(o) FROM Order o " +
+            "WHERE o.status = :status AND o.createdAt BETWEEN :startDate AND :endDate " +
+            "GROUP BY FUNCTION('YEAR', o.createdAt) " +
+            "ORDER BY FUNCTION('YEAR', o.createdAt)")
+    List<Object[]> countOrdersByStatusAndYear( String status,
+                                               LocalDateTime startDate,
+                                               LocalDateTime endDate);
+    @Query("SELECT oi.product.id, oi.product.name, SUM(oi.quantity) as totalQuantity " +
+            "FROM OrderItem oi " +
+            "JOIN oi.order o " +
+            "WHERE FUNCTION('DATE', o.createdAt) = FUNCTION('CURRENT_DATE', CURRENT_DATE) " + // Lọc theo ngày hôm nay
+            "GROUP BY oi.product.id, oi.product.name " +
+            "ORDER BY totalQuantity DESC")
+    List<Object[]> findTopSellingProductsToday();
+    @Query("SELECT oi.product.id, oi.product.name, SUM(oi.quantity) as totalQuantity " +
+            "FROM OrderItem oi " +
+            "JOIN oi.order o " +
+            "WHERE FUNCTION('YEAR', o.createdAt) = FUNCTION('YEAR', CURRENT_DATE) " +  // Lọc theo năm hiện tại
+            "AND FUNCTION('MONTH', o.createdAt) = FUNCTION('MONTH', CURRENT_DATE) " +  // Lọc theo tháng hiện tại
+            "GROUP BY oi.product.id, oi.product.name " +
+            "ORDER BY totalQuantity DESC")
+    List<Object[]> findTopSellingProductsThisMonth();
+
+    @Query("SELECT oi.product.id, oi.product.name, SUM(oi.quantity) as totalQuantity " +
+            "FROM OrderItem oi " +
+            "JOIN oi.order o " +
+            "WHERE FUNCTION('YEAR', o.createdAt) = FUNCTION('YEAR', CURRENT_DATE) " +  // Lọc theo năm hiện tại
+            "GROUP BY oi.product.id, oi.product.name " +
+            "ORDER BY totalQuantity DESC")
+    List<Object[]> findTopSellingProductsThisYear();
 }

@@ -10,7 +10,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @RestController
@@ -50,5 +52,37 @@ public class ReportController {
                                           @RequestParam(value = "size", defaultValue = "20", required = false) Integer size) {
         return ResponseEntity.ok( reportService.findAll(page,size));
     }
+    @GetMapping("/count/day")
+    public Map<LocalDate, Long> getReportCountByDay(
+            @RequestParam("status") String status,
+            @RequestParam("startDate") String startDate,
+            @RequestParam("endDate") String endDate) {
 
+        LocalDate start = LocalDate.parse(startDate);
+        LocalDate end = LocalDate.parse(endDate);
+
+        return reportService.getReportCountByDay(status, start, end);
+    }
+    @GetMapping("/count/month")
+    public Map<String, Long> getReportCountByMonth(
+            @RequestParam("status") String status,
+            @RequestParam("startDate") String startDate,
+            @RequestParam("endDate") String endDate) {
+
+        LocalDate start = LocalDate.parse(startDate);
+        LocalDate end = LocalDate.parse(endDate);
+
+        return reportService.getReportCountByMonth(status, start, end);
+    }
+    @GetMapping("/count/year")
+    public Map<Integer, Long> getReportCountByYear(
+            @RequestParam("status") String status,
+            @RequestParam("startDate") String startDate,
+            @RequestParam("endDate") String endDate) {
+
+        LocalDate start = LocalDate.parse(startDate);
+        LocalDate end = LocalDate.parse(endDate);
+
+        return reportService.getReportCountByYear(status, start, end);
+    }
 }

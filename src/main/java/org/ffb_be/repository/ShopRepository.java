@@ -10,6 +10,9 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 
@@ -25,4 +28,26 @@ public interface ShopRepository extends JpaRepository<Shop, Long>, JpaSpecificat
     Shop findByProduct( Long productId);
 
     Optional<Shop> findByOwnerId(Long userId);
+
+    @Query("SELECT s.createdAt, COUNT(s) FROM Shop s WHERE s.isActive = :status " +
+            "AND s.createdAt BETWEEN :startDate AND :endDate " +
+            "GROUP BY s.createdAt ORDER BY s.createdAt")
+    List<Object[]> countShopsByStatusAndDay(String status,
+                                             LocalDateTime startDate,
+                                             LocalDateTime endDate);
+    @Query("SELECT FUNCTION('MONTH', s.createdAt), COUNT(s) FROM Shop s " +
+            "WHERE s.isActive = :status AND s.createdAt BETWEEN :startDate AND :endDate " +
+            "GROUP BY FUNCTION('MONTH', s.createdAt) " +
+            "ORDER BY FUNCTION('MONTH', s.createdAt)")
+    List<Object[]> countShopsByStatusAndMonth(String status,
+                                               LocalDateTime startDate,
+                                               LocalDateTime endDate);
+
+    @Query("SELECT FUNCTION('YEAR', s.createdAt), COUNT(s) FROM Shop s " +
+            "WHERE s.isActive = :status AND s.createdAt BETWEEN :startDate AND :endDate " +
+            "GROUP BY FUNCTION('YEAR', s.createdAt) " +
+            "ORDER BY FUNCTION('YEAR', s.createdAt)")
+    List<Object[]> countShopsByStatusAndYear( String status,
+                                              LocalDateTime startDate,
+                                              LocalDateTime endDate);
 }

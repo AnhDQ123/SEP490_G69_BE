@@ -19,7 +19,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.math.BigDecimal;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 
 @RequiredArgsConstructor
@@ -470,6 +472,104 @@ public class OrderServiceImpl implements OrderService {
             }
         }
         return dto;
+    }
+        public Map<Integer, Long> getOrderCountByStatusAndYear(String status, LocalDate startDate, LocalDate endDate) {
+        LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+        List<Object[]> results = orderRepository.countOrdersByStatusAndYear(status, startDateTime, endDateTime);
+
+        Map<Integer, Long> orderCountPerYear = new TreeMap<>();
+
+        for (Object[] result : results) {
+            int year = (Integer) result[0];  // Năm
+            Long count = (Long) result[1];   // Số lượng đơn hàng
+
+            orderCountPerYear.put(year, count);
+        }
+
+        return orderCountPerYear;
+    }
+    public Map<String, Long> getOrderCountByStatusAndMonth(String status, LocalDate startDate, LocalDate endDate) {
+        LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+        List<Object[]> results = orderRepository.countOrdersByStatusAndMonth(status, startDateTime, endDateTime);
+
+        Map<String, Long> orderCountPerMonth = new TreeMap<>();
+
+        // Chuyển đổi kết quả thành Map với "YYYY-MM" là key và số lượng đơn hàng là value
+        for (Object[] result : results) {
+            int month = (Integer) result[0];  // Tháng
+            int year = (Integer) result[1];   // Năm
+            Long count = (Long) result[2];    // Số lượng đơn hàng
+
+            String monthYear = year + "-" + String.format("%02d", month);  // Định dạng "YYYY-MM"
+            orderCountPerMonth.put(monthYear, count);
+        }
+
+        return orderCountPerMonth;
+    }
+    public Map<LocalDateTime, Long> getOrderCountByStatusAndDay(String status, LocalDate startDate, LocalDate endDate) {
+        LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+        List<Object[]> results = orderRepository.countOrdersByStatusAndDay(status, startDateTime, endDateTime);
+
+        Map<LocalDateTime, Long> orderCountPerDay = new TreeMap<>();
+
+        for (Object[] result : results) {
+            LocalDateTime date = (LocalDateTime) result[0];  // Ngày
+            Long count = (Long) result[1];                   // Số lượng đơn hàng
+
+            orderCountPerDay.put(date, count);
+        }
+
+        return orderCountPerDay;
+    }
+    public Map<String, Long> getTopSellingProductsToday() {
+        List<Object[]> results = orderRepository.findTopSellingProductsToday();
+
+        Map<String, Long> topSellingProducts = new TreeMap<>();
+
+        // Chuyển đổi kết quả thành Map với key là "productName" và value là "totalQuantity"
+        for (Object[] result : results) {
+            String productKey = (String) result[1];  // Tên sản phẩm
+            Long totalQuantity = (Long) result[2];  // Số lượng bán được
+
+            topSellingProducts.put(productKey, totalQuantity);
+        }
+
+        return topSellingProducts;
+    }
+    public Map<String, Long> getTopSellingProductsThisMonth() {
+        List<Object[]> results = orderRepository.findTopSellingProductsThisMonth();
+
+        Map<String, Long> topSellingProducts = new TreeMap<>();
+
+        // Chuyển đổi kết quả thành Map với key là "productName" và value là "totalQuantity"
+        for (Object[] result : results) {
+            String productKey = (String) result[1];  // Tên sản phẩm
+            Long totalQuantity = (Long) result[2];  // Số lượng bán được
+
+            topSellingProducts.put(productKey, totalQuantity);
+        }
+
+        return topSellingProducts;
+    }
+
+    // Phương thức để lấy danh sách sản phẩm bán chạy nhất trong năm nay
+    public Map<String, Long> getTopSellingProductsThisYear() {
+        List<Object[]> results = orderRepository.findTopSellingProductsThisYear();
+
+        Map<String, Long> topSellingProducts = new TreeMap<>();
+
+        // Chuyển đổi kết quả thành Map với key là "productName" và value là "totalQuantity"
+        for (Object[] result : results) {
+            String productKey = (String) result[1];  // Tên sản phẩm
+            Long totalQuantity = (Long) result[2];  // Số lượng bán được
+
+            topSellingProducts.put(productKey, totalQuantity);
+        }
+
+        return topSellingProducts;
     }
 }
 
