@@ -1,6 +1,7 @@
 package org.ffb_be.controller;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.ffb_be.dto.order.CountByDateDTO;
 import org.ffb_be.dto.order.CountDTO;
 import org.ffb_be.dto.order.OrderDTO;
 import org.ffb_be.dto.order.ReturnOrderDTO;
@@ -142,7 +143,7 @@ public class OrderController {
         return ResponseEntity.ok(orderService.getOrder(orderId));
     }
     @GetMapping("/count/day")
-    public List<Object[]> getOrderCountByStatusAndDay(
+    public List<CountByDateDTO> getOrderCountByStatusAndDay(
             @RequestParam("status") String status) {
         OrderStatus orderStatus = OrderStatus.valueOf(status);
 
@@ -152,7 +153,7 @@ public class OrderController {
         return orderService.getOrderCountByStatusAndDay(orderStatus, startDate, endDate);
     }
     @GetMapping("/count/month")
-    public List<Object[]> getOrderCountByStatusAndMonth(
+    public List<CountByDateDTO> getOrderCountByStatusAndMonth(
             @RequestParam("status") String status) {
         OrderStatus orderStatus = OrderStatus.valueOf(status);
         LocalDate endDate = LocalDate.now();
@@ -162,7 +163,7 @@ public class OrderController {
     }
 
     @GetMapping("/count/year")
-    public List<Object[]> getOrderCountByStatusAndYear(
+    public List<CountByDateDTO> getOrderCountByStatusAndYear(
             @RequestParam("status") String status) {
         OrderStatus orderStatus = OrderStatus.valueOf(status);
         LocalDate endDate = LocalDate.now();
