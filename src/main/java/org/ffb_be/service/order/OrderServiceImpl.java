@@ -525,7 +525,12 @@ public class OrderServiceImpl implements OrderService {
         return orderCountPerDay;
     }
     public Map<String, Long> getTopSellingProductsToday() {
-        List<Object[]> results = orderRepository.findTopSellingProductsToday();
+        LocalDate currentDate = LocalDate.now();
+
+        // Lấy thời gian bắt đầu và kết thúc của ngày hôm nay
+        LocalDateTime startOfDay = currentDate.atStartOfDay();  // 00:00:00
+        LocalDateTime endOfDay = currentDate.atTime(23, 59, 59);
+        List<Object[]> results = orderRepository.findTopSellingProductsToday(startOfDay,endOfDay);
 
         Map<String, Long> topSellingProducts = new TreeMap<>();
 

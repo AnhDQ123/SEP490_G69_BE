@@ -100,11 +100,11 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("SELECT oi.product.id, oi.product.name, SUM(oi.quantity) as totalQuantity " +
             "FROM OrderItem oi " +
             "JOIN oi.order o " +
-            "WHERE o.createdAt >= CAST(CURRENT_DATE AS timestamp) " +
-            "AND o.createdAt < CAST(CURRENT_DATE + 1 AS timestamp) " +
+            "WHERE o.createdAt >= :startDate " +
+            "AND o.createdAt < :endDate " +
             "GROUP BY oi.product.id, oi.product.name " +
             "ORDER BY totalQuantity DESC")
-    List<Object[]> findTopSellingProductsToday();
+    List<Object[]> findTopSellingProductsToday(LocalDateTime startDate, LocalDateTime endDate);
     @Query("SELECT oi.product.id, oi.product.name, SUM(oi.quantity) as totalQuantity " +
             "FROM OrderItem oi " +
             "JOIN oi.order o " +
