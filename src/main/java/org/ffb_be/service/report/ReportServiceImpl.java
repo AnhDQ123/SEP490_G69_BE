@@ -191,7 +191,12 @@ public class ReportServiceImpl implements ReportService {
         for (Object[] result : results) {
             CountByMonthDTO countByMonthDTO = new CountByMonthDTO();
             countByMonthDTO.setMonth((Integer) result[0]);
-            countByMonthDTO.setCount((Long) result[1]);
+            if (result[1] instanceof Long) {
+                countByMonthDTO.setCount((Long) result[1]);
+            } else {
+                // Xử lý trường hợp không phải Long
+                countByMonthDTO.setCount(((Integer) result[1]).longValue());
+            }
             countByMonthDTOS.add(countByMonthDTO);
         }
 
