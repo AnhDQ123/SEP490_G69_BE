@@ -208,6 +208,7 @@ public class OrderServiceImpl implements OrderService {
             orderDTO.setPhone(userRepository.findById(orderDTO.getOwnerId()).get().getPhone());
             orderDTO.setOwnerName(userRepository.findById(orderDTO.getOwnerId()).get().getProfile().getName());
             orderDTO.setReason(order.getReason());
+            orderDTO.setPaymentProof(order.getPaymentProof());
             if(order.getVoucher() != null) {
                 orderDTO.setVoucherId(order.getVoucher().getId());
                 orderDTO.setVoucherAmount(order.getVoucher().getDiscountValue());
