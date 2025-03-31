@@ -143,37 +143,31 @@ public class OrderController {
     }
     @GetMapping("/count/day")
     public Map<LocalDateTime, Long> getOrderCountByStatusAndDay(
-            @RequestParam("status") String status,
-            @RequestParam("startDate") String startDate,
-            @RequestParam("endDate") String endDate) {
+            @RequestParam("status") String status) {
 
-        LocalDate start = LocalDate.parse(startDate);
-        LocalDate end = LocalDate.parse(endDate);
+        LocalDate startDate = LocalDate.now();
+        LocalDate endDate = startDate.plusDays(7);
 
-        return orderService.getOrderCountByStatusAndDay(status, start, end);
+        return orderService.getOrderCountByStatusAndDay(status, startDate, endDate);
     }
     @GetMapping("/count/month")
     public Map<String, Long> getOrderCountByStatusAndMonth(
-            @RequestParam("status") String status,
-            @RequestParam("startDate") String startDate,
-            @RequestParam("endDate") String endDate) {
+            @RequestParam("status") String status) {
 
-        LocalDate start = LocalDate.parse(startDate);
-        LocalDate end = LocalDate.parse(endDate);
+        LocalDate startDate = LocalDate.now();
+        LocalDate endDate = startDate.plusMonths(7);
 
-        return orderService.getOrderCountByStatusAndMonth(status, start, end);
+        return orderService.getOrderCountByStatusAndMonth(status, startDate, endDate);
     }
 
     @GetMapping("/count/year")
     public Map<Integer, Long> getOrderCountByStatusAndYear(
-            @RequestParam("status") String status,
-            @RequestParam("startDate") String startDate,
-            @RequestParam("endDate") String endDate) {
+            @RequestParam("status") String status) {
 
-        LocalDate start = LocalDate.parse(startDate);
-        LocalDate end = LocalDate.parse(endDate);
+        LocalDate startDate = LocalDate.now();
+        LocalDate endDate = startDate.plusYears(3);
 
-        return orderService.getOrderCountByStatusAndYear(status, start, end);
+        return orderService.getOrderCountByStatusAndYear(status, startDate, endDate);
     }
     @GetMapping("/top-selling/today")
     public List<TopProductDTO> getTopSellingProductsToday() {
