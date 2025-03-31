@@ -1,6 +1,8 @@
 package org.ffb_be.service.shop;
 
 import lombok.AllArgsConstructor;
+import org.ffb_be.dto.CountDTOBy.CountByDateDTO;
+import org.ffb_be.dto.CountDTOBy.CountByMonthDTO;
 import org.ffb_be.dto.auth.ProfileDto.BusinessProfileDTO;
 import org.ffb_be.dto.auth.userDto.OwnerDTO;
 import org.ffb_be.dto.shop.ShopDTO;
@@ -30,6 +32,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -326,59 +329,55 @@ public class ShopServiceImpl implements ShopService {
     private String encryptSafe(String data) {
         return data != null ? encryptUtil.encrypt(data) : null;
     }
-    public Map<Integer, Long> getShopCountByMonth(Status status, LocalDate startDate, LocalDate endDate) {
+    public List<CountByMonthDTO> getShopCountByMonth(Status status, LocalDate startDate, LocalDate endDate) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         List<Object[]> results = shopRepository.countShopsByStatusAndMonth(status, startDateTime, endDateTime);
 
-        Map<Integer, Long> shopCountPerMonth = new TreeMap<>();
+        List<CountByMonthDTO> countByMonthDTOS = new ArrayList<>();
 
         // Chuyển đổi kết quả thành Map với tháng là key và số lượng shop là value
         for (Object[] result : results) {
-            int month = (Integer) result[0];  // Tháng
-            Long count = (Long) result[1];     // Số lượng shop
-
-            shopCountPerMonth.put(month, count);
+            CountByMonthDTO countByMonthDTO = new CountByMonthDTO();
+            countByMonthDTO.setMonth((Integer) result[0]);
+            countByMonthDTO.setCount((Long) result[1]);
+            countByMonthDTOS.add(countByMonthDTO);
         }
 
-        return shopCountPerMonth;
+        return countByMonthDTOS;
     }
 
     // Đếm số lượng shop theo trạng thái và năm
-    public Map<Integer, Long> getShopCountByYear(Status status, LocalDate startDate, LocalDate endDate) {
+    public List<CountByMonthDTO> getShopCountByYear(Status status, LocalDate startDate, LocalDate endDate) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         List<Object[]> results = shopRepository.countShopsByStatusAndYear(status, startDateTime, endDateTime);
 
-        Map<Integer, Long> shopCountPerYear = new TreeMap<>();
+        List<CountByMonthDTO> countByMonthDTOS = new ArrayList<>();
 
-        // Chuyển đổi kết quả thành Map với năm là key và số lượng shop là value
+        // Chuyển đổi kết quả thành Map với tháng là key và số lượng shop là value
         for (Object[] result : results) {
-            int year = (Integer) result[0];  // Năm
-            Long count = (Long) result[1];    // Số lượng shop
-
-            shopCountPerYear.put(year, count);
+            CountByMonthDTO countByMonthDTO = new CountByMonthDTO();
+            countByMonthDTO.setMonth((Integer) result[0]);
+            countByMonthDTO.setCount((Long) result[1]);
+            countByMonthDTOS.add(countByMonthDTO);
         }
 
-        return shopCountPerYear;
+        return countByMonthDTOS;
     }
 
-    public Map<LocalDate, Long> getShopCountByDayAndStatus(Status status, LocalDate startDate, LocalDate endDate) {
+    public List<CountByDateDTO> getShopCountByDayAndStatus(Status status, LocalDate startDate, LocalDate endDate) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         List<Object[]> results = shopRepository.countShopsByStatusAndDay(status, startDateTime, endDateTime);
-
-        Map<LocalDate, Long> shopCountPerDay = new TreeMap<>();
-
-        // Chuyển đổi kết quả từ List<Object[]> thành Map với ngày là key và số lượng shop là value
+        List<CountByDateDTO> countByDateDTOS = new ArrayList<>();
         for (Object[] result : results) {
-            LocalDate date = (LocalDate) result[0];  // Ngày
-            Long count = (Long) result[1];            // Số lượng shop
-
-            shopCountPerDay.put(date, count);
+            CountByDateDTO countByDateDTO = new CountByDateDTO();
+            countByDateDTO.setDate((LocalDateTime) result[0]);
+            countByDateDTO.setCount((Long) result[1]);
+            countByDateDTOS.add(countByDateDTO);
         }
-
-        return shopCountPerDay;
+        return countByDateDTOS;
     }
     public long countPendingShop() {
         return shopRepository.countPendingShop();

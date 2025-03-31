@@ -4,7 +4,7 @@ package org.ffb_be.controller;
 import lombok.RequiredArgsConstructor;
 import org.ffb_be.dto.auth.userDto.UserCreateDTO;
 import org.ffb_be.dto.auth.userDto.UserUpdateDTO;
-import org.ffb_be.dto.order.CountByDateDTO;
+import org.ffb_be.dto.CountDTOBy.CountByDateDTO;
 import org.ffb_be.entity.Shop;
 import org.ffb_be.entity.User;
 import org.ffb_be.repository.ProfileRepository;
@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.time.LocalDate;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")

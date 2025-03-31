@@ -1,5 +1,7 @@
 package org.ffb_be.service.shop;
 
+import org.ffb_be.dto.CountDTOBy.CountByDateDTO;
+import org.ffb_be.dto.CountDTOBy.CountByMonthDTO;
 import org.ffb_be.dto.shop.ShopDTO;
 import org.ffb_be.dto.shop.ShopRegisterDTO;
 import org.ffb_be.utils.enums.Status;
@@ -10,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 
 public interface ShopService {
@@ -54,8 +57,8 @@ public interface ShopService {
     ShopDTO getShopById(Long shopId);
 
     ShopDTO getShopByUserId(Long userId);
-    Map<Integer, Long> getShopCountByYear(Status status, LocalDate startDate, LocalDate endDate);
-    Map<Integer, Long> getShopCountByMonth(Status status, LocalDate startDate, LocalDate endDate);
-    Map<LocalDate, Long> getShopCountByDayAndStatus(Status status, LocalDate startDate, LocalDate endDate);
+    List<CountByMonthDTO> getShopCountByYear(Status status, LocalDate startDate, LocalDate endDate);
+    List<CountByMonthDTO> getShopCountByMonth(Status status, LocalDate startDate, LocalDate endDate);
+    List<CountByDateDTO> getShopCountByDayAndStatus(Status status, LocalDate startDate, LocalDate endDate);
     long countPendingShop();
 }

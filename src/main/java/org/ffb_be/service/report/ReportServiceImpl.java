@@ -1,6 +1,8 @@
 package org.ffb_be.service.report;
 
 import lombok.RequiredArgsConstructor;
+import org.ffb_be.dto.CountDTOBy.CountByDateDTO;
+import org.ffb_be.dto.CountDTOBy.CountByMonthDTO;
 import org.ffb_be.dto.image.ImageDTO;
 import org.ffb_be.dto.report.ReportCreateDTO;
 import org.ffb_be.dto.report.ReportViewDTO;
@@ -164,55 +166,53 @@ public class ReportServiceImpl implements ReportService {
         return reports.map(this::convertToDTO);
     }
 
-    public Map<LocalDate, Long> getReportCountByDay(ReportStatus status, LocalDate startDate, LocalDate endDate,Long type) {
+    public List<CountByDateDTO> getReportCountByDay(ReportStatus status, LocalDate startDate, LocalDate endDate, Long type) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         List<Object[]> results = reportRepository.countShopReportsByStatusAndDay(status, startDateTime, endDateTime,type);
 
-        Map<LocalDate, Long> reportCountPerDay = new TreeMap<>();
-
+        List<CountByDateDTO> countByDateDTOS = new ArrayList<>();
         for (Object[] result : results) {
-            LocalDate date = (LocalDate) result[0];  // Ngày
-            Long count = (Long) result[1];           // Số lượng báo cáo
-
-            reportCountPerDay.put(date, count);
+            CountByDateDTO countByDateDTO = new CountByDateDTO();
+            countByDateDTO.setDate((LocalDateTime) result[0]);
+            countByDateDTO.setCount((Long) result[1]);
+            countByDateDTOS.add(countByDateDTO);
         }
-
-        return reportCountPerDay;
+        return countByDateDTOS;
     }
-    public Map<String, Long> getReportCountByMonth(ReportStatus status, LocalDate startDate, LocalDate endDate,Long type) {
+    public List<CountByMonthDTO> getReportCountByMonth(ReportStatus status, LocalDate startDate, LocalDate endDate, Long type) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         List<Object[]> results = reportRepository.countReportsByStatusAndTypeIdAndMonth(status, startDateTime, endDateTime,type);
 
-        Map<String, Long> reportCountPerMonth = new TreeMap<>();
+        List<CountByMonthDTO> countByMonthDTOS = new ArrayList<>();
 
+        // Chuyển đổi kết quả thành Map với tháng là key và số lượng shop là value
         for (Object[] result : results) {
-            int month = (Integer) result[0];  // Tháng
-            int year = (Integer) result[1];   // Năm
-            Long count = (Long) result[2];    // Số lượng báo cáo
-
-            String monthYear = year + "-" + String.format("%02d", month);  // Định dạng "YYYY-MM"
-            reportCountPerMonth.put(monthYear, count);
+            CountByMonthDTO countByMonthDTO = new CountByMonthDTO();
+            countByMonthDTO.setMonth((Integer) result[0]);
+            countByMonthDTO.setCount((Long) result[1]);
+            countByMonthDTOS.add(countByMonthDTO);
         }
 
-        return reportCountPerMonth;
+        return countByMonthDTOS;
     }
-    public Map<Integer, Long> getReportCountByYear(ReportStatus status, LocalDate startDate, LocalDate endDate,Long type) {
+    public List<CountByMonthDTO> getReportCountByYear(ReportStatus status, LocalDate startDate, LocalDate endDate,Long type) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         List<Object[]> results = reportRepository.countReportsByStatusAndTypeIdAndYear(status, startDateTime, endDateTime,type);
 
-        Map<Integer, Long> reportCountPerYear = new TreeMap<>();
+        List<CountByMonthDTO> countByMonthDTOS = new ArrayList<>();
 
+        // Chuyển đổi kết quả thành Map với tháng là key và số lượng shop là value
         for (Object[] result : results) {
-            int year = (Integer) result[0];  // Năm
-            Long count = (Long) result[1];    // Số lượng báo cáo
-
-            reportCountPerYear.put(year, count);
+            CountByMonthDTO countByMonthDTO = new CountByMonthDTO();
+            countByMonthDTO.setMonth((Integer) result[0]);
+            countByMonthDTO.setCount((Long) result[1]);
+            countByMonthDTOS.add(countByMonthDTO);
         }
 
-        return reportCountPerYear;
+        return countByMonthDTOS;
     }
     public Long countAllReports() {
         return reportRepository.countAllReports();

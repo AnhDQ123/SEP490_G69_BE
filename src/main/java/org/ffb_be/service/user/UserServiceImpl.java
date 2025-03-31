@@ -5,7 +5,7 @@ import org.ffb_be.dto.auth.ProfileDto.ProfileDTO;
 import org.ffb_be.dto.auth.userDto.UserCreateDTO;
 import org.ffb_be.dto.auth.userDto.UserResponseDTO;
 import org.ffb_be.dto.auth.userDto.UserUpdateDTO;
-import org.ffb_be.dto.order.CountByDateDTO;
+import org.ffb_be.dto.CountDTOBy.CountByDateDTO;
 import org.ffb_be.entity.Profile;
 import org.ffb_be.entity.Role;
 import org.ffb_be.entity.Shop;
@@ -30,8 +30,6 @@ import java.time.LocalTime;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 @Service
 public class UserServiceImpl implements UserService {
