@@ -13,10 +13,13 @@ public class BusinessProfileDTO {
     private Long id;
     private String name;
     private String avatar;
-    private String tax_code;
+    private String taxCode;
     private String citizenIDNumber;
     private String citizenIDCardFront;
     private String citizenIDCardBack;
-    private String drivingLicense;
+    private String drivingLicenseFront;
+    private String drivingLicenseBack;
+    private String judicialRecord;
     private LocalDate citizenIDExpiredDate;
+    private LocalDate drivingLicenseExpiredDate;
 }

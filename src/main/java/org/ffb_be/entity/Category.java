@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
 import java.util.Set;
 
 @Entity
@@ -27,6 +26,8 @@ public class Category extends BaseEntity{
     @Column(name="description")
     private String description;
 
+    @Column
+    private String image;
 
     @OneToMany(mappedBy = "category")
     private Set<Product> foods;

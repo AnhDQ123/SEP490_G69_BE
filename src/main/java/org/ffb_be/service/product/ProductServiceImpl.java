@@ -1,28 +1,34 @@
 package org.ffb_be.service.product;
 
-import jakarta.persistence.EntityNotFoundException;
 
+
+import lombok.RequiredArgsConstructor;
+
+import org.ffb_be.dto.discount.DiscountDTO2;
+import org.ffb_be.dto.product.FoodOptionDTO;
 import org.ffb_be.dto.product.ProductCreateDTO;
 import org.ffb_be.dto.product.ProductResponseDTO;
 
 import org.ffb_be.entity.Category;
+import org.ffb_be.entity.Discount;
 import org.ffb_be.entity.FoodOption;
 import org.ffb_be.entity.Product;
-import org.ffb_be.repository.CategoryRepository;
-import org.ffb_be.repository.FoodOptionRepository;
-import org.ffb_be.repository.ProductRepository;
+import org.ffb_be.repository.*;
+
 import org.ffb_be.utils.enums.upload.CloudinaryUpload;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
+import java.util.*;
 
-import java.util.List;
-
-
+@RequiredArgsConstructor
 @Service
 public class ProductServiceImpl implements ProductService {
 
@@ -30,19 +36,17 @@ public class ProductServiceImpl implements ProductService {
     private final CategoryRepository categoryRepository;
     private final CloudinaryUpload cloudinaryUpload;
     private final FoodOptionRepository foodOptionRepository;
-    public ProductServiceImpl(ProductRepository productRepository, CategoryRepository categoryRepository, CloudinaryUpload cloudinaryUpload, FoodOptionRepository foodOptionRepository) {
-        this.productRepository = productRepository;
-        this.categoryRepository = categoryRepository;
-        this.cloudinaryUpload = cloudinaryUpload;
-        this.foodOptionRepository = foodOptionRepository;
-    }
+    private final DiscountRepository discountRepository;
+    private final TypesRepository typesRepository;
+    private final OrderRepository orderRepository;
 
+
+@Override
     public void save(ProductCreateDTO productCreateDTO,MultipartFile avatar, List<MultipartFile>option) throws IOException {
         Product product = new Product();
-        Category category = categoryRepository.findById(productCreateDTO.getCategory_id())
-                .orElseThrow(() -> new EntityNotFoundException("Category not found!"));
-
-        List<FoodOption> foodOptions = productCreateDTO.getFoodOption();
+        Category category = categoryRepository.findByName(productCreateDTO.getCategory());
+        List<FoodOption> foodOptions = new ArrayList<>();
+        List<FoodOptionDTO> foodOptionDTOs = productCreateDTO.getFoodOption();
         product.setName(productCreateDTO.getName());
         product.setDescription(productCreateDTO.getDescription());
         product.setExpired_date(productCreateDTO.getExpiryDate());
@@ -50,24 +54,34 @@ public class ProductServiceImpl implements ProductService {
         product.setManufacturer(productCreateDTO.getManufacturer());
         product.setSupplier(productCreateDTO.getSupplier());
         product.setCategory(category);
-        product.setFoodOptions(foodOptions);
-
         if (avatar != null && !avatar.isEmpty()) {
             System.out.println("Uploading Avatar: " + avatar.getOriginalFilename());
             String url = cloudinaryUpload.uploadFile(avatar);
             product.setImage(url);
             System.out.println("Avatar URL: " + url);
         }
-
+        productRepository.save(product);
+        for(FoodOptionDTO foodOptionDTO : foodOptionDTOs) {
+            foodOptionDTO.setProduct_id(product.getId());
+        }
         if (option != null && !option.isEmpty()) {
             System.out.println("Uploading " + option.size() + " option images");
             for (int i = 0; i < option.size(); i++) {
                 String url = cloudinaryUpload.uploadFile(option.get(i));
-                foodOptions.get(i).setImage(url);
+                foodOptionDTOs.get(i).setImage(url);
             }
         }
-
-        productRepository.save(product);
+        for (FoodOptionDTO foodOptionDTO : foodOptionDTOs) {
+            FoodOption foodOption = new FoodOption();
+            foodOption.setId(foodOptionDTO.getId());
+            foodOption.setName(foodOptionDTO.getName());
+            foodOption.setImage(foodOptionDTO.getImage());
+            foodOption.setPrice(foodOptionDTO.getPrice());
+            foodOption.setType(typesRepository.findById(foodOptionDTO.getType_id()).get());
+            foodOption.setFood(productRepository.findById(foodOptionDTO.getProduct_id()).get());
+            foodOptions.add(foodOption);
+        }
+        product.setFoodOptions(foodOptions);
         foodOptionRepository.saveAll(foodOptions);
     }
 
@@ -75,16 +89,315 @@ public class ProductServiceImpl implements ProductService {
     public Page<ProductResponseDTO> findAllByShop(Long id,Pageable pageable) {
         return productRepository.findAllByShop_Id(id,pageable).map(product -> {
             ProductResponseDTO productResponseDTO = new ProductResponseDTO();
+            productResponseDTO.setShopName(product.getShop().getName());
+            productResponseDTO.setId(product.getId());
+            productResponseDTO.setName(product.getName());
+            productResponseDTO.setManufacturer(product.getManufacturer());
+            productResponseDTO.setImage(product.getImage());
+            productResponseDTO.setCategory(product.getCategory().getName());
+            productResponseDTO.setSupplier(product.getShop() != null ? product.getShop().getName() : "");
+            productResponseDTO.setRate(product.getRate());
+            productResponseDTO.setQuantity(product.getQuantity());
+            productResponseDTO.setStatus(product.getStatus().toString());
+            BigDecimal defaultprice = null;
+            List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product);
+            List<Discount> discount=discountRepository.findAllByProduct_Id((product.getId()));
+            if(discount!=null) {
+                List<DiscountDTO2> discountDTOs=new ArrayList<>();
+                for (Discount discount1:discount) {
+                    DiscountDTO2 discountDTO=new DiscountDTO2();
+                    discountDTO.setAmount(discount1.getDiscount_percentage());
+                    discountDTO.setId(discount1.getId());
+                    discountDTO.setStartDate(discount1.getStartDate());
+                    discountDTO.setEndDate(discount1.getEndDate());
+                    discountDTO.setStatus(discount1.getStatus().toString());
+                    discountDTOs.add(discountDTO);
+                }
+                productResponseDTO.setDiscount(discountDTOs);
+            }else {
+                productResponseDTO.setDiscount(null);
+            }
+            for (FoodOption foodOption : foodOptions) {
+                if (foodOption.getType().getId() == 2) {
+                    if (defaultprice == null || foodOption.getPrice().compareTo(defaultprice) < 0) {
+                        defaultprice = foodOption.getPrice();
+                    }
+                }
+            }
+
+            productResponseDTO.setDefaultPrice(defaultprice != null ? defaultprice : BigDecimal.ZERO);
             BeanUtils.copyProperties(product, productResponseDTO);
             return productResponseDTO;
         });
     }
+
+    @Override
+    public List<ProductResponseDTO> findPopularProducts() {
+        List<Object[]> products = orderRepository.findTopSellingProducts();
+        List<ProductResponseDTO> productResponseDTOList = new ArrayList<>();
+        for (Object[] objects : products) {
+            Product product = productRepository.findById((Long) objects[0]).get();
+            ProductResponseDTO productResponseDTO = new ProductResponseDTO();
+            productResponseDTO.setId(product.getId());
+            productResponseDTO.setName(product.getName());
+            productResponseDTO.setManufacturer(product.getManufacturer());
+            productResponseDTO.setSupplier(product.getSupplier());
+            productResponseDTO.setImage(product.getImage());
+            productResponseDTO.setRate(product.getRate()); // thêm rate
+            productResponseDTO.setQuantity(product.getQuantity()); // thêm quantity
+            productResponseDTO.setCategory(product.getCategory().getName());
+            productResponseDTO.setShopName(product.getShop().getName());
+            // Tính defaultPrice từ các FoodOption có type id = 2
+            List<Discount> discount=discountRepository.findAllByProduct_Id((product.getId()));
+            if(discount!=null) {
+                List<DiscountDTO2> discountDTOs=new ArrayList<>();
+                for (Discount discount1:discount) {
+                    DiscountDTO2 discountDTO=new DiscountDTO2();
+                    discountDTO.setAmount(discount1.getDiscount_percentage());
+                    discountDTO.setId(discount1.getId());
+                    discountDTO.setStartDate(discount1.getStartDate());
+                    discountDTO.setEndDate(discount1.getEndDate());
+                    discountDTO.setStatus(discount1.getStatus().toString());
+                    discountDTOs.add(discountDTO);
+                }
+                productResponseDTO.setDiscount(discountDTOs);
+            }else {
+                productResponseDTO.setDiscount(null);
+            }
+            BigDecimal defaultprice = null;
+            List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product);
+            for (FoodOption foodOption : foodOptions) {
+                if (foodOption.getType().getId() == 2) {
+                    if (defaultprice == null || foodOption.getPrice().compareTo(defaultprice) < 0) {
+                        defaultprice = foodOption.getPrice();
+                    }
+                }
+            }
+            productResponseDTO.setDefaultPrice(defaultprice != null ? defaultprice : BigDecimal.ZERO);
+
+            productResponseDTOList.add(productResponseDTO);
+        }
+        return productResponseDTOList;
+    }
+
+//    @Override
+//    public List<ProductResponseDTO> findFreshProducts() {
+//        List<Product> products = productRepository.findFreshProducts();
+//        List<ProductResponseDTO> productResponseDTOList = new ArrayList<>();
+//
+//        for (Product product : products) {
+//            ProductResponseDTO productResponseDTO = new ProductResponseDTO();
+//            productResponseDTO.setId(product.getId());
+//            productResponseDTO.setName(product.getName());
+//            productResponseDTO.setManufacturer(product.getManufacturer());
+//            productResponseDTO.setImage(product.getImage());
+//            productResponseDTO.setCategory(product.getCategory().getName());
+//            productResponseDTO.setShopName(product.getShop().getName());
+//            productResponseDTO.setRate(product.getRate());
+//            productResponseDTO.setQuantity(product.getQuantity());
+//
+//            // Tính defaultPrice cho sản phẩm fresh
+//            BigDecimal defaultprice = null;
+//            List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product);
+//
+//            for (FoodOption foodOption : foodOptions) {
+//                if (foodOption.getType().getId() == 2) { // điều kiện tùy theo nghiệp vụ thực tế
+//                    if (defaultprice == null || foodOption.getPrice().compareTo(defaultprice) < 0) {
+//                        defaultprice = foodOption.getPrice();
+//                    }
+//                }
+//            }
+//
+//            productResponseDTO.setDefaultPrice(defaultprice); // set giá vừa tính được
+//            productResponseDTO.setImage(product.getImage());
+//
+//            productResponseDTOList.add(productResponseDTO);
+//        }
+//
+//        return productResponseDTOList;
+//    }
+//
+//    @Override
+//    public List<ProductResponseDTO> findCookedProducts() {
+//        List<Product> products = productRepository.findCookedProducts();
+//        List<ProductResponseDTO> productResponseDTOList = new ArrayList<>();
+//
+//        for (Product product : products) {
+//            ProductResponseDTO productResponseDTO = new ProductResponseDTO();
+//            productResponseDTO.setId(product.getId());
+//            productResponseDTO.setName(product.getName());
+//            productResponseDTO.setManufacturer(product.getManufacturer());
+//            productResponseDTO.setImage(product.getImage());
+//            productResponseDTO.setCategory(product.getCategory().getName());
+//            productResponseDTO.setSupplier(product.getSupplier());
+//            productResponseDTO.setRate(product.getRate());
+//            productResponseDTO.setQuantity(product.getQuantity());
+//            productResponseDTO.setShopName(product.getShop().getName());
+//
+//            BigDecimal defaultprice = null;
+//            List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product);
+//
+//            for (FoodOption foodOption : foodOptions) {
+//                if (foodOption.getType().getId() == 2) {
+//                    if (defaultprice == null || foodOption.getPrice().compareTo(defaultprice) < 0) {
+//                        defaultprice = foodOption.getPrice();
+//                    }
+//                }
+//            }
+//
+//            // Thêm dòng này để set giá defaultPrice vào DTO
+//            productResponseDTO.setDefaultPrice(defaultprice);
+//
+//            productResponseDTOList.add(productResponseDTO);
+//        }
+//
+//        return productResponseDTOList;
+//    }
+
+    @Override
+    public List<ProductResponseDTO> findByCategory(String cat) {
+        Category category = categoryRepository.findByName(cat);
+        List<Product> productList = productRepository.findAllByCategory(category);
+        List<ProductResponseDTO> productResponseDTOList = new ArrayList<>();
+
+        for (Product product : productList) {
+            ProductResponseDTO productResponseDTO = new ProductResponseDTO();
+            BeanUtils.copyProperties(product, productResponseDTO);
+            List<Discount> discount=discountRepository.findAllByProduct_Id((product.getId()));
+            if(discount!=null) {
+                List<DiscountDTO2> discountDTOs=new ArrayList<>();
+                for (Discount discount1:discount) {
+                    DiscountDTO2 discountDTO=new DiscountDTO2();;
+                    discountDTO.setAmount(discount1.getDiscount_percentage());
+                    discountDTO.setId(discount1.getId());
+                    discountDTO.setStartDate(discount1.getStartDate());
+                    discountDTO.setEndDate(discount1.getEndDate());
+                    discountDTO.setStatus(discount1.getStatus().toString());
+
+                    discountDTOs.add(discountDTO);
+                }
+                productResponseDTO.setDiscount(discountDTOs);
+            }else {
+                productResponseDTO.setDiscount(null);
+            }
+            productResponseDTO.setCategory(product.getCategory().getName());
+            productResponseDTOList.add(productResponseDTO);
+        }
+        return productResponseDTOList;
+    }
+
+    @Override
+    public ProductResponseDTO findById(Long id) {
+        Optional<Product> productOptional = productRepository.findById(id);
+        Product product = productOptional.get();
+        ProductResponseDTO productResponseDTO = new ProductResponseDTO();
+        List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product);
+        List<FoodOptionDTO> foodOptionDTOs = new ArrayList<>();
+        for (FoodOption foodOption : foodOptions) {
+            FoodOptionDTO dto = new FoodOptionDTO();
+            dto.setType_id(foodOption.getType().getId());
+            BeanUtils.copyProperties(foodOption, dto);
+            foodOptionDTOs.add(dto);
+        }
+        BeanUtils.copyProperties(product, productResponseDTO);
+        List<Discount> discount=discountRepository.findAllByProduct_Id((product.getId()));
+        if(discount!=null) {
+            List<DiscountDTO2> discountDTOs=new ArrayList<>();
+            for (Discount discount1:discount) {
+                DiscountDTO2 discountDTO=new DiscountDTO2();
+                discountDTO.setAmount(discount1.getDiscount_percentage());
+                discountDTO.setId(discount1.getId());
+                discountDTO.setStartDate(discount1.getStartDate());
+                discountDTO.setEndDate(discount1.getEndDate());
+                discountDTO.setStatus(discount1.getStatus().toString());
+                discountDTOs.add(discountDTO);
+            }
+            productResponseDTO.setDiscount(discountDTOs);
+        }else {
+            productResponseDTO.setDiscount(null);
+        }
+        Optional<Category> c=categoryRepository.findById(product.getCategory().getId());
+        Category category = c.get();
+        productResponseDTO.setFoodOption(foodOptionDTOs);
+        productResponseDTO.setCategory(category.getName());
+        return productResponseDTO;
+    }
+
+    @Override
+    public List<ProductResponseDTO> findSimimlarProduct(String name) {
+        String[] words = name.split("\\s+");
+        List<ProductResponseDTO> productResponseDTOList = new ArrayList<>();
+        for(String word:words) {
+            List<Product> products = productRepository.findSimilarProducts(word);
+            for (Product product : products) {
+                ProductResponseDTO productResponseDTO = new ProductResponseDTO();
+                productResponseDTO.setId(product.getId());
+                productResponseDTO.setName(product.getName());
+                productResponseDTO.setManufacturer(product.getManufacturer());
+                productResponseDTO.setImage(product.getImage());
+                productResponseDTO.setCategory(product.getCategory().getName());
+                productResponseDTO.setSupplier(product.getShop() != null ? product.getShop().getName() : "");
+                productResponseDTO.setRate(product.getRate());
+                productResponseDTO.setQuantity(product.getQuantity());
+                BigDecimal defaultprice = null;
+                List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product);
+                for (FoodOption foodOption : foodOptions) {
+                    if (foodOption.getType().getId() == 2) {
+                        if (defaultprice == null || foodOption.getPrice().compareTo(defaultprice) < 0) {
+                            defaultprice = foodOption.getPrice();
+                        }
+                    }
+                }
+                productResponseDTO.setDefaultPrice(defaultprice != null ? defaultprice : BigDecimal.ZERO);
+                productResponseDTOList.add(productResponseDTO);
+            }
+        }
+        return productResponseDTOList;
+    }
+
     @Override
     public Page<ProductResponseDTO> findAll(Pageable pageable) {
         return productRepository.findAll(pageable).map(product -> {
-            org.ffb_be.dto.product.ProductResponseDTO productResponseDTO = new org.ffb_be.dto.product.ProductResponseDTO();
+            ProductResponseDTO productResponseDTO = new ProductResponseDTO();
+            List<Discount> discount=discountRepository.findAllByProduct_Id((product.getId()));
+            if(discount!=null) {
+                List<DiscountDTO2> discountDTOs=new ArrayList<>();
+                for (Discount discount1:discount) {
+                    DiscountDTO2 discountDTO=new DiscountDTO2();
+                    discountDTO.setAmount(discount1.getDiscount_percentage());
+                    discountDTO.setId(discount1.getId());
+                    discountDTO.setStartDate(discount1.getStartDate());
+                    discountDTO.setEndDate(discount1.getEndDate());
+                    discountDTO.setStatus(discount1.getStatus().toString());
+                    discountDTOs.add(discountDTO);
+                }
+                productResponseDTO.setDiscount(discountDTOs);
+            }else {
+                productResponseDTO.setDiscount(null);
+            }
+            productResponseDTO.setCategory(product.getCategory().getName());
             BeanUtils.copyProperties(product, productResponseDTO);
             return productResponseDTO;
         });
+    }
+    public List<Object[]> findTopSellingProductsToday(Long shopId) {
+        return productRepository.findTopSellingProductsToday(shopId);
+    }
+
+    // Tính danh sách sản phẩm bán chạy nhất trong tháng này cho cửa hàng cụ thể
+    public List<Object[]> findTopSellingProductsThisMonth(Long shopId) {
+        LocalDate currentDate = LocalDate.now();
+        LocalDate firstDayOfMonth = currentDate.with(TemporalAdjusters.firstDayOfMonth());  // Ngày đầu tháng
+        LocalDate lastDayOfMonth = currentDate.with(TemporalAdjusters.lastDayOfMonth());    // Ngày cuối tháng
+
+        // Chuyển các ngày thành LocalDateTime
+        LocalDateTime startOfMonth = firstDayOfMonth.atStartOfDay();
+        LocalDateTime endOfMonth = lastDayOfMonth.atTime(23, 59, 59);
+        return productRepository.findTopSellingProductsThisMonth(shopId,startOfMonth,endOfMonth);
+    }
+
+    // Tính danh sách sản phẩm bán chạy nhất trong năm này cho cửa hàng cụ thể
+    public List<Object[]> findTopSellingProductsThisYear(Long shopId) {
+        return productRepository.findTopSellingProductsThisYear(shopId);
     }
 }

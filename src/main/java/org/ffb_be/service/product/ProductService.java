@@ -17,5 +17,12 @@ public interface ProductService {
     void save(ProductCreateDTO productCreateDTO,MultipartFile avatar, List<MultipartFile>option) throws IOException;
     Page<ProductResponseDTO> findAll(Pageable pageable);
     Page<ProductResponseDTO> findAllByShop(Long id,Pageable pageable);
+    List<ProductResponseDTO> findPopularProducts();
+    List<ProductResponseDTO> findByCategory(String cat);
+    ProductResponseDTO findById(Long id);
+    List<ProductResponseDTO> findSimimlarProduct(String name);
+    List<Object[]> findTopSellingProductsToday(Long shopId);
+    List<Object[]> findTopSellingProductsThisMonth(Long shopId);
+    List<Object[]> findTopSellingProductsThisYear(Long shopId);
 }
 

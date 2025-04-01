@@ -1,21 +1,15 @@
 package org.ffb_be.controller;
 
-import org.ffb_be.dto.product.FoodOptionDTO;
+
+
+import lombok.RequiredArgsConstructor;
 import org.ffb_be.dto.product.ProductCreateDTO;
 import org.ffb_be.dto.product.ProductResponseDTO;
-import org.ffb_be.entity.Category;
-import org.ffb_be.entity.Discount;
-import org.ffb_be.entity.FoodOption;
-import org.ffb_be.entity.Product;
-import org.ffb_be.repository.CategoryRepository;
-import org.ffb_be.repository.DiscountRepository;
-import org.ffb_be.repository.FoodOptionRepository;
-import org.ffb_be.repository.ProductRepository;
 import org.ffb_be.service.product.ProductService;
-import org.springframework.beans.BeanUtils;
+
+import org.ffb_be.service.product.RecommendationService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
@@ -23,25 +17,17 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/product")
+@RequiredArgsConstructor
+@CrossOrigin("*")
 public class ProductController {
     private final ProductService productService;
-    private final ProductRepository productRepository;
-    private final FoodOptionRepository foodOptionRepository;
-    private final DiscountRepository discountRepository;
-    private final CategoryRepository categoryRepository;
-    public ProductController(ProductService productService, ProductRepository productRepository, FoodOptionRepository foodOptionRepository, DiscountRepository discountRepository, CategoryRepository categoryRepository) {
-        this.productService = productService;
-        this.productRepository = productRepository;
-        this.foodOptionRepository = foodOptionRepository;
-        this.discountRepository = discountRepository;
-        this.categoryRepository = categoryRepository;
-    }
+    private final RecommendationService recommendationService;
+
 
     @GetMapping("/shop/{id}")
     public ResponseEntity<?> getAllByShop(@PathVariable Long id,
@@ -50,41 +36,98 @@ public class ProductController {
         Pageable pageable = PageRequest.of(page-1, size);
         return ResponseEntity.ok( productService.findAllByShop(id,pageable));
     }
-    @GetMapping("/product/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<?> getProductById(@PathVariable Long id) {
-        Optional<Product> productOptional = productRepository.findById(id);
-        if (productOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found!");
-        }
-        Product product = productOptional.get();
-        ProductResponseDTO productResponseDTO = new ProductResponseDTO();
-        List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product);
-        List<FoodOptionDTO> foodOptionDTOs = new ArrayList<>();
-
-        for (FoodOption foodOption : foodOptions) {
-            FoodOptionDTO dto = new FoodOptionDTO();
-            BeanUtils.copyProperties(foodOption, dto);
-            foodOptionDTOs.add(dto);
-        }
-        BeanUtils.copyProperties(product, productResponseDTO);
-        Discount d= discountRepository.findById(product.getDiscount().getId());
-        Optional<Category> c=categoryRepository.findById(product.getCategory().getId());
-        Category category = c.get();
-        productResponseDTO.setDiscount(d.getDiscount_percentage());
-        productResponseDTO.setFoodOption(foodOptionDTOs);
-        productResponseDTO.setCategory(category.getName());
-        return ResponseEntity.ok(productResponseDTO);
+        return ResponseEntity.ok(productService.findById(id));
     }
-    @PostMapping("/add")
-    public ResponseEntity<?> addProduct(@Validated @ModelAttribute("employee") ProductCreateDTO productCreateDTO,
-                                         BindingResult bindingResult,
-                                         @RequestParam("avatar") MultipartFile avatar,
-                                         @RequestParam("avatar")  List<MultipartFile> option) throws IOException {
+
+    @PutMapping()
+    public ResponseEntity<?> update(@Validated @ModelAttribute() ProductCreateDTO productCreateDTO,
+                                        BindingResult bindingResult,
+                                        @RequestParam("avatar") MultipartFile avatar,
+                                        @RequestParam("option")  List<MultipartFile> option) throws IOException {
         if(bindingResult.hasErrors()) {
             return ResponseEntity.badRequest().body(bindingResult.getAllErrors());
         }
         productService.save(productCreateDTO, avatar, option);
         return ResponseEntity.ok().body(productCreateDTO);
+    }
+    @PostMapping("/add")
+    public ResponseEntity<?> addProduct(@Validated @ModelAttribute() ProductCreateDTO productCreateDTO,
+                                         BindingResult bindingResult,
+                                         @RequestParam("avatar") MultipartFile avatar,
+                                         @RequestParam("option")  List<MultipartFile> option) throws IOException {
+        if(bindingResult.hasErrors()) {
+            return ResponseEntity.badRequest().body(bindingResult.getAllErrors());
+        }
+        productService.save(productCreateDTO, avatar, option);
+        return ResponseEntity.ok().body(productCreateDTO);
+    }
+    @GetMapping("/filter") //filter
+    public ResponseEntity<?> getByCategory(@RequestParam String cat) {
+        return ResponseEntity.ok(productService.findByCategory(cat));
+    }
 
+    @GetMapping("/getFresh/{userId}")
+    public ResponseEntity<?> getProductByFreshType(
+            @PathVariable Long userId,
+            @RequestParam(value = "top", required = false) int top) {
+        return ResponseEntity.ok(recommendationService.getRecommendations(userId, "FRESH", top));
+    }
+
+    @GetMapping("/getCooked/{userId}")
+    public ResponseEntity<?> getProductByCookedType(
+            @PathVariable Long userId,
+            @RequestParam(value = "top", required = false) int top) {
+        return ResponseEntity.ok(recommendationService.getRecommendations(userId, "COOKED", top));
+    }
+
+    @GetMapping("/getPopular")
+    public ResponseEntity<?> getPopular() {
+        return ResponseEntity.ok(productService.findPopularProducts());
+    }
+
+    @GetMapping("/similar")
+    public ResponseEntity<?> getSimilarProducts(@RequestParam String search) {
+        return ResponseEntity.ok(productService.findSimimlarProduct(search));
+    }
+
+    @GetMapping("/{userId}/{productType}/{top}")
+    public ResponseEntity<?> getRecommendations(
+            @PathVariable Long userId,
+            @PathVariable String productType,
+            @PathVariable int top) {
+        List<ProductResponseDTO> recommendations = recommendationService.getRecommendations(userId, productType, top);
+        return ResponseEntity.ok(recommendations);
+    }
+
+    @GetMapping("/data")
+    public ResponseEntity<Map<String, Object>> getAllData() {
+        Map<String, Object> response = recommendationService.getAllData();
+        return ResponseEntity.ok(response);
+    }
+
+
+    @GetMapping("/all")
+    public ResponseEntity<?> getAll(@RequestParam(value = "page", defaultValue = "1", required = false) Integer page,
+                                    @RequestParam(value = "size", defaultValue = "20", required = false) Integer size) {
+        Pageable pageable = PageRequest.of(page-1, size);
+        return ResponseEntity.ok( productService.findAll(pageable));
+    }
+    @GetMapping("/top-selling/today")
+    public List<Object[]> findTopSellingProductsToday(@RequestParam("shopId") Long shopId) {
+        return productService.findTopSellingProductsToday(shopId);
+    }
+
+    // API để lấy sản phẩm bán chạy nhất trong tháng này cho cửa hàng cụ thể
+    @GetMapping("/top-selling/month")
+    public List<Object[]> findTopSellingProductsThisMonth(@RequestParam("shopId") Long shopId) {
+        return productService.findTopSellingProductsThisMonth(shopId);
+    }
+
+    // API để lấy sản phẩm bán chạy nhất trong năm này cho cửa hàng cụ thể
+    @GetMapping("/top-selling/year")
+    public List<Object[]> findTopSellingProductsThisYear(@RequestParam("shopId") Long shopId) {
+        return productService.findTopSellingProductsThisYear(shopId);
     }
 }
