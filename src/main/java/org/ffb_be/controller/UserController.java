@@ -2,6 +2,7 @@ package org.ffb_be.controller;
 
 
 import lombok.RequiredArgsConstructor;
+import org.ffb_be.dto.CountDTOBy.CountByMonthDTO;
 import org.ffb_be.dto.auth.userDto.UserCreateDTO;
 import org.ffb_be.dto.auth.userDto.UserUpdateDTO;
 import org.ffb_be.dto.CountDTOBy.CountByDateDTO;
@@ -80,7 +81,7 @@ public class UserController {
     }
 
     @GetMapping("/count/year")
-    public List<CountByDateDTO> getUserCountByYear(
+    public List<CountByMonthDTO> getUserCountByYear(
             @RequestParam("status") String status) {
         Status status1 = Status.valueOf(status);
         LocalDate endDate = LocalDate.now();
@@ -90,7 +91,7 @@ public class UserController {
     }
 
     @GetMapping("/count/month")
-    public List<CountByDateDTO> getUserCountByMonth(
+    public List<CountByMonthDTO> getUserCountByMonth(
             @RequestParam("status") String status) {
         Status status1 = Status.valueOf(status);
         LocalDate endDate = LocalDate.now();

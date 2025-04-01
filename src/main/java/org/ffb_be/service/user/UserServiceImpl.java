@@ -1,6 +1,7 @@
 package org.ffb_be.service.user;
 
 import jakarta.persistence.NonUniqueResultException;
+import org.ffb_be.dto.CountDTOBy.CountByMonthDTO;
 import org.ffb_be.dto.auth.ProfileDto.ProfileDTO;
 import org.ffb_be.dto.auth.userDto.UserCreateDTO;
 import org.ffb_be.dto.auth.userDto.UserResponseDTO;
@@ -196,34 +197,40 @@ public class UserServiceImpl implements UserService {
         return countByDateDTOS;
     }
 
-    public List<CountByDateDTO> getUserCountByMonthAndStatus(LocalDate startDate, LocalDate endDate, Status status) {
+    public List<CountByMonthDTO> getUserCountByMonthAndStatus(LocalDate startDate, LocalDate endDate, Status status) {
 
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         List<Object[]> results = userRepository.countUsersByMonthAndStatus(startDateTime, endDateTime, status);
-        List<CountByDateDTO> countByDateDTOS = new ArrayList<>();
+        List<CountByMonthDTO> countByMonthDTOS = new ArrayList<>();
+
+        // Chuyển đổi kết quả thành Map với tháng là key và số lượng shop là value
         for (Object[] result : results) {
-            CountByDateDTO countByDateDTO = new CountByDateDTO();
-            countByDateDTO.setDate((LocalDateTime) result[0]);
-            countByDateDTO.setCount((Long) result[1]);
-            countByDateDTOS.add(countByDateDTO);
+            CountByMonthDTO countByMonthDTO = new CountByMonthDTO();
+            countByMonthDTO.setMonth((Integer) result[0]);
+            countByMonthDTO.setCount((Long) result[1]);
+            countByMonthDTOS.add(countByMonthDTO);
         }
-        return countByDateDTOS;
+
+        return countByMonthDTOS;
     }
 
-    public List<CountByDateDTO> getUserCountByYearAndStatus(LocalDate startDate, LocalDate endDate, Status status) {
+    public List<CountByMonthDTO> getUserCountByYearAndStatus(LocalDate startDate, LocalDate endDate, Status status) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         List<Object[]> results = userRepository.countUsersByYearAndStatus(startDateTime, endDateTime, status);
 
-        List<CountByDateDTO> countByDateDTOS = new ArrayList<>();
+        List<CountByMonthDTO> countByMonthDTOS = new ArrayList<>();
+
+        // Chuyển đổi kết quả thành Map với tháng là key và số lượng shop là value
         for (Object[] result : results) {
-            CountByDateDTO countByDateDTO = new CountByDateDTO();
-            countByDateDTO.setDate((LocalDateTime) result[0]);
-            countByDateDTO.setCount((Long) result[1]);
-            countByDateDTOS.add(countByDateDTO);
+            CountByMonthDTO countByMonthDTO = new CountByMonthDTO();
+            countByMonthDTO.setMonth((Integer) result[0]);
+            countByMonthDTO.setCount((Long) result[1]);
+            countByMonthDTOS.add(countByMonthDTO);
         }
-        return countByDateDTOS;
+
+        return countByMonthDTOS;
     }
 
     public long countUsersAreShipper() {
