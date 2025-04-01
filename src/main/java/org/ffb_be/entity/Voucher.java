@@ -49,10 +49,7 @@ public class Voucher  extends BaseEntity {
     private LocalDate endDate ;
 
     @Column(name = "max_usage_per_customer")
-    private Integer maxUsagePerCustomer; // Số lần tối đa mỗi khách hàng được dùng
-
-    @Column(name = "is_stackable")
-    private Boolean isStackable;
+    private Integer maxUsagePerCustomer;
 
     @Enumerated(EnumType.STRING)
     private Status status;

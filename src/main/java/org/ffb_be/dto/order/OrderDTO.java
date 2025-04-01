@@ -30,6 +30,7 @@ public class OrderDTO {
     private Long shopId;
     private String status;
     private String image;
+    private String paymentProof;
     private BigDecimal total;
     private BigDecimal shippingFee;
     private LocalDateTime createdAt;

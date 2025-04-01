@@ -3,6 +3,7 @@ package org.ffb_be.controller;
 import lombok.RequiredArgsConstructor;
 import org.ffb_be.dto.CountDTOBy.CountByDateDTO;
 import org.ffb_be.dto.CountDTOBy.CountByMonthDTO;
+import org.ffb_be.dto.CountDTOBy.CountByYearDTO;
 import org.ffb_be.dto.report.ReportCreateDTO;
 import org.ffb_be.service.report.ReportService;
 import org.ffb_be.utils.enums.ReportStatus;
@@ -74,7 +75,7 @@ public class ReportController {
         return reportService.getReportCountByMonth(reportStatus, startDate, endDate,type);
     }
     @GetMapping("/count/year")
-    public List<CountByMonthDTO> getReportCountByYear(
+    public List<CountByYearDTO> getReportCountByYear(
             @RequestParam("status") String status,
             @RequestParam("type") Long type) {
         ReportStatus reportStatus = ReportStatus.valueOf(status);

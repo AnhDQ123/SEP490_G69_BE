@@ -2,12 +2,14 @@ package org.ffb_be.controller;
 
 import org.ffb_be.dto.CountDTOBy.CountByDateDTO;
 import org.ffb_be.dto.CountDTOBy.CountByMonthDTO;
+import org.ffb_be.dto.CountDTOBy.CountByYearDTO;
 import org.ffb_be.dto.order.CountDTO;
 import org.ffb_be.dto.order.OrderDTO;
 import org.ffb_be.dto.order.ReturnOrderDTO;
 import org.ffb_be.dto.product.TopProductDTO;
 import org.ffb_be.entity.Order;
 import org.ffb_be.service.order.OrderService;
+import org.ffb_be.service.qr.QrService;
 import org.ffb_be.utils.enums.OrderStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,9 +31,11 @@ import java.util.Map;
 @RequestMapping("/api/order")
 public class OrderController {
     private final OrderService orderService;
+    private final QrService qrService;
 
-    public OrderController(OrderService orderService) {
+    public OrderController(OrderService orderService, QrService qrService) {
         this.orderService = orderService;
+        this.qrService = qrService;
     }
 
     @PostMapping("/add")
@@ -162,7 +166,7 @@ public class OrderController {
     }
 
     @GetMapping("/count/year")
-    public List<CountByMonthDTO> getOrderCountByStatusAndYear(
+    public List<CountByYearDTO> getOrderCountByStatusAndYear(
             @RequestParam("status") String status) {
         OrderStatus orderStatus = OrderStatus.valueOf(status);
         LocalDate endDate = LocalDate.now();
@@ -189,4 +193,16 @@ public class OrderController {
         return orderService.countAllOrders();
     }
 
+
+    @GetMapping("/generateQr/{orderId}/{shopId}")
+    public String generateQr(@PathVariable Long orderId, @PathVariable Long shopId) {
+        return qrService.generateQrCode(orderId, shopId);
+    }
+
+    @PostMapping("/updatePaymentProof/{orderId}")
+    public void updatePaymentProof(@PathVariable Long orderId,
+                                   @RequestParam("paymentProof") MultipartFile paymentProof
+    ) throws IOException {
+        qrService.updatePaymentProof(orderId, paymentProof);
+    }
 }

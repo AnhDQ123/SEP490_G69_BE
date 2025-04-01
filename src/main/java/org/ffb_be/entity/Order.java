@@ -37,9 +37,12 @@ public class Order extends BaseEntity {
     private BigDecimal total;
 
     @Enumerated(EnumType.STRING)
-    private OrderStatus status;
+    private OrderStatus status = OrderStatus.PENDING;
 
     private BigDecimal voucherValue;
+
+    @Column(name="payment_proof")
+    private String paymentProof;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id")
