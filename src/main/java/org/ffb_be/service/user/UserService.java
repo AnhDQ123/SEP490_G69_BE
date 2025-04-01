@@ -33,5 +33,6 @@ public interface UserService {
     long countPendingShipper();
     long countAllUser();
     String hasShop(Long id);
+    void add();
 }
 

@@ -339,9 +339,9 @@ public class ShopServiceImpl implements ShopService {
         // Chuyển đổi kết quả thành Map với tháng là key và số lượng shop là value
         for (Object[] result : results) {
             CountByMonthDTO countByMonthDTO = new CountByMonthDTO();
-            countByMonthDTO.setMonth((Integer) result[0]);
+            countByMonthDTO.setMonth((Integer) result[1]);
             if (result[1] instanceof Long) {
-                countByMonthDTO.setCount((Long) result[1]);
+                countByMonthDTO.setCount((Long) result[0]);
             } else {
                 // Xử lý trường hợp không phải Long
                 countByMonthDTO.setCount(((Integer) result[1]).longValue());
@@ -363,8 +363,8 @@ public class ShopServiceImpl implements ShopService {
         // Chuyển đổi kết quả thành Map với tháng là key và số lượng shop là value
         for (Object[] result : results) {
             CountByMonthDTO countByMonthDTO = new CountByMonthDTO();
-            countByMonthDTO.setMonth((Integer) result[0]);
-            countByMonthDTO.setCount((Long) result[1]);
+            countByMonthDTO.setMonth((Integer) result[1]);
+            countByMonthDTO.setCount((Long) result[0]);
             countByMonthDTOS.add(countByMonthDTO);
         }
 

@@ -207,8 +207,9 @@ public class UserServiceImpl implements UserService {
         // Chuyển đổi kết quả thành Map với tháng là key và số lượng shop là value
         for (Object[] result : results) {
             CountByMonthDTO countByMonthDTO = new CountByMonthDTO();
-            countByMonthDTO.setMonth((Integer) result[0]);
-            countByMonthDTO.setCount((Long) result[1]);
+            countByMonthDTO.setMonth((Integer) result[1]);
+
+            countByMonthDTO.setCount(((Integer) result[0]).longValue());
             countByMonthDTOS.add(countByMonthDTO);
         }
 
@@ -222,11 +223,10 @@ public class UserServiceImpl implements UserService {
 
         List<CountByMonthDTO> countByMonthDTOS = new ArrayList<>();
 
-        // Chuyển đổi kết quả thành Map với tháng là key và số lượng shop là value
         for (Object[] result : results) {
             CountByMonthDTO countByMonthDTO = new CountByMonthDTO();
-            countByMonthDTO.setMonth((Integer) result[0]);
-            countByMonthDTO.setCount((Long) result[1]);
+            countByMonthDTO.setMonth((Integer) result[1]);
+            countByMonthDTO.setCount(((Integer) result[0]).longValue());
             countByMonthDTOS.add(countByMonthDTO);
         }
 
@@ -263,5 +263,14 @@ public class UserServiceImpl implements UserService {
             return inactive;
         }
         return null;
+    }
+
+    @Override
+    public void add() {
+        User user=new User();
+        user.setUsername("0123456789");
+        user.setPassword("123456");
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        userRepository.save(user);
     }
 }
