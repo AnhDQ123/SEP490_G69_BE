@@ -4,6 +4,6 @@ import lombok.Data;
 
 @Data
 public class CountByMonthDTO {
-    private int month;
+    private String month;
     private Long count;
 }

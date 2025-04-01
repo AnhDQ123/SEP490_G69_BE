@@ -207,9 +207,20 @@ public class UserServiceImpl implements UserService {
         // Chuyển đổi kết quả thành Map với tháng là key và số lượng shop là value
         for (Object[] result : results) {
             CountByMonthDTO countByMonthDTO = new CountByMonthDTO();
-            countByMonthDTO.setMonth((Integer) result[1]);
+            int month = (Integer) result[1];
+            int year = startDate.getYear();  // Assuming all results are within the same year
 
-            countByMonthDTO.setCount(((Integer) result[0]).longValue());
+            // Format month to yyyy/MM
+            String formattedMonth = String.format("%d/%02d", year, month); // Example: 2025/03
+            countByMonthDTO.setMonth(formattedMonth);
+
+            if (result[0] instanceof Long) {
+                countByMonthDTO.setCount((Long) result[0]);
+            } else {
+                // Handle the case when it's not a Long type
+                countByMonthDTO.setCount(((Integer) result[0]).longValue());
+            }
+
             countByMonthDTOS.add(countByMonthDTO);
         }
 
@@ -217,20 +228,20 @@ public class UserServiceImpl implements UserService {
     }
 
     public List<CountByMonthDTO> getUserCountByYearAndStatus(LocalDate startDate, LocalDate endDate, Status status) {
-        LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
-        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
-        List<Object[]> results = userRepository.countUsersByYearAndStatus(startDateTime, endDateTime, status);
+//        LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
+//        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+//        List<Object[]> results = userRepository.countUsersByYearAndStatus(startDateTime, endDateTime, status);
+//
+//        List<CountByMonthDTO> countByMonthDTOS = new ArrayList<>();
+//
+//        for (Object[] result : results) {
+//            CountByMonthDTO countByMonthDTO = new CountByMonthDTO();
+//            countByMonthDTO.setMonth((Integer) result[1]);
+//            countByMonthDTO.setCount(((Integer) result[0]).longValue());
+//            countByMonthDTOS.add(countByMonthDTO);
+//        }
 
-        List<CountByMonthDTO> countByMonthDTOS = new ArrayList<>();
-
-        for (Object[] result : results) {
-            CountByMonthDTO countByMonthDTO = new CountByMonthDTO();
-            countByMonthDTO.setMonth((Integer) result[1]);
-            countByMonthDTO.setCount(((Integer) result[0]).longValue());
-            countByMonthDTOS.add(countByMonthDTO);
-        }
-
-        return countByMonthDTOS;
+        return null;
     }
 
     public long countUsersAreShipper() {

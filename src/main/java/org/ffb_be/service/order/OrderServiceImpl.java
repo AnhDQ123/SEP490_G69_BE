@@ -477,36 +477,43 @@ public class OrderServiceImpl implements OrderService {
         return dto;
     }
         public List<CountByMonthDTO> getOrderCountByStatusAndYear(OrderStatus status, LocalDate startDate, LocalDate endDate) {
-        LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
-        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
-        List<Object[]> results = orderRepository.countOrdersByStatusAndYear(status, startDateTime, endDateTime);
-            List<CountByMonthDTO> countByMonthDTOS = new ArrayList<>();
-
-            // Chuyển đổi kết quả thành Map với tháng là key và số lượng shop là value
-            for (Object[] result : results) {
-                CountByMonthDTO countByMonthDTO = new CountByMonthDTO();
-                countByMonthDTO.setMonth((Integer) result[1]);
-                countByMonthDTO.setCount((Long) result[0]);
-                countByMonthDTOS.add(countByMonthDTO);
-            }
-            return countByMonthDTOS;
+//        LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
+//        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+//        List<Object[]> results = orderRepository.countOrdersByStatusAndYear(status, startDateTime, endDateTime);
+//            List<CountByMonthDTO> countByMonthDTOS = new ArrayList<>();
+//
+//            // Chuyển đổi kết quả thành Map với tháng là key và số lượng shop là value
+//            for (Object[] result : results) {
+//                CountByMonthDTO countByMonthDTO = new CountByMonthDTO();
+//                countByMonthDTO.setMonth((Integer) result[1]);
+//                countByMonthDTO.setCount((Long) result[0]);
+//                countByMonthDTOS.add(countByMonthDTO);
+//            }
+            return null;
     }
     public List<CountByMonthDTO> getOrderCountByStatusAndMonth(OrderStatus status, LocalDate startDate, LocalDate endDate) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
-        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX); // 2023-12-31T23:59:59
         List<Object[]> results = orderRepository.countOrdersByStatusAndMonth(status, startDateTime, endDateTime);
         List<CountByMonthDTO> countByMonthDTOS = new ArrayList<>();
 
         // Chuyển đổi kết quả thành Map với tháng là key và số lượng shop là value
         for (Object[] result : results) {
             CountByMonthDTO countByMonthDTO = new CountByMonthDTO();
-            countByMonthDTO.setMonth((Integer) result[1]);
-            if (result[1] instanceof Long) {
+            int month = (Integer) result[1];
+            int year = startDate.getYear();  // Assuming all results are within the same year
+
+            // Format month to yyyy/MM
+            String formattedMonth = String.format("%d/%02d", year, month); // Example: 2025/03
+            countByMonthDTO.setMonth(formattedMonth);
+
+            if (result[0] instanceof Long) {
                 countByMonthDTO.setCount((Long) result[0]);
             } else {
-                // Xử lý trường hợp không phải Long
+                // Handle the case when it's not a Long type
                 countByMonthDTO.setCount(((Integer) result[0]).longValue());
             }
+
             countByMonthDTOS.add(countByMonthDTO);
         }
 
