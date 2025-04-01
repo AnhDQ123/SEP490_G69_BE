@@ -2,6 +2,7 @@ package org.ffb_be.service.user;
 
 import jakarta.persistence.NonUniqueResultException;
 import org.ffb_be.dto.CountDTOBy.CountByMonthDTO;
+import org.ffb_be.dto.CountDTOBy.CountByYearDTO;
 import org.ffb_be.dto.auth.ProfileDto.ProfileDTO;
 import org.ffb_be.dto.auth.userDto.UserCreateDTO;
 import org.ffb_be.dto.auth.userDto.UserResponseDTO;
@@ -231,25 +232,35 @@ public class UserServiceImpl implements UserService {
 
             // Thêm vào danh sách kết quả
             countByMonthDTOS.add(countByMonthDTO);
-    }
+        }
         return countByMonthDTOS;
     }
 
-    public List<CountByMonthDTO> getUserCountByYearAndStatus(LocalDate startDate, LocalDate endDate, Status status) {
-//        LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
-//        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
-//        List<Object[]> results = userRepository.countUsersByYearAndStatus(startDateTime, endDateTime, status);
-//
-//        List<CountByMonthDTO> countByMonthDTOS = new ArrayList<>();
-//
-//        for (Object[] result : results) {
-//            CountByMonthDTO countByMonthDTO = new CountByMonthDTO();
-//            countByMonthDTO.setMonth((Integer) result[1]);
-//            countByMonthDTO.setCount(((Integer) result[0]).longValue());
-//            countByMonthDTOS.add(countByMonthDTO);
-//        }
+    public List<CountByYearDTO> getUserCountByYearAndStatus(LocalDate startDate, LocalDate endDate, Status status) {
+        LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+        List<Object[]> results = userRepository.countUsersByYearAndStatus(startDateTime, endDateTime, status);
 
-        return null;
+        List<CountByYearDTO> countByYearDTOS = new ArrayList<>();
+
+        // Duyệt qua các kết quả trả về từ truy vấn
+        for (Object[] result : results) {
+            CountByYearDTO countByYearDTO = new CountByYearDTO();
+
+            // Lấy năm từ kết quả truy vấn (result[0] chứa năm)
+            int year = (Integer) result[0];
+            countByYearDTO.setYear(year);
+
+            // Lấy số lượng đơn hàng từ kết quả truy vấn (result[1] chứa số lượng đơn hàng)
+            Long count = (Long) result[1];
+            countByYearDTO.setCount(count);
+
+            // Thêm đối tượng vào danh sách kết quả
+            countByYearDTOS.add(countByYearDTO);
+        }
+
+        // Trả về danh sách kết quả
+        return countByYearDTOS;
     }
 
     public long countUsersAreShipper() {

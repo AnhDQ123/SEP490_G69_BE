@@ -3,6 +3,7 @@ package org.ffb_be.service.report;
 import lombok.RequiredArgsConstructor;
 import org.ffb_be.dto.CountDTOBy.CountByDateDTO;
 import org.ffb_be.dto.CountDTOBy.CountByMonthDTO;
+import org.ffb_be.dto.CountDTOBy.CountByYearDTO;
 import org.ffb_be.dto.image.ImageDTO;
 import org.ffb_be.dto.report.ReportCreateDTO;
 import org.ffb_be.dto.report.ReportViewDTO;
@@ -217,22 +218,31 @@ public class ReportServiceImpl implements ReportService {
         }
         return countByMonthDTOS;
     }
-    public List<CountByMonthDTO> getReportCountByYear(ReportStatus status, LocalDate startDate, LocalDate endDate,Long type) {
-//        LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
-//        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
-//        List<Object[]> results = reportRepository.countReportsByStatusAndTypeIdAndYear(status, startDateTime, endDateTime,type);
-//
-//        List<CountByMonthDTO> countByMonthDTOS = new ArrayList<>();
-//
-//        // Chuyển đổi kết quả thành Map với tháng là key và số lượng shop là value
-//        for (Object[] result : results) {
-//            CountByMonthDTO countByMonthDTO = new CountByMonthDTO();
-//            countByMonthDTO.setMonth((Integer) result[0]);
-//            countByMonthDTO.setCount((Long) result[1]);
-//            countByMonthDTOS.add(countByMonthDTO);
-//        }
+    public List<CountByYearDTO> getReportCountByYear(ReportStatus status, LocalDate startDate, LocalDate endDate,Long type) {
+        LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+        List<Object[]> results = reportRepository.countReportsByStatusAndTypeIdAndYear(status, startDateTime, endDateTime,type);
 
-        return null;
+        List<CountByYearDTO> countByYearDTOS = new ArrayList<>();
+
+        // Duyệt qua các kết quả trả về từ truy vấn
+        for (Object[] result : results) {
+            CountByYearDTO countByYearDTO = new CountByYearDTO();
+
+            // Lấy năm từ kết quả truy vấn (result[0] chứa năm)
+            int year = (Integer) result[0];
+            countByYearDTO.setYear(year);
+
+            // Lấy số lượng đơn hàng từ kết quả truy vấn (result[1] chứa số lượng đơn hàng)
+            Long count = (Long) result[1];
+            countByYearDTO.setCount(count);
+
+            // Thêm đối tượng vào danh sách kết quả
+            countByYearDTOS.add(countByYearDTO);
+        }
+
+        // Trả về danh sách kết quả
+        return countByYearDTOS;
     }
     public Long countAllReports() {
         return reportRepository.countAllReports();

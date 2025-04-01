@@ -4,6 +4,7 @@ package org.ffb_be.service.order;
 import lombok.RequiredArgsConstructor;
 import org.ffb_be.dto.CountDTOBy.CountByDateDTO;
 import org.ffb_be.dto.CountDTOBy.CountByMonthDTO;
+import org.ffb_be.dto.CountDTOBy.CountByYearDTO;
 import org.ffb_be.dto.image.ImageDTO;
 import org.ffb_be.dto.order.*;
 import org.ffb_be.dto.product.TopProductDTO;
@@ -476,20 +477,34 @@ public class OrderServiceImpl implements OrderService {
         }
         return dto;
     }
-        public List<CountByMonthDTO> getOrderCountByStatusAndYear(OrderStatus status, LocalDate startDate, LocalDate endDate) {
-//        LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
-//        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
-//        List<Object[]> results = orderRepository.countOrdersByStatusAndYear(status, startDateTime, endDateTime);
-//            List<CountByMonthDTO> countByMonthDTOS = new ArrayList<>();
-//
-//            // Chuyển đổi kết quả thành Map với tháng là key và số lượng shop là value
-//            for (Object[] result : results) {
-//                CountByMonthDTO countByMonthDTO = new CountByMonthDTO();
-//                countByMonthDTO.setMonth((Integer) result[1]);
-//                countByMonthDTO.setCount((Long) result[0]);
-//                countByMonthDTOS.add(countByMonthDTO);
-//            }
-            return null;
+    public List<CountByYearDTO> getOrderCountByStatusAndYear(OrderStatus status, LocalDate startDate, LocalDate endDate) {
+        LocalDateTime startDateTime = startDate.atStartOfDay(); // Chuyển startDate thành LocalDateTime
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX); // Chuyển endDate thành LocalDateTime
+
+        // Thực hiện truy vấn để lấy kết quả
+        List<Object[]> results = orderRepository.countOrdersByStatusAndYear(status, startDateTime, endDateTime);
+
+        // Danh sách chứa các đối tượng CountByYearDTO
+        List<CountByYearDTO> countByYearDTOS = new ArrayList<>();
+
+        // Duyệt qua các kết quả trả về từ truy vấn
+        for (Object[] result : results) {
+            CountByYearDTO countByYearDTO = new CountByYearDTO();
+
+            // Lấy năm từ kết quả truy vấn (result[0] chứa năm)
+            int year = (Integer) result[0];
+            countByYearDTO.setYear(year);
+
+            // Lấy số lượng đơn hàng từ kết quả truy vấn (result[1] chứa số lượng đơn hàng)
+            Long count = (Long) result[1];
+            countByYearDTO.setCount(count);
+
+            // Thêm đối tượng vào danh sách kết quả
+            countByYearDTOS.add(countByYearDTO);
+        }
+
+        // Trả về danh sách kết quả
+        return countByYearDTOS;
     }
     public List<CountByMonthDTO> getOrderCountByStatusAndMonth(OrderStatus status, LocalDate startDate, LocalDate endDate) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
@@ -506,7 +521,7 @@ public class OrderServiceImpl implements OrderService {
             int year = (Integer) result[1]; // Year
 
             // Format the month as yyyy/MM
-            String formattedMonth = String.format("%d/%02d", year, month); // Example: 2025/03
+            String formattedMonth = String.format("%d/%02d", month, year); // Example: 2025/03
             countByMonthDTO.setMonth(formattedMonth);
 
             // Get the order count (it could be either Long or Integer)

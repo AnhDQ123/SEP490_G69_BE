@@ -3,6 +3,7 @@ package org.ffb_be.controller;
 import lombok.AllArgsConstructor;
 import org.ffb_be.dto.CountDTOBy.CountByDateDTO;
 import org.ffb_be.dto.CountDTOBy.CountByMonthDTO;
+import org.ffb_be.dto.CountDTOBy.CountByYearDTO;
 import org.ffb_be.dto.shop.ShopDTO;
 import org.ffb_be.dto.shop.ShopRegisterDTO;
 import org.ffb_be.service.order.OrderService;
@@ -138,7 +139,7 @@ public class ShopController {
     }
 
     @GetMapping("/count/year")
-    public List<CountByMonthDTO> getShopCountByYear(
+    public List<CountByYearDTO> getShopCountByYear(
             @RequestParam("status") String status) {
         Status status1=Status.valueOf(status);
         LocalDate endDate = LocalDate.now();

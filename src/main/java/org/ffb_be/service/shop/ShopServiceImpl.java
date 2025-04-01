@@ -3,6 +3,7 @@ package org.ffb_be.service.shop;
 import lombok.AllArgsConstructor;
 import org.ffb_be.dto.CountDTOBy.CountByDateDTO;
 import org.ffb_be.dto.CountDTOBy.CountByMonthDTO;
+import org.ffb_be.dto.CountDTOBy.CountByYearDTO;
 import org.ffb_be.dto.auth.ProfileDto.BusinessProfileDTO;
 import org.ffb_be.dto.auth.userDto.OwnerDTO;
 import org.ffb_be.dto.shop.ShopDTO;
@@ -368,22 +369,31 @@ public class ShopServiceImpl implements ShopService {
     }
 
     // Đếm số lượng shop theo trạng thái và năm
-    public List<CountByMonthDTO> getShopCountByYear(Status status, LocalDate startDate, LocalDate endDate) {
-//        LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
-//        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
-//        List<Object[]> results = shopRepository.countShopsByStatusAndYear(status, startDateTime, endDateTime);
-//
-//        List<CountByMonthDTO> countByMonthDTOS = new ArrayList<>();
-//
-//        // Chuyển đổi kết quả thành Map với tháng là key và số lượng shop là value
-//        for (Object[] result : results) {
-//            CountByMonthDTO countByMonthDTO = new CountByMonthDTO();
-//            countByMonthDTO.setMonth((Integer) result[1]);
-//            countByMonthDTO.setCount((Long) result[0]);
-//            countByMonthDTOS.add(countByMonthDTO);
-//        }
+    public List<CountByYearDTO> getShopCountByYear(Status status, LocalDate startDate, LocalDate endDate) {
+        LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+        List<Object[]> results = shopRepository.countShopsByStatusAndYear(status, startDateTime, endDateTime);
 
-        return null;
+        List<CountByYearDTO> countByYearDTOS = new ArrayList<>();
+
+        // Duyệt qua các kết quả trả về từ truy vấn
+        for (Object[] result : results) {
+            CountByYearDTO countByYearDTO = new CountByYearDTO();
+
+            // Lấy năm từ kết quả truy vấn (result[0] chứa năm)
+            int year = (Integer) result[0];
+            countByYearDTO.setYear(year);
+
+            // Lấy số lượng đơn hàng từ kết quả truy vấn (result[1] chứa số lượng đơn hàng)
+            Long count = (Long) result[1];
+            countByYearDTO.setCount(count);
+
+            // Thêm đối tượng vào danh sách kết quả
+            countByYearDTOS.add(countByYearDTO);
+        }
+
+        // Trả về danh sách kết quả
+        return countByYearDTOS;
     }
 
     public List<CountByDateDTO> getShopCountByDayAndStatus(Status status, LocalDate startDate, LocalDate endDate) {

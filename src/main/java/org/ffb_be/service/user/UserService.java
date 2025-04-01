@@ -1,6 +1,7 @@
 package org.ffb_be.service.user;
 
 import org.ffb_be.dto.CountDTOBy.CountByMonthDTO;
+import org.ffb_be.dto.CountDTOBy.CountByYearDTO;
 import org.ffb_be.dto.auth.ProfileDto.ProfileDTO;
 import org.ffb_be.dto.auth.userDto.UserCreateDTO;
 import org.ffb_be.dto.auth.userDto.UserResponseDTO;
@@ -27,7 +28,7 @@ public interface UserService {
     void inactiveUser(Long id);
     List<CountByDateDTO> getUserCountByDayAndStatus(LocalDate startDate, LocalDate endDate, Status status);
     List<CountByMonthDTO> getUserCountByMonthAndStatus(LocalDate startDate, LocalDate endDate, Status status);
-    List<CountByMonthDTO> getUserCountByYearAndStatus(LocalDate startDate, LocalDate endDate, Status status);
+    List<CountByYearDTO> getUserCountByYearAndStatus(LocalDate startDate, LocalDate endDate, Status status);
     long countUsersAreShipper();
     long countUsersHaveShop();
     long countPendingShipper();
