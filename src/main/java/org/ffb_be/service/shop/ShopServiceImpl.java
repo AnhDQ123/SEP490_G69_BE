@@ -25,6 +25,7 @@ import org.ffb_be.utils.mapping.ShopMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,8 +36,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 @Service
 @Transactional
@@ -93,7 +92,10 @@ public class ShopServiceImpl implements ShopService {
         User owner = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User"));
         Profile profile = profileRepository.getByUserId(userId)
-                .orElseThrow(() -> new NotFoundException("User"));
+                .orElseThrow(() -> new NotFoundException("Profile"));
+        if (owner.getRole().getName().equals("shipper")) {
+            throw new BadRequestException("User không thể tạo cửa hàng vì là shipper");
+        }
 
 
         Shop shop = shopMapper.toEntity(shopDTO);
@@ -147,7 +149,7 @@ public class ShopServiceImpl implements ShopService {
             MultipartFile citizenIDBack
     ) throws IOException {
         Shop shop = shopRepository.findById(shopId)
-                .orElseThrow(() -> new NotFoundException("Shop không tồn tại"));
+                .orElseThrow(() -> new NotFoundException("Shop"));
 
         Profile profile = profileRepository.getByUserId(shop.getOwner().getId())
                 .orElseThrow(() -> new NotFoundException("User"));
@@ -291,10 +293,6 @@ public class ShopServiceImpl implements ShopService {
         }
     }
 
-
-
-
-
     @Override
     public ShopDTO getShopById(Long shopId) {
         return shopRepository.findById(shopId)
@@ -304,10 +302,43 @@ public class ShopServiceImpl implements ShopService {
 
     @Override
     public ShopDTO getShopByUserId(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User"));
+        Shop shop = shopRepository.findByOwnerId(user.getId())
+                .orElseThrow(() -> new NotFoundException("User"));
+        if(shop.getIsActive() == Status.INACTIVE){
+            throw new BadRequestException("Cửa hàng đã bị vô hiệu hóa");
+        }
+        if(shop.getIsActive() == Status.PENDING) {
+            throw new BadRequestException("Cửa hàng đang chờ duyệt");
+        }
         return shopRepository.findByOwnerId(userId)
                 .map(this::decryptShopDTO)
                 .orElseThrow(() -> new NotFoundException("Shop"));
     }
+
+    @Override
+    public ResponseEntity<?> getShopByOwnerId(Long userId) {
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) {
+            return ResponseEntity.badRequest().body("User không tồn tại");
+        }
+
+        Shop shop = shopRepository.findByOwnerId(user.getId()).orElse(null);
+        if (shop == null) {
+            return ResponseEntity.badRequest().body("Cửa hàng không tồn tại");
+        }
+
+        if (shop.getIsActive() == Status.INACTIVE) {
+            return ResponseEntity.ok().body("Cửa hàng đã bị vô hiệu hóa");
+        }
+        if (shop.getIsActive() == Status.PENDING) {
+            return ResponseEntity.ok().body("Cửa hàng đang chờ duyệt");
+        }
+
+        return ResponseEntity.ok(decryptShopDTO(shop));
+    }
+
 
 
     private ShopDTO decryptShopDTO(Shop shop) {
