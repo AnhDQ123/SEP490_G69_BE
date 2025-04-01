@@ -188,32 +188,26 @@ public class ReportServiceImpl implements ReportService {
 
         List<CountByMonthDTO> countByMonthDTOS = new ArrayList<>();
 
-        // Chuyển đổi kết quả thành Map với tháng là key và số lượng shop là value
+        // Chuyển đổi kết quả thành danh sách DTO
         for (Object[] result : results) {
             CountByMonthDTO countByMonthDTO = new CountByMonthDTO();
-            int month = (Integer) result[1];
 
-            // Lấy năm từ startDate
-            int year = startDate.getYear();
+            // Get the month and year from the query result
+            int month = (Integer) result[0]; // Month
+            int year = (Integer) result[1]; // Year
 
-            // Nếu tháng trong kết quả nhỏ hơn tháng của startDate, tăng năm
-            if (month < startDate.getMonthValue()) {
-                year += 1; // Tháng này thuộc năm sau
-            }
-
-            // Định dạng tháng theo định dạng yyyy/MM
-            String formattedMonth = String.format("%d/%02d", year, month); // Ví dụ: 2025/03
+            // Format the month as yyyy/MM
+            String formattedMonth = String.format("%d/%02d", month, year); // Example: 2025/03
             countByMonthDTO.setMonth(formattedMonth);
 
-            // Kiểm tra kiểu dữ liệu và gán số lượng
-            if (result[0] instanceof Long) {
-                countByMonthDTO.setCount((Long) result[0]);
+            // Get the order count (it could be either Long or Integer)
+            if (result[2] instanceof Long) {
+                countByMonthDTO.setCount((Long) result[2]);
             } else {
-                // Nếu không phải kiểu Long, chuyển thành long
-                countByMonthDTO.setCount(((Integer) result[0]).longValue());
+                countByMonthDTO.setCount(((Integer) result[2]).longValue());
             }
 
-            // Thêm vào danh sách kết quả
+            // Add the DTO to the result list
             countByMonthDTOS.add(countByMonthDTO);
         }
         return countByMonthDTOS;
