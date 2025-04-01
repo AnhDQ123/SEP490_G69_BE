@@ -191,7 +191,12 @@ public class ReportServiceImpl implements ReportService {
         for (Object[] result : results) {
             CountByMonthDTO countByMonthDTO = new CountByMonthDTO();
             int month = (Integer) result[1];
-            int year = startDate.getYear();  // Assuming all results are within the same year
+
+            // Dynamically calculate the year based on the month and the startDate
+            int year = startDate.getYear();
+            if (month < startDate.getMonthValue()) {
+                year += 1; // If the month is before the start date month, increment the year
+            }
 
             // Format month to yyyy/MM
             String formattedMonth = String.format("%d/%02d", year, month); // Example: 2025/03
