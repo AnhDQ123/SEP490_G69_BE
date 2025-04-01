@@ -214,7 +214,7 @@ public class UserServiceImpl implements UserService {
             int year = (Integer) result[1]; // Year
 
             // Format the month as yyyy/MM
-            String formattedMonth = String.format("%d/%02d", month, year); // Example: 2025/03
+            String formattedMonth = String.format("%d/%02d", year, month); // Example: 2025/03
             countByMonthDTO.setMonth(formattedMonth);
 
             // Get the order count (it could be either Long or Integer)
