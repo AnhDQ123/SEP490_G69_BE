@@ -129,7 +129,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "AND o.createdAt BETWEEN :startDate AND :endDate " +
             "AND o.shop.id = :shopId " +
             "GROUP BY o.createdAt ORDER BY o.createdAt")
-    List<Object[]> countShopOrdersByStatusAndDay( String status,
+    List<Object[]> countShopOrdersByStatusAndDay( OrderStatus status,
                                               LocalDateTime startDate,
                                               LocalDateTime endDate,
                                               Long shopId);
@@ -139,7 +139,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "AND o.shop.id = :shopId " +
             "GROUP BY FUNCTION('YEAR', o.createdAt), FUNCTION('MONTH', o.createdAt) " +
             "ORDER BY FUNCTION('YEAR', o.createdAt), FUNCTION('MONTH', o.createdAt)")
-    List<Object[]> countShopOrdersByStatusAndMonth( String status,
+    List<Object[]> countShopOrdersByStatusAndMonth( OrderStatus status,
                                                 LocalDateTime startDate,
                                                LocalDateTime endDate,
                                                 Long shopId);
@@ -149,7 +149,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "AND o.shop.id = :shopId " +
             "GROUP BY FUNCTION('YEAR', o.createdAt) " +
             "ORDER BY FUNCTION('YEAR', o.createdAt)")
-    List<Object[]> countShopOrdersByStatusAndYear( String status,
+    List<Object[]> countShopOrdersByStatusAndYear( OrderStatus status,
                                                LocalDateTime startDate,
                                                LocalDateTime endDate,
                                                Long shopId);

@@ -611,19 +611,19 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.countAllOrders();
     }
 
-    public List<Object[]> countShopOrdersByStatusAndDay(String status, LocalDate startDate, LocalDate endDate, Long shopId) {
+    public List<Object[]> countShopOrdersByStatusAndDay(OrderStatus status, LocalDate startDate, LocalDate endDate, Long shopId) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         return orderRepository.countShopOrdersByStatusAndDay(status, startDateTime, endDateTime, shopId);
     }
-    public List<Object[]> countShopOrdersByStatusAndMonth(String status, LocalDate startDate, LocalDate endDate, Long shopId) {
+    public List<Object[]> countShopOrdersByStatusAndMonth(OrderStatus status, LocalDate startDate, LocalDate endDate, Long shopId) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         return orderRepository.countShopOrdersByStatusAndMonth(status, startDateTime, endDateTime, shopId);
     }
 
     // Đếm số lượng đơn hàng theo năm cho cửa hàng cụ thể
-    public List<Object[]> countShopOrdersByStatusAndYear(String status, LocalDate startDate, LocalDate endDate, Long shopId) {
+    public List<Object[]> countShopOrdersByStatusAndYear(OrderStatus status, LocalDate startDate, LocalDate endDate, Long shopId) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         return orderRepository.countShopOrdersByStatusAndYear(status, startDateTime, endDateTime, shopId);
