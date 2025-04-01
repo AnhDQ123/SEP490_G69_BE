@@ -1,6 +1,8 @@
 package org.ffb_be.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.ffb_be.dto.CountDTOBy.CountByDateDTO;
+import org.ffb_be.dto.CountDTOBy.CountByMonthDTO;
 import org.ffb_be.dto.report.ReportCreateDTO;
 import org.ffb_be.service.report.ReportService;
 import org.ffb_be.utils.enums.ReportStatus;
@@ -54,17 +56,16 @@ public class ReportController {
         return ResponseEntity.ok( reportService.findAll(page,size));
     }
     @GetMapping("/count/day")
-    public Map<LocalDate, Long> getReportCountByDay(
+    public List<CountByDateDTO> getReportCountByDay(
             @RequestParam("status") String status,
             @RequestParam("type") Long type) {
         ReportStatus reportStatus = ReportStatus.valueOf(status);
         LocalDate endDate = LocalDate.now();
         LocalDate startDate = endDate.minusDays(7);
-
         return reportService.getReportCountByDay(reportStatus, startDate, endDate,type);
     }
     @GetMapping("/count/month")
-    public Map<String, Long> getReportCountByMonth(
+    public List<CountByMonthDTO> getReportCountByMonth(
             @RequestParam("status") String status,
             @RequestParam("type") Long type) {
         LocalDate endDate = LocalDate.now();
@@ -73,7 +74,7 @@ public class ReportController {
         return reportService.getReportCountByMonth(reportStatus, startDate, endDate,type);
     }
     @GetMapping("/count/year")
-    public Map<Integer, Long> getReportCountByYear(
+    public List<CountByMonthDTO> getReportCountByYear(
             @RequestParam("status") String status,
             @RequestParam("type") Long type) {
         ReportStatus reportStatus = ReportStatus.valueOf(status);

@@ -4,6 +4,7 @@ package org.ffb_be.controller;
 import lombok.RequiredArgsConstructor;
 import org.ffb_be.dto.auth.userDto.UserCreateDTO;
 import org.ffb_be.dto.auth.userDto.UserUpdateDTO;
+import org.ffb_be.dto.CountDTOBy.CountByDateDTO;
 import org.ffb_be.entity.Shop;
 import org.ffb_be.entity.User;
 import org.ffb_be.repository.ProfileRepository;
@@ -23,7 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDate;
 
-import java.util.Map;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
@@ -79,7 +80,7 @@ public class UserController {
     }
 
     @GetMapping("/count/year")
-    public Map<Integer, Long> getUserCountByYear(
+    public List<CountByDateDTO> getUserCountByYear(
             @RequestParam("status") String status) {
         Status status1 = Status.valueOf(status);
         LocalDate endDate = LocalDate.now();
@@ -89,7 +90,7 @@ public class UserController {
     }
 
     @GetMapping("/count/month")
-    public Map<String, Long> getUserCountByMonth(
+    public List<CountByDateDTO> getUserCountByMonth(
             @RequestParam("status") String status) {
         Status status1 = Status.valueOf(status);
         LocalDate endDate = LocalDate.now();
@@ -98,7 +99,7 @@ public class UserController {
         return userService.getUserCountByMonthAndStatus(startDate, endDate,status1);
     }
     @GetMapping("/count/day")
-    public Map<LocalDate, Long> getUserCountByDayAndStatus(
+    public List<CountByDateDTO> getUserCountByDayAndStatus(
             @RequestParam("status") String status) {
         Status status1 = Status.valueOf(status);
         LocalDate endDate = LocalDate.now();

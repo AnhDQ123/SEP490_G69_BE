@@ -1,6 +1,8 @@
 package org.ffb_be.controller;
 
 import lombok.AllArgsConstructor;
+import org.ffb_be.dto.CountDTOBy.CountByDateDTO;
+import org.ffb_be.dto.CountDTOBy.CountByMonthDTO;
 import org.ffb_be.dto.shop.ShopDTO;
 import org.ffb_be.dto.shop.ShopRegisterDTO;
 import org.ffb_be.service.order.OrderService;
@@ -126,7 +128,7 @@ public class ShopController {
         return ResponseEntity.ok().build();
     }
     @GetMapping("/count/day")
-    public Map<LocalDate, Long> getShopCountByDayAndStatus(
+    public List<CountByDateDTO> getShopCountByDayAndStatus(
             @RequestParam("status") String status) {
         Status status1=Status.valueOf(status);
         LocalDate endDate = LocalDate.now();
@@ -136,7 +138,7 @@ public class ShopController {
     }
 
     @GetMapping("/count/year")
-    public Map<Integer, Long> getShopCountByYear(
+    public List<CountByMonthDTO> getShopCountByYear(
             @RequestParam("status") String status) {
         Status status1=Status.valueOf(status);
         LocalDate endDate = LocalDate.now();
@@ -145,7 +147,7 @@ public class ShopController {
         return shopService.getShopCountByYear(status1, startDate, endDate);
     }
     @GetMapping("/count/month")
-    public Map<Integer, Long> getShopCountByMonth(
+    public List<CountByMonthDTO> getShopCountByMonth(
             @RequestParam("status") String status) {
         Status status1=Status.valueOf(status);
         LocalDate endDate = LocalDate.now();

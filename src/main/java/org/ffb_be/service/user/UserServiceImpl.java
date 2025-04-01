@@ -5,6 +5,7 @@ import org.ffb_be.dto.auth.ProfileDto.ProfileDTO;
 import org.ffb_be.dto.auth.userDto.UserCreateDTO;
 import org.ffb_be.dto.auth.userDto.UserResponseDTO;
 import org.ffb_be.dto.auth.userDto.UserUpdateDTO;
+import org.ffb_be.dto.CountDTOBy.CountByDateDTO;
 import org.ffb_be.entity.Profile;
 import org.ffb_be.entity.Role;
 import org.ffb_be.entity.Shop;
@@ -27,9 +28,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -181,60 +181,49 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
-    public Map<LocalDate, Long> getUserCountByDayAndStatus(LocalDate startDate, LocalDate endDate, Status status) {
+    public List<CountByDateDTO> getUserCountByDayAndStatus(LocalDate startDate, LocalDate endDate, Status status) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         List<Object[]> results = userRepository.countUsersByDayAndStatus(startDateTime, endDateTime, status);
 
-        Map<LocalDate, Long> usersCountPerDay = new TreeMap<>();
-
-        // Chuyển đổi kết quả thành Map với ngày là key và số lượng người dùng là value
+        List<CountByDateDTO> countByDateDTOS = new ArrayList<>();
         for (Object[] result : results) {
-            LocalDate date = (LocalDate) result[0];  // Ngày
-            Long count = (Long) result[1];            // Số lượng người dùng
-
-            usersCountPerDay.put(date, count);
+            CountByDateDTO countByDateDTO = new CountByDateDTO();
+            countByDateDTO.setDate((LocalDateTime) result[0]);
+            countByDateDTO.setCount((Long) result[1]);
+            countByDateDTOS.add(countByDateDTO);
         }
-
-        return usersCountPerDay;
+        return countByDateDTOS;
     }
 
-    public Map<String, Long> getUserCountByMonthAndStatus(LocalDate startDate, LocalDate endDate, Status status) {
+    public List<CountByDateDTO> getUserCountByMonthAndStatus(LocalDate startDate, LocalDate endDate, Status status) {
 
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         List<Object[]> results = userRepository.countUsersByMonthAndStatus(startDateTime, endDateTime, status);
-        Map<String, Long> usersCountPerMonth = new TreeMap<>();
-
-        // Chuyển đổi kết quả thành Map với tháng và năm là key (với định dạng "YYYY-MM") và số lượng người dùng là value
+        List<CountByDateDTO> countByDateDTOS = new ArrayList<>();
         for (Object[] result : results) {
-            int month = (Integer) result[0];  // Tháng
-            int year = (Integer) result[1];   // Năm
-            Long count = (Long) result[2];     // Số lượng người dùng
-
-            String monthYear = year + "-" + String.format("%02d", month);  // Định dạng "YYYY-MM"
-            usersCountPerMonth.put(monthYear, count);
+            CountByDateDTO countByDateDTO = new CountByDateDTO();
+            countByDateDTO.setDate((LocalDateTime) result[0]);
+            countByDateDTO.setCount((Long) result[1]);
+            countByDateDTOS.add(countByDateDTO);
         }
-
-        return usersCountPerMonth;
+        return countByDateDTOS;
     }
 
-    public Map<Integer, Long> getUserCountByYearAndStatus(LocalDate startDate, LocalDate endDate, Status status) {
+    public List<CountByDateDTO> getUserCountByYearAndStatus(LocalDate startDate, LocalDate endDate, Status status) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         List<Object[]> results = userRepository.countUsersByYearAndStatus(startDateTime, endDateTime, status);
 
-        Map<Integer, Long> usersCountPerYear = new TreeMap<>();
-
-        // Chuyển đổi kết quả thành Map với năm là key và số lượng người dùng là value
+        List<CountByDateDTO> countByDateDTOS = new ArrayList<>();
         for (Object[] result : results) {
-            int year = (Integer) result[0];  // Năm
-            Long count = (Long) result[1];    // Số lượng người dùng
-
-            usersCountPerYear.put(year, count);
+            CountByDateDTO countByDateDTO = new CountByDateDTO();
+            countByDateDTO.setDate((LocalDateTime) result[0]);
+            countByDateDTO.setCount((Long) result[1]);
+            countByDateDTOS.add(countByDateDTO);
         }
-
-        return usersCountPerYear;
+        return countByDateDTOS;
     }
 
     public long countUsersAreShipper() {

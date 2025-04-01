@@ -1,7 +1,7 @@
 package org.ffb_be.service.order;
 
-import org.apache.commons.lang3.tuple.Pair;
-import org.ffb_be.dto.order.CountByDateDTO;
+import org.ffb_be.dto.CountDTOBy.CountByDateDTO;
+import org.ffb_be.dto.CountDTOBy.CountByMonthDTO;
 import org.ffb_be.dto.order.CountDTO;
 import org.ffb_be.dto.order.OrderDTO;
 import org.ffb_be.dto.order.ReturnOrderDTO;
@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -42,8 +41,8 @@ public interface OrderService {
     Page<OrderDTO> findAllByFilter(String orderCode, OrderStatus status, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
 
     OrderDTO getOrder(Long id);
-    List<CountByDateDTO> getOrderCountByStatusAndYear(OrderStatus status, LocalDate startDate, LocalDate endDate);
-    List<CountByDateDTO> getOrderCountByStatusAndMonth(OrderStatus status, LocalDate startDate, LocalDate endDate);
+    List<CountByMonthDTO> getOrderCountByStatusAndYear(OrderStatus status, LocalDate startDate, LocalDate endDate);
+    List<CountByMonthDTO> getOrderCountByStatusAndMonth(OrderStatus status, LocalDate startDate, LocalDate endDate);
     List<CountByDateDTO> getOrderCountByStatusAndDay(OrderStatus status, LocalDate startDate, LocalDate endDate);
     List<TopProductDTO> getTopSellingProductsThisMonth();
     List<TopProductDTO> getTopSellingProductsThisYear();
