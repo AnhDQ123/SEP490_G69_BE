@@ -1,12 +1,18 @@
 package org.ffb_be.controller;
 
-import lombok.AllArgsConstructor;
+
 import lombok.RequiredArgsConstructor;
 import org.ffb_be.dto.auth.userDto.UserCreateDTO;
 import org.ffb_be.dto.auth.userDto.UserUpdateDTO;
+import org.ffb_be.dto.CountDTOBy.CountByDateDTO;
+import org.ffb_be.entity.Shop;
+import org.ffb_be.entity.User;
 import org.ffb_be.repository.ProfileRepository;
+import org.ffb_be.repository.ShopRepository;
 import org.ffb_be.repository.UserRepository;
+import org.ffb_be.service.shop.ShopService;
 import org.ffb_be.service.user.UserService;
+import org.ffb_be.utils.enums.Status;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +22,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
+
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/users")
 @CrossOrigin("*")
@@ -24,7 +34,8 @@ public class UserController {
     private final UserRepository userRepository;
     private final ProfileRepository profileRepository;
     private final UserService userService;
-
+    private final ShopRepository shopRepository;
+    private final ShopService shopService;
     @GetMapping("/{id}")
     public ResponseEntity<?> getUserById(@PathVariable Long id) {
         return ResponseEntity.ok( userService.findById(id));
@@ -66,5 +77,69 @@ public class UserController {
                                     @RequestParam(value = "size", defaultValue = "20", required = false) Integer size) {
         Pageable pageable = PageRequest.of(page-1, size);
         return ResponseEntity.ok( userService.findAll(search,pageable));
+    }
+
+    @GetMapping("/count/year")
+    public List<CountByDateDTO> getUserCountByYear(
+            @RequestParam("status") String status) {
+        Status status1 = Status.valueOf(status);
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusYears(3);
+
+        return userService.getUserCountByYearAndStatus(startDate, endDate,status1);
+    }
+
+    @GetMapping("/count/month")
+    public List<CountByDateDTO> getUserCountByMonth(
+            @RequestParam("status") String status) {
+        Status status1 = Status.valueOf(status);
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusMonths(7);
+
+        return userService.getUserCountByMonthAndStatus(startDate, endDate,status1);
+    }
+    @GetMapping("/count/day")
+    public List<CountByDateDTO> getUserCountByDayAndStatus(
+            @RequestParam("status") String status) {
+        Status status1 = Status.valueOf(status);
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusDays(7);
+        return userService.getUserCountByDayAndStatus(startDate, endDate, status1);
+    }
+    @GetMapping("/count/shop")
+    public long getUserHaveShopCount() {
+        return userService.countUsersHaveShop();
+    }
+    @GetMapping("/count/shipper")
+    public long getUserAreShipperCount() {
+        return userService.countUsersAreShipper();
+    }
+    @GetMapping("/count/pendingshipper")
+    public long getPendingShipper() {
+        return userService.countPendingShipper();
+    }
+    @GetMapping("/count/all")
+    public long getAllUserCount() {
+        return userService.countAllUser();
+    }
+
+    @GetMapping("/shop")
+    public ResponseEntity<?> getUserShop(@RequestParam("id") Long id) {
+        User user=userRepository.findById(id).orElse(null);
+        Shop shop=shopRepository.findByOwnerId(user.getId()).orElse(null);
+        String status=userService.hasShop(id);
+        if(status==null) {
+            return ResponseEntity.badRequest().body("No such user");
+        }
+        if(status.equals("inactive")) {
+            return ResponseEntity.ok().body("Shop has been inactived");
+        }
+        if(status.equals("active")) {
+            return ResponseEntity.ok(shopService.getShopById(shop.getId()));
+        }
+        if(status.equals("pending")) {
+            return ResponseEntity.ok().body("Shop is pending");
+        }
+        return ResponseEntity.ok().body("");
     }
 }

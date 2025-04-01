@@ -16,11 +16,12 @@ public interface VoucherService {
 
     VoucherDTO addVoucher(VoucherDTO dto);
 
-    VoucherDTO updateVoucher(Long id, VoucherDTO dto);
+    VoucherDTO updateVoucher(String code, VoucherDTO dto);
 
-    void deleteVoucher(Long id);
+    void deleteVoucher(String code);
 
     BigDecimal applyVoucher(String code, BigDecimal orderTotal, Long userId);
 
     Map<String, Integer> getVoucherUsageStats();
+   void checkAndUpdateDiscountStatus();
 }

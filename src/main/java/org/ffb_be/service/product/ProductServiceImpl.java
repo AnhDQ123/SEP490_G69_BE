@@ -23,6 +23,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 
 @RequiredArgsConstructor
@@ -87,6 +90,15 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.findAllByShop_Id(id,pageable).map(product -> {
             ProductResponseDTO productResponseDTO = new ProductResponseDTO();
             productResponseDTO.setShopName(product.getShop().getName());
+            productResponseDTO.setId(product.getId());
+            productResponseDTO.setName(product.getName());
+            productResponseDTO.setManufacturer(product.getManufacturer());
+            productResponseDTO.setImage(product.getImage());
+            productResponseDTO.setCategory(product.getCategory().getName());
+            productResponseDTO.setSupplier(product.getShop() != null ? product.getShop().getName() : "");
+            productResponseDTO.setRate(product.getRate());
+            productResponseDTO.setQuantity(product.getQuantity());
+            productResponseDTO.setStatus(product.getStatus().toString());
             BigDecimal defaultprice = null;
             List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product);
             List<Discount> discount=discountRepository.findAllByProduct_Id((product.getId()));
@@ -368,5 +380,24 @@ public class ProductServiceImpl implements ProductService {
             return productResponseDTO;
         });
     }
+    public List<Object[]> findTopSellingProductsToday(Long shopId) {
+        return productRepository.findTopSellingProductsToday(shopId);
+    }
 
+    // Tính danh sách sản phẩm bán chạy nhất trong tháng này cho cửa hàng cụ thể
+    public List<Object[]> findTopSellingProductsThisMonth(Long shopId) {
+        LocalDate currentDate = LocalDate.now();
+        LocalDate firstDayOfMonth = currentDate.with(TemporalAdjusters.firstDayOfMonth());  // Ngày đầu tháng
+        LocalDate lastDayOfMonth = currentDate.with(TemporalAdjusters.lastDayOfMonth());    // Ngày cuối tháng
+
+        // Chuyển các ngày thành LocalDateTime
+        LocalDateTime startOfMonth = firstDayOfMonth.atStartOfDay();
+        LocalDateTime endOfMonth = lastDayOfMonth.atTime(23, 59, 59);
+        return productRepository.findTopSellingProductsThisMonth(shopId,startOfMonth,endOfMonth);
+    }
+
+    // Tính danh sách sản phẩm bán chạy nhất trong năm này cho cửa hàng cụ thể
+    public List<Object[]> findTopSellingProductsThisYear(Long shopId) {
+        return productRepository.findTopSellingProductsThisYear(shopId);
+    }
 }
