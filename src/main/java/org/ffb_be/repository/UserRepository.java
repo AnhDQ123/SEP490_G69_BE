@@ -3,6 +3,7 @@ package org.ffb_be.repository;
 import org.ffb_be.entity.Role;
 import org.ffb_be.entity.User;
 import org.ffb_be.utils.enums.ShipperStatus;
+import org.ffb_be.utils.enums.Status;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
@@ -11,6 +12,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 @Repository
@@ -37,5 +40,41 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findAllAvailableShippers();
 
     Page<User> findAll(Specification<User> spec, Pageable pageable);
+
+    @Query("SELECT u.createdAt, COUNT(u) " +
+            "FROM User u WHERE u.createdAt BETWEEN :startDate AND :endDate " +
+            "AND u.status = :status " +
+            "GROUP BY u.createdAt " +
+            "ORDER BY u.createdAt")
+    List<Object[]> countUsersByDayAndStatus( LocalDateTime startDate,
+                                             LocalDateTime endDate,
+                                             Status status);
+
+    @Query("SELECT FUNCTION('MONTH', u.createdAt), FUNCTION('YEAR', u.createdAt), COUNT(u) " +
+            "FROM User u WHERE u.createdAt BETWEEN :startDate AND :endDate " +
+            "AND u.status = :status " +
+            "GROUP BY FUNCTION('MONTH', u.createdAt), FUNCTION('YEAR', u.createdAt) " +
+            "ORDER BY FUNCTION('YEAR', u.createdAt), FUNCTION('MONTH', u.createdAt)")
+    List<Object[]> countUsersByMonthAndStatus( LocalDateTime startDate,
+                                               LocalDateTime endDate,
+                                               Status status);
+
+    @Query("SELECT FUNCTION('YEAR', u.createdAt), COUNT(u) " +
+            "FROM User u WHERE u.createdAt BETWEEN :startDate AND :endDate " +
+            "AND u.status = :status " +
+            "GROUP BY FUNCTION('YEAR', u.createdAt) " +
+            "ORDER BY FUNCTION('YEAR', u.createdAt)")
+    List<Object[]> countUsersByYearAndStatus( LocalDateTime startDate,
+                                              LocalDateTime endDate,
+                                              Status status);
+
+    @Query("SELECT COUNT(u) FROM User u WHERE u.role.id = 4")
+    long countUsersAreShipper();
+    @Query("SELECT COUNT(u) FROM User u WHERE u.role.id = 2")
+    long countUsersHaveShop();
+    @Query("SELECT COUNT(u) FROM User u WHERE u.shipperStatus = 'PENDING'")
+    long countPendingShipper();
+    @Query("SELECT COUNT(u) FROM User u")
+    long countAllUser();
 }
 

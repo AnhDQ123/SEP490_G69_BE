@@ -1,16 +1,20 @@
 package org.ffb_be.service.shop;
 
 import lombok.AllArgsConstructor;
+import org.ffb_be.dto.CountDTOBy.CountByDateDTO;
+import org.ffb_be.dto.CountDTOBy.CountByMonthDTO;
 import org.ffb_be.dto.auth.ProfileDto.BusinessProfileDTO;
 import org.ffb_be.dto.auth.userDto.OwnerDTO;
 import org.ffb_be.dto.shop.ShopDTO;
 import org.ffb_be.dto.shop.ShopRegisterDTO;
 import org.ffb_be.entity.Profile;
+import org.ffb_be.entity.Role;
 import org.ffb_be.entity.Shop;
 import org.ffb_be.entity.User;
 import org.ffb_be.exception.BadRequestException;
 import org.ffb_be.exception.NotFoundException;
 import org.ffb_be.repository.ProfileRepository;
+import org.ffb_be.repository.RoleRepository;
 import org.ffb_be.repository.ShopRepository;
 import org.ffb_be.repository.UserRepository;
 import org.ffb_be.utils.EncryptUtil;
@@ -28,6 +32,10 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 @Service
 @Transactional
@@ -39,6 +47,7 @@ public class ShopServiceImpl implements ShopService {
     private final ProfileRepository profileRepository;
     private final CloudinaryUpload cloudinaryUpload;
     private final EncryptUtil encryptUtil;
+    private final RoleRepository roleRepository;
 
     @Override
     public Page<ShopDTO> getShops(String type, String status, String search, Pageable pageable) {
@@ -205,7 +214,7 @@ public class ShopServiceImpl implements ShopService {
             shop.setReason(null);
             shop.setIsActive(Status.PENDING);
         }
-
+        shop.setIsActive(Status.ACTIVE);
         profileRepository.save(profile);
         shopRepository.save(shop);
     }
@@ -220,6 +229,10 @@ public class ShopServiceImpl implements ShopService {
         if(shop.getIsActive() != Status.PENDING){
             throw new BadRequestException("Shop không ở trạng thái chờ duyệt");
         }
+        User user=userRepository.findById(shop.getOwner().getId()).get();
+        Role role=roleRepository.findById(2L).get();
+        user.setRole(role);
+        userRepository.save(user);
         shop.setIsActive(Status.ACTIVE);
         shopRepository.save(shop);
     }
@@ -316,5 +329,62 @@ public class ShopServiceImpl implements ShopService {
     private String encryptSafe(String data) {
         return data != null ? encryptUtil.encrypt(data) : null;
     }
+    public List<CountByMonthDTO> getShopCountByMonth(Status status, LocalDate startDate, LocalDate endDate) {
+        LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+        List<Object[]> results = shopRepository.countShopsByStatusAndMonth(status, startDateTime, endDateTime);
 
+        List<CountByMonthDTO> countByMonthDTOS = new ArrayList<>();
+
+        // Chuyển đổi kết quả thành Map với tháng là key và số lượng shop là value
+        for (Object[] result : results) {
+            CountByMonthDTO countByMonthDTO = new CountByMonthDTO();
+            countByMonthDTO.setMonth((Integer) result[0]);
+            if (result[1] instanceof Long) {
+                countByMonthDTO.setCount((Long) result[1]);
+            } else {
+                // Xử lý trường hợp không phải Long
+                countByMonthDTO.setCount(((Integer) result[1]).longValue());
+            }
+            countByMonthDTOS.add(countByMonthDTO);
+        }
+
+        return countByMonthDTOS;
+    }
+
+    // Đếm số lượng shop theo trạng thái và năm
+    public List<CountByMonthDTO> getShopCountByYear(Status status, LocalDate startDate, LocalDate endDate) {
+        LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+        List<Object[]> results = shopRepository.countShopsByStatusAndYear(status, startDateTime, endDateTime);
+
+        List<CountByMonthDTO> countByMonthDTOS = new ArrayList<>();
+
+        // Chuyển đổi kết quả thành Map với tháng là key và số lượng shop là value
+        for (Object[] result : results) {
+            CountByMonthDTO countByMonthDTO = new CountByMonthDTO();
+            countByMonthDTO.setMonth((Integer) result[0]);
+            countByMonthDTO.setCount((Long) result[1]);
+            countByMonthDTOS.add(countByMonthDTO);
+        }
+
+        return countByMonthDTOS;
+    }
+
+    public List<CountByDateDTO> getShopCountByDayAndStatus(Status status, LocalDate startDate, LocalDate endDate) {
+        LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+        List<Object[]> results = shopRepository.countShopsByStatusAndDay(status, startDateTime, endDateTime);
+        List<CountByDateDTO> countByDateDTOS = new ArrayList<>();
+        for (Object[] result : results) {
+            CountByDateDTO countByDateDTO = new CountByDateDTO();
+            countByDateDTO.setDate((LocalDateTime) result[0]);
+            countByDateDTO.setCount((Long) result[1]);
+            countByDateDTOS.add(countByDateDTO);
+        }
+        return countByDateDTOS;
+    }
+    public long countPendingShop() {
+        return shopRepository.countPendingShop();
+    }
 }

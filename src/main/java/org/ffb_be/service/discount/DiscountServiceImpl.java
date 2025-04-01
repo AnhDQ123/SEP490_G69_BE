@@ -8,6 +8,7 @@ import org.ffb_be.entity.Product;
 import org.ffb_be.repository.DiscountRepository;
 import org.ffb_be.repository.ProductRepository;
 import org.ffb_be.utils.enums.Status;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 
@@ -28,8 +29,7 @@ public class DiscountServiceImpl implements DiscountService{
         discountEntity.setStartDate(discount.getStartDate());
         discountEntity.setEndDate(discount.getEndDate());
         discountEntity.setStatus(Status.PENDING);
-        if (discount.getStartDate() != null &&
-                discount.getStartDate().isBefore(LocalDate.now())) {
+        if (discount.getStartDate().isEqual(LocalDate.now())) {
             discountEntity.setStatus(Status.ACTIVE);
         }
         Product product=productRepository.findById(productId).get();
@@ -74,6 +74,24 @@ public class DiscountServiceImpl implements DiscountService{
         return discountDTOs;
     }
 
+    @Scheduled(cron = "0 0 0 * * ?")  // Lên lịch chạy mỗi ngày lúc nửa đêm
+    public void checkAndUpdateDiscountStatus() {
+        LocalDate today = LocalDate.now();
+
+        List<Discount> discounts = discountRepository.findAll(); // Lấy tất cả discounts
+
+        for (Discount discount : discounts) {
+            // Nếu ngày hôm nay là startDate thì đổi trạng thái thành activated
+            if (discount.getStartDate().equals(today) && !discount.getStatus().equals(Status.ACTIVE)) {
+                discount.setStatus(Status.ACTIVE);
+                discountRepository.save(discount);
+            }
+            if (discount.getEndDate().equals(today) && !discount.getStatus().equals(Status.INACTIVE)) {
+                discount.setStatus(Status.INACTIVE);
+                discountRepository.save(discount);
+            }
+        }
+    }
 
 
 }

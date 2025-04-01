@@ -1,17 +1,19 @@
 package org.ffb_be.service.order;
 
+
 import lombok.RequiredArgsConstructor;
+import org.ffb_be.dto.CountDTOBy.CountByDateDTO;
+import org.ffb_be.dto.CountDTOBy.CountByMonthDTO;
 import org.ffb_be.dto.image.ImageDTO;
 import org.ffb_be.dto.order.*;
+import org.ffb_be.dto.product.TopProductDTO;
 import org.ffb_be.entity.*;
 import org.ffb_be.exception.NotFoundException;
 import org.ffb_be.repository.*;
 import org.ffb_be.utils.enums.OrderStatus;
 import org.ffb_be.utils.enums.upload.CloudinaryUpload;
 import org.ffb_be.utils.mapping.OrderMapper;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,7 +21,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.math.BigDecimal;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 
 @RequiredArgsConstructor
@@ -471,6 +475,176 @@ public class OrderServiceImpl implements OrderService {
             }
         }
         return dto;
+    }
+        public List<CountByMonthDTO> getOrderCountByStatusAndYear(OrderStatus status, LocalDate startDate, LocalDate endDate) {
+        LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+        List<Object[]> results = orderRepository.countOrdersByStatusAndYear(status, startDateTime, endDateTime);
+            List<CountByMonthDTO> countByMonthDTOS = new ArrayList<>();
+
+            // Chuyển đổi kết quả thành Map với tháng là key và số lượng shop là value
+            for (Object[] result : results) {
+                CountByMonthDTO countByMonthDTO = new CountByMonthDTO();
+                countByMonthDTO.setMonth((Integer) result[0]);
+                countByMonthDTO.setCount((Long) result[1]);
+                countByMonthDTOS.add(countByMonthDTO);
+            }
+            return countByMonthDTOS;
+    }
+    public List<CountByMonthDTO> getOrderCountByStatusAndMonth(OrderStatus status, LocalDate startDate, LocalDate endDate) {
+        LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+        List<Object[]> results = orderRepository.countOrdersByStatusAndMonth(status, startDateTime, endDateTime);
+        List<CountByMonthDTO> countByMonthDTOS = new ArrayList<>();
+
+        // Chuyển đổi kết quả thành Map với tháng là key và số lượng shop là value
+        for (Object[] result : results) {
+            CountByMonthDTO countByMonthDTO = new CountByMonthDTO();
+            countByMonthDTO.setMonth((Integer) result[0]);
+            if (result[1] instanceof Long) {
+                countByMonthDTO.setCount((Long) result[1]);
+            } else {
+                // Xử lý trường hợp không phải Long
+                countByMonthDTO.setCount(((Integer) result[1]).longValue());
+            }
+            countByMonthDTOS.add(countByMonthDTO);
+        }
+
+        return countByMonthDTOS;
+    }
+    public List<CountByDateDTO> getOrderCountByStatusAndDay(OrderStatus status, LocalDate startDate, LocalDate endDate) {
+        LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+        List<Object[]> results = orderRepository.countOrdersByStatusAndDay(status, startDateTime, endDateTime);
+        List<CountByDateDTO> countByDateDTOS = new ArrayList<>();
+        for (Object[] result : results) {
+            CountByDateDTO countByDateDTO = new CountByDateDTO();
+            countByDateDTO.setDate((LocalDateTime) result[0]);
+            countByDateDTO.setCount((Long) result[1]);
+            countByDateDTOS.add(countByDateDTO);
+        }
+        return countByDateDTOS;
+    }
+    public  List<TopProductDTO> getTopSellingProductsToday() {
+        LocalDate currentDate = LocalDate.now();
+
+        // Lấy thời gian bắt đầu và kết thúc của ngày hôm nay
+        LocalDateTime startOfDay = currentDate.atStartOfDay();  // 00:00:00
+        LocalDateTime endOfDay = currentDate.atTime(23, 59, 59);
+        Pageable pageable = PageRequest.of(0, 5);
+        List<Object[]> results = orderRepository.findTopSellingProductsToday(startOfDay,endOfDay,pageable);
+
+        List<TopProductDTO> topSellingProducts = new ArrayList<>();
+
+        // Chuyển đổi kết quả thành Map với key là "productName" và value là "totalQuantity"
+        for (Object[] result : results) {
+            TopProductDTO topProductDTO = new TopProductDTO();
+            topProductDTO.setName((String) result[1]);
+            topProductDTO.setTotalQuantity((Long) result[2]);
+            topProductDTO.setTotalValue((BigDecimal) result[3]);
+            topSellingProducts.add(topProductDTO);
+        }
+
+        return topSellingProducts;
+    }
+    public  List<TopProductDTO> getTopSellingProductsThisMonth() {
+        Pageable pageable = PageRequest.of(0, 5);
+        List<Object[]> results = orderRepository.findTopSellingProductsThisMonth(pageable);
+
+        List<TopProductDTO> topSellingProducts = new ArrayList<>();
+
+        // Chuyển đổi kết quả thành Map với key là "productName" và value là "totalQuantity"
+        for (Object[] result : results) {
+            TopProductDTO topProductDTO = new TopProductDTO();
+            topProductDTO.setName((String) result[1]);
+            topProductDTO.setTotalQuantity((Long) result[2]);
+            topProductDTO.setTotalValue((BigDecimal) result[3]);
+            topSellingProducts.add(topProductDTO);
+        }
+
+        return topSellingProducts;
+    }
+
+    // Phương thức để lấy danh sách sản phẩm bán chạy nhất trong năm nay
+    public List<TopProductDTO> getTopSellingProductsThisYear() {
+        Pageable pageable = PageRequest.of(0, 5);
+        List<Object[]> results = orderRepository.findTopSellingProductsThisYear(pageable);
+        List<TopProductDTO> topSellingProducts = new ArrayList<>();
+        // Chuyển đổi kết quả thành Map với key là "productName" và value là "totalQuantity"
+        for (Object[] result : results) {
+            TopProductDTO topProductDTO = new TopProductDTO();
+            topProductDTO.setName((String) result[1]);
+            topProductDTO.setTotalQuantity((Long) result[2]);
+            topProductDTO.setTotalValue((BigDecimal) result[3]);
+            topSellingProducts.add(topProductDTO);
+        }
+
+        return topSellingProducts;
+    }
+    // Đếm số lượng đơn hàng
+    public Long countAllOrders() {
+        return orderRepository.countAllOrders();
+    }
+
+    public List<Object[]> countShopOrdersByStatusAndDay(String status, LocalDate startDate, LocalDate endDate, Long shopId) {
+        LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+        return orderRepository.countShopOrdersByStatusAndDay(status, startDateTime, endDateTime, shopId);
+    }
+    public List<Object[]> countShopOrdersByStatusAndMonth(String status, LocalDate startDate, LocalDate endDate, Long shopId) {
+        LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+        return orderRepository.countShopOrdersByStatusAndMonth(status, startDateTime, endDateTime, shopId);
+    }
+
+    // Đếm số lượng đơn hàng theo năm cho cửa hàng cụ thể
+    public List<Object[]> countShopOrdersByStatusAndYear(String status, LocalDate startDate, LocalDate endDate, Long shopId) {
+        LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+        return orderRepository.countShopOrdersByStatusAndYear(status, startDateTime, endDateTime, shopId);
+    }
+    public Map<Long, Double> calculateShopRevenueByDay(LocalDate startDate, LocalDate endDate, Long shopId) {
+        LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+        List<Object[]> results = orderRepository.calculateShopRevenueByDay(startDateTime, endDateTime, shopId);
+
+        Map<Long, Double> shopRevenue = new HashMap<>();
+        for (Object[] result : results) {
+            Long shopIdResult = (Long) result[0];
+            Double revenue = (Double) result[1];
+            shopRevenue.put(shopIdResult, revenue);
+        }
+        return shopRevenue;
+    }
+
+    // Tính tổng doanh thu theo tháng
+    public Map<String, Double> calculateShopRevenueByMonth(LocalDate startDate, LocalDate endDate, Long shopId) {
+        LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+        List<Object[]> results = orderRepository.calculateShopRevenueByMonth(startDateTime, endDateTime, shopId);
+
+        Map<String, Double> shopRevenue = new HashMap<>();
+        for (Object[] result : results) {
+            String monthYear = result[0] + "-" + String.format("%02d", result[1]);  // Format: YYYY-MM
+            Double revenue = (Double) result[2];
+            shopRevenue.put(monthYear, revenue);
+        }
+        return shopRevenue;
+    }
+
+    // Tính tổng doanh thu theo năm
+    public Map<Integer, Double> calculateShopRevenueByYear(LocalDate startDate, LocalDate endDate, Long shopId) {
+        LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+        List<Object[]> results = orderRepository.calculateShopRevenueByYear(startDateTime, endDateTime, shopId);
+
+        Map<Integer, Double> shopRevenue = new HashMap<>();
+        for (Object[] result : results) {
+            Integer year = (Integer) result[0];
+            Double revenue = (Double) result[1];
+            shopRevenue.put(year, revenue);
+        }
+        return shopRevenue;
     }
 }
 

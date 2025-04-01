@@ -5,11 +5,14 @@ import org.ffb_be.dto.auth.ProfileDto.ProfileDTO;
 import org.ffb_be.dto.auth.userDto.UserCreateDTO;
 import org.ffb_be.dto.auth.userDto.UserResponseDTO;
 import org.ffb_be.dto.auth.userDto.UserUpdateDTO;
+import org.ffb_be.dto.CountDTOBy.CountByDateDTO;
 import org.ffb_be.entity.Profile;
 import org.ffb_be.entity.Role;
+import org.ffb_be.entity.Shop;
 import org.ffb_be.entity.User;
 import org.ffb_be.repository.ProfileRepository;
 import org.ffb_be.repository.RoleRepository;
+import org.ffb_be.repository.ShopRepository;
 import org.ffb_be.repository.UserRepository;
 import org.ffb_be.utils.enums.Status;
 import org.ffb_be.utils.enums.upload.CloudinaryUpload;
@@ -21,6 +24,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -29,13 +38,15 @@ public class UserServiceImpl implements UserService {
     private final CloudinaryUpload cloudinaryUpload;
     private final RoleRepository roleRepository;
     private final ProfileRepository profileRepository;
+    private final ShopRepository shopRepository;
 
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, CloudinaryUpload cloudinaryUpload, RoleRepository roleRepository, ProfileRepository profileRepository) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, CloudinaryUpload cloudinaryUpload, RoleRepository roleRepository, ProfileRepository profileRepository, ShopRepository shopRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.cloudinaryUpload = cloudinaryUpload;
         this.roleRepository = roleRepository;
         this.profileRepository = profileRepository;
+        this.shopRepository = shopRepository;
     }
     public void create(UserCreateDTO userCreateDTO) throws IOException {
         User user = new User();
@@ -170,5 +181,80 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
+    public List<CountByDateDTO> getUserCountByDayAndStatus(LocalDate startDate, LocalDate endDate, Status status) {
+        LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+        List<Object[]> results = userRepository.countUsersByDayAndStatus(startDateTime, endDateTime, status);
 
+        List<CountByDateDTO> countByDateDTOS = new ArrayList<>();
+        for (Object[] result : results) {
+            CountByDateDTO countByDateDTO = new CountByDateDTO();
+            countByDateDTO.setDate((LocalDateTime) result[0]);
+            countByDateDTO.setCount((Long) result[1]);
+            countByDateDTOS.add(countByDateDTO);
+        }
+        return countByDateDTOS;
+    }
+
+    public List<CountByDateDTO> getUserCountByMonthAndStatus(LocalDate startDate, LocalDate endDate, Status status) {
+
+        LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+        List<Object[]> results = userRepository.countUsersByMonthAndStatus(startDateTime, endDateTime, status);
+        List<CountByDateDTO> countByDateDTOS = new ArrayList<>();
+        for (Object[] result : results) {
+            CountByDateDTO countByDateDTO = new CountByDateDTO();
+            countByDateDTO.setDate((LocalDateTime) result[0]);
+            countByDateDTO.setCount((Long) result[1]);
+            countByDateDTOS.add(countByDateDTO);
+        }
+        return countByDateDTOS;
+    }
+
+    public List<CountByDateDTO> getUserCountByYearAndStatus(LocalDate startDate, LocalDate endDate, Status status) {
+        LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+        List<Object[]> results = userRepository.countUsersByYearAndStatus(startDateTime, endDateTime, status);
+
+        List<CountByDateDTO> countByDateDTOS = new ArrayList<>();
+        for (Object[] result : results) {
+            CountByDateDTO countByDateDTO = new CountByDateDTO();
+            countByDateDTO.setDate((LocalDateTime) result[0]);
+            countByDateDTO.setCount((Long) result[1]);
+            countByDateDTOS.add(countByDateDTO);
+        }
+        return countByDateDTOS;
+    }
+
+    public long countUsersAreShipper() {
+        return userRepository.countUsersAreShipper();
+    }
+    public long countUsersHaveShop() {
+        return userRepository.countUsersHaveShop();
+    }
+    public long countPendingShipper() {
+        return userRepository.countPendingShipper();
+    }
+    public long countAllUser() {
+        return userRepository.countAllUser();
+    }
+
+    @Override
+    public String hasShop(Long id) {
+        User user=userRepository.findById(id).orElse(null);
+        Shop shop=shopRepository.findByOwnerId(user.getId()).orElse(null);
+        if (shop!=null&&shop.getIsActive().equals(Status.PENDING)) {
+            String pending="pending";
+            return  pending;
+        }
+        if (shop!=null&&shop.getIsActive().equals(Status.ACTIVE)) {
+            String active="active";
+            return active;
+        }
+        if (shop!=null&&shop.getIsActive().equals(Status.INACTIVE)) {
+            String inactive="inactive";
+            return inactive;
+        }
+        return null;
+    }
 }
