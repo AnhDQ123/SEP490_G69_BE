@@ -339,13 +339,20 @@ public class ShopServiceImpl implements ShopService {
         // Chuyển đổi kết quả thành Map với tháng là key và số lượng shop là value
         for (Object[] result : results) {
             CountByMonthDTO countByMonthDTO = new CountByMonthDTO();
-            countByMonthDTO.setMonth((Integer) result[1]);
-            if (result[1] instanceof Long) {
+            int month = (Integer) result[1];
+            int year = startDate.getYear();  // Assuming all results are within the same year
+
+            // Format month to yyyy/MM
+            String formattedMonth = String.format("%d/%02d", year, month); // Example: 2025/03
+            countByMonthDTO.setMonth(formattedMonth);
+
+            if (result[0] instanceof Long) {
                 countByMonthDTO.setCount((Long) result[0]);
             } else {
-                // Xử lý trường hợp không phải Long
-                countByMonthDTO.setCount(((Integer) result[1]).longValue());
+                // Handle the case when it's not a Long type
+                countByMonthDTO.setCount(((Integer) result[0]).longValue());
             }
+
             countByMonthDTOS.add(countByMonthDTO);
         }
 
@@ -354,21 +361,21 @@ public class ShopServiceImpl implements ShopService {
 
     // Đếm số lượng shop theo trạng thái và năm
     public List<CountByMonthDTO> getShopCountByYear(Status status, LocalDate startDate, LocalDate endDate) {
-        LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
-        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
-        List<Object[]> results = shopRepository.countShopsByStatusAndYear(status, startDateTime, endDateTime);
+//        LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
+//        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+//        List<Object[]> results = shopRepository.countShopsByStatusAndYear(status, startDateTime, endDateTime);
+//
+//        List<CountByMonthDTO> countByMonthDTOS = new ArrayList<>();
+//
+//        // Chuyển đổi kết quả thành Map với tháng là key và số lượng shop là value
+//        for (Object[] result : results) {
+//            CountByMonthDTO countByMonthDTO = new CountByMonthDTO();
+//            countByMonthDTO.setMonth((Integer) result[1]);
+//            countByMonthDTO.setCount((Long) result[0]);
+//            countByMonthDTOS.add(countByMonthDTO);
+//        }
 
-        List<CountByMonthDTO> countByMonthDTOS = new ArrayList<>();
-
-        // Chuyển đổi kết quả thành Map với tháng là key và số lượng shop là value
-        for (Object[] result : results) {
-            CountByMonthDTO countByMonthDTO = new CountByMonthDTO();
-            countByMonthDTO.setMonth((Integer) result[1]);
-            countByMonthDTO.setCount((Long) result[0]);
-            countByMonthDTOS.add(countByMonthDTO);
-        }
-
-        return countByMonthDTOS;
+        return null;
     }
 
     public List<CountByDateDTO> getShopCountByDayAndStatus(Status status, LocalDate startDate, LocalDate endDate) {

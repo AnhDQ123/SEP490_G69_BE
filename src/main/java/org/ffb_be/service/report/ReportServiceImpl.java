@@ -190,34 +190,41 @@ public class ReportServiceImpl implements ReportService {
         // Chuyển đổi kết quả thành Map với tháng là key và số lượng shop là value
         for (Object[] result : results) {
             CountByMonthDTO countByMonthDTO = new CountByMonthDTO();
-            countByMonthDTO.setMonth((Integer) result[0]);
-            if (result[1] instanceof Long) {
-                countByMonthDTO.setCount((Long) result[1]);
+            int month = (Integer) result[1];
+            int year = startDate.getYear();  // Assuming all results are within the same year
+
+            // Format month to yyyy/MM
+            String formattedMonth = String.format("%d/%02d", year, month); // Example: 2025/03
+            countByMonthDTO.setMonth(formattedMonth);
+
+            if (result[0] instanceof Long) {
+                countByMonthDTO.setCount((Long) result[0]);
             } else {
-                // Xử lý trường hợp không phải Long
-                countByMonthDTO.setCount(((Integer) result[1]).longValue());
+                // Handle the case when it's not a Long type
+                countByMonthDTO.setCount(((Integer) result[0]).longValue());
             }
+
             countByMonthDTOS.add(countByMonthDTO);
         }
 
         return countByMonthDTOS;
     }
     public List<CountByMonthDTO> getReportCountByYear(ReportStatus status, LocalDate startDate, LocalDate endDate,Long type) {
-        LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
-        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
-        List<Object[]> results = reportRepository.countReportsByStatusAndTypeIdAndYear(status, startDateTime, endDateTime,type);
+//        LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
+//        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+//        List<Object[]> results = reportRepository.countReportsByStatusAndTypeIdAndYear(status, startDateTime, endDateTime,type);
+//
+//        List<CountByMonthDTO> countByMonthDTOS = new ArrayList<>();
+//
+//        // Chuyển đổi kết quả thành Map với tháng là key và số lượng shop là value
+//        for (Object[] result : results) {
+//            CountByMonthDTO countByMonthDTO = new CountByMonthDTO();
+//            countByMonthDTO.setMonth((Integer) result[0]);
+//            countByMonthDTO.setCount((Long) result[1]);
+//            countByMonthDTOS.add(countByMonthDTO);
+//        }
 
-        List<CountByMonthDTO> countByMonthDTOS = new ArrayList<>();
-
-        // Chuyển đổi kết quả thành Map với tháng là key và số lượng shop là value
-        for (Object[] result : results) {
-            CountByMonthDTO countByMonthDTO = new CountByMonthDTO();
-            countByMonthDTO.setMonth((Integer) result[0]);
-            countByMonthDTO.setCount((Long) result[1]);
-            countByMonthDTOS.add(countByMonthDTO);
-        }
-
-        return countByMonthDTOS;
+        return null;
     }
     public Long countAllReports() {
         return reportRepository.countAllReports();
