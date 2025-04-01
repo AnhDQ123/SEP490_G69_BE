@@ -2,6 +2,7 @@ package org.ffb_be.repository;
 
 import jakarta.transaction.Transactional;
 import org.ffb_be.entity.Image;
+import org.ffb_be.utils.enums.Status;
 import org.ffb_be.utils.enums.TypesCategory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -41,4 +42,8 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
     List<Image> findAllByType_Id(Long typeId);
 
     List<Image> findAllByRelatedIdAndType_Id(Long relatedId, Long typeId);
+
+    List<Image> findAllByStatus(Status status);
+
+    List<Image> findAllByStatusAndType_Id(Status status, Long typeId);
 }

@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.ffb_be.dto.CountDTOBy.CountByDateDTO;
 import org.ffb_be.dto.CountDTOBy.CountByMonthDTO;
 import org.ffb_be.dto.CountDTOBy.CountByYearDTO;
+import org.ffb_be.dto.banner.BannerDTO;
 import org.ffb_be.dto.shop.ShopDTO;
 import org.ffb_be.dto.shop.ShopRegisterDTO;
 import org.ffb_be.service.order.OrderService;
@@ -232,5 +233,23 @@ public class ShopController {
         LocalDate startDate = endDate.minusYears(3);
 
         return orderService.countShopOrdersByStatusAndYear(status1, startDate, endDate, shopId);
+    }
+    @PutMapping("/rate")
+    public void rateShop(@RequestParam("shopId") Long shopId,
+                         @RequestParam("rate") Double newRate){
+        shopService.rateShop(shopId, newRate);
+    }
+    @PostMapping("/banner/upload")
+    public void uploadBanner(@RequestParam("shopId") Long shopId,
+                            @RequestParam("file") MultipartFile file) throws IOException {
+        shopService.uploadBanner(shopId,file);
+    }
+    @GetMapping("/banner/shop")
+    public List<BannerDTO> viewBannerByShop(@RequestParam("shopId") Long shopId){
+        return shopService.viewBannerByShop(shopId);
+    }
+    @GetMapping("/banner/homepage")
+    public List<BannerDTO> viewHomePageBanner(){
+        return shopService.homePageBanner();
     }
 }

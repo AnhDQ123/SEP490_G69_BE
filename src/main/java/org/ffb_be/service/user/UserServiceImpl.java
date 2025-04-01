@@ -103,7 +103,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ProfileDTO findById(Long id) {
-        Profile profile = profileRepository.findById(id).orElse(null);
+        Profile profile = profileRepository.findByUserId2(id).orElse(null);
         ProfileDTO profileDTO = new ProfileDTO();
         profileDTO.setStatus(userRepository.findById(id).get().getStatus());
         profileDTO.setEmail(userRepository.findById(id).get().getEmail());

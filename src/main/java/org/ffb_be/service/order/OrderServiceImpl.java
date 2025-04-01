@@ -308,6 +308,11 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public Page<OrderDTO> findAllByShopAndPending(Long id, Pageable pageable) {
+        Page<Order> orderList=orderRepository.findOrdersByShopIdAndStatus(id, OrderStatus.PENDING,pageable);
+        return toDTO(orderList,pageable);
+    }
+    @Override
     public void acceptOrder(Long id) {
         Order order=orderRepository.findById(id).get();
         order.setStatus(OrderStatus.PROCESSING);
@@ -641,6 +646,8 @@ public class OrderServiceImpl implements OrderService {
         }
         return shopRevenue;
     }
+
+
 
     // Tính tổng doanh thu theo tháng
     public Map<String, Double> calculateShopRevenueByMonth(LocalDate startDate, LocalDate endDate, Long shopId) {

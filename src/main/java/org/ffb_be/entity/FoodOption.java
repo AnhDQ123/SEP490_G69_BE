@@ -41,9 +41,9 @@ public class FoodOption extends BaseEntity {
     @JoinColumn(name = "type_id")
     private Types type;
 
-    @OneToMany(mappedBy = "FoodOption")
+    @OneToMany(mappedBy = "foodOption")
     private List<CartItemOption> cartItemOptions;
 
-    @OneToMany(mappedBy = "FoodOption")
+    @OneToMany(mappedBy = "foodOption")
     private List<OrderItemOption> orderItemOptions;
 }

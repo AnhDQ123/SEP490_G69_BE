@@ -14,4 +14,5 @@ public class ProductCreateDTO {
     private List<FoodOptionDTO> foodOption;
     private String supplier;
     private String manufacturer;
+    private String foodType;
 }

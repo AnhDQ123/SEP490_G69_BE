@@ -55,4 +55,5 @@ public interface OrderService {
     Map<Integer, Double> calculateShopRevenueByYear(LocalDate startDate, LocalDate endDate, Long shopId);
     Map<String, Double> calculateShopRevenueByMonth(LocalDate startDate, LocalDate endDate, Long shopId);
     Map<Long, Double> calculateShopRevenueByDay(LocalDate startDate, LocalDate endDate, Long shopId);
+    Page<OrderDTO> findAllByShopAndPending(Long id,Pageable pageable);
 }
