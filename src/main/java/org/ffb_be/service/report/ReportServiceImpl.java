@@ -192,26 +192,29 @@ public class ReportServiceImpl implements ReportService {
             CountByMonthDTO countByMonthDTO = new CountByMonthDTO();
             int month = (Integer) result[1];
 
-            // Dynamically calculate the year based on the month and the startDate
+            // Lấy năm từ startDate
             int year = startDate.getYear();
+
+            // Nếu tháng trong kết quả nhỏ hơn tháng của startDate, tăng năm
             if (month < startDate.getMonthValue()) {
-                year += 1; // If the month is before the start date month, increment the year
+                year += 1; // Tháng này thuộc năm sau
             }
 
-            // Format month to yyyy/MM
-            String formattedMonth = String.format("%d/%02d", year, month); // Example: 2025/03
+            // Định dạng tháng theo định dạng yyyy/MM
+            String formattedMonth = String.format("%d/%02d", year, month); // Ví dụ: 2025/03
             countByMonthDTO.setMonth(formattedMonth);
 
+            // Kiểm tra kiểu dữ liệu và gán số lượng
             if (result[0] instanceof Long) {
                 countByMonthDTO.setCount((Long) result[0]);
             } else {
-                // Handle the case when it's not a Long type
+                // Nếu không phải kiểu Long, chuyển thành long
                 countByMonthDTO.setCount(((Integer) result[0]).longValue());
             }
 
+            // Thêm vào danh sách kết quả
             countByMonthDTOS.add(countByMonthDTO);
         }
-
         return countByMonthDTOS;
     }
     public List<CountByMonthDTO> getReportCountByYear(ReportStatus status, LocalDate startDate, LocalDate endDate,Long type) {
