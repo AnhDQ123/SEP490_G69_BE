@@ -130,7 +130,7 @@ class BlogServiceImpl implements BlogService {
         List<Image> newImages = imageUrls.stream()
                 .filter(url -> !existingUrls.contains(url)) // Chỉ thêm ảnh chưa có
                 .limit(5)
-                .map(url -> new Image(null, url, blogType, blog.getWriter().getId() ,blogId))
+                .map(url -> new Image(null, url, blogType, blog.getWriter().getId(), blogId, Status.ACTIVE))
                 .collect(Collectors.toList());
 
         if (!newImages.isEmpty()) {
