@@ -8,6 +8,7 @@ import org.ffb_be.dto.shop.ShopDTO;
 import org.ffb_be.dto.shop.ShopRegisterDTO;
 import org.ffb_be.service.order.OrderService;
 import org.ffb_be.service.shop.ShopService;
+import org.ffb_be.utils.enums.OrderStatus;
 import org.ffb_be.utils.enums.Status;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -200,41 +201,36 @@ public class ShopController {
     @GetMapping("/count/order/day")
     public List<Object[]> countOrdersByStatusAndDay(
             @RequestParam("status") String status,
-            @RequestParam("startDate") String startDate,
-            @RequestParam("endDate") String endDate,
             @RequestParam("shopId") Long shopId) {
 
-        LocalDate start = LocalDate.parse(startDate);
-        LocalDate end = LocalDate.parse(endDate);
+        OrderStatus status1=OrderStatus.valueOf(status);
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusDays(7);
 
-        return orderService.countShopOrdersByStatusAndDay(status, start, end, shopId);
+        return orderService.countShopOrdersByStatusAndDay(status1, startDate, endDate, shopId);
     }
 
     // API để đếm số lượng đơn hàng theo tháng cho cửa hàng cụ thể
     @GetMapping("/count/order/month")
     public List<Object[]> countOrdersByStatusAndMonth(
             @RequestParam("status") String status,
-            @RequestParam("startDate") String startDate,
-            @RequestParam("endDate") String endDate,
             @RequestParam("shopId") Long shopId) {
+        OrderStatus status1=OrderStatus.valueOf(status);
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusMonths(7);
 
-        LocalDate start = LocalDate.parse(startDate);
-        LocalDate end = LocalDate.parse(endDate);
-
-        return orderService.countShopOrdersByStatusAndMonth(status, start, end, shopId);
+        return orderService.countShopOrdersByStatusAndMonth(status1, startDate, endDate, shopId);
     }
 
     // API để đếm số lượng đơn hàng theo năm cho cửa hàng cụ thể
     @GetMapping("/count/order/year")
     public List<Object[]> countOrdersByStatusAndYear(
             @RequestParam("status") String status,
-            @RequestParam("startDate") String startDate,
-            @RequestParam("endDate") String endDate,
             @RequestParam("shopId") Long shopId) {
+        OrderStatus status1=OrderStatus.valueOf(status);
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusYears(3);
 
-        LocalDate start = LocalDate.parse(startDate);
-        LocalDate end = LocalDate.parse(endDate);
-
-        return orderService.countShopOrdersByStatusAndYear(status, start, end, shopId);
+        return orderService.countShopOrdersByStatusAndYear(status1, startDate, endDate, shopId);
     }
 }
