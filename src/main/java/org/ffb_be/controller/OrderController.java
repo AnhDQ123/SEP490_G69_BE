@@ -100,6 +100,10 @@ public class OrderController {
     public ResponseEntity<?> findByShopStatus(@RequestParam Long id ,@RequestParam OrderStatus status, Pageable pageable) throws IOException {
         return ResponseEntity.ok(orderService.findAllByShopAndStatus(id,status,pageable));
     }
+    @GetMapping("/shop/pending")
+    public ResponseEntity<?> findByShopPending(@RequestParam Long id , Pageable pageable) throws IOException {
+        return ResponseEntity.ok(orderService.findAllByShopAndPending( id, pageable));
+    }
 
     @GetMapping("/shipper")
     public ResponseEntity<?> findByShipper(@RequestParam Long id, Pageable pageable) throws IOException {

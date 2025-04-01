@@ -13,9 +13,7 @@ import org.ffb_be.utils.enums.TypesCategory;
 import org.ffb_be.utils.enums.upload.CloudinaryUpload;
 import org.ffb_be.utils.mapping.BlogMapper;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -130,7 +128,7 @@ class BlogServiceImpl implements BlogService {
         List<Image> newImages = imageUrls.stream()
                 .filter(url -> !existingUrls.contains(url)) // Chỉ thêm ảnh chưa có
                 .limit(5)
-                .map(url -> new Image(null, url, blogType, blog.getWriter().getId() ,blogId))
+                .map(url -> new Image(null, url, blogType, blog.getWriter().getId(), blogId, Status.ACTIVE))
                 .collect(Collectors.toList());
 
         if (!newImages.isEmpty()) {

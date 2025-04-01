@@ -6,22 +6,18 @@ import org.ffb_be.dto.CountDTOBy.CountByMonthDTO;
 import org.ffb_be.dto.CountDTOBy.CountByYearDTO;
 import org.ffb_be.dto.auth.ProfileDto.BusinessProfileDTO;
 import org.ffb_be.dto.auth.userDto.OwnerDTO;
+import org.ffb_be.dto.banner.BannerDTO;
 import org.ffb_be.dto.shop.ShopDTO;
 import org.ffb_be.dto.shop.ShopRegisterDTO;
-import org.ffb_be.entity.Profile;
-import org.ffb_be.entity.Role;
-import org.ffb_be.entity.Shop;
-import org.ffb_be.entity.User;
+import org.ffb_be.entity.*;
 import org.ffb_be.exception.BadRequestException;
 import org.ffb_be.exception.NotFoundException;
-import org.ffb_be.repository.ProfileRepository;
-import org.ffb_be.repository.RoleRepository;
-import org.ffb_be.repository.ShopRepository;
-import org.ffb_be.repository.UserRepository;
+import org.ffb_be.repository.*;
 import org.ffb_be.utils.EncryptUtil;
 import org.ffb_be.utils.enums.Status;
 import org.ffb_be.utils.enums.upload.CloudinaryUpload;
 import org.ffb_be.utils.mapping.ShopMapper;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -35,8 +31,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+
 
 @Service
 @Transactional
@@ -49,7 +44,8 @@ public class ShopServiceImpl implements ShopService {
     private final CloudinaryUpload cloudinaryUpload;
     private final EncryptUtil encryptUtil;
     private final RoleRepository roleRepository;
-
+    private final TypesRepository typesRepository;
+    private final ImageRepository imageRepository;
     @Override
     public Page<ShopDTO> getShops(String type, String status, String search, Pageable pageable) {
         Specification<Shop> spec = Specification.where(null);
@@ -404,4 +400,56 @@ public class ShopServiceImpl implements ShopService {
     public long countPendingShop() {
         return shopRepository.countPendingShop();
     }
+
+    @Override
+    public void rateShop(Long shopId,Double newRate) {
+        Shop shop = shopRepository.findById(shopId).get();
+        shop.setRate((shop.getRate()*shop.getViewCount()+newRate)/(shop.getViewCount()+1));
+        shop.setViewCount(shop.getViewCount() + 1);
+        shopRepository.save(shop);
+    }
+
+    @Override
+    public void uploadBanner(Long shopId, MultipartFile banner) throws IOException {
+        Shop shop=shopRepository.findById(shopId).get();
+        Image image=new Image();
+        String url = cloudinaryUpload.uploadFile(banner);
+        image.setUrl(url);
+        image.setRelatedId(shop.getId());
+        image.setOwnerId(shop.getOwner().getId());
+        image.setType(typesRepository.findById(8L).get());
+        imageRepository.save(image);
+    }
+
+    @Override
+    public List<BannerDTO> viewBannerByShop(Long shopId) {
+        List<Image> images=imageRepository.findAllByRelatedIdAndType_Id(shopId,8L);
+        List<BannerDTO> bannerDTOS=new ArrayList<>();
+        for (Image image : images) {
+            BannerDTO bannerDTO=new BannerDTO();
+            bannerDTO.setUrl(image.getUrl());
+            bannerDTO.setBannerId(image.getId());
+            bannerDTO.setShopId(shopId);
+            bannerDTO.setStatus(image.getStatus().toString());
+            bannerDTOS.add(bannerDTO);
+        }
+        return bannerDTOS;
+    }
+
+    @Override
+    public List<BannerDTO> homePageBanner() {
+        List<Image> images=imageRepository.findAllByStatusAndType_Id(Status.ACTIVE,8L);
+        List<BannerDTO> bannerDTOS=new ArrayList<>();
+        for (Image image : images) {
+            BannerDTO bannerDTO=new BannerDTO();
+            bannerDTO.setUrl(image.getUrl());
+            bannerDTO.setBannerId(image.getId());
+            bannerDTO.setShopId(image.getRelatedId());
+            bannerDTO.setStatus(image.getStatus().toString());
+            bannerDTOS.add(bannerDTO);
+        }
+        return bannerDTOS;
+    }
+
+
 }

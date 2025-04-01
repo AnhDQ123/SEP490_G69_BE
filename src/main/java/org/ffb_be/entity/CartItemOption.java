@@ -32,5 +32,5 @@ public class CartItemOption extends BaseEntity{
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "food_option_id")
-    private FoodOption FoodOption;
+    private FoodOption foodOption;
 }

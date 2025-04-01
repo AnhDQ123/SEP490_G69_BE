@@ -3,9 +3,7 @@ package org.ffb_be.service.cart;
 import org.ffb_be.dto.cart.CartDTO;
 import org.ffb_be.dto.cart.CartItemDTO;
 import org.ffb_be.dto.cart.CartItemOptionDTO;
-import org.ffb_be.entity.Cart;
-import org.ffb_be.entity.CartItem;
-import org.ffb_be.entity.CartItemOption;
+import org.ffb_be.entity.*;
 import org.ffb_be.repository.*;
 import org.ffb_be.utils.enums.CartStatus;
 import org.springframework.stereotype.Service;
@@ -198,6 +196,20 @@ public class CartServiceImpl implements CartService {
             }
             cartDTO.setCartItemDTOList(cartItemDTOList);
         return cartDTO;
+    }
+
+    @Override
+    public void deleteItemFromCart(Long cartId, Long id) {
+        Product product=productRepository.findById(cartId).get();
+        CartItem cartItem=cartItemRepository.findByProduct(product);
+        cartItemRepository.delete(cartItem);
+
+    }
+
+    @Override
+    public void deleteOptionFromCart(Long cartId, Long optionId) {
+        CartItemOption cartItemOption=cartItemOptionRepository.findByCartItem_IdAndFoodOption_Id(cartId,optionId);
+        cartItemOptionRepository.delete(cartItemOption);
     }
 
 

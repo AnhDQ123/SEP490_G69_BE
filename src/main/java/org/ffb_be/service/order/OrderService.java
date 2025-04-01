@@ -49,10 +49,11 @@ public interface OrderService {
     List<TopProductDTO> getTopSellingProductsThisYear();
     List<TopProductDTO> getTopSellingProductsToday();
     Long countAllOrders();
-    List<Object[]> countShopOrdersByStatusAndYear(String status, LocalDate startDate, LocalDate endDate, Long shopId);
-    List<Object[]> countShopOrdersByStatusAndMonth(String status, LocalDate startDate, LocalDate endDate, Long shopId);
-    List<Object[]> countShopOrdersByStatusAndDay(String status, LocalDate startDate, LocalDate endDate, Long shopId);
+    List<Object[]> countShopOrdersByStatusAndYear(OrderStatus status, LocalDate startDate, LocalDate endDate, Long shopId);
+    List<Object[]> countShopOrdersByStatusAndMonth(OrderStatus status, LocalDate startDate, LocalDate endDate, Long shopId);
+    List<Object[]> countShopOrdersByStatusAndDay(OrderStatus status, LocalDate startDate, LocalDate endDate, Long shopId);
     Map<Integer, Double> calculateShopRevenueByYear(LocalDate startDate, LocalDate endDate, Long shopId);
     Map<String, Double> calculateShopRevenueByMonth(LocalDate startDate, LocalDate endDate, Long shopId);
     Map<Long, Double> calculateShopRevenueByDay(LocalDate startDate, LocalDate endDate, Long shopId);
+    Page<OrderDTO> findAllByShopAndPending(Long id,Pageable pageable);
 }

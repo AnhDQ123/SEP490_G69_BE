@@ -130,4 +130,9 @@ public class ProductController {
     public List<Object[]> findTopSellingProductsThisYear(@RequestParam("shopId") Long shopId) {
         return productService.findTopSellingProductsThisYear(shopId);
     }
+
+    @GetMapping("/shop/drink")
+    public ResponseEntity<?> getDrinkByShop(@RequestParam("shopId") Long shopId) {
+        return ResponseEntity.ok( productService.findByCategoryByShop(shopId));
+    }
 }
