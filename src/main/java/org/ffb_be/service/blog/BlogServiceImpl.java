@@ -13,9 +13,7 @@ import org.ffb_be.utils.enums.TypesCategory;
 import org.ffb_be.utils.enums.upload.CloudinaryUpload;
 import org.ffb_be.utils.mapping.BlogMapper;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -171,5 +169,19 @@ class BlogServiceImpl implements BlogService {
         commentRepository.deleteByBlogId(id);
         imageRepository.deleteByBlogId(id);
         blogRepository.deleteById(id);
+    }
+
+    @Override
+    public void blogStatusUpdate(Long id, Status status, String reason) {
+        Blog blog = blogRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Blog"));
+        if (status == Status.ACTIVE) {
+            blog.setReason(null);
+        }
+        if (status == Status.INACTIVE) {
+            blog.setReason(reason);
+        }
+        blog.setStatus(status);
+        blogRepository.save(blog);
     }
 }
