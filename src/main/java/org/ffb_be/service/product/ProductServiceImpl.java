@@ -13,6 +13,7 @@ import org.ffb_be.entity.*;
 import org.ffb_be.repository.*;
 
 import org.ffb_be.utils.enums.SellType;
+import org.ffb_be.utils.enums.Status;
 import org.ffb_be.utils.enums.upload.CloudinaryUpload;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
@@ -268,6 +269,22 @@ public class ProductServiceImpl implements ProductService {
             BeanUtils.copyProperties(product, productResponseDTO);
             productResponseDTO.setDescription(product.getDescription());
             productResponseDTO.setFoodType(product.getType().toString());
+            BigDecimal defaultprice = null;
+            List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product);
+            for (FoodOption foodOption : foodOptions) {
+                if (foodOption.getType().getId() == 2) {
+                    if (defaultprice == null || foodOption.getPrice().compareTo(defaultprice) < 0) {
+                        defaultprice = foodOption.getPrice();
+                    }
+                }
+            }
+            List<FoodOptionDTO> foodOptionDTOs = new ArrayList<>();
+            for (FoodOption foodOption : foodOptions) {
+                FoodOptionDTO dto = new FoodOptionDTO();
+                dto.setType_id(foodOption.getType().getId());
+                BeanUtils.copyProperties(foodOption, dto);
+                foodOptionDTOs.add(dto);
+            }
             productResponseDTO.setShopName(product.getShop().getName());
             List<Discount> discount=discountRepository.findAllByProduct_Id((product.getId()));
             if(discount!=null) {
@@ -279,13 +296,18 @@ public class ProductServiceImpl implements ProductService {
                     discountDTO.setStartDate(discount1.getStartDate());
                     discountDTO.setEndDate(discount1.getEndDate());
                     discountDTO.setStatus(discount1.getStatus().toString());
-
                     discountDTOs.add(discountDTO);
                 }
                 productResponseDTO.setDiscount(discountDTOs);
             }else {
                 productResponseDTO.setDiscount(null);
             }
+            for(Discount discount1:discount){
+                if(discount1.getStatus().equals(Status.ACTIVE)){
+                    defaultprice=defaultprice.multiply(discount1.getDiscount_percentage());
+                }
+            }
+            productResponseDTO.setDefaultPrice(defaultprice);
             productResponseDTO.setCategory(product.getCategory().getName());
             productResponseDTOList.add(productResponseDTO);
         }
@@ -296,7 +318,18 @@ public class ProductServiceImpl implements ProductService {
     public ProductResponseDTO findById(Long id) {
         Product product = productRepository.findById(id).get();
         ProductResponseDTO productResponseDTO = new ProductResponseDTO();
+        BeanUtils.copyProperties(product, productResponseDTO);
+        productResponseDTO.setDescription(product.getDescription());
+        productResponseDTO.setFoodType(product.getType().toString());
+        BigDecimal defaultprice = null;
         List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product);
+        for (FoodOption foodOption : foodOptions) {
+            if (foodOption.getType().getId() == 2) {
+                if (defaultprice == null || foodOption.getPrice().compareTo(defaultprice) < 0) {
+                    defaultprice = foodOption.getPrice();
+                }
+            }
+        }
         List<FoodOptionDTO> foodOptionDTOs = new ArrayList<>();
         for (FoodOption foodOption : foodOptions) {
             FoodOptionDTO dto = new FoodOptionDTO();
@@ -304,16 +337,12 @@ public class ProductServiceImpl implements ProductService {
             BeanUtils.copyProperties(foodOption, dto);
             foodOptionDTOs.add(dto);
         }
-        BeanUtils.copyProperties(product, productResponseDTO);
-        productResponseDTO.setDescription(product.getDescription());
-        productResponseDTO.setFoodType(product.getType().toString());
         productResponseDTO.setShopName(product.getShop().getName());
-        productResponseDTO.setShopId(product.getShop().getId());
         List<Discount> discount=discountRepository.findAllByProduct_Id((product.getId()));
         if(discount!=null) {
             List<DiscountDTO2> discountDTOs=new ArrayList<>();
             for (Discount discount1:discount) {
-                DiscountDTO2 discountDTO=new DiscountDTO2();
+                DiscountDTO2 discountDTO=new DiscountDTO2();;
                 discountDTO.setAmount(discount1.getDiscount_percentage());
                 discountDTO.setId(discount1.getId());
                 discountDTO.setStartDate(discount1.getStartDate());
@@ -325,6 +354,12 @@ public class ProductServiceImpl implements ProductService {
         }else {
             productResponseDTO.setDiscount(null);
         }
+        for(Discount discount1:discount){
+            if(discount1.getStatus().equals(Status.ACTIVE)){
+                defaultprice=defaultprice.multiply(discount1.getDiscount_percentage());
+            }
+        }
+        productResponseDTO.setDefaultPrice(defaultprice);
         Optional<Category> c=categoryRepository.findById(product.getCategory().getId());
         Category category = c.get();
         productResponseDTO.setFoodOption(foodOptionDTOs);
@@ -371,11 +406,28 @@ public class ProductServiceImpl implements ProductService {
     public Page<ProductResponseDTO> findAll(Pageable pageable) {
         return productRepository.findAll(pageable).map(product -> {
             ProductResponseDTO productResponseDTO = new ProductResponseDTO();
+            List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product);
+            BigDecimal defaultprice = null;
+            for (FoodOption foodOption : foodOptions) {
+                if (foodOption.getType().getId() == 2) {
+                    if (defaultprice == null || foodOption.getPrice().compareTo(defaultprice) < 0) {
+                        defaultprice = foodOption.getPrice();
+                    }
+                }
+            }
+            List<FoodOptionDTO> foodOptionDTOs = new ArrayList<>();
+            for (FoodOption foodOption : foodOptions) {
+                FoodOptionDTO dto = new FoodOptionDTO();
+                dto.setType_id(foodOption.getType().getId());
+                BeanUtils.copyProperties(foodOption, dto);
+                foodOptionDTOs.add(dto);
+            }
+            productResponseDTO.setShopName(product.getShop().getName());
             List<Discount> discount=discountRepository.findAllByProduct_Id((product.getId()));
             if(discount!=null) {
                 List<DiscountDTO2> discountDTOs=new ArrayList<>();
                 for (Discount discount1:discount) {
-                    DiscountDTO2 discountDTO=new DiscountDTO2();
+                    DiscountDTO2 discountDTO=new DiscountDTO2();;
                     discountDTO.setAmount(discount1.getDiscount_percentage());
                     discountDTO.setId(discount1.getId());
                     discountDTO.setStartDate(discount1.getStartDate());
@@ -386,6 +438,11 @@ public class ProductServiceImpl implements ProductService {
                 productResponseDTO.setDiscount(discountDTOs);
             }else {
                 productResponseDTO.setDiscount(null);
+            }
+            for(Discount discount1:discount){
+                if(discount1.getStatus().equals(Status.ACTIVE)){
+                    defaultprice=defaultprice.multiply(discount1.getDiscount_percentage());
+                }
             }
             productResponseDTO.setCategory(product.getCategory().getName());
             productResponseDTO.setDescription(product.getDescription());
