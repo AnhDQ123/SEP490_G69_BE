@@ -21,8 +21,8 @@ public class FeedbackController {
 
     @GetMapping("/product/{id}")
     public ResponseEntity<?> getAllByProduct(@PathVariable Long id,
-                                             @RequestParam(value = "page", defaultValue = "1", required = false) Integer page,
-                                             @RequestParam(value = "size", defaultValue = "20", required = false) Integer size) {
+                                          @RequestParam(value = "page", defaultValue = "1", required = false) Integer page,
+                                          @RequestParam(value = "size", defaultValue = "20", required = false) Integer size) {
         Pageable pageable = PageRequest.of(page-1, size);
         return ResponseEntity.ok(feedbackService.findAll(id,pageable) );
     }
