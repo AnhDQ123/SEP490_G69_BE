@@ -160,9 +160,13 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public Page<ReportViewDTO> findAll( int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+    public Page<ReportViewDTO> findAllByStatus(ReportStatus status, Pageable pageable) {
+        Page<Report> reports = reportRepository.findAllByStatus(status,pageable);
+        return reports.map(this::convertToDTO);
+    }
 
+    @Override
+    public Page<ReportViewDTO> findAll(Pageable pageable) {
         Page<Report> reports = reportRepository.findAll(pageable);
         return reports.map(this::convertToDTO);
     }
@@ -240,5 +244,12 @@ public class ReportServiceImpl implements ReportService {
     }
     public Long countAllReports() {
         return reportRepository.countAllReports();
+    }
+
+    @Override
+    public void updateReportStatus(Long id, ReportStatus status) {
+        Report report=reportRepository.findById(id).get();
+        report.setStatus(status);
+        reportRepository.save(report);
     }
 }

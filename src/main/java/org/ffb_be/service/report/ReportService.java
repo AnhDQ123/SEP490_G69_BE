@@ -7,6 +7,7 @@ import org.ffb_be.dto.report.ReportCreateDTO;
 import org.ffb_be.dto.report.ReportViewDTO;
 import org.ffb_be.utils.enums.ReportStatus;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,10 +22,11 @@ public interface ReportService {
     ReportViewDTO viewReport(Long id);
     void addToReport(Long id,List<MultipartFile> option) throws IOException;
     Page<ReportViewDTO> findAllByShop(Long id,int page,int size);
-    Page<ReportViewDTO> findAll(int page,int size);
+    Page<ReportViewDTO> findAllByStatus(ReportStatus status, Pageable pageable);
+    Page<ReportViewDTO> findAll(Pageable pageable);
     List<CountByYearDTO > getReportCountByYear(ReportStatus status, LocalDate startDate, LocalDate endDate, Long type);
     List<CountByMonthDTO> getReportCountByMonth(ReportStatus status, LocalDate startDate, LocalDate endDate, Long type);
     List<CountByDateDTO> getReportCountByDay(ReportStatus status, LocalDate startDate, LocalDate endDate, Long type);
     Long countAllReports();
-
+    void updateReportStatus(Long id, ReportStatus status);
 }

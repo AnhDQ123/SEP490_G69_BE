@@ -3,6 +3,7 @@ package org.ffb_be.service.shop;
 import org.ffb_be.dto.CountDTOBy.CountByDateDTO;
 import org.ffb_be.dto.CountDTOBy.CountByMonthDTO;
 import org.ffb_be.dto.CountDTOBy.CountByYearDTO;
+import org.ffb_be.dto.banner.BannerDTO;
 import org.ffb_be.dto.shop.ShopDTO;
 import org.ffb_be.dto.shop.ShopRegisterDTO;
 import org.ffb_be.utils.enums.Status;
@@ -15,7 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
+
 
 public interface ShopService {
 
@@ -66,4 +67,8 @@ public interface ShopService {
     List<CountByMonthDTO> getShopCountByMonth(Status status, LocalDate startDate, LocalDate endDate);
     List<CountByDateDTO> getShopCountByDayAndStatus(Status status, LocalDate startDate, LocalDate endDate);
     long countPendingShop();
+    void rateShop(Long shopId,Double newRate);
+    void uploadBanner(Long shopId,MultipartFile image) throws IOException;
+    List<BannerDTO> viewBannerByShop(Long shopId);
+    List<BannerDTO> homePageBanner();
 }
