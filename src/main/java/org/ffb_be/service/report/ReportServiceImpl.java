@@ -197,8 +197,8 @@ public class ReportServiceImpl implements ReportService {
             CountByMonthDTO countByMonthDTO = new CountByMonthDTO();
 
             // Get the month and year from the query result
-            int month = (Integer) result[0]; // Month
-            int year = (Integer) result[1]; // Year
+            int month = (Integer) result[1]; // Month
+            int year = (Integer) result[0]; // Year
 
             // Format the month as yyyy/MM
             String formattedMonth = String.format("%d/%02d", year, month); // Example: 2025/03
