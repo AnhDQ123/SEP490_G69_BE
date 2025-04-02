@@ -312,6 +312,7 @@ public class OrderServiceImpl implements OrderService {
         Page<Order> orderList=orderRepository.findOrdersByShopIdAndStatus(id, OrderStatus.PENDING,pageable);
         return toDTO(orderList,pageable);
     }
+
     @Override
     public void acceptOrder(Long id) {
         Order order=orderRepository.findById(id).get();
