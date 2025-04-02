@@ -26,6 +26,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -618,9 +619,18 @@ public class OrderServiceImpl implements OrderService {
     }
 
     public List<Object[]> countShopOrdersByStatusAndDay(OrderStatus status, LocalDate startDate, LocalDate endDate, Long shopId) {
+        // Convert startDate and endDate to LocalDateTime for query parameters
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
-        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
-        return orderRepository.countShopOrdersByStatusAndDay(status, startDateTime, endDateTime, shopId);
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX); // 2023-01-01T23:59:59
+        List<Object[]> results = orderRepository.countShopOrdersByStatusAndDay(status, startDateTime, endDateTime, shopId);
+
+        // Convert the results to return LocalDate
+        return results.stream()
+                .map(result -> {
+                    LocalDate date = ((java.sql.Date) result[0]).toLocalDate(); // Convert java.sql.Date to LocalDate
+                    return new Object[]{date, result[1]};
+                })
+                .collect(Collectors.toList());
     }
     public List<Object[]> countShopOrdersByStatusAndMonth(OrderStatus status, LocalDate startDate, LocalDate endDate, Long shopId) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
