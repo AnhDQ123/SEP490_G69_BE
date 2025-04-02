@@ -135,8 +135,8 @@ public class ProductController {
     public ResponseEntity<?> getDrinkByShop(@RequestParam("shopId") Long shopId) {
         return ResponseEntity.ok( productService.findByCategoryByShop(shopId));
     }
-    @GetMapping("/search")
-    public List<ProductResponseDTO> searchProducts(@RequestParam String query) {
-        return productService.searchProducts(query); // Tìm kiếm sản phẩm theo từ khóa
-    }
+//    @GetMapping("/search")
+//    public List<ProductResponseDTO> searchProducts(@RequestParam String query) {
+//        return productService.searchProducts(query); // Tìm kiếm sản phẩm theo từ khóa
+//    }
 }

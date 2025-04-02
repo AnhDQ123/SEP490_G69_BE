@@ -7,11 +7,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.ffb_be.utils.enums.SellType;
 import org.ffb_be.utils.enums.Status;
-import org.springframework.data.elasticsearch.annotations.Document;
+//import org.springframework.data.elasticsearch.annotations.Document;
 
 import java.time.LocalDate;
 import java.util.List;
-@Document(indexName = "products")
+//@Document(indexName = "products")
 @Entity
 @Table(name = "products")
 @AllArgsConstructor
