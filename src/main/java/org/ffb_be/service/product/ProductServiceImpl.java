@@ -17,6 +17,7 @@ import org.ffb_be.utils.enums.Status;
 import org.ffb_be.utils.enums.upload.CloudinaryUpload;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,6 +40,7 @@ public class ProductServiceImpl implements ProductService {
     private final TypesRepository typesRepository;
     private final OrderRepository orderRepository;
     private final ShopRepository shopRepository;
+    private final ProductRepositoryElasticsearch  productRepositoryElasticsearch;
 
 
 @Override
@@ -52,6 +54,7 @@ public class ProductServiceImpl implements ProductService {
         product.setExpired_date(productCreateDTO.getExpiryDate());
         product.setQuantity(productCreateDTO.getQuantity());
         product.setManufacturer(productCreateDTO.getManufacturer());
+        product.setShop(shopRepository.findById(productCreateDTO.getShopId()).get());
         product.setSupplier(productCreateDTO.getSupplier());
         product.setCategory(category);
         product.setType(SellType.valueOf(productCreateDTO.getFoodType()));
@@ -485,4 +488,60 @@ public class ProductServiceImpl implements ProductService {
         }
         return productResponseDTOList2;
     }
+
+//    @Override
+//    public List<ProductResponseDTO> searchProducts(String query,int page,int size) {
+//        Pageable pageable = PageRequest.of(page-1, size);
+//        Page<Product> products=productRepositoryElasticsearch.searchByNameOrDescription(query,pageable);
+//        List<ProductResponseDTO> productResponseDTOList = new ArrayList<>();
+//
+//        for (Product product : products) {
+//            ProductResponseDTO productResponseDTO = new ProductResponseDTO();
+//            BeanUtils.copyProperties(product, productResponseDTO);
+//            productResponseDTO.setDescription(product.getDescription());
+//            productResponseDTO.setFoodType(product.getType().toString());
+//            BigDecimal defaultprice = null;
+//            List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product);
+//            for (FoodOption foodOption : foodOptions) {
+//                if (foodOption.getType().getId() == 2) {
+//                    if (defaultprice == null || foodOption.getPrice().compareTo(defaultprice) < 0) {
+//                        defaultprice = foodOption.getPrice();
+//                    }
+//                }
+//            }
+//            List<FoodOptionDTO> foodOptionDTOs = new ArrayList<>();
+//            for (FoodOption foodOption : foodOptions) {
+//                FoodOptionDTO dto = new FoodOptionDTO();
+//                dto.setType_id(foodOption.getType().getId());
+//                BeanUtils.copyProperties(foodOption, dto);
+//                foodOptionDTOs.add(dto);
+//            }
+//            productResponseDTO.setShopName(product.getShop().getName());
+//            List<Discount> discount=discountRepository.findAllByProduct_Id((product.getId()));
+//            if(discount!=null) {
+//                List<DiscountDTO2> discountDTOs=new ArrayList<>();
+//                for (Discount discount1:discount) {
+//                    DiscountDTO2 discountDTO=new DiscountDTO2();;
+//                    discountDTO.setAmount(discount1.getDiscount_percentage());
+//                    discountDTO.setId(discount1.getId());
+//                    discountDTO.setStartDate(discount1.getStartDate());
+//                    discountDTO.setEndDate(discount1.getEndDate());
+//                    discountDTO.setStatus(discount1.getStatus().toString());
+//                    discountDTOs.add(discountDTO);
+//                }
+//                productResponseDTO.setDiscount(discountDTOs);
+//            }else {
+//                productResponseDTO.setDiscount(null);
+//            }
+//            for(Discount discount1:discount){
+//                if(discount1.getStatus().equals(Status.ACTIVE)){
+//                    defaultprice=defaultprice.multiply(discount1.getDiscount_percentage());
+//                }
+//            }
+//            productResponseDTO.setDefaultPrice(defaultprice);
+//            productResponseDTO.setCategory(product.getCategory().getName());
+//            productResponseDTOList.add(productResponseDTO);
+//        }
+//        return productResponseDTOList;
+//    }
 }
