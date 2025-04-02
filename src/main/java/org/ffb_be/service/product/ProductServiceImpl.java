@@ -40,7 +40,7 @@ public class ProductServiceImpl implements ProductService {
     private final TypesRepository typesRepository;
     private final OrderRepository orderRepository;
     private final ShopRepository shopRepository;
-    private final ProductRepositoryElasticsearch  productRepositoryElasticsearch;
+//    private final ProductRepositoryElasticsearch  productRepositoryElasticsearch;
 
 
 @Override
@@ -58,6 +58,7 @@ public class ProductServiceImpl implements ProductService {
         product.setSupplier(productCreateDTO.getSupplier());
         product.setCategory(category);
         product.setType(SellType.valueOf(productCreateDTO.getFoodType()));
+        product.setStatus(Status.ACTIVE);
         if (avatar != null && !avatar.isEmpty()) {
             System.out.println("Uploading Avatar: " + avatar.getOriginalFilename());
             String url = cloudinaryUpload.uploadFile(avatar);
@@ -492,7 +493,7 @@ public class ProductServiceImpl implements ProductService {
 //    @Override
 //    public List<ProductResponseDTO> searchProducts(String query,int page,int size) {
 //        Pageable pageable = PageRequest.of(page-1, size);
-//        Page<Product> products=productRepositoryElasticsearch.searchByNameOrDescription(query,pageable);
+//        Page<Product> products=productRepositoryElasticsearch.findByNameContainingOrDescriptionContaining(query,query,pageable);
 //        List<ProductResponseDTO> productResponseDTOList = new ArrayList<>();
 //
 //        for (Product product : products) {
