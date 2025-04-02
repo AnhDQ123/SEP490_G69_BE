@@ -99,4 +99,10 @@ public class ReportController {
     public Long countAllPendingReports() {
         return reportService.countAllReports();
     }
+
+    @PutMapping("/update")
+    public void updateStatus( @RequestParam("status") String status,
+                              @RequestParam("id") Long id){
+        reportService.updateReportStatus(id, ReportStatus.valueOf(status));
+    }
 }

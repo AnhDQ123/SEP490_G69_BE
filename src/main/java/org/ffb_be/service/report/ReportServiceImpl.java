@@ -245,4 +245,11 @@ public class ReportServiceImpl implements ReportService {
     public Long countAllReports() {
         return reportRepository.countAllReports();
     }
+
+    @Override
+    public void updateReportStatus(Long id, ReportStatus status) {
+        Report report=reportRepository.findById(id).get();
+        report.setStatus(status);
+        reportRepository.save(report);
+    }
 }
