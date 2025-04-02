@@ -7,6 +7,8 @@ import org.ffb_be.entity.*;
 import org.ffb_be.repository.*;
 import org.ffb_be.utils.enums.CartStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -14,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class CartServiceImpl implements CartService {
@@ -35,90 +38,133 @@ public class CartServiceImpl implements CartService {
     }
 
 
+    @Transactional
     @Override
     public void save(CartDTO cartDTO) throws IOException {
-        // Nhóm sản phẩm theo Shop
         Map<Long, List<CartItemDTO>> shopCartItems = new HashMap<>();
 
+        // Nhóm các sản phẩm theo Shop
         for (CartItemDTO cartItemDTO : cartDTO.getCartItemDTOList()) {
             Long shopId = shopRepository.findByProduct(cartItemDTO.getProductId()).getId();
             shopCartItems.computeIfAbsent(shopId, k -> new ArrayList<>()).add(cartItemDTO);
         }
 
-        // Duyệt từng shop để tạo Cart riêng
         for (Map.Entry<Long, List<CartItemDTO>> entry : shopCartItems.entrySet()) {
-
+            Long shopId = entry.getKey();
             List<CartItemDTO> cartItemDTOList = entry.getValue();
 
-            // Tạo giỏ hàng mới cho từng shop
-            Cart cart = new Cart();
-            cart.setOwner(userRepository.findById(cartDTO.getUserId())
-                    .orElseThrow(() -> new RuntimeException("User not found")));
-            cart.setStatus(CartStatus.PENDING);
-            cart.setTotal(BigDecimal.ZERO);
-            cart.setCreatedAt(LocalDateTime.now());
-            cartRepository.save(cart); // Lưu Cart trước để có ID
+            // Lấy hoặc tạo Cart mới cho User và Shop
+            Cart cart = getOrCreateCart(cartDTO.getUserId(), shopId);
+            BigDecimal totalCartPrice = cart.getTotal() != null ? cart.getTotal() : BigDecimal.ZERO;
 
-            List<CartItem> cartItems = new ArrayList<>();
-            BigDecimal totalCartPrice = BigDecimal.ZERO;
-
-            // Duyệt qua từng CartItem của shop này
             for (CartItemDTO cartItemDTO : cartItemDTOList) {
-                CartItem item = new CartItem();
-                item.setCart(cart);
-                item.setQuantity(cartItemDTO.getQuantity());
-                item.setProduct(productRepository.findById(cartItemDTO.getProductId())
-                        .orElseThrow(() -> new RuntimeException("Product not found")));
-                item.setCreatedAt(LocalDateTime.now());
+                // Tìm CartItem đã có trong giỏ hàng
+                List<CartItem> existingItems = cartItemRepository
+                        .findAllByCartIdAndProductId(cart.getId(), cartItemDTO.getProductId());
 
-                // **Gán đầy đủ thông tin trước khi lưu**
-                cartItems.add(item);
-            }
+                // Danh sách optionId của sản phẩm đang thêm
+                List<Long> incomingOptionIds = cartItemDTO.getCartItemOptionDTOList()
+                        .stream()
+                        .map(CartItemOptionDTO::getOptionId)
+                        .sorted()
+                        .collect(Collectors.toList());
 
-            // **Lưu tất cả CartItems vào DB trước**
-            cartItemRepository.saveAll(cartItems);
+                CartItem matchedItem = null;
 
-            List<CartItemOption> cartItemOptions = new ArrayList<>();
-            for (CartItem item : cartItems) {
-                for (CartItemOptionDTO cartItemOptionDTO : cartItemDTOList
-                        .stream().filter(dto -> dto.getProductId().equals(item.getProduct().getId()))
-                        .findFirst().orElseThrow(() -> new RuntimeException("CartItemDTO not found"))
-                        .getCartItemOptionDTOList()) {
+                // Kiểm tra nếu có CartItem đã tồn tại với các option trùng khớp
+                for (CartItem existingItem : existingItems) {
+                    List<Long> existingOptionIds = cartItemOptionRepository
+                            .findAllByCartItemId(existingItem.getId())
+                            .stream()
+                            .map(o -> o.getFoodOption().getId())
+                            .sorted()
+                            .collect(Collectors.toList());
 
-                    CartItemOption cartItemOption = new CartItemOption();
+                    if (existingOptionIds.equals(incomingOptionIds)) {
+                        matchedItem = existingItem;
+                        break;
+                    }
+                }
 
-                    // Nếu typeId == 2 thì gán giá từ `FoodOption`
-                    if (cartItemOptionDTO.getTypeId() == 2) {
-                        BigDecimal unitPrice = foodOptionRepository.findById(cartItemOptionDTO.getOptionId())
-                                .orElseThrow(() -> new RuntimeException("Food Option not found"))
-                                .getPrice();
+                // Nếu CartItem đã có, chỉ cần cập nhật
+                CartItem item;
+                if (matchedItem != null) {
+                    item = matchedItem;
+                    item.setQuantity(item.getQuantity() + cartItemDTO.getQuantity());
+                    item.setUpdatedAt(LocalDateTime.now());
+
+                    // Xóa các option cũ để thêm lại option mới
+                    cartItemOptionRepository.deleteAllByCartItemId(item.getId());
+                } else {
+                    // Nếu không có CartItem, tạo mới
+                    item = new CartItem();
+                    item.setCart(cart);
+                    item.setProduct(productRepository.findById(cartItemDTO.getProductId())
+                            .orElseThrow(() -> new RuntimeException("Product not found")));
+                    item.setQuantity(cartItemDTO.getQuantity());
+                    item.setCreatedAt(LocalDateTime.now());
+                }
+
+                item.setUnitPrice(BigDecimal.ZERO);  // Set tạm thời, sẽ tính lại sau
+                item.setTotalPrice(BigDecimal.ZERO); // Set tạm thời, sẽ tính lại sau
+                cartItemRepository.save(item);
+
+                BigDecimal itemTotal = BigDecimal.ZERO;
+
+                // Thêm CartItemOption nếu chưa có
+                for (CartItemOptionDTO optionDTO : cartItemDTO.getCartItemOptionDTOList()) {
+                    CartItemOption option = new CartItemOption();
+                    option.setCartItem(item);
+                    option.setQuantity(optionDTO.getQuantity());
+                    option.setCreatedAt(LocalDateTime.now());
+                    option.setUpdatedAt(LocalDateTime.now());
+
+                    BigDecimal unitPrice = foodOptionRepository.findById(optionDTO.getOptionId())
+                            .orElseThrow(() -> new RuntimeException("Food Option not found"))
+                            .getPrice();
+
+                    option.setUnitPrice(unitPrice);
+
+                    BigDecimal totalOptionPrice = unitPrice
+                            .multiply(BigDecimal.valueOf(option.getQuantity()))
+                            .multiply(BigDecimal.valueOf(item.getQuantity()));
+
+                    option.setTotalPrice(totalOptionPrice);
+                    option.setFoodOption(foodOptionRepository.findById(optionDTO.getOptionId())
+                            .orElseThrow(() -> new RuntimeException("Food Option not found")));
+
+                    // Nếu là option chính (typeId == 2), cập nhật giá sản phẩm
+                    if (optionDTO.getTypeId() == 2) {
                         item.setUnitPrice(unitPrice);
                         item.setTotalPrice(unitPrice.multiply(BigDecimal.valueOf(item.getQuantity())));
                     }
 
-                    cartItemOption.setCartItem(item);
-                    cartItemOption.setQuantity(cartItemOptionDTO.getQuantity());
-                    cartItemOption.setCreatedAt(LocalDateTime.now());
-                    cartItemOption.setUnitPrice(foodOptionRepository.findById(cartItemOptionDTO.getOptionId())
-                            .orElseThrow(() -> new RuntimeException("Food Option not found")).getPrice());
-                    cartItemOption.setTotalPrice(cartItemOption.getUnitPrice()
-                            .multiply(BigDecimal.valueOf(cartItemOption.getQuantity())));
-                    cartItemOption.setFoodOption(foodOptionRepository.findById(cartItemOptionDTO.getOptionId())
-                            .orElseThrow(() -> new RuntimeException("Food Option not found")));
-                    totalCartPrice = totalCartPrice.add(cartItemOption.getTotalPrice());
-                    cartItemOptions.add(cartItemOption);
+                    itemTotal = itemTotal.add(totalOptionPrice);
+                    cartItemOptionRepository.save(option);
                 }
+
+                totalCartPrice = totalCartPrice.add(itemTotal);
+                cartItemRepository.save(item); // Cập nhật lại CartItem
             }
 
-            // **Lưu tất cả CartItemOptions vào DB**
-            cartItemOptionRepository.saveAll(cartItemOptions);
-
-            // Cập nhật total của Cart
+            // Cập nhật tổng tiền của Cart
             cart.setTotal(totalCartPrice);
+            cart.setUpdatedAt(LocalDateTime.now());
             cartRepository.save(cart);
         }
     }
-
+    private Cart getOrCreateCart(Long userId, Long shopId) {
+        return cartRepository.findByUserIdAndShopIdAndStatus(userId, shopId, CartStatus.PENDING)
+                .orElseGet(() -> {
+                    Cart newCart = new Cart();
+                    newCart.setOwner(userRepository.findById(userId)
+                            .orElseThrow(() -> new RuntimeException("User not found")));
+                    newCart.setStatus(CartStatus.PENDING);
+                    newCart.setTotal(BigDecimal.ZERO);
+                    newCart.setCreatedAt(LocalDateTime.now());
+                    return cartRepository.save(newCart);
+                });
+    }
     @Override
     public List<CartDTO> findByUserId(Long id) {
             CartStatus status = CartStatus.PENDING;
