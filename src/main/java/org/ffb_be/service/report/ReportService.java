@@ -29,4 +29,5 @@ public interface ReportService {
     List<CountByDateDTO> getReportCountByDay(ReportStatus status, LocalDate startDate, LocalDate endDate, Long type);
     Long countAllReports();
     void updateReportStatus(Long id);
+    Long countAllByShop(Long shopId);
 }

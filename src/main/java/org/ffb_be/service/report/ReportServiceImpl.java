@@ -275,4 +275,9 @@ public class ReportServiceImpl implements ReportService {
         }
         reportRepository.save(report);
     }
+
+    @Override
+    public Long countAllByShop(Long shopId) {
+        return reportRepository.countAllReportsByShop(shopId);
+    }
 }
