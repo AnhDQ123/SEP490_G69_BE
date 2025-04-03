@@ -200,8 +200,10 @@ public class OrderServiceImpl implements OrderService {
              orderItem.setTotalPrice(orderItemTotal);
              orderItemRepository.save(orderItem);
              orderItemList.add(orderItem);
+             order.setShop(shopRepository.findByProduct(orderItem.getProduct().getId()));
              orderTotal=orderTotal.add(orderItemTotal);
          }
+
          order.setTotal(orderTotal);
          orderRepository.save(order);
          return order;
