@@ -168,9 +168,9 @@ public class UserServiceImpl implements UserService {
 
 
     public void update(UserUpdateDTO userUpdateDTO, MultipartFile avatar) throws IOException {
-        User user = new User();
+        User user = userRepository.findByPhone(userUpdateDTO.getPhone()).get();
         BeanUtils.copyProperties(userUpdateDTO, user);
-        Profile p = profileRepository.findByUserId2(userUpdateDTO.getId())
+        Profile p = profileRepository.findByUserId2(user.getId())
                 .orElseThrow(() -> new RuntimeException("Profile not found"));
         p.setAddress(userUpdateDTO.getAddress());
         p.setName(userUpdateDTO.getName());

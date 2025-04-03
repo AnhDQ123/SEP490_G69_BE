@@ -11,4 +11,5 @@ public class UserUpdateDTO {
     private LocalDate dob;
     private String name;
     private String address;
+    private String phone;
 }
