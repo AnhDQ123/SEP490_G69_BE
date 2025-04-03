@@ -147,120 +147,67 @@ public class OrderServiceImpl implements OrderService {
     }
     @Override
     public Order save(OrderDTO orderDTO) throws IOException {
-        Order order = new Order();
+         Order order = new Order();
+         order.setOwner(userRepository.findById(orderDTO.getOwnerId()).get());
+         order.setPaymentMethod(paymentRepository.findById(orderDTO.getPaymentMethodId()).get());
+         order.setDeliveryMethod(deliveryMethodRepository.findById(orderDTO.getShipMethodId()).get());
+         orderRepository.save(order);
+         BigDecimal orderTotal = BigDecimal.ZERO;
+         List<OrderItemDTO> orderItemDTOList = orderDTO.getOrderItem();
+         List<OrderItem> orderItemList = new ArrayList<>();
+         for (OrderItemDTO orderItemDTO : orderItemDTOList) {
+             BigDecimal orderItemTotal = BigDecimal.ZERO;
+             OrderItem orderItem = new OrderItem();
+             orderItem.setId(orderItemDTO.getId());
+             orderItem.setQuantity(orderItemDTO.getQuantity());
+             orderItem.setProduct(productRepository.findById(orderItemDTO.getProductId()).get());
+             orderItem.setOrder(order);
+             orderItem.setCreatedAt(LocalDateTime.now());
+             orderItemRepository.save(orderItem);
+             List<Discount> discount=discountRepository.findAllByProduct_Id((orderItem.getId()));
+             List<OrderItemOptionDTO> orderItemOptionDTOList = orderItemDTO.getOrderItemOptions();
+             List<OrderItemOption> orderItemOptions = new ArrayList<>();
+             for(OrderItemOptionDTO orderItemOptionDTO:orderItemOptionDTOList){
+                 OrderItemOption orderItemOption = new OrderItemOption();
+                 orderItemOption.setId(orderItemOptionDTO.getId());
+                 orderItemOption.setOrderItem(orderItem);
+                 orderItemOption.setFoodOption(foodOptionRepository.findById(orderItemOptionDTO.getOptionId()).get());
+                 if (orderItemOptionDTO.getTypeId() == 2) {
+                     orderItemOption.setQuantity(orderItem.getQuantity());
+                     BigDecimal unitPrice = foodOptionRepository.findById(orderItemOptionDTO.getOptionId()).get().getPrice();
+                     orderItem.setUnitPrice(unitPrice);
+                     orderItem.setTotalPrice(unitPrice.multiply(BigDecimal.valueOf(orderItemDTO.getQuantity())));
+                     orderItemOption.setTotalPrice(BigDecimal.ZERO);
+                     orderItemTotal=orderItemTotal.add(orderItem.getTotalPrice());
+                 }else{
+                     orderItemOption.setQuantity(orderItemOptionDTO.getQuantity());
+                     BigDecimal unitPrice = foodOptionRepository.findById(orderItemOptionDTO.getOptionId()).get().getPrice();
+                     orderItemOption.setUnitPrice(unitPrice);
+                     orderItemOption.setTotalPrice(unitPrice.multiply(BigDecimal.valueOf(orderItemOption.getQuantity())));
+                     orderItemTotal=orderItemTotal.add(orderItemOption.getTotalPrice());
+                 }
+                 orderItemOptionRepository.save(orderItemOption);
+                 orderItemOptions.add(orderItemOption);
+             }
+             if(discount!=null && !discount.isEmpty()){
+                 for(Discount discount1:discount){
+                     if(discount1.getStatus().equals(Status.ACTIVE)){
+                         orderItem.setDiscountValue(discount1.getDiscount_percentage());
+                     }
+                 }
+             }else orderItem.setDiscountValue(BigDecimal.ZERO);
+             orderItemTotal=orderItemTotal.multiply(BigDecimal.ONE.subtract(orderItem.getDiscountValue()));
+             orderItem.setTotalPrice(orderItemTotal);
+             orderItemRepository.save(orderItem);
+             orderItemList.add(orderItem);
+             order.setShop(shopRepository.findByProduct(orderItem.getProduct().getId()));
+             orderTotal=orderTotal.add(orderItemTotal);
+         }
 
-        // Lấy dữ liệu và xử lý khi không tìm thấy
-        order.setOwner(userRepository.findById(orderDTO.getOwnerId())
-                .orElseThrow(() -> new RuntimeException("User not found")));
-        order.setPaymentMethod(paymentRepository.findById(orderDTO.getPaymentMethodId())
-                .orElseThrow(() -> new RuntimeException("Payment method not found")));
-        order.setDeliveryMethod(deliveryMethodRepository.findById(orderDTO.getShipMethodId())
-                .orElseThrow(() -> new RuntimeException("Delivery method not found")));
-
-        orderRepository.save(order);
-
-        BigDecimal orderTotal = BigDecimal.ZERO;
-        List<OrderItemDTO> orderItemDTOList = orderDTO.getOrderItem();
-        List<OrderItem> orderItemList = new ArrayList<>();
-
-        // Sử dụng cache để lưu trữ các FoodOption đã lấy
-        Map<Long, FoodOption> foodOptionCache = new HashMap<>();
-
-        // Biến để gán shop cho order (giả sử order chỉ thuộc 1 shop)
-        Shop orderShop = null;
-
-        for (OrderItemDTO orderItemDTO : orderItemDTOList) {
-            BigDecimal orderItemTotal = BigDecimal.ZERO;
-            OrderItem orderItem = new OrderItem();
-            // Không set id cho entity mới nếu sử dụng @GeneratedValue
-            orderItem.setQuantity(orderItemDTO.getQuantity());
-            orderItem.setProduct(productRepository.findById(orderItemDTO.getProductId())
-                    .orElseThrow(() -> new RuntimeException("Product not found")));
-            orderItem.setOrder(order);
-            orderItem.setCreatedAt(LocalDateTime.now());
-            orderItemRepository.save(orderItem);
-
-            // Lấy discount theo product id
-            List<Discount> discountList = discountRepository.findAllByProduct_Id(orderItem.getProduct().getId());
-
-            List<OrderItemOptionDTO> orderItemOptionDTOList = orderItemDTO.getOrderItemOptions();
-            List<OrderItemOption> orderItemOptions = new ArrayList<>();
-
-            for (OrderItemOptionDTO orderItemOptionDTO : orderItemOptionDTOList) {
-                OrderItemOption orderItemOption = new OrderItemOption();
-                orderItemOption.setOrderItem(orderItem);
-
-                // Lấy FoodOption từ cache hoặc repository
-                Long optionId = orderItemOptionDTO.getOptionId();
-                FoodOption foodOption = foodOptionCache.get(optionId);
-                if (foodOption == null) {
-                    foodOption = foodOptionRepository.findById(optionId)
-                            .orElseThrow(() -> new RuntimeException("FoodOption not found"));
-                    foodOptionCache.put(optionId, foodOption);
-                }
-                orderItemOption.setFoodOption(foodOption);
-
-                // Xử lý theo loại option
-                if (orderItemOptionDTO.getTypeId() == 2) {
-                    orderItemOption.setQuantity(orderItem.getQuantity());
-                    BigDecimal unitPrice = foodOption.getPrice();
-                    orderItem.setUnitPrice(unitPrice);
-                    BigDecimal totalPrice = unitPrice.multiply(BigDecimal.valueOf(orderItemDTO.getQuantity()));
-                    orderItem.setTotalPrice(totalPrice);
-                    orderItemOption.setTotalPrice(BigDecimal.ZERO);
-                    orderItemTotal = orderItemTotal.add(totalPrice);
-                } else {
-                    orderItemOption.setQuantity(orderItemOptionDTO.getQuantity());
-                    BigDecimal unitPrice = foodOption.getPrice();
-                    orderItemOption.setUnitPrice(unitPrice);
-                    BigDecimal optionTotalPrice = unitPrice.multiply(BigDecimal.valueOf(orderItemOption.getQuantity()));
-                    orderItemOption.setTotalPrice(optionTotalPrice);
-                    orderItemTotal = orderItemTotal.add(optionTotalPrice);
-                }
-
-                orderItemOptionRepository.save(orderItemOption);
-                orderItemOptions.add(orderItemOption);
-            }
-
-            // Xử lý discount nếu có
-            if (discountList != null && !discountList.isEmpty()) {
-                for (Discount discount : discountList) {
-                    if (discount.getStatus().equals(Status.ACTIVE)) {
-                        orderItem.setDiscountValue(discount.getDiscount_percentage());
-                        break; // Lấy discount đầu tiên có trạng thái ACTIVE
-                    }
-                }
-            } else {
-                orderItem.setDiscountValue(BigDecimal.ZERO);
-            }
-
-            // Áp dụng discount cho tổng của orderItem
-            orderItemTotal = orderItemTotal.multiply(BigDecimal.ONE.subtract(orderItem.getDiscountValue()));
-            orderItem.setTotalPrice(orderItemTotal);
-            orderItem.setOrderItemOptions(orderItemOptions);
-            orderItemRepository.save(orderItem);
-            orderItemList.add(orderItem);
-
-            // Gán shop cho order dựa trên sản phẩm của orderItem
-            Shop shop = shopRepository.findByProduct(orderItem.getProduct().getId());
-            if (orderShop == null) {
-                orderShop = shop;
-            } else if (!orderShop.equals(shop)) {
-                // Nếu order chứa sản phẩm từ nhiều shop khác nhau, có thể xử lý tùy theo nghiệp vụ
-                throw new RuntimeException("Order chứa sản phẩm từ nhiều shop khác nhau");
-            }
-
-            orderTotal = orderTotal.add(orderItemTotal);
-        }
-
-        order.setTotal(orderTotal);
-        order.setOrderItems(orderItemList);
-        order.setShop(orderShop);
-        orderRepository.save(order);
-
-        return order;
+         order.setTotal(orderTotal);
+         orderRepository.save(order);
+         return order;
     }
-
 
     @Override
     public OrderDTO viewOrder(Long id) throws IOException {
