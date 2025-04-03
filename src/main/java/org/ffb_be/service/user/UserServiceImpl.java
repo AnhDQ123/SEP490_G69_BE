@@ -50,7 +50,7 @@ public class UserServiceImpl implements UserService {
         this.profileRepository = profileRepository;
         this.shopRepository = shopRepository;
     }
-    public Long create(UserCreateDTO userCreateDTO) throws IOException {
+    public void create(UserCreateDTO userCreateDTO) throws IOException {
         User user = new User();
         BeanUtils.copyProperties(userCreateDTO, user);
 
@@ -77,7 +77,6 @@ public class UserServiceImpl implements UserService {
         Profile profile = new Profile();
         profile.setUser(user);
         profileRepository.save(profile);
-        return user.getId();
     }
 
 

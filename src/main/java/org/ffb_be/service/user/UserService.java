@@ -18,7 +18,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface UserService {
-    Long create(UserCreateDTO employeeCreateDTO) throws IOException;
+    void create(UserCreateDTO employeeCreateDTO) throws IOException;
 
     void activeUser(Long id);
 

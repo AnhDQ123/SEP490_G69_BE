@@ -44,8 +44,13 @@ public class UserController {
     }
 
     @PostMapping("/add")
-    public Long addUser(@Validated @RequestBody UserCreateDTO user) throws IOException {
-       return userService.create(user);
+    public ResponseEntity<?> addUser(@Validated @RequestBody UserCreateDTO user,
+                                         BindingResult bindingResult) throws IOException {
+        if(bindingResult.hasErrors()) {
+            return ResponseEntity.badRequest().body("Invalid data!");
+        }
+        userService.create(user);
+        return ResponseEntity.ok().body(user);
     }
     @PutMapping("/update")
     public ResponseEntity<?> updateProfile(@Validated @ModelAttribute("employee") UserUpdateDTO user,
