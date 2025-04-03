@@ -21,7 +21,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -46,9 +45,9 @@ public class ProductServiceImpl implements ProductService {
     private final TypesRepository typesRepository;
     private final OrderRepository orderRepository;
     private final ShopRepository shopRepository;
-    private final ProductESRepository productESRepository;
-    @Qualifier("elasticsearchTemplate")
-    private final ElasticsearchOperations elasticsearchOperations;
+//    private final ProductESRepository productESRepository;
+//    @Qualifier("elasticsearchTemplate")
+//    private final ElasticsearchOperations elasticsearchOperations;
 
 @Override
     public void save(ProductCreateDTO productCreateDTO,MultipartFile avatar, List<MultipartFile>option) throws IOException {
@@ -332,6 +331,7 @@ public class ProductServiceImpl implements ProductService {
         BeanUtils.copyProperties(product, productResponseDTO);
         productResponseDTO.setDescription(product.getDescription());
         productResponseDTO.setFoodType(product.getType().toString());
+        productResponseDTO.setReportCount(product.getReportCount());
         BigDecimal defaultprice = null;
         List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product);
         for (FoodOption foodOption : foodOptions) {
@@ -497,130 +497,130 @@ public class ProductServiceImpl implements ProductService {
         return productResponseDTOList2;
     }
 
-    @Override
-    public List<ProductResponseDTO> searchHighlySimilarProducts(String query, int page, int size) {
-
-
-        // Search with 90% similarity threshold
-        Page<Product> products = productESRepository.findHighlySimilarProducts(
-                query,
-                PageRequest.of(page - 1, size)
-        );
-
-
-        // 3. Lấy đầy đủ thông tin từ database
-        List<Long> productIds = products.getContent()
-                .stream()
-                .map(Product::getId)
-                .distinct()
-                .toList();
-
-        return productRepository.findAllById(productIds)
-                .stream()
-                .map(product -> {
-                    ProductResponseDTO dto = new ProductResponseDTO();
-                    // Copy các thuộc tính cơ bản
-                    BeanUtils.copyProperties(product, dto);
-                    dto.setDescription(product.getDescription());
-                    dto.setFoodType(product.getType().toString());
-
-                    // Xử lý food options
-                    List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product);
-                    BigDecimal defaultPrice = calculateDefaultPrice(foodOptions);
-                    List<FoodOptionDTO> foodOptionDTOs = convertFoodOptionsToDTOs(foodOptions);
-
-                    // Xử lý discounts
-                    List<Discount> discounts = discountRepository.findAllByProduct_Id(product.getId());
-                    List<DiscountDTO2> discountDTOs = convertDiscountsToDTOs(discounts);
-
-                    // Áp dụng discount nếu có
-                    if (!discounts.isEmpty()) {
-                        defaultPrice = applyActiveDiscounts(defaultPrice, discounts);
-                    }
-
-                    // Set các giá trị vào DTO
-                    dto.setDefaultPrice(defaultPrice);
-                    dto.setFoodOption(foodOptionDTOs);
-                    dto.setDiscount(discountDTOs);
-                    dto.setShopName(product.getShop() != null ? product.getShop().getName() : null);
-                    dto.setCategory(product.getCategory() != null ? product.getCategory().getName() : null);
-
-                    return dto;
-                })
-                .toList();
-    }
-
-    private BigDecimal calculateDefaultPrice(List<FoodOption> foodOptions) {
-        return foodOptions.stream()
-                .filter(fo -> fo.getType() != null && fo.getType().getId() == 2)
-                .map(FoodOption::getPrice)
-                .min(BigDecimal::compareTo)
-                .orElse(BigDecimal.ZERO);
-    }
-
-    private List<FoodOptionDTO> convertFoodOptionsToDTOs(List<FoodOption> foodOptions) {
-        return foodOptions.stream()
-                .map(fo -> {
-                    FoodOptionDTO dto = new FoodOptionDTO();
-                    dto.setType_id(fo.getType().getId());
-                    BeanUtils.copyProperties(fo, dto);
-                    return dto;
-                })
-                .toList();
-    }
-
-    private List<DiscountDTO2> convertDiscountsToDTOs(List<Discount> discounts) {
-        return discounts.stream()
-                .map(d -> {
-                    DiscountDTO2 dto = new DiscountDTO2();
-                    dto.setId(d.getId());
-                    dto.setAmount(d.getDiscount_percentage());
-                    dto.setStartDate(d.getStartDate());
-                    dto.setEndDate(d.getEndDate());
-                    dto.setStatus(d.getStatus().toString());
-                    return dto;
-                })
-                .toList();
-    }
-
-    private BigDecimal applyActiveDiscounts(BigDecimal price, List<Discount> discounts) {
-        BigDecimal finalPrice = price;
-        for (Discount discount : discounts) {
-            if (discount.getStatus().equals(Status.ACTIVE)) {
-                finalPrice = finalPrice.multiply(
-                        BigDecimal.ONE.subtract(discount.getDiscount_percentage().divide(BigDecimal.valueOf(100)))
-                                .setScale(2, RoundingMode.HALF_UP));
-            }
-        }
-        return finalPrice;
-    }
-
-    @Transactional
-    public String syncAllProducts() {
-        // Lấy toàn bộ sản phẩm từ MySQL (có thể thêm phân trang nếu dữ liệu lớn)
-        List<Product> dbProducts = productRepository.findAll();
-
-        // Chuyển đổi sang ProductES
-        List<ProductES> esProducts = dbProducts.stream()
-                .map(this::convertToProductES)
-                .collect(Collectors.toList());
-
-        // Xóa index cũ và tạo lại (tuỳ nhu cầu)
-        productESRepository.deleteAll();
-
-        // Lưu vào Elasticsearch
-        productESRepository.saveAll(esProducts);
-
-        return "Đã đồng bộ " + esProducts.size() + " sản phẩm";
-    }
-
-    private ProductES convertToProductES(Product product) {
-        return ProductES.builder()
-                .id(product.getId())
-                .name(product.getName())
-                .description(product.getDescription())
-                .manufacturer(product.getManufacturer())
-                // Có thể thêm các trường khác nếu cần
-                .build();
-    }
+//    @Override
+//    public List<ProductResponseDTO> searchHighlySimilarProducts(String query, int page, int size) {
+//
+//
+//        // Search with 90% similarity threshold
+//        Page<Product> products = productESRepository.findHighlySimilarProducts(
+//                query,
+//                PageRequest.of(page - 1, size)
+//        );
+//
+//
+//        // 3. Lấy đầy đủ thông tin từ database
+//        List<Long> productIds = products.getContent()
+//                .stream()
+//                .map(Product::getId)
+//                .distinct()
+//                .toList();
+//
+//        return productRepository.findAllById(productIds)
+//                .stream()
+//                .map(product -> {
+//                    ProductResponseDTO dto = new ProductResponseDTO();
+//                    // Copy các thuộc tính cơ bản
+//                    BeanUtils.copyProperties(product, dto);
+//                    dto.setDescription(product.getDescription());
+//                    dto.setFoodType(product.getType().toString());
+//
+//                    // Xử lý food options
+//                    List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product);
+//                    BigDecimal defaultPrice = calculateDefaultPrice(foodOptions);
+//                    List<FoodOptionDTO> foodOptionDTOs = convertFoodOptionsToDTOs(foodOptions);
+//
+//                    // Xử lý discounts
+//                    List<Discount> discounts = discountRepository.findAllByProduct_Id(product.getId());
+//                    List<DiscountDTO2> discountDTOs = convertDiscountsToDTOs(discounts);
+//
+//                    // Áp dụng discount nếu có
+//                    if (!discounts.isEmpty()) {
+//                        defaultPrice = applyActiveDiscounts(defaultPrice, discounts);
+//                    }
+//
+//                    // Set các giá trị vào DTO
+//                    dto.setDefaultPrice(defaultPrice);
+//                    dto.setFoodOption(foodOptionDTOs);
+//                    dto.setDiscount(discountDTOs);
+//                    dto.setShopName(product.getShop() != null ? product.getShop().getName() : null);
+//                    dto.setCategory(product.getCategory() != null ? product.getCategory().getName() : null);
+//
+//                    return dto;
+//                })
+//                .toList();
+//    }
+//
+//    private BigDecimal calculateDefaultPrice(List<FoodOption> foodOptions) {
+//        return foodOptions.stream()
+//                .filter(fo -> fo.getType() != null && fo.getType().getId() == 2)
+//                .map(FoodOption::getPrice)
+//                .min(BigDecimal::compareTo)
+//                .orElse(BigDecimal.ZERO);
+//    }
+//
+//    private List<FoodOptionDTO> convertFoodOptionsToDTOs(List<FoodOption> foodOptions) {
+//        return foodOptions.stream()
+//                .map(fo -> {
+//                    FoodOptionDTO dto = new FoodOptionDTO();
+//                    dto.setType_id(fo.getType().getId());
+//                    BeanUtils.copyProperties(fo, dto);
+//                    return dto;
+//                })
+//                .toList();
+//    }
+//
+//    private List<DiscountDTO2> convertDiscountsToDTOs(List<Discount> discounts) {
+//        return discounts.stream()
+//                .map(d -> {
+//                    DiscountDTO2 dto = new DiscountDTO2();
+//                    dto.setId(d.getId());
+//                    dto.setAmount(d.getDiscount_percentage());
+//                    dto.setStartDate(d.getStartDate());
+//                    dto.setEndDate(d.getEndDate());
+//                    dto.setStatus(d.getStatus().toString());
+//                    return dto;
+//                })
+//                .toList();
+//    }
+//
+//    private BigDecimal applyActiveDiscounts(BigDecimal price, List<Discount> discounts) {
+//        BigDecimal finalPrice = price;
+//        for (Discount discount : discounts) {
+//            if (discount.getStatus().equals(Status.ACTIVE)) {
+//                finalPrice = finalPrice.multiply(
+//                        BigDecimal.ONE.subtract(discount.getDiscount_percentage().divide(BigDecimal.valueOf(100)))
+//                                .setScale(2, RoundingMode.HALF_UP));
+//            }
+//        }
+//        return finalPrice;
+//    }
+//
+//    @Transactional
+//    public String syncAllProducts() {
+//        // Lấy toàn bộ sản phẩm từ MySQL (có thể thêm phân trang nếu dữ liệu lớn)
+//        List<Product> dbProducts = productRepository.findAll();
+//
+//        // Chuyển đổi sang ProductES
+//        List<ProductES> esProducts = dbProducts.stream()
+//                .map(this::convertToProductES)
+//                .collect(Collectors.toList());
+//
+//        // Xóa index cũ và tạo lại (tuỳ nhu cầu)
+//        productESRepository.deleteAll();
+//
+//        // Lưu vào Elasticsearch
+//        productESRepository.saveAll(esProducts);
+//
+//        return "Đã đồng bộ " + esProducts.size() + " sản phẩm";
+//    }
+//
+//    private ProductES convertToProductES(Product product) {
+//        return ProductES.builder()
+//                .id(product.getId())
+//                .name(product.getName())
+//                .description(product.getDescription())
+//                .manufacturer(product.getManufacturer())
+//                // Có thể thêm các trường khác nếu cần
+//                .build();
+//    }
 }

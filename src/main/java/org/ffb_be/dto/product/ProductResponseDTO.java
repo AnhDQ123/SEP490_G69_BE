@@ -31,4 +31,5 @@ public class ProductResponseDTO {
     private BigDecimal defaultPrice;
     private String foodType;
     private Long shopId;
+    private int reportCount;
 }

@@ -135,15 +135,15 @@ public class ProductController {
     public ResponseEntity<?> getDrinkByShop(@RequestParam("shopId") Long shopId) {
         return ResponseEntity.ok( productService.findByCategoryByShop(shopId));
     }
-    @GetMapping("/search")
-    public List<ProductResponseDTO> searchProducts(@RequestParam String query,
-                                                   @RequestParam(value = "page", defaultValue = "1", required = false) Integer page,
-                                                   @RequestParam(value = "size", defaultValue = "20", required = false) Integer size
-    ) {
-        return productService.searchHighlySimilarProducts(query,page,size); // Tìm kiếm sản phẩm theo từ khóa
-    }
-    @PostMapping("/document")
-    public String syncProducts() {
-        return productService.syncAllProducts();
-    }
+//    @GetMapping("/search")
+//    public List<ProductResponseDTO> searchProducts(@RequestParam String query,
+//                                                   @RequestParam(value = "page", defaultValue = "1", required = false) Integer page,
+//                                                   @RequestParam(value = "size", defaultValue = "20", required = false) Integer size
+//    ) {
+//        return productService.searchHighlySimilarProducts(query,page,size); // Tìm kiếm sản phẩm theo từ khóa
+//    }
+//    @PostMapping("/document")
+//    public String syncProducts() {
+//        return productService.syncAllProducts();
+//    }
 }
