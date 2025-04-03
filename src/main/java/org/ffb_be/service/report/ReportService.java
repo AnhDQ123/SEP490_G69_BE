@@ -28,5 +28,5 @@ public interface ReportService {
     List<CountByMonthDTO> getReportCountByMonth(ReportStatus status, LocalDate startDate, LocalDate endDate, Long type);
     List<CountByDateDTO> getReportCountByDay(ReportStatus status, LocalDate startDate, LocalDate endDate, Long type);
     Long countAllReports();
-    void updateReportStatus(Long id, ReportStatus status);
+    void updateReportStatus(Long id);
 }

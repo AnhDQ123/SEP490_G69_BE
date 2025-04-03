@@ -101,4 +101,5 @@ public class Shop extends BaseEntity{
     @OneToOne
     @JoinColumn(name = "user_id")
     private User owner;
+    private int reportCount;
 }

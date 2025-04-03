@@ -76,4 +76,5 @@ public class Product extends BaseEntity {
     @JoinColumn(name = "shop_id")
     private Shop shop;
 
+    private int reportCount;
 }
