@@ -5,11 +5,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.ffb_be.utils.enums.SellType;
 import org.ffb_be.utils.enums.Status;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "products")
@@ -48,18 +48,20 @@ public class Product extends BaseEntity {
     private Float rate;
 
     @Enumerated(EnumType.STRING)
-    private Status is_active;
+    private Status status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "discount_id")
-    private Discount discount;
+    @OneToMany(mappedBy = "product")
+    private List<Discount> discounts;
 
     @OneToMany(mappedBy = "product")
     private List<Feedback> feedbacks;
+
+    @Enumerated(EnumType.STRING)
+    private SellType type;
 
     @OneToMany(mappedBy = "product")
     private List<CartItem> cartItems;
@@ -74,4 +76,5 @@ public class Product extends BaseEntity {
     @JoinColumn(name = "shop_id")
     private Shop shop;
 
+    private int reportCount;
 }

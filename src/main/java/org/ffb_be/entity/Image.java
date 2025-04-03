@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.ffb_be.utils.enums.Status;
+
 @Entity
 @Table(name = "images")
 @AllArgsConstructor
@@ -24,5 +26,9 @@ public class Image extends BaseEntity {
     @JoinColumn(name = "type_id")
     private Types type;
 
+    private Long ownerId;
+
     private Long relatedId;
+
+    private Status status;
 }

@@ -35,6 +35,8 @@ public class Comment extends BaseEntity{
     @Column(name = "like_count")
     private int likeCount = 0;
 
+    private String reason;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User writer;

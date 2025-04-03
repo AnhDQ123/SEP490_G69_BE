@@ -1,14 +1,22 @@
 package org.ffb_be.service.shop;
 
+import org.ffb_be.dto.CountDTOBy.CountByDateDTO;
+import org.ffb_be.dto.CountDTOBy.CountByMonthDTO;
+import org.ffb_be.dto.CountDTOBy.CountByYearDTO;
+import org.ffb_be.dto.banner.BannerDTO;
 import org.ffb_be.dto.shop.ShopDTO;
 import org.ffb_be.dto.shop.ShopRegisterDTO;
 import org.ffb_be.utils.enums.Status;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.util.List;
+
 
 public interface ShopService {
 
@@ -19,6 +27,7 @@ public interface ShopService {
             Long userId,
             ShopRegisterDTO shopDTO,
             MultipartFile logo,
+            MultipartFile background,
             MultipartFile citizenIDFront,
             MultipartFile citizenIDBack,
             MultipartFile registrationCert,
@@ -31,6 +40,7 @@ public interface ShopService {
             Long shopId,
             ShopRegisterDTO shopDTO,
             MultipartFile logo,
+            MultipartFile background,
             MultipartFile menu,
             MultipartFile registrationCert,
             MultipartFile foodSafetyCert,
@@ -38,10 +48,27 @@ public interface ShopService {
             MultipartFile citizenIDBack
     ) throws IOException;
 
+    void approveShop(Long id);
+
+    void rejectShop(Long id, String reason);
+
     @Transactional
-    void updateShopStatus(Long shopId, Status newStatus);
+    void updateShopStatus(Long shopId, Status newStatus, String reason);
 
     boolean isShopOpen(Long shopId);
 
     ShopDTO getShopById(Long shopId);
+
+    ShopDTO getShopByUserId(Long userId);
+    List<CountByYearDTO> getShopCountByYear(Status status, LocalDate startDate, LocalDate endDate);
+
+    ResponseEntity<?> getShopByOwnerId(Long userId);
+
+    List<CountByMonthDTO> getShopCountByMonth(Status status, LocalDate startDate, LocalDate endDate);
+    List<CountByDateDTO> getShopCountByDayAndStatus(Status status, LocalDate startDate, LocalDate endDate);
+    long countPendingShop();
+    void rateShop(Long shopId,Double newRate);
+    void uploadBanner(Long shopId,MultipartFile image) throws IOException;
+    List<BannerDTO> viewBannerByShop(Long shopId);
+    List<BannerDTO> homePageBanner();
 }

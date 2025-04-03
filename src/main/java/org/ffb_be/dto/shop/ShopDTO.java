@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 import org.ffb_be.dto.auth.userDto.OwnerDTO;
 import org.ffb_be.utils.enums.Status;
 
+import java.time.LocalTime;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -17,7 +19,16 @@ public class ShopDTO {
     private String backgroundImage;
     private String menu;
     private String phone;
+    private LocalTime openTime;
+    private LocalTime closeTime;
+    private String registrationCertificate;
+    private String foodSafetyCertificate;
     private String address;
     private Status isActive;
+    private Double rate;
+    private String reason;
+    private int viewCount;
+    private Boolean isShipping;
+    private Boolean isOpening;
     private OwnerDTO owner;
 }

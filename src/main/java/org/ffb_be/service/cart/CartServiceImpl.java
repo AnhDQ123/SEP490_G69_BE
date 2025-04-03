@@ -3,10 +3,7 @@ package org.ffb_be.service.cart;
 import org.ffb_be.dto.cart.CartDTO;
 import org.ffb_be.dto.cart.CartItemDTO;
 import org.ffb_be.dto.cart.CartItemOptionDTO;
-
-import org.ffb_be.entity.Cart;
-import org.ffb_be.entity.CartItem;
-import org.ffb_be.entity.CartItemOption;
+import org.ffb_be.entity.*;
 import org.ffb_be.repository.*;
 import org.ffb_be.utils.enums.CartStatus;
 import org.springframework.stereotype.Service;
@@ -15,7 +12,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -154,9 +154,6 @@ public class CartServiceImpl implements CartService {
         }
     }
 
-
-
-    // Hỗ trợ: lấy hoặc tạo mới cart
     private Cart getOrCreateCart(Long userId, Long shopId) {
         return cartRepository.findByUserIdAndShopIdAndStatus(userId, shopId, CartStatus.PENDING)
                 .orElseGet(() -> {
@@ -169,9 +166,6 @@ public class CartServiceImpl implements CartService {
                     return cartRepository.save(newCart);
                 });
     }
-
-
-
     @Override
     public List<CartDTO> findByUserId(Long id) {
             CartStatus status = CartStatus.PENDING;
@@ -195,6 +189,8 @@ public class CartServiceImpl implements CartService {
                     cartItemDTO.setProductName(productRepository.findById(cartItemDTO.getProductId()).get().getName());
                     cartItemDTO.setImage(productRepository.findById(cartItemDTO.getProductId()).get().getImage());
                     cartItemDTO.setQuantity(cartItem.getQuantity());
+                    cartItemDTO.setPrice(cartItem.getUnitPrice());
+                    cartItemDTO.setTotalPrice(cartItem.getTotalPrice());
                     cartItemDTO.setId(cartItem.getId());
                     cartItemDTO.setCartId(cart.getId());
                     List<CartItemOptionDTO> cartItemOptionDTOList=new ArrayList<>();
@@ -244,6 +240,7 @@ public class CartServiceImpl implements CartService {
                 cartItemDTO.setProductId(cartItem.getProduct().getId());
                 cartDTO.setShopId(shopRepository.findByProduct(cartItem.getProduct().getId()).getId());
                 cartItemDTO.setQuantity(cartItem.getQuantity());
+                cartItemDTO.setPrice(cartItem.getUnitPrice());
                 cartItemDTO.setTotalPrice(cartItem.getTotalPrice());
                 cartItemDTO.setId(cartItem.getId());
                 cartItemDTO.setCartId(cart.getId());
@@ -254,6 +251,8 @@ public class CartServiceImpl implements CartService {
                     cartItemOptionDTO.setOptionId(cartItemOption.getId());
                     cartItemOptionDTO.setQuantity(cartItemOption.getQuantity());
                     cartItemOptionDTO.setCartItemId(cartItemDTO.getId());
+                    cartItemOptionDTO.setPrice(cartItemOption.getUnitPrice());
+                    cartItemOptionDTO.setTotalPrice(cartItemOption.getTotalPrice());
                     cartItemOptionDTO.setTypeId(cartItemOption.getFoodOption().getType().getId());
                     cartItemOptionDTOList.add(cartItemOptionDTO);
                 }
@@ -264,7 +263,17 @@ public class CartServiceImpl implements CartService {
         return cartDTO;
     }
 
+    @Override
+    public void deleteItemFromCart(Long cartId, Long id) {
+        Product product=productRepository.findById(cartId).get();
+        CartItem cartItem=cartItemRepository.findByProduct(product);
+        cartItemRepository.delete(cartItem);
 
+    }
+
+    @Override
+    public void deleteOptionFromCart(Long cartId, Long optionId) {
+        CartItemOption cartItemOption=cartItemOptionRepository.findByCartItem_IdAndFoodOption_Id(cartId,optionId);
+        cartItemOptionRepository.delete(cartItemOption);
+    }
 }
-
-

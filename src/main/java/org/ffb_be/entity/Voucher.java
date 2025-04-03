@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.ffb_be.utils.enums.DiscountType;
 import org.ffb_be.utils.enums.Status;
 
 import java.math.BigDecimal;
@@ -23,16 +24,32 @@ public class Voucher  extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "code" , unique = true)
     private String code;
 
-    @Column(name="discount_percentage")
-    private BigDecimal discount_percentage;
+    @Enumerated(EnumType.STRING)
+    private DiscountType discountType;
+
+    @Column(name = "discount_value")
+    private BigDecimal discountValue;
+
+    @Column(name = "min_order_value")
+    private BigDecimal minOrderValue;
+
+    @Column(name = "total_vouchers")
+    private Integer totalVouchers;
+
+    @Column(name = "used_vouchers")
+    private Integer usedVouchers = 0;
 
     @Column(name="start_date")
-    private LocalDate start_date;
+    private LocalDate startDate;
 
     @Column(name="end_date")
-    private LocalDate end_date ;
+    private LocalDate endDate ;
+
+    @Column(name = "max_usage_per_customer")
+    private Integer maxUsagePerCustomer;
 
     @Enumerated(EnumType.STRING)
     private Status status;

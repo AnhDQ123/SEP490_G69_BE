@@ -22,14 +22,27 @@ public class Order extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String orderCode;
+
     @Column(name = "shipping_address")
-    private String shipping_address;
+    private String shippingAddress;
+
+    @Column(name = "latitude")
+    private Double latitude;
+
+    @Column(name = "longitude")
+    private Double longitude;
 
     @Column(name = "total")
     private BigDecimal total;
 
     @Enumerated(EnumType.STRING)
-    private OrderStatus status;
+    private OrderStatus status = OrderStatus.PENDING;
+
+    private BigDecimal voucherValue;
+
+    @Column(name="payment_proof")
+    private String paymentProof;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id")
@@ -50,6 +63,14 @@ public class Order extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "voucher_id")
     private Voucher voucher;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shop_id")
+    private Shop shop;
+
+    private String reason;
+
+    private String paymentQrCode;
 
     @OneToMany(mappedBy = "order")
     private List<OrderItem> orderItems;

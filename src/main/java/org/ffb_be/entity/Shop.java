@@ -5,8 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.ffb_be.utils.enums.SellType;
 import org.ffb_be.utils.enums.Status;
+
+
 import java.time.LocalTime;
 import java.util.List;
 
@@ -37,8 +38,14 @@ public class Shop extends BaseEntity{
     @Column(name="phone")
     private String phone;
 
+    private String reason;
+
     @Column(name="address")
     private String address;
+
+    private Double latitude;
+
+    private Double longitude;
 
     @Column(name="registration_certificate")
     private String registrationCertificate;
@@ -79,17 +86,20 @@ public class Shop extends BaseEntity{
     @OneToMany(mappedBy = "shop")
     private List<Product> products;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name="sell_type")
-    private SellType sellType;
-
     @OneToMany(mappedBy = "shop")
     private List<Feedback> feedbacks;
 
     @OneToMany(mappedBy = "shop")
     private List<Voucher> vouchers;
 
+    @OneToMany(mappedBy = "shop")
+    private List<Order> orders;
+    
+    @OneToMany(mappedBy = "shop")
+    private List<Discount> discounts;
+
     @OneToOne
     @JoinColumn(name = "user_id")
     private User owner;
+    private int reportCount;
 }

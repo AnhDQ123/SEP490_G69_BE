@@ -13,9 +13,7 @@ import org.ffb_be.utils.enums.TypesCategory;
 import org.ffb_be.utils.enums.upload.CloudinaryUpload;
 import org.ffb_be.utils.mapping.BlogMapper;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,8 +36,7 @@ class BlogServiceImpl implements BlogService {
     private final CloudinaryUpload cloudinaryUpload;
 
     @Override
-    public List<BlogDTO> getBlogs(int page, int limit) {
-        Pageable pageable = PageRequest.of(page, 10000, Sort.by("id").ascending());
+    public List<BlogDTO> getBlogs(Pageable pageable) {
         Page<Blog> blogPage = blogRepository.findAll(pageable);
         return blogPage.getContent().stream()
                 .map(this::mapBlogToDTO)
@@ -109,6 +106,8 @@ class BlogServiceImpl implements BlogService {
     }
 
     private void updateBlogImages(Long blogId, List<String> imageUrls) {
+        Blog blog = blogRepository.findById(blogId)
+                .orElseThrow(() -> new NotFoundException("Blog"));
         List<String> existingUrls = imageRepository.findImageUrlsByBlogId(blogId);
 
         // Tìm ảnh cần xóa (có trong DB nhưng không có trong danh sách mới)
@@ -129,7 +128,7 @@ class BlogServiceImpl implements BlogService {
         List<Image> newImages = imageUrls.stream()
                 .filter(url -> !existingUrls.contains(url)) // Chỉ thêm ảnh chưa có
                 .limit(5)
-                .map(url -> new Image(null, url, blogType, blogId))
+                .map(url -> new Image(null, url, blogType, blog.getWriter().getId(), blogId, Status.ACTIVE))
                 .collect(Collectors.toList());
 
         if (!newImages.isEmpty()) {
@@ -170,5 +169,19 @@ class BlogServiceImpl implements BlogService {
         commentRepository.deleteByBlogId(id);
         imageRepository.deleteByBlogId(id);
         blogRepository.deleteById(id);
+    }
+
+    @Override
+    public void blogStatusUpdate(Long id, Status status, String reason) {
+        Blog blog = blogRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Blog"));
+        if (status == Status.ACTIVE) {
+            blog.setReason(null);
+        }
+        if (status == Status.INACTIVE) {
+            blog.setReason(reason);
+        }
+        blog.setStatus(status);
+        blogRepository.save(blog);
     }
 }
