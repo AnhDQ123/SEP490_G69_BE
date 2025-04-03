@@ -29,5 +29,6 @@ public class Image extends BaseEntity {
     private Long ownerId;
 
     private Long relatedId;
+
     private Status status;
 }

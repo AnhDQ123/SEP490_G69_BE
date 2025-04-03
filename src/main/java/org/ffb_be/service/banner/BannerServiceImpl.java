@@ -3,9 +3,11 @@ package org.ffb_be.service.banner;
 import lombok.RequiredArgsConstructor;
 import org.ffb_be.dto.image.ImageDTO;
 import org.ffb_be.entity.Image;
+import org.ffb_be.entity.Shop;
 import org.ffb_be.entity.Types;
 import org.ffb_be.exception.NotFoundException;
 import org.ffb_be.repository.ImageRepository;
+import org.ffb_be.repository.ShopRepository;
 import org.ffb_be.repository.TypesRepository;
 import org.ffb_be.utils.enums.TypesCategory;
 import org.ffb_be.utils.enums.upload.CloudinaryUpload;
@@ -21,6 +23,7 @@ import java.time.LocalDateTime;
 @Service
 @RequiredArgsConstructor
 public class BannerServiceImpl implements BannerService {
+    private final ShopRepository shopRepository;
     private final ImageRepository imageRepository;
     private final TypesRepository typesRepository;
     private final CloudinaryUpload cloudinaryUpload;
@@ -40,7 +43,9 @@ public class BannerServiceImpl implements BannerService {
     }
 
     @Override
-    public void createBanner(ImageDTO image, MultipartFile file) throws IOException {
+    public void createBanner(Long shopId,ImageDTO image, MultipartFile file) throws IOException {
+        Shop shop = shopRepository.findById(shopId)
+                .orElseThrow(() -> new NotFoundException("Shop"));
         Types type = typesRepository.findByCategory(TypesCategory.BANNER)
                 .orElseThrow(() -> new NotFoundException("Type"));
         Image banner = imageMapper.toEntity(image);
@@ -48,6 +53,8 @@ public class BannerServiceImpl implements BannerService {
             String url = cloudinaryUpload.uploadFile(file);
             banner.setUrl(url);
         }
+        banner.setRelatedId(shop.getId());
+        banner.setOwnerId(shop.getOwner().getId());
         banner.setCreatedAt(LocalDateTime.now());
         banner.setType(type);
         imageRepository.save(banner);

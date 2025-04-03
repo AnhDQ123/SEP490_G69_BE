@@ -3,6 +3,7 @@ package org.ffb_be.controller;
 import lombok.RequiredArgsConstructor;
 import org.ffb_be.dto.comment.CommentDTO;
 import org.ffb_be.service.comment.CommentService;
+import org.ffb_be.utils.enums.Status;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,5 +47,18 @@ public class CommentController {
         commentService.deleteComment(commentId);
         return ResponseEntity.ok("Comment deleted successfully");
     }
+
+    @PutMapping("/{commentId}/active")
+    public ResponseEntity<String> activeComment(@PathVariable Long commentId) {
+        commentService.commentStatusUpdate(commentId, Status.ACTIVE, null);
+        return ResponseEntity.ok("Comment activated successfully");
+    }
+
+    @PutMapping("/{commentId}/inactive")
+    public ResponseEntity<String> inactiveComment(@PathVariable Long commentId, @RequestParam String reason) {
+        commentService.commentStatusUpdate(commentId, Status.INACTIVE, reason);
+        return ResponseEntity.ok("Comment deactivated successfully");
+    }
+
 
 }

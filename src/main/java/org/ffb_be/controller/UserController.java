@@ -9,6 +9,8 @@ import org.ffb_be.dto.auth.userDto.UserUpdateDTO;
 import org.ffb_be.dto.CountDTOBy.CountByDateDTO;
 import org.ffb_be.entity.Shop;
 import org.ffb_be.entity.User;
+import org.ffb_be.exception.BadRequestException;
+import org.ffb_be.exception.NotFoundException;
 import org.ffb_be.repository.ProfileRepository;
 import org.ffb_be.repository.ShopRepository;
 import org.ffb_be.repository.UserRepository;
@@ -127,21 +129,17 @@ public class UserController {
 
     @GetMapping("/shop")
     public ResponseEntity<?> getUserShop(@RequestParam("id") Long id) {
-        User user=userRepository.findById(id).orElse(null);
-        Shop shop=shopRepository.findByOwnerId(user.getId()).orElse(null);
-        String status=userService.hasShop(id);
-        if(status==null) {
-            return ResponseEntity.badRequest().body("No such user");
+        try {
+            return ResponseEntity.ok(shopService.getShopByOwnerId(id));
+        } catch (NotFoundException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (BadRequestException e) {
+            return ResponseEntity.ok().body(e.getMessage());
         }
-        if(status.equals("inactive")) {
-            return ResponseEntity.ok().body("Shop has been inactived");
-        }
-        if(status.equals("active")) {
-            return ResponseEntity.ok(shopService.getShopById(shop.getId()));
-        }
-        if(status.equals("pending")) {
-            return ResponseEntity.ok().body("Shop is pending");
-        }
-        return ResponseEntity.ok().body("");
+    }
+
+    @GetMapping("/profile/{id}")
+    public ResponseEntity<?> getUserProfile(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(userService.getRoleProfile(id));
     }
 }
