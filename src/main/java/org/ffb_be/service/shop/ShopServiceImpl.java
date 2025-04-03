@@ -3,24 +3,21 @@ package org.ffb_be.service.shop;
 import lombok.AllArgsConstructor;
 import org.ffb_be.dto.CountDTOBy.CountByDateDTO;
 import org.ffb_be.dto.CountDTOBy.CountByMonthDTO;
+import org.ffb_be.dto.CountDTOBy.CountByYearDTO;
 import org.ffb_be.dto.auth.ProfileDto.BusinessProfileDTO;
 import org.ffb_be.dto.auth.userDto.OwnerDTO;
+import org.ffb_be.dto.banner.BannerDTO;
 import org.ffb_be.dto.shop.ShopDTO;
 import org.ffb_be.dto.shop.ShopRegisterDTO;
-import org.ffb_be.entity.Profile;
-import org.ffb_be.entity.Role;
-import org.ffb_be.entity.Shop;
-import org.ffb_be.entity.User;
+import org.ffb_be.entity.*;
 import org.ffb_be.exception.BadRequestException;
 import org.ffb_be.exception.NotFoundException;
-import org.ffb_be.repository.ProfileRepository;
-import org.ffb_be.repository.RoleRepository;
-import org.ffb_be.repository.ShopRepository;
-import org.ffb_be.repository.UserRepository;
+import org.ffb_be.repository.*;
 import org.ffb_be.utils.EncryptUtil;
 import org.ffb_be.utils.enums.Status;
 import org.ffb_be.utils.enums.upload.CloudinaryUpload;
 import org.ffb_be.utils.mapping.ShopMapper;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -34,8 +31,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+
 
 @Service
 @Transactional
@@ -48,7 +44,8 @@ public class ShopServiceImpl implements ShopService {
     private final CloudinaryUpload cloudinaryUpload;
     private final EncryptUtil encryptUtil;
     private final RoleRepository roleRepository;
-
+    private final TypesRepository typesRepository;
+    private final ImageRepository imageRepository;
     @Override
     public Page<ShopDTO> getShops(String type, String status, String search, Pageable pageable) {
         Specification<Shop> spec = Specification.where(null);
@@ -336,39 +333,57 @@ public class ShopServiceImpl implements ShopService {
 
         List<CountByMonthDTO> countByMonthDTOS = new ArrayList<>();
 
-        // Chuyển đổi kết quả thành Map với tháng là key và số lượng shop là value
+        // Chuyển đổi kết quả thành danh sách DTO
         for (Object[] result : results) {
             CountByMonthDTO countByMonthDTO = new CountByMonthDTO();
-            countByMonthDTO.setMonth((Integer) result[0]);
-            if (result[1] instanceof Long) {
-                countByMonthDTO.setCount((Long) result[1]);
+
+            // Get the month and year from the query result
+            int month = (Integer) result[0]; // Month
+            int year = (Integer) result[1]; // Year
+
+            // Format the month as yyyy/MM
+            String formattedMonth = String.format("%d/%02d", month, year); // Example: 2025/03
+            countByMonthDTO.setMonth(formattedMonth);
+
+            // Get the order count (it could be either Long or Integer)
+            if (result[2] instanceof Long) {
+                countByMonthDTO.setCount((Long) result[2]);
             } else {
-                // Xử lý trường hợp không phải Long
-                countByMonthDTO.setCount(((Integer) result[1]).longValue());
+                countByMonthDTO.setCount(((Integer) result[2]).longValue());
             }
+
+            // Add the DTO to the result list
             countByMonthDTOS.add(countByMonthDTO);
         }
-
         return countByMonthDTOS;
     }
 
     // Đếm số lượng shop theo trạng thái và năm
-    public List<CountByMonthDTO> getShopCountByYear(Status status, LocalDate startDate, LocalDate endDate) {
+    public List<CountByYearDTO> getShopCountByYear(Status status, LocalDate startDate, LocalDate endDate) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         List<Object[]> results = shopRepository.countShopsByStatusAndYear(status, startDateTime, endDateTime);
 
-        List<CountByMonthDTO> countByMonthDTOS = new ArrayList<>();
+        List<CountByYearDTO> countByYearDTOS = new ArrayList<>();
 
-        // Chuyển đổi kết quả thành Map với tháng là key và số lượng shop là value
+        // Duyệt qua các kết quả trả về từ truy vấn
         for (Object[] result : results) {
-            CountByMonthDTO countByMonthDTO = new CountByMonthDTO();
-            countByMonthDTO.setMonth((Integer) result[0]);
-            countByMonthDTO.setCount((Long) result[1]);
-            countByMonthDTOS.add(countByMonthDTO);
+            CountByYearDTO countByYearDTO = new CountByYearDTO();
+
+            // Lấy năm từ kết quả truy vấn (result[0] chứa năm)
+            int year = (Integer) result[0];
+            countByYearDTO.setYear(year);
+
+            // Lấy số lượng đơn hàng từ kết quả truy vấn (result[1] chứa số lượng đơn hàng)
+            Long count = (Long) result[1];
+            countByYearDTO.setCount(count);
+
+            // Thêm đối tượng vào danh sách kết quả
+            countByYearDTOS.add(countByYearDTO);
         }
 
-        return countByMonthDTOS;
+        // Trả về danh sách kết quả
+        return countByYearDTOS;
     }
 
     public List<CountByDateDTO> getShopCountByDayAndStatus(Status status, LocalDate startDate, LocalDate endDate) {
@@ -387,4 +402,56 @@ public class ShopServiceImpl implements ShopService {
     public long countPendingShop() {
         return shopRepository.countPendingShop();
     }
+
+    @Override
+    public void rateShop(Long shopId,Double newRate) {
+        Shop shop = shopRepository.findById(shopId).get();
+        shop.setRate((shop.getRate()*shop.getViewCount()+newRate)/(shop.getViewCount()+1));
+        shop.setViewCount(shop.getViewCount() + 1);
+        shopRepository.save(shop);
+    }
+
+    @Override
+    public void uploadBanner(Long shopId, MultipartFile banner) throws IOException {
+        Shop shop=shopRepository.findById(shopId).get();
+        Image image=new Image();
+        String url = cloudinaryUpload.uploadFile(banner);
+        image.setUrl(url);
+        image.setRelatedId(shop.getId());
+        image.setOwnerId(shop.getOwner().getId());
+        image.setType(typesRepository.findById(8L).get());
+        imageRepository.save(image);
+    }
+
+    @Override
+    public List<BannerDTO> viewBannerByShop(Long shopId) {
+        List<Image> images=imageRepository.findAllByRelatedIdAndType_Id(shopId,8L);
+        List<BannerDTO> bannerDTOS=new ArrayList<>();
+        for (Image image : images) {
+            BannerDTO bannerDTO=new BannerDTO();
+            bannerDTO.setUrl(image.getUrl());
+            bannerDTO.setBannerId(image.getId());
+            bannerDTO.setShopId(shopId);
+            bannerDTO.setStatus(image.getStatus().toString());
+            bannerDTOS.add(bannerDTO);
+        }
+        return bannerDTOS;
+    }
+
+    @Override
+    public List<BannerDTO> homePageBanner() {
+        List<Image> images=imageRepository.findAllByStatusAndType_Id(Status.ACTIVE,8L);
+        List<BannerDTO> bannerDTOS=new ArrayList<>();
+        for (Image image : images) {
+            BannerDTO bannerDTO=new BannerDTO();
+            bannerDTO.setUrl(image.getUrl());
+            bannerDTO.setBannerId(image.getId());
+            bannerDTO.setShopId(image.getRelatedId());
+            bannerDTO.setStatus(image.getStatus().toString());
+            bannerDTOS.add(bannerDTO);
+        }
+        return bannerDTOS;
+    }
+
+
 }

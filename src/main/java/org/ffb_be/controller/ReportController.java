@@ -3,9 +3,12 @@ package org.ffb_be.controller;
 import lombok.RequiredArgsConstructor;
 import org.ffb_be.dto.CountDTOBy.CountByDateDTO;
 import org.ffb_be.dto.CountDTOBy.CountByMonthDTO;
+import org.ffb_be.dto.CountDTOBy.CountByYearDTO;
 import org.ffb_be.dto.report.ReportCreateDTO;
 import org.ffb_be.service.report.ReportService;
 import org.ffb_be.utils.enums.ReportStatus;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
@@ -49,11 +52,20 @@ public class ReportController {
         return ResponseEntity.ok( reportService.findAllByShop(id,page,size));
     }
 
-    @GetMapping("/all")
-    public ResponseEntity<?> getAll(
+    @GetMapping("/status")
+    public ResponseEntity<?> getAllByStatus(      @RequestParam("status") String status,
                                           @RequestParam(value = "page", defaultValue = "1", required = false) Integer page,
                                           @RequestParam(value = "size", defaultValue = "20", required = false) Integer size) {
-        return ResponseEntity.ok( reportService.findAll(page,size));
+        ReportStatus reportStatus = ReportStatus.valueOf(status);
+        Pageable pageable = PageRequest.of(page-1, size);
+        return ResponseEntity.ok( reportService.findAllByStatus(reportStatus,pageable));
+    }
+    @GetMapping("/all")
+    public ResponseEntity<?> getAll(
+            @RequestParam(value = "page", defaultValue = "1", required = false) Integer page,
+            @RequestParam(value = "size", defaultValue = "20", required = false) Integer size) {
+        Pageable pageable = PageRequest.of(page-1, size);
+        return ResponseEntity.ok( reportService.findAll(pageable));
     }
     @GetMapping("/count/day")
     public List<CountByDateDTO> getReportCountByDay(
@@ -74,7 +86,7 @@ public class ReportController {
         return reportService.getReportCountByMonth(reportStatus, startDate, endDate,type);
     }
     @GetMapping("/count/year")
-    public List<CountByMonthDTO> getReportCountByYear(
+    public List<CountByYearDTO> getReportCountByYear(
             @RequestParam("status") String status,
             @RequestParam("type") Long type) {
         ReportStatus reportStatus = ReportStatus.valueOf(status);
@@ -86,5 +98,16 @@ public class ReportController {
     @GetMapping("count/pending")
     public Long countAllPendingReports() {
         return reportService.countAllReports();
+    }
+
+    @PutMapping("/update")
+    public void updateStatus(
+                              @RequestParam("id") Long id){
+        reportService.updateReportStatus(id);
+    }
+
+    @GetMapping("/shop/count")
+    public Long countReportsByShop(@RequestParam("id") Long id) {
+        return reportService.countAllByShop(id);
     }
 }

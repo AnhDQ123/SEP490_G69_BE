@@ -2,6 +2,7 @@ package org.ffb_be.controller;
 
 
 
+import org.ffb_be.dto.feedback.FeedbackDTO;
 import org.ffb_be.service.feedback.FeedbackService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,5 +25,12 @@ public class FeedbackController {
                                           @RequestParam(value = "size", defaultValue = "20", required = false) Integer size) {
         Pageable pageable = PageRequest.of(page-1, size);
         return ResponseEntity.ok(feedbackService.findAll(id,pageable) );
+    }
+
+    @PostMapping("/create")
+    public void create(@RequestParam("userId") Long userId,
+                                    @RequestParam("productId") Long productId,
+                                    @RequestBody FeedbackDTO feedbackDTO) {
+        feedbackService.create(userId,productId,feedbackDTO);
     }
 }

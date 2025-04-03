@@ -2,6 +2,7 @@ package org.ffb_be.controller;
 
 import org.ffb_be.dto.CountDTOBy.CountByDateDTO;
 import org.ffb_be.dto.CountDTOBy.CountByMonthDTO;
+import org.ffb_be.dto.CountDTOBy.CountByYearDTO;
 import org.ffb_be.dto.order.CountDTO;
 import org.ffb_be.dto.order.OrderDTO;
 import org.ffb_be.dto.order.ReturnOrderDTO;
@@ -68,7 +69,9 @@ public class OrderController {
         return ResponseEntity.ok(orders);
     }
     @GetMapping("/status")
-    public ResponseEntity<?> findByStatus(@RequestParam Long id ,@RequestParam OrderStatus status,@RequestParam Pageable pageable) throws IOException {
+    public ResponseEntity<?> findByStatus(@RequestParam Long id ,
+                                          @RequestParam OrderStatus status,
+                                           Pageable pageable) throws IOException {
         Page<OrderDTO> orders = orderService.findAllByOwnerAndStatus(id,status,pageable);
         if (orders.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -98,6 +101,10 @@ public class OrderController {
     @GetMapping("/shop/status")
     public ResponseEntity<?> findByShopStatus(@RequestParam Long id ,@RequestParam OrderStatus status, Pageable pageable) throws IOException {
         return ResponseEntity.ok(orderService.findAllByShopAndStatus(id,status,pageable));
+    }
+    @GetMapping("/shop/pending")
+    public ResponseEntity<?> findByShopPending(@RequestParam Long id , Pageable pageable) throws IOException {
+        return ResponseEntity.ok(orderService.findAllByShopAndPending( id, pageable));
     }
 
     @GetMapping("/shipper")
@@ -165,7 +172,7 @@ public class OrderController {
     }
 
     @GetMapping("/count/year")
-    public List<CountByMonthDTO> getOrderCountByStatusAndYear(
+    public List<CountByYearDTO> getOrderCountByStatusAndYear(
             @RequestParam("status") String status) {
         OrderStatus orderStatus = OrderStatus.valueOf(status);
         LocalDate endDate = LocalDate.now();

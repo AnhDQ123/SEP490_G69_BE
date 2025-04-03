@@ -3,6 +3,7 @@ package org.ffb_be.dto.order;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.ffb_be.dto.discount.DiscountDTO2;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -16,7 +17,7 @@ public class OrderItemDTO {
     private Long productId;
     private String productName;
     private Long discountId;
-    private BigDecimal discount;
+    private List<DiscountDTO2> discount;
     private String image;
     private BigDecimal price;
     private LocalDateTime createdAt;

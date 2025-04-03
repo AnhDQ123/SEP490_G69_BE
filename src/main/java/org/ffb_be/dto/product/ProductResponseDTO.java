@@ -29,4 +29,7 @@ public class ProductResponseDTO {
     private String description;
     private Float rate;
     private BigDecimal defaultPrice;
+    private String foodType;
+    private Long shopId;
+    private int reportCount;
 }

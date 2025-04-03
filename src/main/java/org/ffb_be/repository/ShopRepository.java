@@ -36,10 +36,10 @@ public interface ShopRepository extends JpaRepository<Shop, Long>, JpaSpecificat
     List<Object[]> countShopsByStatusAndDay(Status status,
                                              LocalDateTime startDate,
                                              LocalDateTime endDate);
-    @Query("SELECT FUNCTION('MONTH', s.createdAt), COUNT(s) FROM Shop s " +
+    @Query("SELECT FUNCTION('MONTH', s.createdAt),FUNCTION('YEAR', s.createdAt), COUNT(s) FROM Shop s " +
             "WHERE s.isActive = :status AND s.createdAt BETWEEN :startDate AND :endDate " +
-            "GROUP BY FUNCTION('MONTH', s.createdAt) " +
-            "ORDER BY FUNCTION('MONTH', s.createdAt)")
+            "GROUP BY FUNCTION('YEAR', s.createdAt), FUNCTION('MONTH', s.createdAt) " +
+            "ORDER BY FUNCTION('YEAR', s.createdAt), FUNCTION('MONTH', s.createdAt)")
     List<Object[]> countShopsByStatusAndMonth(Status status,
                                               LocalDateTime startDate,
                                               LocalDateTime endDate);
@@ -53,4 +53,6 @@ public interface ShopRepository extends JpaRepository<Shop, Long>, JpaSpecificat
                                               LocalDateTime endDate);
     @Query("SELECT COUNT(u) FROM Shop u WHERE u.isActive = 'PENDING'")
     long countPendingShop();
+    @Query("SELECT COUNT(u) FROM Shop u ")
+    long countShop();
 }

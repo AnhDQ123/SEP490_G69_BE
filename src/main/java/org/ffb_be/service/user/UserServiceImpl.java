@@ -1,6 +1,8 @@
 package org.ffb_be.service.user;
 
 import jakarta.persistence.NonUniqueResultException;
+import org.ffb_be.dto.CountDTOBy.CountByMonthDTO;
+import org.ffb_be.dto.CountDTOBy.CountByYearDTO;
 import org.ffb_be.dto.auth.ProfileDto.ProfileDTO;
 import org.ffb_be.dto.auth.userDto.UserCreateDTO;
 import org.ffb_be.dto.auth.userDto.UserResponseDTO;
@@ -101,7 +103,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ProfileDTO findById(Long id) {
-        Profile profile = profileRepository.findById(id).orElse(null);
+        Profile profile = profileRepository.findByUserId2(id).orElse(null);
         ProfileDTO profileDTO = new ProfileDTO();
         profileDTO.setStatus(userRepository.findById(id).get().getStatus());
         profileDTO.setEmail(userRepository.findById(id).get().getEmail());
@@ -196,41 +198,70 @@ public class UserServiceImpl implements UserService {
         return countByDateDTOS;
     }
 
-    public List<CountByDateDTO> getUserCountByMonthAndStatus(LocalDate startDate, LocalDate endDate, Status status) {
+    public List<CountByMonthDTO> getUserCountByMonthAndStatus(LocalDate startDate, LocalDate endDate, Status status) {
 
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         List<Object[]> results = userRepository.countUsersByMonthAndStatus(startDateTime, endDateTime, status);
-        List<CountByDateDTO> countByDateDTOS = new ArrayList<>();
+        List<CountByMonthDTO> countByMonthDTOS = new ArrayList<>();
+
+        // Chuyển đổi kết quả thành danh sách DTO
         for (Object[] result : results) {
-            CountByDateDTO countByDateDTO = new CountByDateDTO();
-            countByDateDTO.setDate((LocalDateTime) result[0]);
-            countByDateDTO.setCount((Long) result[1]);
-            countByDateDTOS.add(countByDateDTO);
+            CountByMonthDTO countByMonthDTO = new CountByMonthDTO();
+
+            // Get the month and year from the query result
+            int month = (Integer) result[1]; // Month
+            int year = (Integer) result[0]; // Year
+
+            // Format the month as yyyy/MM
+            String formattedMonth = String.format("%d/%02d", year, month); // Example: 2025/03
+            countByMonthDTO.setMonth(formattedMonth);
+
+            // Get the order count (it could be either Long or Integer)
+            if (result[2] instanceof Long) {
+                countByMonthDTO.setCount((Long) result[2]);
+            } else {
+                countByMonthDTO.setCount(((Integer) result[2]).longValue());
+            }
+
+            // Add the DTO to the result list
+            countByMonthDTOS.add(countByMonthDTO);
         }
-        return countByDateDTOS;
+        return countByMonthDTOS;
     }
 
-    public List<CountByDateDTO> getUserCountByYearAndStatus(LocalDate startDate, LocalDate endDate, Status status) {
+    public List<CountByYearDTO> getUserCountByYearAndStatus(LocalDate startDate, LocalDate endDate, Status status) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         List<Object[]> results = userRepository.countUsersByYearAndStatus(startDateTime, endDateTime, status);
 
-        List<CountByDateDTO> countByDateDTOS = new ArrayList<>();
+        List<CountByYearDTO> countByYearDTOS = new ArrayList<>();
+
+        // Duyệt qua các kết quả trả về từ truy vấn
         for (Object[] result : results) {
-            CountByDateDTO countByDateDTO = new CountByDateDTO();
-            countByDateDTO.setDate((LocalDateTime) result[0]);
-            countByDateDTO.setCount((Long) result[1]);
-            countByDateDTOS.add(countByDateDTO);
+            CountByYearDTO countByYearDTO = new CountByYearDTO();
+
+            // Lấy năm từ kết quả truy vấn (result[0] chứa năm)
+            int year = (Integer) result[0];
+            countByYearDTO.setYear(year);
+
+            // Lấy số lượng đơn hàng từ kết quả truy vấn (result[1] chứa số lượng đơn hàng)
+            Long count = (Long) result[1];
+            countByYearDTO.setCount(count);
+
+            // Thêm đối tượng vào danh sách kết quả
+            countByYearDTOS.add(countByYearDTO);
         }
-        return countByDateDTOS;
+
+        // Trả về danh sách kết quả
+        return countByYearDTOS;
     }
 
     public long countUsersAreShipper() {
         return userRepository.countUsersAreShipper();
     }
     public long countUsersHaveShop() {
-        return userRepository.countUsersHaveShop();
+        return shopRepository.countShop();
     }
     public long countPendingShipper() {
         return userRepository.countPendingShipper();
@@ -256,5 +287,14 @@ public class UserServiceImpl implements UserService {
             return inactive;
         }
         return null;
+    }
+
+    @Override
+    public void add() {
+        User user=new User();
+        user.setUsername("0123456789");
+        user.setPassword("123456");
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        userRepository.save(user);
     }
 }

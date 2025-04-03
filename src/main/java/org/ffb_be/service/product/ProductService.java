@@ -24,5 +24,8 @@ public interface ProductService {
     List<Object[]> findTopSellingProductsToday(Long shopId);
     List<Object[]> findTopSellingProductsThisMonth(Long shopId);
     List<Object[]> findTopSellingProductsThisYear(Long shopId);
+    List<ProductResponseDTO> findByCategoryByShop(Long shopId);
+//    List<ProductResponseDTO> searchHighlySimilarProducts(String query, int page, int size);
+//    String syncAllProducts();
 }
 

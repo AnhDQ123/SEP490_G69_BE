@@ -11,4 +11,6 @@ public interface CartService {
     void save(CartDTO cartDTO) throws IOException;
     List<CartDTO> findByUserId(Long id);
     CartDTO findById(Long id);
+    void deleteItemFromCart(Long cartId,Long id);
+    void deleteOptionFromCart(Long cartId,Long optionId);
 }

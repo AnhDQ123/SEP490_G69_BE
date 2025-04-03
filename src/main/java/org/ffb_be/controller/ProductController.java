@@ -55,8 +55,8 @@ public class ProductController {
     @PostMapping("/add")
     public ResponseEntity<?> addProduct(@Validated @ModelAttribute() ProductCreateDTO productCreateDTO,
                                          BindingResult bindingResult,
-                                         @RequestParam("avatar") MultipartFile avatar,
-                                         @RequestParam("option")  List<MultipartFile> option) throws IOException {
+                                        MultipartFile avatar,
+                                        List<MultipartFile> option) throws IOException {
         if(bindingResult.hasErrors()) {
             return ResponseEntity.badRequest().body(bindingResult.getAllErrors());
         }
@@ -130,4 +130,20 @@ public class ProductController {
     public List<Object[]> findTopSellingProductsThisYear(@RequestParam("shopId") Long shopId) {
         return productService.findTopSellingProductsThisYear(shopId);
     }
+
+    @GetMapping("/shop/drink")
+    public ResponseEntity<?> getDrinkByShop(@RequestParam("shopId") Long shopId) {
+        return ResponseEntity.ok( productService.findByCategoryByShop(shopId));
+    }
+//    @GetMapping("/search")
+//    public List<ProductResponseDTO> searchProducts(@RequestParam String query,
+//                                                   @RequestParam(value = "page", defaultValue = "1", required = false) Integer page,
+//                                                   @RequestParam(value = "size", defaultValue = "20", required = false) Integer size
+//    ) {
+//        return productService.searchHighlySimilarProducts(query,page,size); // Tìm kiếm sản phẩm theo từ khóa
+//    }
+//    @PostMapping("/document")
+//    public String syncProducts() {
+//        return productService.syncAllProducts();
+//    }
 }

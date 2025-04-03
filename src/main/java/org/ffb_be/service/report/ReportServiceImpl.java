@@ -3,14 +3,15 @@ package org.ffb_be.service.report;
 import lombok.RequiredArgsConstructor;
 import org.ffb_be.dto.CountDTOBy.CountByDateDTO;
 import org.ffb_be.dto.CountDTOBy.CountByMonthDTO;
+import org.ffb_be.dto.CountDTOBy.CountByYearDTO;
 import org.ffb_be.dto.image.ImageDTO;
 import org.ffb_be.dto.report.ReportCreateDTO;
 import org.ffb_be.dto.report.ReportViewDTO;
-import org.ffb_be.entity.Image;
-import org.ffb_be.entity.Report;
+import org.ffb_be.entity.*;
 import org.ffb_be.repository.*;
 import org.ffb_be.utils.enums.ReportStatus;
 
+import org.ffb_be.utils.enums.Status;
 import org.ffb_be.utils.enums.upload.CloudinaryUpload;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -70,18 +71,18 @@ public class ReportServiceImpl implements ReportService {
         ReportViewDTO reportViewDTO=new ReportViewDTO();
         reportViewDTO.setId(id);
         reportViewDTO.setReporterId(report.getReporter().getId());
-        if(report.getType().getId()==4l){
+        if(report.getType().getId()==4L){
             reportViewDTO.setReportName(blogRepository.findById(report.getRelatedId()).get().getWriter().getUsername());
             reportViewDTO.setReportedUserId(blogRepository.findById(report.getRelatedId()).get().getWriter().getId());
             reportViewDTO.setReportItemId(report.getRelatedId());
             reportViewDTO.setReportType("BLOG");
         }
-        if(report.getType().getId()==5l){
+        if(report.getType().getId()==5L){
             reportViewDTO.setReportName(shopRepository.findById(report.getRelatedId()).get().getName());
             reportViewDTO.setReportedUserId(shopRepository.findById(report.getRelatedId()).get().getOwner().getId());
             reportViewDTO.setReportItemId(report.getRelatedId());
             reportViewDTO.setReportType("SHOP");
-        }if(report.getType().getId()==6l){
+        }if(report.getType().getId()==6L){
             reportViewDTO.setReportName(productRepository.findById(report.getRelatedId()).get().getName());
             reportViewDTO.setReportedUserId(shopRepository.findByProduct(report.getRelatedId()).getOwner().getId());
             reportViewDTO.setReportItemId(report.getRelatedId());
@@ -159,9 +160,13 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public Page<ReportViewDTO> findAll( int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+    public Page<ReportViewDTO> findAllByStatus(ReportStatus status, Pageable pageable) {
+        Page<Report> reports = reportRepository.findAllByStatus(status,pageable);
+        return reports.map(this::convertToDTO);
+    }
 
+    @Override
+    public Page<ReportViewDTO> findAll(Pageable pageable) {
         Page<Report> reports = reportRepository.findAll(pageable);
         return reports.map(this::convertToDTO);
     }
@@ -187,39 +192,92 @@ public class ReportServiceImpl implements ReportService {
 
         List<CountByMonthDTO> countByMonthDTOS = new ArrayList<>();
 
-        // Chuyển đổi kết quả thành Map với tháng là key và số lượng shop là value
+        // Chuyển đổi kết quả thành danh sách DTO
         for (Object[] result : results) {
             CountByMonthDTO countByMonthDTO = new CountByMonthDTO();
-            countByMonthDTO.setMonth((Integer) result[0]);
-            if (result[1] instanceof Long) {
-                countByMonthDTO.setCount((Long) result[1]);
+
+            // Get the month and year from the query result
+            int month = (Integer) result[1]; // Month
+            int year = (Integer) result[0]; // Year
+
+            // Format the month as yyyy/MM
+            String formattedMonth = String.format("%d/%02d", year, month); // Example: 2025/03
+            countByMonthDTO.setMonth(formattedMonth);
+
+            // Get the order count (it could be either Long or Integer)
+            if (result[2] instanceof Long) {
+                countByMonthDTO.setCount((Long) result[2]);
             } else {
-                // Xử lý trường hợp không phải Long
-                countByMonthDTO.setCount(((Integer) result[1]).longValue());
+                countByMonthDTO.setCount(((Integer) result[2]).longValue());
             }
+
+            // Add the DTO to the result list
             countByMonthDTOS.add(countByMonthDTO);
         }
-
         return countByMonthDTOS;
     }
-    public List<CountByMonthDTO> getReportCountByYear(ReportStatus status, LocalDate startDate, LocalDate endDate,Long type) {
+    public List<CountByYearDTO> getReportCountByYear(ReportStatus status, LocalDate startDate, LocalDate endDate,Long type) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         List<Object[]> results = reportRepository.countReportsByStatusAndTypeIdAndYear(status, startDateTime, endDateTime,type);
 
-        List<CountByMonthDTO> countByMonthDTOS = new ArrayList<>();
+        List<CountByYearDTO> countByYearDTOS = new ArrayList<>();
 
-        // Chuyển đổi kết quả thành Map với tháng là key và số lượng shop là value
+        // Duyệt qua các kết quả trả về từ truy vấn
         for (Object[] result : results) {
-            CountByMonthDTO countByMonthDTO = new CountByMonthDTO();
-            countByMonthDTO.setMonth((Integer) result[0]);
-            countByMonthDTO.setCount((Long) result[1]);
-            countByMonthDTOS.add(countByMonthDTO);
+            CountByYearDTO countByYearDTO = new CountByYearDTO();
+
+            // Lấy năm từ kết quả truy vấn (result[0] chứa năm)
+            int year = (Integer) result[0];
+            countByYearDTO.setYear(year);
+
+            // Lấy số lượng đơn hàng từ kết quả truy vấn (result[1] chứa số lượng đơn hàng)
+            Long count = (Long) result[1];
+            countByYearDTO.setCount(count);
+
+            // Thêm đối tượng vào danh sách kết quả
+            countByYearDTOS.add(countByYearDTO);
         }
 
-        return countByMonthDTOS;
+        // Trả về danh sách kết quả
+        return countByYearDTOS;
     }
     public Long countAllReports() {
         return reportRepository.countAllReports();
+    }
+
+    @Override
+    public void updateReportStatus(Long id) {
+        Report report=reportRepository.findById(id).get();
+        if(report.getType().getId()==4L){
+            Blog blog=blogRepository.findById(report.getRelatedId()).get();
+            blog.setReportCount(blog.getReportCount()+1);
+            if(blog.getReportCount()>10){
+                blog.setStatus(Status.DELETED);
+            }
+            blogRepository.save(blog);
+        }
+        if(report.getType().getId()==5L){
+            Shop shop=shopRepository.findById(report.getRelatedId()).get();
+            shop.setReportCount(shop.getReportCount()+1);
+            if(shop.getReportCount()>20){
+                shop.setIsActive(Status.DELETED);
+            }
+            shopRepository.save(shop);
+        }
+        if(report.getType().getId()==6L){
+            Product product=productRepository.findById(report.getRelatedId()).get();
+            product.setReportCount(product.getReportCount()+1);
+            if(product.getReportCount()>10){
+                product.setStatus(Status.DELETED);
+            }
+            productRepository.save(product);
+        }
+        reportRepository.save(report);
+    }
+
+    @Override
+    public Long countAllByShop(Long shopId) {
+        return reportRepository.countAllReportsByShop(shopId);
     }
 }
