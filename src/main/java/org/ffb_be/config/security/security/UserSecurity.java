@@ -17,7 +17,9 @@ public class UserSecurity implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of( new SimpleGrantedAuthority("ROLE_"+employee.getRole().getName()));
     }
-
+    public Long getId(){
+        return employee.getId();
+    }
     @Override
     public String getPassword() {
         return employee.getPassword();

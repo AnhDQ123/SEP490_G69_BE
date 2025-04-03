@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.ffb_be.utils.enums.Status;
 
+
 @Entity
 @Table(name = "feedbacks")
 @AllArgsConstructor
@@ -24,6 +25,9 @@ public class Feedback extends BaseEntity{
 
     @Column(name="rate")
     private Double rate;
+
+    @Column
+    private String image;
 
     @Enumerated(EnumType.STRING)
     private Status status;

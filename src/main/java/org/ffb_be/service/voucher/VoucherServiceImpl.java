@@ -2,6 +2,7 @@ package org.ffb_be.service.voucher;
 
 import lombok.RequiredArgsConstructor;
 import org.ffb_be.dto.voucher.VoucherDTO;
+
 import org.ffb_be.entity.Voucher;
 import org.ffb_be.exception.NotFoundException;
 import org.ffb_be.repository.OrderRepository;
@@ -9,6 +10,7 @@ import org.ffb_be.repository.VoucherRepository;
 import org.ffb_be.utils.enums.DiscountType;
 import org.ffb_be.utils.enums.Status;
 import org.ffb_be.utils.mapping.VoucherMapper;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -49,13 +51,16 @@ public class VoucherServiceImpl implements VoucherService {
     public VoucherDTO addVoucher(VoucherDTO dto) {
         Voucher voucher = voucherMapper.toEntity(dto);
         voucher.setUsedVouchers(0);
+        if (voucher.getStartDate().isEqual(LocalDate.now())) {
+            voucher.setStatus(Status.ACTIVE);
+        }
         voucher = voucherRepository.save(voucher);
         return voucherMapper.toDTO(voucher);
     }
 
     @Override
-    public VoucherDTO updateVoucher(Long id, VoucherDTO dto) {
-        Voucher voucher = voucherRepository.findById(id)
+    public VoucherDTO updateVoucher(String code, VoucherDTO dto) {
+        Voucher voucher = voucherRepository.findByCode(code)
                 .orElseThrow(() -> new NotFoundException("Voucher"));
         voucher.setDiscountType(dto.getDiscountType());
         voucher.setDiscountValue(dto.getDiscountValue());
@@ -71,8 +76,8 @@ public class VoucherServiceImpl implements VoucherService {
     }
 
     @Override
-    public void deleteVoucher(Long id) {
-        Voucher voucher = voucherRepository.findById(id)
+    public void deleteVoucher(String code) {
+        Voucher voucher = voucherRepository.findByCode(code)
                 .orElseThrow(() -> new NotFoundException("Voucher"));
         voucherRepository.delete(voucher);
     }
@@ -126,6 +131,25 @@ public class VoucherServiceImpl implements VoucherService {
             stats.put((String) result[0], ((Long) result[1]).intValue());
         }
         return stats;
+    }
+
+    @Scheduled(cron = "0 0 0 * * ?")  // Lên lịch chạy mỗi ngày lúc nửa đêm
+    public void checkAndUpdateDiscountStatus() {
+        LocalDate today = LocalDate.now();
+
+        List<Voucher> vouchers=voucherRepository.findAll(); // Lấy tất cả discounts
+
+        for (Voucher voucher : vouchers) {
+            // Nếu ngày hôm nay là startDate thì đổi trạng thái thành activated
+            if (voucher.getStartDate().equals(today) && !voucher.getStatus().equals(Status.ACTIVE)) {
+                voucher.setStatus(Status.ACTIVE);
+                voucherRepository.save(voucher);
+            }
+            if (voucher.getEndDate().equals(today) && !voucher.getStatus().equals(Status.INACTIVE)) {
+                voucher.setStatus(Status.INACTIVE);
+                voucherRepository.save(voucher);
+            }
+        }
     }
 
 }

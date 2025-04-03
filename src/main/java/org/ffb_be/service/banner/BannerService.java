@@ -12,7 +12,7 @@ public interface BannerService {
 
     ImageDTO getBannerById(Long id);
 
-    void createBanner(ImageDTO banner, MultipartFile file) throws IOException;
+    void createBanner(Long shopId,ImageDTO banner, MultipartFile file) throws IOException;
 
     void updateBanner(Long id, ImageDTO image, MultipartFile file) throws IOException;
 

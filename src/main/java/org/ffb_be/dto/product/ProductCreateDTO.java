@@ -7,6 +7,7 @@ import java.util.List;
 @Data
 public class ProductCreateDTO {
     private String name;
+    private Long shopId;
     private String description;
     private String category;
     private int quantity;
@@ -14,4 +15,5 @@ public class ProductCreateDTO {
     private List<FoodOptionDTO> foodOption;
     private String supplier;
     private String manufacturer;
+    private String foodType;
 }

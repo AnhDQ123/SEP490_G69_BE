@@ -28,8 +28,9 @@ public class BannerController {
         return ResponseEntity.ok(bannerService.getBannerById(bannerId));
     }
 
-    @PostMapping("/create")
+    @PostMapping("/create/{shopId}")
     public ResponseEntity<?> createBanner(
+            @PathVariable Long shopId,
             @Validated @ModelAttribute ImageDTO banner,
             @RequestPart(value = "file", required = false) MultipartFile file,
             BindingResult result
@@ -37,7 +38,7 @@ public class BannerController {
         if (result.hasErrors()) {
             return ResponseEntity.badRequest().body(result.getAllErrors());
         }
-        bannerService.createBanner(banner, file);
+        bannerService.createBanner(shopId, banner, file);
         return ResponseEntity.ok().build();
     }
 

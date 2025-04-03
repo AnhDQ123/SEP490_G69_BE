@@ -38,4 +38,16 @@ public class CartController {
     public ResponseEntity<?> getCartById(@PathVariable Long id) {
         return ResponseEntity.ok(cartService.findById(id));
     }
+
+    @DeleteMapping("/item/delete")
+    public void deleteItemFromCart(  @RequestParam("cartId") Long cartId,
+                                     @RequestParam("id") Long id){
+        cartService.deleteItemFromCart(cartId,id);
+    }
+    @DeleteMapping("/option/delete")
+    public void deleteItemOptionFromCart(  @RequestParam("cartId") Long cartId,
+                                     @RequestParam("id") Long id){
+        cartService.deleteOptionFromCart(cartId,id);
+    }
+
 }

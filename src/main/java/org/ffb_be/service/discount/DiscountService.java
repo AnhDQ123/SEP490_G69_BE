@@ -12,5 +12,5 @@ public interface DiscountService {
     DiscountDTO findById(Long id);
 
     List<DiscountDTO> findAllByShopIdAndStatus(Long shopId,Status status);
-
+    void checkAndUpdateDiscountStatus();
 }

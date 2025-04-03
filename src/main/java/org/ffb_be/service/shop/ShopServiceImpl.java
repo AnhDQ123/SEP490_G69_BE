@@ -1,18 +1,18 @@
 package org.ffb_be.service.shop;
 
 import lombok.AllArgsConstructor;
+import org.ffb_be.dto.CountDTOBy.CountByDateDTO;
+import org.ffb_be.dto.CountDTOBy.CountByMonthDTO;
+import org.ffb_be.dto.CountDTOBy.CountByYearDTO;
 import org.ffb_be.dto.auth.ProfileDto.BusinessProfileDTO;
 import org.ffb_be.dto.auth.userDto.OwnerDTO;
+import org.ffb_be.dto.banner.BannerDTO;
 import org.ffb_be.dto.shop.ShopDTO;
 import org.ffb_be.dto.shop.ShopRegisterDTO;
-import org.ffb_be.entity.Profile;
-import org.ffb_be.entity.Shop;
-import org.ffb_be.entity.User;
+import org.ffb_be.entity.*;
 import org.ffb_be.exception.BadRequestException;
 import org.ffb_be.exception.NotFoundException;
-import org.ffb_be.repository.ProfileRepository;
-import org.ffb_be.repository.ShopRepository;
-import org.ffb_be.repository.UserRepository;
+import org.ffb_be.repository.*;
 import org.ffb_be.utils.EncryptUtil;
 import org.ffb_be.utils.enums.Status;
 import org.ffb_be.utils.enums.upload.CloudinaryUpload;
@@ -20,6 +20,7 @@ import org.ffb_be.utils.mapping.ShopMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,6 +29,9 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
+
 
 @Service
 @Transactional
@@ -39,7 +43,9 @@ public class ShopServiceImpl implements ShopService {
     private final ProfileRepository profileRepository;
     private final CloudinaryUpload cloudinaryUpload;
     private final EncryptUtil encryptUtil;
-
+    private final RoleRepository roleRepository;
+    private final TypesRepository typesRepository;
+    private final ImageRepository imageRepository;
     @Override
     public Page<ShopDTO> getShops(String type, String status, String search, Pageable pageable) {
         Specification<Shop> spec = Specification.where(null);
@@ -83,7 +89,10 @@ public class ShopServiceImpl implements ShopService {
         User owner = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User"));
         Profile profile = profileRepository.getByUserId(userId)
-                .orElseThrow(() -> new NotFoundException("User"));
+                .orElseThrow(() -> new NotFoundException("Profile"));
+        if (owner.getRole().getName().equals("shipper")) {
+            throw new BadRequestException("User không thể tạo cửa hàng vì là shipper");
+        }
 
 
         Shop shop = shopMapper.toEntity(shopDTO);
@@ -137,7 +146,7 @@ public class ShopServiceImpl implements ShopService {
             MultipartFile citizenIDBack
     ) throws IOException {
         Shop shop = shopRepository.findById(shopId)
-                .orElseThrow(() -> new NotFoundException("Shop không tồn tại"));
+                .orElseThrow(() -> new NotFoundException("Shop"));
 
         Profile profile = profileRepository.getByUserId(shop.getOwner().getId())
                 .orElseThrow(() -> new NotFoundException("User"));
@@ -205,7 +214,7 @@ public class ShopServiceImpl implements ShopService {
             shop.setReason(null);
             shop.setIsActive(Status.PENDING);
         }
-
+        shop.setIsActive(Status.ACTIVE);
         profileRepository.save(profile);
         shopRepository.save(shop);
     }
@@ -220,6 +229,10 @@ public class ShopServiceImpl implements ShopService {
         if(shop.getIsActive() != Status.PENDING){
             throw new BadRequestException("Shop không ở trạng thái chờ duyệt");
         }
+        User user=userRepository.findById(shop.getOwner().getId()).get();
+        Role role=roleRepository.findById(2L).get();
+        user.setRole(role);
+        userRepository.save(user);
         shop.setIsActive(Status.ACTIVE);
         shopRepository.save(shop);
     }
@@ -277,10 +290,6 @@ public class ShopServiceImpl implements ShopService {
         }
     }
 
-
-
-
-
     @Override
     public ShopDTO getShopById(Long shopId) {
         return shopRepository.findById(shopId)
@@ -290,10 +299,43 @@ public class ShopServiceImpl implements ShopService {
 
     @Override
     public ShopDTO getShopByUserId(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User"));
+        Shop shop = shopRepository.findByOwnerId(user.getId())
+                .orElseThrow(() -> new NotFoundException("User"));
+        if(shop.getIsActive() == Status.INACTIVE){
+            throw new BadRequestException("Cửa hàng đã bị vô hiệu hóa");
+        }
+        if(shop.getIsActive() == Status.PENDING) {
+            throw new BadRequestException("Cửa hàng đang chờ duyệt");
+        }
         return shopRepository.findByOwnerId(userId)
                 .map(this::decryptShopDTO)
                 .orElseThrow(() -> new NotFoundException("Shop"));
     }
+
+    @Override
+    public ResponseEntity<?> getShopByOwnerId(Long userId) {
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) {
+            return ResponseEntity.badRequest().body("User không tồn tại");
+        }
+
+        Shop shop = shopRepository.findByOwnerId(user.getId()).orElse(null);
+        if (shop == null) {
+            return ResponseEntity.badRequest().body("Cửa hàng không tồn tại");
+        }
+
+        if (shop.getIsActive() == Status.INACTIVE) {
+            return ResponseEntity.ok().body("Cửa hàng đã bị vô hiệu hóa");
+        }
+        if (shop.getIsActive() == Status.PENDING) {
+            return ResponseEntity.ok().body("Cửa hàng đang chờ duyệt");
+        }
+
+        return ResponseEntity.ok(decryptShopDTO(shop));
+    }
+
 
 
     private ShopDTO decryptShopDTO(Shop shop) {
@@ -316,5 +358,132 @@ public class ShopServiceImpl implements ShopService {
     private String encryptSafe(String data) {
         return data != null ? encryptUtil.encrypt(data) : null;
     }
+    public List<CountByMonthDTO> getShopCountByMonth(Status status, LocalDate startDate, LocalDate endDate) {
+        LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+        List<Object[]> results = shopRepository.countShopsByStatusAndMonth(status, startDateTime, endDateTime);
+
+        List<CountByMonthDTO> countByMonthDTOS = new ArrayList<>();
+
+        // Chuyển đổi kết quả thành danh sách DTO
+        for (Object[] result : results) {
+            CountByMonthDTO countByMonthDTO = new CountByMonthDTO();
+
+            // Get the month and year from the query result
+            int month = (Integer) result[0]; // Month
+            int year = (Integer) result[1]; // Year
+
+            // Format the month as yyyy/MM
+            String formattedMonth = String.format("%d/%02d", month, year); // Example: 2025/03
+            countByMonthDTO.setMonth(formattedMonth);
+
+            // Get the order count (it could be either Long or Integer)
+            if (result[2] instanceof Long) {
+                countByMonthDTO.setCount((Long) result[2]);
+            } else {
+                countByMonthDTO.setCount(((Integer) result[2]).longValue());
+            }
+
+            // Add the DTO to the result list
+            countByMonthDTOS.add(countByMonthDTO);
+        }
+        return countByMonthDTOS;
+    }
+
+    // Đếm số lượng shop theo trạng thái và năm
+    public List<CountByYearDTO> getShopCountByYear(Status status, LocalDate startDate, LocalDate endDate) {
+        LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+        List<Object[]> results = shopRepository.countShopsByStatusAndYear(status, startDateTime, endDateTime);
+
+        List<CountByYearDTO> countByYearDTOS = new ArrayList<>();
+
+        // Duyệt qua các kết quả trả về từ truy vấn
+        for (Object[] result : results) {
+            CountByYearDTO countByYearDTO = new CountByYearDTO();
+
+            // Lấy năm từ kết quả truy vấn (result[0] chứa năm)
+            int year = (Integer) result[0];
+            countByYearDTO.setYear(year);
+
+            // Lấy số lượng đơn hàng từ kết quả truy vấn (result[1] chứa số lượng đơn hàng)
+            Long count = (Long) result[1];
+            countByYearDTO.setCount(count);
+
+            // Thêm đối tượng vào danh sách kết quả
+            countByYearDTOS.add(countByYearDTO);
+        }
+
+        // Trả về danh sách kết quả
+        return countByYearDTOS;
+    }
+
+    public List<CountByDateDTO> getShopCountByDayAndStatus(Status status, LocalDate startDate, LocalDate endDate) {
+        LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+        List<Object[]> results = shopRepository.countShopsByStatusAndDay(status, startDateTime, endDateTime);
+        List<CountByDateDTO> countByDateDTOS = new ArrayList<>();
+        for (Object[] result : results) {
+            CountByDateDTO countByDateDTO = new CountByDateDTO();
+            countByDateDTO.setDate((LocalDateTime) result[0]);
+            countByDateDTO.setCount((Long) result[1]);
+            countByDateDTOS.add(countByDateDTO);
+        }
+        return countByDateDTOS;
+    }
+    public long countPendingShop() {
+        return shopRepository.countPendingShop();
+    }
+
+    @Override
+    public void rateShop(Long shopId,Double newRate) {
+        Shop shop = shopRepository.findById(shopId).get();
+        shop.setRate((shop.getRate()*shop.getViewCount()+newRate)/(shop.getViewCount()+1));
+        shop.setViewCount(shop.getViewCount() + 1);
+        shopRepository.save(shop);
+    }
+
+    @Override
+    public void uploadBanner(Long shopId, MultipartFile banner) throws IOException {
+        Shop shop=shopRepository.findById(shopId).get();
+        Image image=new Image();
+        String url = cloudinaryUpload.uploadFile(banner);
+        image.setUrl(url);
+        image.setRelatedId(shop.getId());
+        image.setOwnerId(shop.getOwner().getId());
+        image.setType(typesRepository.findById(8L).get());
+        imageRepository.save(image);
+    }
+
+    @Override
+    public List<BannerDTO> viewBannerByShop(Long shopId) {
+        List<Image> images=imageRepository.findAllByRelatedIdAndType_Id(shopId,8L);
+        List<BannerDTO> bannerDTOS=new ArrayList<>();
+        for (Image image : images) {
+            BannerDTO bannerDTO=new BannerDTO();
+            bannerDTO.setUrl(image.getUrl());
+            bannerDTO.setBannerId(image.getId());
+            bannerDTO.setShopId(shopId);
+            bannerDTO.setStatus(image.getStatus().toString());
+            bannerDTOS.add(bannerDTO);
+        }
+        return bannerDTOS;
+    }
+
+    @Override
+    public List<BannerDTO> homePageBanner() {
+        List<Image> images=imageRepository.findAllByStatusAndType_Id(Status.ACTIVE,8L);
+        List<BannerDTO> bannerDTOS=new ArrayList<>();
+        for (Image image : images) {
+            BannerDTO bannerDTO=new BannerDTO();
+            bannerDTO.setUrl(image.getUrl());
+            bannerDTO.setBannerId(image.getId());
+            bannerDTO.setShopId(image.getRelatedId());
+            bannerDTO.setStatus(image.getStatus().toString());
+            bannerDTOS.add(bannerDTO);
+        }
+        return bannerDTOS;
+    }
+
 
 }

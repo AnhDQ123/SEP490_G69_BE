@@ -24,6 +24,8 @@ public class Blog extends BaseEntity{
     @Enumerated(EnumType.STRING)
     private Status status;
 
+    private String reason;
+
     @Column(columnDefinition = "TEXT", name = "liked_users")
     private String likedUsers;
 
@@ -36,4 +38,5 @@ public class Blog extends BaseEntity{
 
     @OneToMany(mappedBy = "blog", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
+    private int reportCount;
 }

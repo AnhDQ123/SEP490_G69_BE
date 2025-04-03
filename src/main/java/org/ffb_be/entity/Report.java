@@ -3,6 +3,7 @@ package org.ffb_be.entity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.ffb_be.utils.enums.ReportStatus;
 
@@ -11,6 +12,7 @@ import org.ffb_be.utils.enums.ReportStatus;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Data
 public class Report extends BaseEntity {
     @Id
     @Column(name = "report_id")

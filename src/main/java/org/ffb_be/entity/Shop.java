@@ -43,10 +43,8 @@ public class Shop extends BaseEntity{
     @Column(name="address")
     private String address;
 
-    @Column(nullable = false)
     private Double latitude;
 
-    @Column(nullable = false)
     private Double longitude;
 
     @Column(name="registration_certificate")
@@ -103,4 +101,5 @@ public class Shop extends BaseEntity{
     @OneToOne
     @JoinColumn(name = "user_id")
     private User owner;
+    private int reportCount;
 }

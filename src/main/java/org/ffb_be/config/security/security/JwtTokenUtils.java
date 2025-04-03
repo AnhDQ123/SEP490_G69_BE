@@ -49,7 +49,9 @@ public class JwtTokenUtils {
 
     //generate token for user
     public String generateToken(UserDetails userDetails) {
+        UserSecurity userSecurity = (UserSecurity) userDetails;
         Map<String, Object> claims = new HashMap<>();
+        claims.put("userId", userSecurity.getId());
         return doGenerateToken(claims, userDetails.getUsername());
     }
 
