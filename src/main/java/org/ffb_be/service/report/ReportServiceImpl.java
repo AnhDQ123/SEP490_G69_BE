@@ -7,11 +7,11 @@ import org.ffb_be.dto.CountDTOBy.CountByYearDTO;
 import org.ffb_be.dto.image.ImageDTO;
 import org.ffb_be.dto.report.ReportCreateDTO;
 import org.ffb_be.dto.report.ReportViewDTO;
-import org.ffb_be.entity.Image;
-import org.ffb_be.entity.Report;
+import org.ffb_be.entity.*;
 import org.ffb_be.repository.*;
 import org.ffb_be.utils.enums.ReportStatus;
 
+import org.ffb_be.utils.enums.Status;
 import org.ffb_be.utils.enums.upload.CloudinaryUpload;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -71,18 +71,18 @@ public class ReportServiceImpl implements ReportService {
         ReportViewDTO reportViewDTO=new ReportViewDTO();
         reportViewDTO.setId(id);
         reportViewDTO.setReporterId(report.getReporter().getId());
-        if(report.getType().getId()==4l){
+        if(report.getType().getId()==4L){
             reportViewDTO.setReportName(blogRepository.findById(report.getRelatedId()).get().getWriter().getUsername());
             reportViewDTO.setReportedUserId(blogRepository.findById(report.getRelatedId()).get().getWriter().getId());
             reportViewDTO.setReportItemId(report.getRelatedId());
             reportViewDTO.setReportType("BLOG");
         }
-        if(report.getType().getId()==5l){
+        if(report.getType().getId()==5L){
             reportViewDTO.setReportName(shopRepository.findById(report.getRelatedId()).get().getName());
             reportViewDTO.setReportedUserId(shopRepository.findById(report.getRelatedId()).get().getOwner().getId());
             reportViewDTO.setReportItemId(report.getRelatedId());
             reportViewDTO.setReportType("SHOP");
-        }if(report.getType().getId()==6l){
+        }if(report.getType().getId()==6L){
             reportViewDTO.setReportName(productRepository.findById(report.getRelatedId()).get().getName());
             reportViewDTO.setReportedUserId(shopRepository.findByProduct(report.getRelatedId()).getOwner().getId());
             reportViewDTO.setReportItemId(report.getRelatedId());
@@ -197,8 +197,8 @@ public class ReportServiceImpl implements ReportService {
             CountByMonthDTO countByMonthDTO = new CountByMonthDTO();
 
             // Get the month and year from the query result
-            int month = (Integer) result[0]; // Month
-            int year = (Integer) result[1]; // Year
+            int month = (Integer) result[1]; // Month
+            int year = (Integer) result[0]; // Year
 
             // Format the month as yyyy/MM
             String formattedMonth = String.format("%d/%02d", year, month); // Example: 2025/03
@@ -247,9 +247,37 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public void updateReportStatus(Long id, ReportStatus status) {
+    public void updateReportStatus(Long id) {
         Report report=reportRepository.findById(id).get();
-        report.setStatus(status);
+        if(report.getType().getId()==4L){
+            Blog blog=blogRepository.findById(report.getRelatedId()).get();
+            blog.setReportCount(blog.getReportCount()+1);
+            if(blog.getReportCount()>10){
+                blog.setStatus(Status.DELETED);
+            }
+            blogRepository.save(blog);
+        }
+        if(report.getType().getId()==5L){
+            Shop shop=shopRepository.findById(report.getRelatedId()).get();
+            shop.setReportCount(shop.getReportCount()+1);
+            if(shop.getReportCount()>20){
+                shop.setIsActive(Status.DELETED);
+            }
+            shopRepository.save(shop);
+        }
+        if(report.getType().getId()==6L){
+            Product product=productRepository.findById(report.getRelatedId()).get();
+            product.setReportCount(product.getReportCount()+1);
+            if(product.getReportCount()>10){
+                product.setStatus(Status.DELETED);
+            }
+            productRepository.save(product);
+        }
         reportRepository.save(report);
+    }
+
+    @Override
+    public Long countAllByShop(Long shopId) {
+        return reportRepository.countAllReportsByShop(shopId);
     }
 }

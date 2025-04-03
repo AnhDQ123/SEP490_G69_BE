@@ -69,7 +69,9 @@ public class OrderController {
         return ResponseEntity.ok(orders);
     }
     @GetMapping("/status")
-    public ResponseEntity<?> findByStatus(@RequestParam Long id ,@RequestParam OrderStatus status,@RequestParam Pageable pageable) throws IOException {
+    public ResponseEntity<?> findByStatus(@RequestParam Long id ,
+                                          @RequestParam OrderStatus status,
+                                           Pageable pageable) throws IOException {
         Page<OrderDTO> orders = orderService.findAllByOwnerAndStatus(id,status,pageable);
         if (orders.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)

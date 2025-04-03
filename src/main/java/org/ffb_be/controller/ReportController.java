@@ -101,8 +101,13 @@ public class ReportController {
     }
 
     @PutMapping("/update")
-    public void updateStatus( @RequestParam("status") String status,
+    public void updateStatus(
                               @RequestParam("id") Long id){
-        reportService.updateReportStatus(id, ReportStatus.valueOf(status));
+        reportService.updateReportStatus(id);
+    }
+
+    @GetMapping("/shop/count")
+    public Long countReportsByShop(@RequestParam("id") Long id) {
+        return reportService.countAllByShop(id);
     }
 }

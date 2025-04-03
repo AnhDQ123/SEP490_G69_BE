@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.ffb_be.dto.CountDTOBy.CountByDateDTO;
 import org.ffb_be.dto.CountDTOBy.CountByMonthDTO;
 import org.ffb_be.dto.CountDTOBy.CountByYearDTO;
+import org.ffb_be.dto.discount.DiscountDTO2;
 import org.ffb_be.dto.image.ImageDTO;
 import org.ffb_be.dto.order.*;
 import org.ffb_be.dto.product.TopProductDTO;
@@ -12,6 +13,7 @@ import org.ffb_be.entity.*;
 import org.ffb_be.exception.NotFoundException;
 import org.ffb_be.repository.*;
 import org.ffb_be.utils.enums.OrderStatus;
+import org.ffb_be.utils.enums.Status;
 import org.ffb_be.utils.enums.upload.CloudinaryUpload;
 import org.ffb_be.utils.mapping.OrderMapper;
 import org.springframework.data.domain.*;
@@ -26,6 +28,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -75,12 +78,21 @@ public class OrderServiceImpl implements OrderService {
                 orderItemDTO.setQuantity(orderItem.getQuantity());
                 orderItemDTO.setProductId(orderItem.getProduct().getId());
                 orderItemDTO.setTotal(orderItem.getTotalPrice());
-                Discount discount=discountRepository.findByProduct(orderItem.getProduct());
-                if (discount!=null) {
-                    orderItemDTO.setDiscountId(discount.getId());
-                    orderItemDTO.setDiscount(discount.getDiscount_percentage());
-                } else {
-                    orderItemDTO.setDiscount(BigDecimal.ZERO);
+                List<Discount> discount=discountRepository.findAllByProduct_Id((orderItem.getId()));
+                if(discount!=null) {
+                    List<DiscountDTO2> discountDTOs=new ArrayList<>();
+                    for (Discount discount1:discount) {
+                        DiscountDTO2 discountDTO=new DiscountDTO2();;
+                        discountDTO.setAmount(discount1.getDiscount_percentage());
+                        discountDTO.setId(discount1.getId());
+                        discountDTO.setStartDate(discount1.getStartDate());
+                        discountDTO.setEndDate(discount1.getEndDate());
+                        discountDTO.setStatus(discount1.getStatus().toString());
+                        discountDTOs.add(discountDTO);
+                    }
+                    orderItemDTO.setDiscount(discountDTOs);
+                }else {
+                    orderItemDTO.setDiscount(null);
                 }
                 orderItemDTO.setCreatedAt(orderItem.getCreatedAt());
                 orderItemDTO.setOrderId(order.getId());
@@ -118,7 +130,11 @@ public class OrderServiceImpl implements OrderService {
                     orderItemOptionDTOList.add(orderItemOptionDTO);
                 }
                 orderItemTotal = orderItemTotal.add(orderItemOptionTotal);
-                orderItemDTO.setTotal(orderItemTotal.multiply(BigDecimal.ONE.subtract(orderItemDTO.getDiscount())));
+                for(Discount discount1:discount){
+                    if(discount1.getStatus().equals(Status.ACTIVE)){
+                        orderItemDTO.setTotal(orderItemTotal.multiply(BigDecimal.ONE.subtract(discount1.getDiscount_percentage())));
+                    }
+                }
                 orderItemDTO.setOrderItemOptions(orderItemOptionDTOList);
                 orderItemDTOList.add(orderItemDTO);
             }
@@ -230,12 +246,21 @@ public class OrderServiceImpl implements OrderService {
                 orderItemDTO.setQuantity(orderItem.getQuantity());
                 orderItemDTO.setProductId(orderItem.getProduct().getId());
                 orderItemDTO.setTotal(orderItem.getTotalPrice());
-              Discount discount=discountRepository.findByProduct(orderItem.getProduct());
-                if (discount!=null) {
-                    orderItemDTO.setDiscountId(discount.getId());
-                    orderItemDTO.setDiscount(discount.getDiscount_percentage());
-                } else {
-                    orderItemDTO.setDiscount(BigDecimal.ZERO);
+                List<Discount> discount=discountRepository.findAllByProduct_Id((orderItem.getId()));
+                if(discount!=null) {
+                    List<DiscountDTO2> discountDTOs=new ArrayList<>();
+                    for (Discount discount1:discount) {
+                        DiscountDTO2 discountDTO=new DiscountDTO2();;
+                        discountDTO.setAmount(discount1.getDiscount_percentage());
+                        discountDTO.setId(discount1.getId());
+                        discountDTO.setStartDate(discount1.getStartDate());
+                        discountDTO.setEndDate(discount1.getEndDate());
+                        discountDTO.setStatus(discount1.getStatus().toString());
+                        discountDTOs.add(discountDTO);
+                    }
+                    orderItemDTO.setDiscount(discountDTOs);
+                }else {
+                    orderItemDTO.setDiscount(null);
                 }
                 orderItemDTO.setCreatedAt(orderItem.getCreatedAt());
                 orderItemDTO.setOrderId(order.getId());
@@ -273,7 +298,11 @@ public class OrderServiceImpl implements OrderService {
                     orderItemOptionDTOList.add(orderItemOptionDTO);
                 }
                 orderItemTotal = orderItemTotal.add(orderItemOptionTotal);
-                orderItemDTO.setTotal(orderItemTotal.multiply(BigDecimal.ONE.subtract(orderItemDTO.getDiscount())));
+                for(Discount discount1:discount){
+                    if(discount1.getStatus().equals(Status.ACTIVE)){
+                        orderItemDTO.setTotal(orderItemTotal.multiply(BigDecimal.ONE.subtract(discount1.getDiscount_percentage())));
+                    }
+                }
                 orderItemTotal=orderItemDTO.getTotal();
                 orderItemDTO.setOrderItemOptions(orderItemOptionDTOList);
                 orderItemDTOList.add(orderItemDTO);
@@ -618,9 +647,18 @@ public class OrderServiceImpl implements OrderService {
     }
 
     public List<Object[]> countShopOrdersByStatusAndDay(OrderStatus status, LocalDate startDate, LocalDate endDate, Long shopId) {
+        // Convert startDate and endDate to LocalDateTime for query parameters
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
-        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
-        return orderRepository.countShopOrdersByStatusAndDay(status, startDateTime, endDateTime, shopId);
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX); // 2023-01-01T23:59:59
+        List<Object[]> results = orderRepository.countShopOrdersByStatusAndDay(status, startDateTime, endDateTime, shopId);
+
+        // Convert the results to return LocalDate
+        return results.stream()
+                .map(result -> {
+                    LocalDate date = ((java.sql.Date) result[0]).toLocalDate(); // Convert java.sql.Date to LocalDate
+                    return new Object[]{date, result[1]};
+                })
+                .collect(Collectors.toList());
     }
     public List<Object[]> countShopOrdersByStatusAndMonth(OrderStatus status, LocalDate startDate, LocalDate endDate, Long shopId) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00

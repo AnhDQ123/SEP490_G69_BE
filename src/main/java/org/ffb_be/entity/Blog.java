@@ -38,4 +38,5 @@ public class Blog extends BaseEntity{
 
     @OneToMany(mappedBy = "blog", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
+    private int reportCount;
 }
