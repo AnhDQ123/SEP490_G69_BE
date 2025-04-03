@@ -15,9 +15,15 @@ import java.util.Map;
 @RequestMapping("/otp")
 public class SMSRestController {
 
-    @Autowired
-    private SMSService smsService;
-    private OtpCacheService otpCacheService;
+
+    private final SMSService smsService;
+    private final OtpCacheService otpCacheService;
+
+    public SMSRestController(SMSService smsService, OtpCacheService otpCacheService) {
+        this.smsService = smsService;
+        this.otpCacheService = otpCacheService;
+    }
+
     @PostMapping(value = "/send", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> sendSms(@RequestBody Map<String, String> request) {
         String phone = request.get("phone");

@@ -53,12 +53,19 @@ public class ReportController {
     }
 
     @GetMapping("/status")
-    public ResponseEntity<?> getAllByStatus(      @RequestParam("status") String status,
+    public ResponseEntity<?> getAllByStatus(@RequestParam("status") String status,
                                           @RequestParam(value = "page", defaultValue = "1", required = false) Integer page,
                                           @RequestParam(value = "size", defaultValue = "20", required = false) Integer size) {
         ReportStatus reportStatus = ReportStatus.valueOf(status);
         Pageable pageable = PageRequest.of(page-1, size);
         return ResponseEntity.ok( reportService.findAllByStatus(reportStatus,pageable));
+    }
+    @GetMapping("/type")
+    public ResponseEntity<?> getAllByType(@RequestParam("type") Long id,
+                                            @RequestParam(value = "page", defaultValue = "1", required = false) Integer page,
+                                            @RequestParam(value = "size", defaultValue = "20", required = false) Integer size) {
+        Pageable pageable = PageRequest.of(page-1, size);
+        return ResponseEntity.ok( reportService.findAllByType(id,pageable));
     }
     @GetMapping("/all")
     public ResponseEntity<?> getAll(
