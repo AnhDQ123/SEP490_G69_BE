@@ -41,7 +41,7 @@ public class Product extends BaseEntity {
     @Column(name="expired_date")
     private LocalDate expired_date;
 
-    @Column(name="description")
+    @Column(name="description", columnDefinition = "TEXT")
     private String description;
 
     @Column(name="rate")
@@ -75,6 +75,4 @@ public class Product extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "shop_id")
     private Shop shop;
-
-    private int reportCount;
 }

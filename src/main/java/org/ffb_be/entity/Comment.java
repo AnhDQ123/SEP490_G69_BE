@@ -23,7 +23,7 @@ public class Comment extends BaseEntity{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name="content", length = 1000)
+    @Column(name="content", columnDefinition = "TEXT")
     private String content;
 
     @Enumerated(EnumType.STRING)

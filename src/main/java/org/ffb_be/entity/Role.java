@@ -24,6 +24,7 @@ public class Role extends BaseEntity{
     @Column(unique = true)
     private String name;
 
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
     @OneToMany(mappedBy = "role")
     private List<User> users;
