@@ -106,7 +106,7 @@ public class ReportController {
         reportService.updateReportStatus(id);
     }
 
-    @GetMapping
+    @GetMapping("/shop/count")
     public Long countReportsByShop(@RequestParam("id") Long id) {
         return reportService.countAllByShop(id);
     }
