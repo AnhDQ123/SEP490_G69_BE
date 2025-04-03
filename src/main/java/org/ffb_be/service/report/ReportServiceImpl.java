@@ -166,6 +166,12 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
+    public Page<ReportViewDTO> findAllByType(Long id, Pageable pageable) {
+        Page<Report> reports = reportRepository.findAllByType_Id(id,pageable);
+        return reports.map(this::convertToDTO);
+    }
+
+    @Override
     public Page<ReportViewDTO> findAll(Pageable pageable) {
         Page<Report> reports = reportRepository.findAll(pageable);
         return reports.map(this::convertToDTO);
