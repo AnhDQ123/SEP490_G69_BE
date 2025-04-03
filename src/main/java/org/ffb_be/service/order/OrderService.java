@@ -22,7 +22,7 @@ import java.util.Map;
 
 @Service
 public interface OrderService {
-    List<Order> save(OrderDTO oderDTO) throws IOException;
+    Order save(OrderDTO oderDTO) throws IOException;
     OrderDTO viewOrder(Long id) throws IOException;
     Page<OrderDTO> findAllByOwnerAndStatus(Long id, OrderStatus status, Pageable pageable);
     void cancelOrder(Long id,String reason);

@@ -146,75 +146,65 @@ public class OrderServiceImpl implements OrderService {
         return new PageImpl<>(orderDTOs, pageable, orders.getTotalElements());
     }
     @Override
-    public List<Order> save(OrderDTO orderDTO) throws IOException {
-        Map<Long, List<OrderItemDTO>> shopOrderItems = new HashMap<>();
-
-        for (OrderItemDTO orderItemDTO : orderDTO.getOrderItem()) {
-            Long shopId = shopRepository.findByProduct(orderItemDTO.getProductId()).getId();
-            shopOrderItems.computeIfAbsent(shopId, k -> new ArrayList<>()).add(orderItemDTO);
-        }
-
-        List<Order> createdOrders = new ArrayList<>();
-
-        for (Map.Entry<Long, List<OrderItemDTO>> entry : shopOrderItems.entrySet()) {
-            List<OrderItemDTO> orderItemDTOList = entry.getValue();
-
-            Order order = new Order();
-            order.setShippingAddress(orderDTO.getAddress());
-            order.setOwner(userRepository.findById(orderDTO.getOwnerId())
-                    .orElseThrow(() -> new RuntimeException("User not found")));
-            order.setShipper(userRepository.findById(orderDTO.getShipperId())
-                    .orElseThrow(() -> new RuntimeException("Shipper not found")));
-            order.setStatus(OrderStatus.PENDING);
-            order.setDeliveryMethod(deliveryMethodRepository.findById(orderDTO.getShipMethodId())
-                    .orElseThrow(() -> new RuntimeException("Delivery method not found")));
-            order.setPaymentMethod(paymentRepository.findById(orderDTO.getPaymentMethodId())
-                    .orElseThrow(() -> new RuntimeException("Payment method not found")));
-            order.setTotal(BigDecimal.ZERO);
-            order.setStatus(OrderStatus.PENDING);
-            order.setCreatedAt(LocalDateTime.now());
-            orderRepository.save(order);
-
-            BigDecimal totalOrderPrice = BigDecimal.ZERO;
-
-            for (OrderItemDTO orderItemDTO : orderItemDTOList) {
-                OrderItem orderItem = new OrderItem();
-                orderItem.setOrder(order);
-                orderItem.setProduct(productRepository.findById(orderItemDTO.getProductId())
-                        .orElseThrow(() -> new RuntimeException("Product not found")));
-                orderItem.setQuantity(orderItemDTO.getQuantity());
-                orderItem.setCreatedAt(LocalDateTime.now());
-
-                orderItem = orderItemRepository.save(orderItem);
-
-                List<OrderItemOption> orderItemOptions = new ArrayList<>();
-                for (OrderItemOptionDTO orderItemOptionDTO : orderItemDTO.getOrderItemOptions()) {
-                    OrderItemOption orderItemOption = new OrderItemOption();
-                    orderItemOption.setOrderItem(orderItem);
-                    orderItemOption.setQuantity(orderItemOptionDTO.getQuantity());
-                    orderItemOption.setUnitPrice(foodOptionRepository.findById(orderItemOptionDTO.getOptionId())
-                            .orElseThrow(() -> new RuntimeException("Food Option not found")).getPrice());
-                    orderItemOption.setTotalPrice(orderItemOption.getUnitPrice()
-                            .multiply(BigDecimal.valueOf(orderItemOption.getQuantity()))
-                            .multiply(BigDecimal.valueOf(orderItem.getQuantity())));
-                    orderItemOption.setFoodOption(foodOptionRepository.findById(orderItemOptionDTO.getOptionId())
-                            .orElseThrow(() -> new RuntimeException("Food Option not found")));
-
-                    totalOrderPrice = totalOrderPrice.add(orderItemOption.getTotalPrice());
-                    orderItemOptions.add(orderItemOption);
-                }
-
-                orderItemOptionRepository.saveAll(orderItemOptions);
-            }
-
-            totalOrderPrice = totalOrderPrice.add(order.getDeliveryMethod().getFee());
-            order.setTotal(totalOrderPrice);
-            orderRepository.save(order);
-
-            createdOrders.add(order);
-        }
-
-        return createdOrders;  // Trả về danh sách tất cả Order đã được tạo
+    public Order save(OrderDTO orderDTO) throws IOException {
+         Order order = new Order();
+         order.setOwner(userRepository.findById(orderDTO.getOwnerId()).get());
+         order.setPaymentMethod(paymentRepository.findById(orderDTO.getPaymentMethodId()).get());
+         order.setDeliveryMethod(deliveryMethodRepository.findById(orderDTO.getShipMethodId()).get());
+         orderRepository.save(order);
+         BigDecimal orderTotal = BigDecimal.ZERO;
+         List<OrderItemDTO> orderItemDTOList = orderDTO.getOrderItem();
+         List<OrderItem> orderItemList = new ArrayList<>();
+         for (OrderItemDTO orderItemDTO : orderItemDTOList) {
+             BigDecimal orderItemTotal = BigDecimal.ZERO;
+             OrderItem orderItem = new OrderItem();
+             orderItem.setId(orderItemDTO.getId());
+             orderItem.setQuantity(orderItemDTO.getQuantity());
+             orderItem.setProduct(productRepository.findById(orderItemDTO.getProductId()).get());
+             orderItem.setOrder(order);
+             orderItem.setCreatedAt(LocalDateTime.now());
+             orderItemRepository.save(orderItem);
+             List<Discount> discount=discountRepository.findAllByProduct_Id((orderItem.getId()));
+             List<OrderItemOptionDTO> orderItemOptionDTOList = orderItemDTO.getOrderItemOptions();
+             List<OrderItemOption> orderItemOptions = new ArrayList<>();
+             for(OrderItemOptionDTO orderItemOptionDTO:orderItemOptionDTOList){
+                 OrderItemOption orderItemOption = new OrderItemOption();
+                 orderItemOption.setId(orderItemOptionDTO.getId());
+                 orderItemOption.setOrderItem(orderItem);
+                 orderItemOption.setFoodOption(foodOptionRepository.findById(orderItemOptionDTO.getOptionId()).get());
+                 if (orderItemOptionDTO.getTypeId() == 2) {
+                     orderItemOption.setQuantity(orderItem.getQuantity());
+                     BigDecimal unitPrice = foodOptionRepository.findById(orderItemOptionDTO.getOptionId()).get().getPrice();
+                     orderItem.setUnitPrice(unitPrice);
+                     orderItem.setTotalPrice(unitPrice.multiply(BigDecimal.valueOf(orderItemDTO.getQuantity())));
+                     orderItemOption.setTotalPrice(BigDecimal.ZERO);
+                     orderItemTotal=orderItemTotal.add(orderItem.getTotalPrice());
+                 }else{
+                     orderItemOption.setQuantity(orderItemOptionDTO.getQuantity());
+                     BigDecimal unitPrice = foodOptionRepository.findById(orderItemOptionDTO.getOptionId()).get().getPrice();
+                     orderItemOption.setUnitPrice(unitPrice);
+                     orderItemOption.setTotalPrice(unitPrice.multiply(BigDecimal.valueOf(orderItemOption.getQuantity())));
+                     orderItemTotal=orderItemTotal.add(orderItemOption.getTotalPrice());
+                 }
+                 orderItemOptionRepository.save(orderItemOption);
+                 orderItemOptions.add(orderItemOption);
+             }
+             if(discount!=null && !discount.isEmpty()){
+                 for(Discount discount1:discount){
+                     if(discount1.getStatus().equals(Status.ACTIVE)){
+                         orderItem.setDiscountValue(discount1.getDiscount_percentage());
+                     }
+                 }
+             }else orderItem.setDiscountValue(BigDecimal.ZERO);
+             orderItemTotal=orderItemTotal.multiply(BigDecimal.ONE.subtract(orderItem.getDiscountValue()));
+             orderItem.setTotalPrice(orderItemTotal);
+             orderItemRepository.save(orderItem);
+             orderItemList.add(orderItem);
+             orderTotal=orderTotal.add(orderItemTotal);
+         }
+         order.setTotal(orderTotal);
+         orderRepository.save(order);
+         return order;
     }
 
     @Override
@@ -239,7 +229,7 @@ public class OrderServiceImpl implements OrderService {
             orderDTO.setPaymentMethodId(order.getPaymentMethod() != null ? order.getPaymentMethod().getId() : null);
             orderDTO.setShipMethodId(order.getDeliveryMethod() != null ? order.getDeliveryMethod().getId() : null);
             List<OrderItemDTO> orderItemDTOList = new ArrayList<>();
-            BigDecimal orderItemTotal = BigDecimal.ZERO;
+        BigDecimal orderItemTotal = BigDecimal.ZERO;
             for (OrderItem orderItem : order.getOrderItems()) {
                 OrderItemDTO orderItemDTO = new OrderItemDTO();
                 orderItemDTO.setId(orderItem.getId());

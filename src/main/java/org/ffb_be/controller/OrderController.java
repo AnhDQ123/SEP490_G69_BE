@@ -40,21 +40,13 @@ public class OrderController {
 
     @PostMapping("/add")
     public ResponseEntity<List<Map<String, Object>>> saveOrder(@RequestBody OrderDTO orderDTO) throws IOException {
-        List<Order> createdOrders = orderService.save(orderDTO);
-
-        if (createdOrders.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(List.of(Map.of("error", "Không thể tạo đơn hàng")));
-        }
-
+        Order createdOrders = orderService.save(orderDTO);
         List<Map<String, Object>> responseList = new ArrayList<>();
-        for (Order order : createdOrders) {
             Map<String, Object> response = new HashMap<>();
-            response.put("orderId", order.getId());
-            response.put("total", order.getTotal());
-            response.put("status", order.getStatus().toString());
+            response.put("orderId", createdOrders.getId());
+            response.put("total", createdOrders.getTotal());
+            response.put("status", createdOrders.getStatus().toString());
             responseList.add(response);
-        }
         return ResponseEntity.ok(responseList);
     }
     @GetMapping("/checkout")
