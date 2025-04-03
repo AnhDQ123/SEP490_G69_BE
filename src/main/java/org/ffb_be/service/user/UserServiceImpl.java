@@ -169,7 +169,6 @@ public class UserServiceImpl implements UserService {
 
     public void update(UserUpdateDTO userUpdateDTO, MultipartFile avatar) throws IOException {
         User user = userRepository.findByPhone(userUpdateDTO.getPhone()).get();
-        BeanUtils.copyProperties(userUpdateDTO, user);
         Profile p = profileRepository.findByUserId2(user.getId())
                 .orElseThrow(() -> new RuntimeException("Profile not found"));
         p.setAddress(userUpdateDTO.getAddress());
@@ -178,6 +177,7 @@ public class UserServiceImpl implements UserService {
         p.setDob(userUpdateDTO.getDob());
         String url = cloudinaryUpload.uploadFile(avatar);
         p.setAvatar(url);
+        profileRepository.save(p);
         user.setProfile(p);
         userRepository.save(user);
     }
