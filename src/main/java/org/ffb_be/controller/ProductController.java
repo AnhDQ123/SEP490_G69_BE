@@ -41,15 +41,15 @@ public class ProductController {
         return ResponseEntity.ok(productService.findById(id));
     }
 
-    @PutMapping()
-    public ResponseEntity<?> update(@Validated @ModelAttribute() ProductCreateDTO productCreateDTO,
+    @PutMapping("/{id}")
+    public ResponseEntity<?> update(@PathVariable Long id,@Validated @ModelAttribute() ProductCreateDTO productCreateDTO,
                                         BindingResult bindingResult,
                                         @RequestParam("avatar") MultipartFile avatar,
                                         @RequestParam("option")  List<MultipartFile> option) throws IOException {
         if(bindingResult.hasErrors()) {
             return ResponseEntity.badRequest().body(bindingResult.getAllErrors());
         }
-        productService.save(productCreateDTO, avatar, option);
+        productService.update(id,productCreateDTO, avatar, option);
         return ResponseEntity.ok().body(productCreateDTO);
     }
     @PostMapping("/add")
