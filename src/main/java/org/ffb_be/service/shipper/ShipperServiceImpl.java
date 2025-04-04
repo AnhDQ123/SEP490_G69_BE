@@ -62,7 +62,9 @@ public class ShipperServiceImpl implements ShipperService {
         }
         Profile profile = profileRepository.getByUserId(userId)
                 .orElseThrow(() -> new NotFoundException("User"));
-
+        profile.setName(shipperRegisterDTO.getName());
+        profile.setGender(shipperRegisterDTO.getGender());
+        profile.setDob(shipperRegisterDTO.getDob());
         String citizenIDFrontUrl = cloudinaryUpload.uploadFile(citizenIDFront);
         if (citizenIDFrontUrl != null) profile.setCitizenIDCardFront(citizenIDFrontUrl);
 
@@ -202,7 +204,7 @@ public class ShipperServiceImpl implements ShipperService {
             throw new BadRequestException("Bằng lái xe đã hết hạn!");
         }
 
-        profile.setCitizenIDNumber(encryptSafe(shipperRegisterDTO.getCitizenIDNumber()));
+        profile.setCitizenIDNumber((shipperRegisterDTO.getCitizenIDNumber()));
         profile.setCitizenIDExpiredDate(shipperRegisterDTO.getCitizenIDExpiredDate());
         profile.setDrivingLicenseExpiredDate(shipperRegisterDTO.getDrivingLicenseExpiredDate());
         user.setRejectReason(null);

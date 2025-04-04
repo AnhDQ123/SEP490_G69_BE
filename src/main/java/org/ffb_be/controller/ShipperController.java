@@ -26,11 +26,11 @@ public class ShipperController {
     public ResponseEntity<?> registerShipper(
             @PathVariable Long userId,
             @Validated @ModelAttribute ShipperRegisterDTO shipperRegisterDTO,
-            @RequestPart(value = "citizenIDFront", required = false) MultipartFile citizenIDFront,
-            @RequestPart(value = "citizenIDBack", required = false) MultipartFile citizenIDBack,
-            @RequestParam(value = "drivingLicenseFront", required = false) MultipartFile drivingLicenseFront,
-            @RequestParam(value = "drivingLicenseBack", required = false) MultipartFile drivingLicenseBack,
-            @RequestParam(value = "judicialRecord", required = false) MultipartFile judicialRecord,
+            @RequestPart(value = "citizenIDFront") MultipartFile citizenIDFront,
+            @RequestPart(value = "citizenIDBack") MultipartFile citizenIDBack,
+            @RequestParam(value = "drivingLicenseFront") MultipartFile drivingLicenseFront,
+            @RequestParam(value = "drivingLicenseBack") MultipartFile drivingLicenseBack,
+            @RequestParam(value = "judicialRecord") MultipartFile judicialRecord,
             BindingResult result
     ) throws IOException {
         if (result.hasErrors()) {
@@ -56,11 +56,11 @@ public class ShipperController {
     public ResponseEntity<?> updateShipperInfo(
             @PathVariable Long userId,
             @Validated @ModelAttribute ShipperRegisterDTO shipperRegisterDTO,
-            @RequestPart(value = "citizenIDFront", required = false) MultipartFile citizenIDFront,
-            @RequestPart(value = "citizenIDBack", required = false) MultipartFile citizenIDBack,
-            @RequestParam(value = "drivingLicenseFront", required = false) MultipartFile drivingLicenseFront,
-            @RequestParam(value = "drivingLicenseBack", required = false) MultipartFile drivingLicenseBack,
-            @RequestParam(value = "judicialRecord", required = false) MultipartFile judicialRecord,
+            @RequestPart(value = "citizenIDFront") MultipartFile citizenIDFront,
+            @RequestPart(value = "citizenIDBack") MultipartFile citizenIDBack,
+            @RequestParam(value = "drivingLicenseFront") MultipartFile drivingLicenseFront,
+            @RequestParam(value = "drivingLicenseBack") MultipartFile drivingLicenseBack,
+            @RequestParam(value = "judicialRecord") MultipartFile judicialRecord,
             BindingResult result
     ) throws IOException {
         if (result.hasErrors()) {
