@@ -30,11 +30,11 @@ public class DiscountController {
         return discountService.findAllByShopIdAndStatus(shopId, status);
     }
     @PutMapping("/update/{id}")
-    public void update(@PathVariable Long productId,@RequestBody DiscountDTO discountDTO) {
-        discountService.update(discountDTO,productId);
+    public void update(@PathVariable Long id, @RequestBody DiscountDTO discountDTO) {
+        discountService.update(discountDTO,id);
     }
     @PutMapping("/delete/{id}")
-    public void delete(@PathVariable Long productId) {
-        discountService.delete(productId);
+    public void delete(@PathVariable Long id) {
+        discountService.delete(id);
     }
 }
