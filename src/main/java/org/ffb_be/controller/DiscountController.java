@@ -29,5 +29,12 @@ public class DiscountController {
     public List<DiscountDTO> findByShopId(@RequestParam Long shopId, @RequestParam Status status) {
         return discountService.findAllByShopIdAndStatus(shopId, status);
     }
-
+    @PutMapping("/update/{id}")
+    public void update(@PathVariable Long productId,@RequestBody DiscountDTO discountDTO) {
+        discountService.update(discountDTO,productId);
+    }
+    @PutMapping("/update/{id}")
+    public void delete(@PathVariable Long productId) {
+        discountService.delete(productId);
+    }
 }

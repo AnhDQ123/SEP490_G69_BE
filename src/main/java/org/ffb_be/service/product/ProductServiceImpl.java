@@ -4,7 +4,7 @@ package org.ffb_be.service.product;
 
 import lombok.RequiredArgsConstructor;
 
-import org.ffb_be.dto.discount.DiscountDTO;
+
 import org.ffb_be.dto.discount.DiscountDTO2;
 import org.ffb_be.dto.product.FoodOptionDTO;
 import org.ffb_be.dto.product.ProductCreateDTO;
@@ -94,6 +94,60 @@ public class ProductServiceImpl implements ProductService {
         }
         product.setFoodOptions(foodOptions);
         foodOptionRepository.saveAll(foodOptions);
+    }
+
+    @Override
+    public void update(Long id, ProductCreateDTO productCreateDTO, MultipartFile avatar, List<MultipartFile> option) throws IOException {
+        Product product = productRepository.findById(id).get();
+        Category category = categoryRepository.findByName(productCreateDTO.getCategory());
+        List<FoodOption> foodOptions = new ArrayList<>();
+        List<FoodOptionDTO> foodOptionDTOs = productCreateDTO.getFoodOption();
+        product.setName(productCreateDTO.getName());
+        product.setDescription(productCreateDTO.getDescription());
+        product.setExpired_date(productCreateDTO.getExpiryDate());
+        product.setQuantity(productCreateDTO.getQuantity());
+        product.setManufacturer(productCreateDTO.getManufacturer());
+        product.setShop(shopRepository.findById(productCreateDTO.getShopId()).get());
+        product.setSupplier(productCreateDTO.getSupplier());
+        product.setCategory(category);
+        product.setType(SellType.valueOf(productCreateDTO.getFoodType()));
+        product.setStatus(Status.ACTIVE);
+        if (avatar != null && !avatar.isEmpty()) {
+            System.out.println("Uploading Avatar: " + avatar.getOriginalFilename());
+            String url = cloudinaryUpload.uploadFile(avatar);
+            product.setImage(url);
+            System.out.println("Avatar URL: " + url);
+        }
+        productRepository.save(product);
+        for(FoodOptionDTO foodOptionDTO : foodOptionDTOs) {
+            foodOptionDTO.setProduct_id(product.getId());
+        }
+        if (option != null && !option.isEmpty()) {
+            System.out.println("Uploading " + option.size() + " option images");
+            for (int i = 0; i < option.size(); i++) {
+                String url = cloudinaryUpload.uploadFile(option.get(i));
+                foodOptionDTOs.get(i).setImage(url);
+            }
+        }
+        for (FoodOptionDTO foodOptionDTO : foodOptionDTOs) {
+            FoodOption foodOption = new FoodOption();
+            foodOption.setId(foodOptionDTO.getId());
+            foodOption.setName(foodOptionDTO.getName());
+            foodOption.setImage(foodOptionDTO.getImage());
+            foodOption.setPrice(foodOptionDTO.getPrice());
+            foodOption.setType(typesRepository.findById(foodOptionDTO.getType_id()).get());
+            foodOption.setFood(productRepository.findById(foodOptionDTO.getProduct_id()).get());
+            foodOptions.add(foodOption);
+        }
+        product.setFoodOptions(foodOptions);
+        foodOptionRepository.saveAll(foodOptions);
+    }
+
+    @Override
+    public void delete(Long id) throws IOException {
+        Product product = productRepository.findById(id).get();
+        product.setStatus(Status.INACTIVE);
+        productRepository.save(product);
     }
 
     @Override
@@ -331,7 +385,6 @@ public class ProductServiceImpl implements ProductService {
         BeanUtils.copyProperties(product, productResponseDTO);
         productResponseDTO.setDescription(product.getDescription());
         productResponseDTO.setFoodType(product.getType().toString());
-        productResponseDTO.setReportCount(product.getReportCount());
         BigDecimal defaultprice = null;
         List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product);
         for (FoodOption foodOption : foodOptions) {

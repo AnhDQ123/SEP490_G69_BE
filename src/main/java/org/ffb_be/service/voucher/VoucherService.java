@@ -14,7 +14,7 @@ public interface VoucherService {
 
     VoucherDTO getVoucherById(Long id);
 
-    VoucherDTO addVoucher(VoucherDTO dto);
+    VoucherDTO addVoucher(VoucherDTO dto, Long shopId);
 
     VoucherDTO updateVoucher(String code, VoucherDTO dto);
 
