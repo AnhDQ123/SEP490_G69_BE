@@ -50,6 +50,29 @@ public class DiscountServiceImpl implements DiscountService{
     }
 
     @Override
+    public void update(DiscountDTO discount, Long productId) {
+        Discount discountEntity=discountRepository.findById(discount.getId());
+        discountEntity.setId(discount.getId());
+        discountEntity.setDiscount_percentage(discount.getAmount());
+        discountEntity.setStartDate(discount.getStartDate());
+        discountEntity.setEndDate(discount.getEndDate());
+        discountEntity.setStatus(Status.PENDING);
+        if (discount.getStartDate().isEqual(LocalDate.now())) {
+            discountEntity.setStatus(Status.ACTIVE);
+        }
+        Product product=productRepository.findById(productId).get();
+        discountEntity.setProduct(product);
+        discountRepository.save(discountEntity);
+    }
+
+    @Override
+    public void delete(Long id) {
+        Discount discountEntity=discountRepository.findById(id);
+        discountEntity.setStatus(Status.INACTIVE);
+        discountRepository.save(discountEntity);
+    }
+
+    @Override
     public List<DiscountDTO> findAllByShopIdAndStatus(Long shopId,Status status) {
         List<Discount> discounts=discountRepository.findAllByShop_IdAndStatus(shopId,status);
         List<DiscountDTO> discountDTOs=new ArrayList<>();
