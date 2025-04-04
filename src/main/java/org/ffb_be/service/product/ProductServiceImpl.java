@@ -144,6 +144,13 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public void delete(Long id) throws IOException {
+        Product product = productRepository.findById(id).get();
+        product.setStatus(Status.INACTIVE);
+        productRepository.save(product);
+    }
+
+    @Override
     public Page<ProductResponseDTO> findAllByShop(Long id,Pageable pageable) {
         return productRepository.findAllByShop_Id(id,pageable).map(product -> {
             ProductResponseDTO productResponseDTO = new ProductResponseDTO();

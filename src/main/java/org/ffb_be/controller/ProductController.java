@@ -41,7 +41,7 @@ public class ProductController {
         return ResponseEntity.ok(productService.findById(id));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<?> update(@PathVariable Long id,@Validated @ModelAttribute() ProductCreateDTO productCreateDTO,
                                         BindingResult bindingResult,
                                         @RequestParam("avatar") MultipartFile avatar,
@@ -86,7 +86,10 @@ public class ProductController {
     public ResponseEntity<?> getPopular() {
         return ResponseEntity.ok(productService.findPopularProducts());
     }
-
+    @PutMapping("/delete/{id}")
+    public void deleteProduct(@PathVariable Long id) throws IOException {
+        productService.delete(id);
+    }
     @GetMapping("/similar")
     public ResponseEntity<?> getSimilarProducts(@RequestParam String search) {
         return ResponseEntity.ok(productService.findSimimlarProduct(search));
