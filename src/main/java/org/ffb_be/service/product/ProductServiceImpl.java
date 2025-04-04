@@ -136,7 +136,7 @@ public class ProductServiceImpl implements ProductService {
             foodOption.setImage(foodOptionDTO.getImage());
             foodOption.setPrice(foodOptionDTO.getPrice());
             foodOption.setType(typesRepository.findById(foodOptionDTO.getType_id()).get());
-            foodOption.setFood(productRepository.findById(foodOptionDTO.getProduct_id()).get());
+            foodOption.setFood(productRepository.findById(id).get());
             foodOptions.add(foodOption);
         }
         product.setFoodOptions(foodOptions);
