@@ -19,7 +19,7 @@ public class Report extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name="reason")
+    @Column(name="reason", columnDefinition = "TEXT")
     private String reason;
 
     @Enumerated(EnumType.STRING)

@@ -65,7 +65,7 @@ public class EncryptUtil {
 
             return new String(decryptedBytes, StandardCharsets.UTF_8);
         } catch (Exception e) {
-            throw new RuntimeException("Lỗi giải mã dữ liệu", e);
+            return encryptedData;
         }
     }
 

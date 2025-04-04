@@ -24,7 +24,7 @@ public class Types extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private TypesCategory category;
 
-    @Column(name = "description")
+    @Column(name = "description" , columnDefinition = "TEXT")
     private String description;
 
     @OneToMany(mappedBy = "type")
