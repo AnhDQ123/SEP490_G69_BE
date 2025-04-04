@@ -33,7 +33,7 @@ public class DiscountController {
     public void update(@PathVariable Long productId,@RequestBody DiscountDTO discountDTO) {
         discountService.update(discountDTO,productId);
     }
-    @PutMapping("/update/{id}")
+    @PutMapping("/delete/{id}")
     public void delete(@PathVariable Long productId) {
         discountService.delete(productId);
     }
