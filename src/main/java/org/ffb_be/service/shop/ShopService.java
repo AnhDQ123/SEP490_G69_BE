@@ -9,6 +9,7 @@ import org.ffb_be.dto.shop.ShopRegisterDTO;
 import org.ffb_be.utils.enums.Status;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -60,6 +61,9 @@ public interface ShopService {
 
     ShopDTO getShopByUserId(Long userId);
     List<CountByYearDTO> getShopCountByYear(Status status, LocalDate startDate, LocalDate endDate);
+
+    ResponseEntity<?> getShopByOwnerId(Long userId);
+
     List<CountByMonthDTO> getShopCountByMonth(Status status, LocalDate startDate, LocalDate endDate);
     List<CountByDateDTO> getShopCountByDayAndStatus(Status status, LocalDate startDate, LocalDate endDate);
     long countPendingShop();

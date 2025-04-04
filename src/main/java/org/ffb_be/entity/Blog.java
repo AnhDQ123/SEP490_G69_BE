@@ -24,6 +24,8 @@ public class Blog extends BaseEntity{
     @Enumerated(EnumType.STRING)
     private Status status;
 
+    private String reason;
+
     @Column(columnDefinition = "TEXT", name = "liked_users")
     private String likedUsers;
 
