@@ -1,11 +1,8 @@
 package org.ffb_be.utils.mapping;
-import org.ffb_be.dto.auth.ProfileDto.BusinessProfileDTO;
 import org.ffb_be.dto.auth.userDto.ShipperInfoDTO;
-import org.ffb_be.dto.auth.userDto.ShipperRegisterDTO;
 import org.ffb_be.entity.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.springframework.context.annotation.Profile;
 
 @Mapper(componentModel = "spring")
 public interface ShipperMapper {
@@ -22,6 +19,4 @@ public interface ShipperMapper {
     @Mapping(target = "citizenIDExpiredDate", source = "profile.citizenIDExpiredDate")
     @Mapping(target = "drivingLicenseExpiredDate", source = "profile.drivingLicenseExpiredDate")
     ShipperInfoDTO toDTO(User shipper);
-
-    BusinessProfileDTO toProfileDTO(Profile profile);
 }
