@@ -1,23 +1,27 @@
 package org.ffb_be.service.user;
 
 import jakarta.persistence.NonUniqueResultException;
+import lombok.RequiredArgsConstructor;
 import org.ffb_be.dto.CountDTOBy.CountByMonthDTO;
 import org.ffb_be.dto.CountDTOBy.CountByYearDTO;
 import org.ffb_be.dto.auth.ProfileDto.ProfileDTO;
 import org.ffb_be.dto.auth.userDto.UserCreateDTO;
 import org.ffb_be.dto.auth.userDto.UserResponseDTO;
+import org.ffb_be.dto.auth.userDto.UserRoleProfile;
 import org.ffb_be.dto.auth.userDto.UserUpdateDTO;
 import org.ffb_be.dto.CountDTOBy.CountByDateDTO;
 import org.ffb_be.entity.Profile;
 import org.ffb_be.entity.Role;
 import org.ffb_be.entity.Shop;
 import org.ffb_be.entity.User;
+import org.ffb_be.exception.NotFoundException;
 import org.ffb_be.repository.ProfileRepository;
 import org.ffb_be.repository.RoleRepository;
 import org.ffb_be.repository.ShopRepository;
 import org.ffb_be.repository.UserRepository;
 import org.ffb_be.utils.enums.Status;
 import org.ffb_be.utils.enums.upload.CloudinaryUpload;
+import org.ffb_be.utils.mapping.UserMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -34,6 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -41,15 +46,9 @@ public class UserServiceImpl implements UserService {
     private final RoleRepository roleRepository;
     private final ProfileRepository profileRepository;
     private final ShopRepository shopRepository;
+    private final UserMapper userMapper;
 
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, CloudinaryUpload cloudinaryUpload, RoleRepository roleRepository, ProfileRepository profileRepository, ShopRepository shopRepository) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.cloudinaryUpload = cloudinaryUpload;
-        this.roleRepository = roleRepository;
-        this.profileRepository = profileRepository;
-        this.shopRepository = shopRepository;
-    }
+
     public void create(UserCreateDTO userCreateDTO) throws IOException {
         User user = new User();
         BeanUtils.copyProperties(userCreateDTO, user);
@@ -295,5 +294,12 @@ public class UserServiceImpl implements UserService {
         user.setPassword("123456");
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
+    }
+
+    @Override
+    public UserRoleProfile getRoleProfile(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User"));
+        return userMapper.toDTO(user);
     }
 }

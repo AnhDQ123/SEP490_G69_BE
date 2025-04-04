@@ -170,4 +170,18 @@ class BlogServiceImpl implements BlogService {
         imageRepository.deleteByBlogId(id);
         blogRepository.deleteById(id);
     }
+
+    @Override
+    public void blogStatusUpdate(Long id, Status status, String reason) {
+        Blog blog = blogRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Blog"));
+        if (status == Status.ACTIVE) {
+            blog.setReason(null);
+        }
+        if (status == Status.INACTIVE) {
+            blog.setReason(reason);
+        }
+        blog.setStatus(status);
+        blogRepository.save(blog);
+    }
 }

@@ -26,7 +26,7 @@ public class Shop extends BaseEntity{
     @Column(name="shop_name")
     private String name;
 
-    @Column(name="description")
+    @Column(name="description", columnDefinition = "TEXT")
     private String description;
 
     @Column(name="logo")
@@ -101,5 +101,4 @@ public class Shop extends BaseEntity{
     @OneToOne
     @JoinColumn(name = "user_id")
     private User owner;
-    private int reportCount;
 }

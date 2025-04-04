@@ -5,6 +5,7 @@ import org.ffb_be.dto.CountDTOBy.CountByYearDTO;
 import org.ffb_be.dto.auth.ProfileDto.ProfileDTO;
 import org.ffb_be.dto.auth.userDto.UserCreateDTO;
 import org.ffb_be.dto.auth.userDto.UserResponseDTO;
+import org.ffb_be.dto.auth.userDto.UserRoleProfile;
 import org.ffb_be.dto.auth.userDto.UserUpdateDTO;
 import org.ffb_be.dto.CountDTOBy.CountByDateDTO;
 import org.ffb_be.utils.enums.Status;
@@ -35,5 +36,7 @@ public interface UserService {
     long countAllUser();
     String hasShop(Long id);
     void add();
+
+    UserRoleProfile getRoleProfile(Long id);
 }
 

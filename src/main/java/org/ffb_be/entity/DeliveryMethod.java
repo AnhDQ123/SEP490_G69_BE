@@ -25,7 +25,7 @@ public class DeliveryMethod extends BaseEntity{
     @Column(name="method_name")
     private String name;
 
-    @Column(name="description")
+    @Column(name="description", columnDefinition = "TEXT")
     private String description;
 
     @Enumerated(EnumType.STRING)

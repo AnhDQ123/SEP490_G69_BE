@@ -7,6 +7,7 @@ import org.ffb_be.entity.Comment;
 import org.ffb_be.exception.NotFoundException;
 import org.ffb_be.repository.BlogRepository;
 import org.ffb_be.repository.CommentRepository;
+import org.ffb_be.utils.enums.Status;
 import org.ffb_be.utils.mapping.CommentMapper;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -108,5 +109,19 @@ public class CommentServiceImpl implements CommentService{
             throw new NotFoundException("Comment not found");
         }
         commentRepository.deleteById(commentId);
+    }
+
+    @Override
+    public void commentStatusUpdate(Long id, Status status, String reason) {
+        Comment comment = commentRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Comment"));
+        if (status == Status.ACTIVE) {
+            comment.setReason(null);
+        }
+        if (status == Status.INACTIVE) {
+            comment.setReason(reason);
+        }
+        comment.setStatus(status);
+        commentRepository.save(comment);
     }
 }
