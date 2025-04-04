@@ -54,12 +54,17 @@ public class ShipperServiceImpl implements ShipperService {
         if(user.getRole().getName().equals("shipper")) {
             throw new BadRequestException("User đã đăng ký làm shipper.");
         }
+        if(user.getShipperStatus() == ShipperStatus.PENDING) {
+            throw new BadRequestException("Shipper đang chở được duyệt không thể gửi đăng ký.");
+        }
         if(user.getRole().getName().equals("shopkeeper")) {
             throw new BadRequestException("User đã đăng ký làm chủ cửa hàng không thể đăng ký làm shipper.");
         }
         Profile profile = profileRepository.getByUserId(userId)
                 .orElseThrow(() -> new NotFoundException("User"));
-
+        profile.setName(shipperRegisterDTO.getName());
+        profile.setGender(shipperRegisterDTO.getGender());
+        profile.setDob(shipperRegisterDTO.getDob());
         String citizenIDFrontUrl = cloudinaryUpload.uploadFile(citizenIDFront);
         if (citizenIDFrontUrl != null) profile.setCitizenIDCardFront(citizenIDFrontUrl);
 
@@ -121,6 +126,7 @@ public class ShipperServiceImpl implements ShipperService {
         Role role = roleRepository.getByName("user")
                 .orElseThrow(() ->new NotFoundException("Role"));
         user.setRole(role);
+        user.setShipperStatus(null);
         user.setRejectReason(reason);
         userRepository.save(user);
     }
@@ -198,7 +204,7 @@ public class ShipperServiceImpl implements ShipperService {
             throw new BadRequestException("Bằng lái xe đã hết hạn!");
         }
 
-        profile.setCitizenIDNumber(encryptSafe(shipperRegisterDTO.getCitizenIDNumber()));
+        profile.setCitizenIDNumber((shipperRegisterDTO.getCitizenIDNumber()));
         profile.setCitizenIDExpiredDate(shipperRegisterDTO.getCitizenIDExpiredDate());
         profile.setDrivingLicenseExpiredDate(shipperRegisterDTO.getDrivingLicenseExpiredDate());
         user.setRejectReason(null);
