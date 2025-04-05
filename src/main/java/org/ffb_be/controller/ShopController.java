@@ -199,6 +199,10 @@ public class ShopController {
 
         return orderService.calculateShopRevenueByYear(start, end, shopId);
     }
+    @GetMapping("/shop/shopId")
+    public Long shopId( @RequestParam("productId") Long productId) {
+        return shopService.shopId(productId);
+    }
     @GetMapping("/count/order/day")
     public List<Object[]> countOrdersByStatusAndDay(
             @RequestParam("status") String status,
