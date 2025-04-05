@@ -161,7 +161,10 @@ public class OrderServiceImpl implements OrderService {
              if(orderItemDTO.getQuantity()>product.getQuantity()){
                  orderRepository.delete(order);
                  return null;
-             }else product.setQuantity(product.getQuantity() - orderItemDTO.getQuantity());
+             }else {
+                 product.setQuantity(product.getQuantity() - orderItemDTO.getQuantity());
+                 productRepository.save(product);
+             }
              OrderItem orderItem = new OrderItem();
              orderItem.setId(orderItemDTO.getId());
              orderItem.setQuantity(orderItemDTO.getQuantity());
