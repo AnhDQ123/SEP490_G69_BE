@@ -200,12 +200,14 @@ public class CartServiceImpl implements CartService {
                             BigDecimal unitPrice = foodOptionRepository.findById(cartItemOption.getFoodOption().getId()).get().getPrice();
                             cartItemDTO.setPrice(unitPrice);
                             cartItemOptionDTO.setTotalPrice(BigDecimal.ZERO);
-                            cartItemTotal=cartItemTotal.add(cartItemDTO.getTotalPrice());
+
                             for(Discount discount1:discount){
-                                if(discount1.getStatus().compareTo(Status.ACTIVE) == 0){
+                                if(discount1.getStatus().equals(Status.ACTIVE)){
                                     cartItemDTO.setTotalPrice(cartItemTotal.multiply(BigDecimal.ONE.subtract(discount1.getDiscount_percentage())));
+                                    cartItemTotal=cartItemTotal.add(cartItemDTO.getTotalPrice());
                                 }else{
                                     cartItemDTO.setTotalPrice(unitPrice.multiply(BigDecimal.valueOf(cartItem.getQuantity())));
+                                    cartItemTotal=cartItemTotal.add(cartItemDTO.getTotalPrice());
                                 }
                             }
                         }else{
