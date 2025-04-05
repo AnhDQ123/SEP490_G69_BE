@@ -211,7 +211,6 @@ public class OrderServiceImpl implements OrderService {
              order.setShop(shopRepository.findByProduct(orderItem.getProduct().getId()));
              orderTotal=orderTotal.add(orderItemTotal);
          }
-
          order.setTotal(orderTotal);
          orderRepository.save(order);
          return order;
