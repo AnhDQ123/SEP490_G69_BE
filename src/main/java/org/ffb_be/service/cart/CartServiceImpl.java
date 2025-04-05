@@ -1,11 +1,13 @@
 package org.ffb_be.service.cart;
 
+import lombok.RequiredArgsConstructor;
 import org.ffb_be.dto.cart.CartDTO;
 import org.ffb_be.dto.cart.CartItemDTO;
 import org.ffb_be.dto.cart.CartItemOptionDTO;
 import org.ffb_be.entity.*;
 import org.ffb_be.repository.*;
 import org.ffb_be.utils.enums.CartStatus;
+import org.ffb_be.utils.enums.Status;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,7 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
+@RequiredArgsConstructor
 @Service
 public class CartServiceImpl implements CartService {
     private final CartRepository cartRepository;
@@ -27,15 +29,8 @@ public class CartServiceImpl implements CartService {
     private final UserRepository userRepository;
     private final FoodOptionRepository foodOptionRepository;
     private final ShopRepository shopRepository;
-    public CartServiceImpl(CartItemRepository cartItemRepository, ProductRepository productRepository, CartItemOptionRepository cartItemOptionRepository, UserRepository userRepository, CartRepository cartRepository, FoodOptionRepository foodOptionRepository, ShopRepository shopRepository) {
-        this.cartRepository = cartRepository;
-        this.cartItemRepository = cartItemRepository;
-        this.cartItemOptionRepository = cartItemOptionRepository;
-        this.productRepository = productRepository;
-        this.userRepository = userRepository;
-        this.foodOptionRepository = foodOptionRepository;
-        this.shopRepository = shopRepository;
-    }
+    private final DiscountRepository discountRepository;
+
 
 
     @Transactional
@@ -171,13 +166,14 @@ public class CartServiceImpl implements CartService {
             List<Cart> cartList=cartRepository.findAllByOwner_IdAndStatus(id,status);
             List<CartDTO> cartDTOList=new ArrayList<>();
             for(Cart cart:cartList){
+                BigDecimal cartTotal = BigDecimal.ZERO;
                 CartDTO cartDTO=new CartDTO();
                 cartDTO.setUserId(cart.getOwner().getId());
                 cartDTO.setId(cart.getId());
-                cartDTO.setPrice(cart.getTotal());
                 List<CartItemDTO> cartItemDTOList=new ArrayList<>();
                 List<CartItem> cartItems=cart.getCartItems();
                 for(CartItem cartItem:cartItems){
+                    BigDecimal cartItemTotal = BigDecimal.ZERO;
                     CartItemDTO cartItemDTO=new CartItemDTO();
                     cartItemDTO.setProductId(cartItem.getProduct().getId());
                     cartDTO.setShopId(shopRepository.findByProduct(cartItem.getProduct().getId()).getId());
@@ -191,6 +187,7 @@ public class CartServiceImpl implements CartService {
                     cartItemDTO.setCartId(cart.getId());
                     List<CartItemOptionDTO> cartItemOptionDTOList=new ArrayList<>();
                     List<CartItemOption> cartItemOptions=cartItem.getCartItemOptions();
+                    List<Discount> discount=discountRepository.findAllByProduct_Id((cartItem.getProduct().getId()));
                     for(CartItemOption cartItemOption:cartItemOptions){
                         CartItemOptionDTO cartItemOptionDTO=new CartItemOptionDTO();
                         cartItemOptionDTO.setOptionId(cartItemOption.getFoodOption().getId());
@@ -198,6 +195,27 @@ public class CartServiceImpl implements CartService {
                         cartItemOptionDTO.setImage(cartItemOption.getFoodOption().getImage());
                         cartItemOptionDTO.setQuantity(cartItemOption.getQuantity());
                         cartItemOptionDTO.setCartItemId(cartItemDTO.getId());
+                        if (cartItemOption.getFoodOption().getType().getId() == 2) {
+                            cartItemOptionDTO.setQuantity(cartItem.getQuantity());
+                            BigDecimal unitPrice = foodOptionRepository.findById(cartItemOption.getFoodOption().getId()).get().getPrice();
+                            cartItemDTO.setPrice(unitPrice);
+                            cartItemOptionDTO.setTotalPrice(BigDecimal.ZERO);
+                            cartItemTotal=cartItemTotal.add(cartItemDTO.getTotalPrice());
+                            for(Discount discount1:discount){
+                                if(discount1.getStatus().equals(Status.ACTIVE)){
+                                    cartItemDTO.setTotalPrice(cartItemTotal.multiply(BigDecimal.ONE.subtract(discount1.getDiscount_percentage())));
+                                }else{
+                                    cartItemDTO.setTotalPrice(unitPrice.multiply(BigDecimal.valueOf(cartItem.getQuantity())));
+                                }
+                            }
+                        }else{
+                            cartItemOptionDTO.setQuantity(cartItemOption.getQuantity());
+                            BigDecimal unitPrice = foodOptionRepository.findById(cartItemOption.getFoodOption().getId()).get().getPrice();
+                            cartItemOptionDTO.setPrice(unitPrice);
+                            cartItemOptionDTO.setTotalPrice(unitPrice.multiply(BigDecimal.valueOf(cartItemOption.getQuantity())));
+                            cartItemTotal=cartItemTotal.add(cartItemOptionDTO.getTotalPrice());
+                        }
+                        cartTotal=cartTotal.add(cartItemTotal);
                         cartItemOptionDTO.setPrice(cartItemOption.getUnitPrice());
                         cartItemOptionDTO.setTotalPrice(cartItemOption.getTotalPrice());
                         cartItemOptionDTO.setTypeId(cartItemOption.getFoodOption().getType().getId());
@@ -206,6 +224,7 @@ public class CartServiceImpl implements CartService {
                     cartItemDTO.setCartItemOptionDTOList(cartItemOptionDTOList);
                     cartItemDTOList.add(cartItemDTO);
                 }
+                cartDTO.setDiscountPrice(cartTotal);
                 cartDTO.setCartItemDTOList(cartItemDTOList);
                 cartDTOList.add(cartDTO);
             }
@@ -218,13 +237,13 @@ public class CartServiceImpl implements CartService {
         CartDTO cartDTO=new CartDTO();
             cartDTO.setUserId(cart.getOwner().getId());
             cartDTO.setId(cart.getId());
-            cartDTO.setPrice(cart.getTotal());
             List<CartItemDTO> cartItemDTOList=new ArrayList<>();
             List<CartItem> cartItems=cart.getCartItems();
             for(CartItem cartItem:cartItems){
                 CartItemDTO cartItemDTO=new CartItemDTO();
                 cartItemDTO.setProductId(cartItem.getProduct().getId());
                 cartDTO.setShopId(shopRepository.findByProduct(cartItem.getProduct().getId()).getId());
+                cartDTO.setShopName(shopRepository.findById(cartDTO.getShopId()).get().getName());
                 cartItemDTO.setQuantity(cartItem.getQuantity());
                 cartItemDTO.setPrice(cartItem.getUnitPrice());
                 cartItemDTO.setTotalPrice(cartItem.getTotalPrice());
