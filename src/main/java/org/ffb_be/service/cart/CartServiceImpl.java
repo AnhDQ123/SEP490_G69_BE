@@ -202,7 +202,7 @@ public class CartServiceImpl implements CartService {
                             cartItemOptionDTO.setTotalPrice(BigDecimal.ZERO);
                             cartItemTotal=cartItemTotal.add(cartItemDTO.getTotalPrice());
                             for(Discount discount1:discount){
-                                if(discount1.getStatus().equals(Status.ACTIVE)){
+                                if(discount1.getStatus().compareTo(Status.ACTIVE) == 0){
                                     cartItemDTO.setTotalPrice(cartItemTotal.multiply(BigDecimal.ONE.subtract(discount1.getDiscount_percentage())));
                                 }else{
                                     cartItemDTO.setTotalPrice(unitPrice.multiply(BigDecimal.valueOf(cartItem.getQuantity())));
