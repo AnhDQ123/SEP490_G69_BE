@@ -71,4 +71,5 @@ public interface ShopService {
     void uploadBanner(Long shopId,MultipartFile image) throws IOException;
     List<BannerDTO> viewBannerByShop(Long shopId);
     List<BannerDTO> homePageBanner();
+    Long shopId(Long productId);
 }

@@ -485,5 +485,11 @@ public class ShopServiceImpl implements ShopService {
         return bannerDTOS;
     }
 
+    @Override
+    public Long shopId(Long productId) {
+        Shop shop=shopRepository.findById(productId).get();
+        return shop.getId();
+    }
+
 
 }
