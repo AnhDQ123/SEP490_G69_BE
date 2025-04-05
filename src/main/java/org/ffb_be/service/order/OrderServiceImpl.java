@@ -157,6 +157,11 @@ public class OrderServiceImpl implements OrderService {
          List<OrderItem> orderItemList = new ArrayList<>();
          for (OrderItemDTO orderItemDTO : orderItemDTOList) {
              BigDecimal orderItemTotal = BigDecimal.ZERO;
+             Product product = productRepository.findById(orderItemDTO.getProductId()).get();
+             if(orderItemDTO.getQuantity()>product.getQuantity()){
+                 orderRepository.delete(order);
+                 return null;
+             }else product.setQuantity(product.getQuantity() - orderItemDTO.getQuantity());
              OrderItem orderItem = new OrderItem();
              orderItem.setId(orderItemDTO.getId());
              orderItem.setQuantity(orderItemDTO.getQuantity());
