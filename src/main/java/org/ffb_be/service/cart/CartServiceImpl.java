@@ -193,7 +193,7 @@ public class CartServiceImpl implements CartService {
                     List<CartItemOption> cartItemOptions=cartItem.getCartItemOptions();
                     for(CartItemOption cartItemOption:cartItemOptions){
                         CartItemOptionDTO cartItemOptionDTO=new CartItemOptionDTO();
-                        cartItemOptionDTO.setOptionId(cartItemOption.getId());
+                        cartItemOptionDTO.setOptionId(cartItemOption.getFoodOption().getId());
                         cartItemOptionDTO.setOptionName(cartItemOption.getFoodOption().getName());
                         cartItemOptionDTO.setImage(cartItemOption.getFoodOption().getImage());
                         cartItemOptionDTO.setQuantity(cartItemOption.getQuantity());
@@ -234,7 +234,7 @@ public class CartServiceImpl implements CartService {
                 List<CartItemOption> cartItemOptions=cartItem.getCartItemOptions();
                 for(CartItemOption cartItemOption:cartItemOptions){
                     CartItemOptionDTO cartItemOptionDTO=new CartItemOptionDTO();
-                    cartItemOptionDTO.setOptionId(cartItemOption.getId());
+                    cartItemOptionDTO.setOptionId(cartItemOption.getFoodOption().getId());
                     cartItemOptionDTO.setQuantity(cartItemOption.getQuantity());
                     cartItemOptionDTO.setCartItemId(cartItemDTO.getId());
                     cartItemOptionDTO.setPrice(cartItemOption.getUnitPrice());
