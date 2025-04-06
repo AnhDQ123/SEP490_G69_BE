@@ -72,4 +72,7 @@ public interface ShopService {
     List<BannerDTO> viewBannerByShop(Long shopId);
     List<BannerDTO> homePageBanner();
     Long shopId(Long productId);
+    void changeIsShipping(Long shopId);
+    void changeIsOpen(Long shopId);
+
 }
