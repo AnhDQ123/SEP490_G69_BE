@@ -451,6 +451,7 @@ public class ShopServiceImpl implements ShopService {
         image.setUrl(url);
         image.setRelatedId(shop.getId());
         image.setOwnerId(shop.getOwner().getId());
+        image.setStatus(Status.PENDING);
         image.setType(typesRepository.findById(8L).get());
         imageRepository.save(image);
     }
