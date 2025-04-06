@@ -385,6 +385,7 @@ public class ProductServiceImpl implements ProductService {
         BeanUtils.copyProperties(product, productResponseDTO);
         productResponseDTO.setDescription(product.getDescription());
         productResponseDTO.setFoodType(product.getType().toString());
+        productResponseDTO.setShopId(shopRepository.findByProduct(id).getId());
         BigDecimal defaultprice = null;
         List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product);
         for (FoodOption foodOption : foodOptions) {
