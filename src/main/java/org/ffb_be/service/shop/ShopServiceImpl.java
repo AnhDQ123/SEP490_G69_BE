@@ -491,5 +491,19 @@ public class ShopServiceImpl implements ShopService {
         return shop.getId();
     }
 
+    @Override
+    public void changeIsShipping(Long shopId) {
+        Shop shop=shopRepository.findById(shopId).get();
+        shop.setIsShipping(!shop.getIsShipping());
+        shopRepository.save(shop);
+    }
+
+    @Override
+    public void changeIsOpen(Long shopId) {
+        Shop shop=shopRepository.findById(shopId).get();
+        shop.setIsOpening(!shop.getIsOpening());
+        shopRepository.save(shop);
+    }
+
 
 }

@@ -256,4 +256,12 @@ public class ShopController {
     public List<BannerDTO> viewHomePageBanner(){
         return shopService.homePageBanner();
     }
+    @PutMapping("/isOpen")
+    public void changeShopIsOpen(@RequestParam("shopId") Long shopId){
+        shopService.changeIsOpen(shopId);
+    }
+    @PutMapping("/isShipping")
+    public void changeShopIsShipping(@RequestParam("shopId") Long shopId){
+        shopService.changeIsShipping(shopId);
+    }
 }

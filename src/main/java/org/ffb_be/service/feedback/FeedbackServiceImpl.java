@@ -38,8 +38,21 @@ public class FeedbackServiceImpl implements FeedbackService {
         feedback.setShop(shopRepository.findByProduct(productId));
         feedbackRepository.save(feedback);
     }
+
     @Override
-    public Page<FeedbackDTO> findAll(Long id, Pageable pageable) {
+    public Double getRate(Long productId) {
+        List<Feedback> feedbacks=feedbackRepository.findAllByProduct_Id(productId);
+        Double rate=0.0;
+        long count= feedbackRepository.countAllByProduct_Id(productId);
+        for(Feedback feedback:feedbacks){
+            rate=rate+feedback.getRate();
+        }
+        return rate/count;
+    }
+
+
+    @Override
+    public Page<FeedbackDTO> findAllByProduct(Long id, Pageable pageable) {
         return feedbackRepository.findAllByProduct_Id(id,pageable).map(feedback -> {
             FeedbackDTO feedbackDTO = new FeedbackDTO();
             feedbackDTO.setId(feedback.getId());
