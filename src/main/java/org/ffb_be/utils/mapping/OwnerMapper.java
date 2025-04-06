@@ -16,6 +16,4 @@ public interface OwnerMapper {
     @Mapping(source = "profile", target = "profile")
     @Mapping(source = "profile.taxCode", target = "profile.taxCode")
     OwnerDTO toDTO(User owner);
-
-    BusinessProfileDTO toProfileDTO(Profile profile);
 }

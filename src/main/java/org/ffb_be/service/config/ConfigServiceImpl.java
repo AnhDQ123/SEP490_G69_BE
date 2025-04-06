@@ -19,7 +19,7 @@ public class ConfigServiceImpl implements ConfigService {
 
     @Override
     public Page<Config> getConfigsByCategory(ConfigCategory category, Pageable pageable) {
-        return configRepository.findByCategoryAndStatus(category, Status.ACTIVE , pageable);
+        return configRepository.findByCategoryAndStatusOrderByCreatedAtDesc(category, Status.ACTIVE , pageable);
     }
 
     @Override

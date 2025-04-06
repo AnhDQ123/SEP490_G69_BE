@@ -29,7 +29,7 @@ public class VoucherServiceImpl implements VoucherService {
 
     @Override
     public List<VoucherDTO> getAllVouchers(Long shopId) {
-        List<Voucher> vouchers = voucherRepository.getAllByShopId(shopId);
+        List<Voucher> vouchers = voucherRepository.getAllByShopIdOrderByCreatedAtDesc(shopId);
         return vouchers.stream().map(voucherMapper::toDTO).collect(Collectors.toList());
     }
 

@@ -18,7 +18,9 @@ import org.ffb_be.utils.enums.Status;
 import org.ffb_be.utils.enums.upload.CloudinaryUpload;
 import org.ffb_be.utils.mapping.ShopMapper;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -49,7 +51,11 @@ public class ShopServiceImpl implements ShopService {
     @Override
     public Page<ShopDTO> getShops(String type, String status, String search, Pageable pageable) {
         Specification<Shop> spec = Specification.where(null);
-
+        Pageable sortedPageable = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                Sort.by(Sort.Direction.DESC, "createdAt")
+        );
         // Lọc theo status nếu có
         if (status != null && !status.isEmpty()) {
             spec = spec.and((root, query, cb) -> cb.equal(root.get("isActive"), status));
@@ -65,7 +71,7 @@ public class ShopServiceImpl implements ShopService {
             spec = spec.and((root, query, cb) -> cb.like(cb.lower(root.get("name")), "%" + search.toLowerCase() + "%"));
         }
 
-        Page<Shop> shops = shopRepository.findAll(spec, pageable);
+        Page<Shop> shops = shopRepository.findAll(spec, sortedPageable);
         return shops.map(this::decryptShopDTO);
     }
 
