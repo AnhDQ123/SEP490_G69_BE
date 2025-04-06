@@ -5,6 +5,7 @@ import org.ffb_be.dto.CountDTOBy.CountByDateDTO;
 import org.ffb_be.dto.CountDTOBy.CountByMonthDTO;
 import org.ffb_be.dto.CountDTOBy.CountByYearDTO;
 import org.ffb_be.dto.banner.BannerDTO;
+import org.ffb_be.dto.payment.ShipPaymentDTO;
 import org.ffb_be.dto.shop.ShopDTO;
 import org.ffb_be.dto.shop.ShopRegisterDTO;
 import org.ffb_be.service.order.OrderService;
@@ -263,5 +264,10 @@ public class ShopController {
     @PutMapping("/isShipping")
     public void changeShopIsShipping(@RequestParam("shopId") Long shopId){
         shopService.changeIsShipping(shopId);
+    }
+    @GetMapping("/shipPayment/{shopId}")
+    public ResponseEntity<List<ShipPaymentDTO>> getShipPaymentsByShopId(@PathVariable Long shopId) {
+        List<ShipPaymentDTO> shipPayments = orderService.findAllShipPaymentByShopId(shopId);
+        return ResponseEntity.ok(shipPayments);
     }
 }

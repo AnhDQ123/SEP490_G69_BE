@@ -6,6 +6,7 @@ import org.ffb_be.dto.CountDTOBy.CountByYearDTO;
 import org.ffb_be.dto.order.CountDTO;
 import org.ffb_be.dto.order.OrderDTO;
 import org.ffb_be.dto.order.ReturnOrderDTO;
+import org.ffb_be.dto.payment.ShipPaymentDTO;
 import org.ffb_be.dto.product.TopProductDTO;
 import org.ffb_be.entity.Order;
 import org.ffb_be.utils.enums.OrderStatus;
@@ -27,6 +28,7 @@ public interface OrderService {
     Page<OrderDTO> findAllByOwnerAndStatus(Long id, OrderStatus status, Pageable pageable);
     void cancelOrder(Long id,String reason);
     Page<OrderDTO> findAllByShopAndStatus(Long id,OrderStatus status,Pageable pageable);
+    List<ShipPaymentDTO> findAllShipPaymentByShopId(Long id);
     void acceptOrder(Long id);
     void rejectOrder(Long id);
     void changeStatus(Long id,Long userId, OrderStatus status, MultipartFile avatar) throws IOException;

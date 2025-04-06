@@ -8,6 +8,7 @@ import org.ffb_be.dto.CountDTOBy.CountByYearDTO;
 import org.ffb_be.dto.discount.DiscountDTO2;
 import org.ffb_be.dto.image.ImageDTO;
 import org.ffb_be.dto.order.*;
+import org.ffb_be.dto.payment.ShipPaymentDTO;
 import org.ffb_be.dto.product.TopProductDTO;
 import org.ffb_be.entity.*;
 import org.ffb_be.exception.NotFoundException;
@@ -333,6 +334,46 @@ public class OrderServiceImpl implements OrderService {
     public Page<OrderDTO> findAllByShopAndStatus(Long id, OrderStatus status,Pageable pageable) {
         Page<Order> orderList=orderRepository.findOrdersByShopIdAndStatus(id, status,pageable);
         return toDTO(orderList,pageable);
+    }
+
+    @Override
+    public List<ShipPaymentDTO> findAllShipPaymentByShopId(Long shopId) {
+        // Lấy tất cả các đơn hàng của shop có trạng thái DELIVERED
+        List<Order> orders = orderRepository.findAllByShop_IdAndStatus(shopId, OrderStatus.DELIVERED);
+
+        // Map để gom nhóm shipperId với tổng phí giao hàng
+        Map<Long, BigDecimal> shipPaymentMap = new HashMap<>();
+        // Map để lưu shipperName tương ứng với shipperId
+        Map<Long, String> shipperNameMap = new HashMap<>();
+
+        for (Order order : orders) {
+            // Kiểm tra shipper và deliveryMethod có hợp lệ không
+            if (order.getShipper() != null
+                    && order.getDeliveryMethod() != null
+                    && order.getDeliveryMethod().getFee() != null) {
+                Long shipperId = order.getShipper().getId();
+                BigDecimal fee = order.getDeliveryMethod().getFee();
+
+                // Cộng dồn phí giao hàng cho shipper tương ứng
+                shipPaymentMap.put(shipperId, shipPaymentMap.getOrDefault(shipperId, BigDecimal.ZERO).add(fee));
+                // Lưu tên shipper nếu chưa có
+                if (!shipperNameMap.containsKey(shipperId)) {
+                    shipperNameMap.put(shipperId, order.getShipper().getProfile().getName());
+                }
+            }
+        }
+
+        // Tạo danh sách DTO từ các Map đã có
+        List<ShipPaymentDTO> shipPaymentDTOList = new ArrayList<>();
+        for (Map.Entry<Long, BigDecimal> entry : shipPaymentMap.entrySet()) {
+            ShipPaymentDTO dto = new ShipPaymentDTO();
+            dto.setShipperId(entry.getKey());
+            dto.setAmount(entry.getValue());
+            dto.setShipperName(shipperNameMap.get(entry.getKey()));
+            shipPaymentDTOList.add(dto);
+        }
+
+        return shipPaymentDTOList;
     }
 
     @Override
