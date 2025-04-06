@@ -1,6 +1,7 @@
 package org.ffb_be.repository;
 
 import org.ffb_be.entity.Order;
+import org.ffb_be.entity.Shop;
 import org.ffb_be.utils.enums.OrderStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -184,4 +185,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
                                                Long shopId);
 
 
+    List<Order> findAllByShopAndStatus(Shop shop, OrderStatus status);
+
+    List<Order> findAllByShop_IdAndStatus(Long shopId, OrderStatus status);
 }
