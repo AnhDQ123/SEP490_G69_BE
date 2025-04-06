@@ -30,5 +30,6 @@ public class Image extends BaseEntity {
 
     private Long relatedId;
 
+    @Enumerated(EnumType.STRING)
     private Status status;
 }
