@@ -119,8 +119,7 @@ public class CartServiceImpl implements CartService {
                     option.setUnitPrice(unitPrice);
 
                     BigDecimal totalOptionPrice = unitPrice
-                            .multiply(BigDecimal.valueOf(option.getQuantity()))
-                            .multiply(BigDecimal.valueOf(item.getQuantity()));
+                            .multiply(BigDecimal.valueOf(option.getQuantity()));
 
                     option.setTotalPrice(totalOptionPrice);
                     option.setFoodOption(foodOptionRepository.findById(optionDTO.getOptionId())
