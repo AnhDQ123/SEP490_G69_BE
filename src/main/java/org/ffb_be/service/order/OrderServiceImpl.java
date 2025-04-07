@@ -185,7 +185,7 @@ public class OrderServiceImpl implements OrderService {
                      orderItemOption.setQuantity(orderItem.getQuantity());
                      BigDecimal unitPrice = foodOptionRepository.findById(orderItemOptionDTO.getOptionId()).get().getPrice();
                      orderItem.setUnitPrice(unitPrice);
-                     orderItem.setTotalPrice(unitPrice.multiply(BigDecimal.valueOf(orderItemDTO.getQuantity())));
+
                      orderItemOption.setTotalPrice(BigDecimal.ZERO);
                      if(discount!=null && !discount.isEmpty()){
                          for(Discount discount1:discount){
@@ -194,7 +194,8 @@ public class OrderServiceImpl implements OrderService {
                              }
                          }
                      }else orderItem.setDiscountValue(BigDecimal.ZERO);
-                     orderItemTotal=orderItemTotal.multiply(BigDecimal.ONE.subtract(orderItem.getDiscountValue()));
+                     orderItem.setTotalPrice(unitPrice.multiply(BigDecimal.valueOf(orderItemDTO.getQuantity())).multiply(orderItem.getDiscountValue()));
+                     orderItemTotal=orderItemTotal.add(orderItem.getTotalPrice());
                  }else{
                      orderItemOption.setQuantity(orderItemOptionDTO.getQuantity());
                      BigDecimal unitPrice = foodOptionRepository.findById(orderItemOptionDTO.getOptionId()).get().getPrice();
