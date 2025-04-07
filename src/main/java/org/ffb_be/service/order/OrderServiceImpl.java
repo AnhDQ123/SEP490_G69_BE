@@ -219,99 +219,133 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderDTO viewOrder(Long id) throws IOException {
-        Order order = orderRepository.findById(id).get(); // Load tất cả đơn hàng trước
+        Order order = orderRepository.findById(id).get(); // Load tất cả đơn hàng
         OrderDTO orderDTO = new OrderDTO();
-        BigDecimal orderTotal = BigDecimal.ZERO;
-            orderDTO.setId(order.getId());
-            orderDTO.setAddress(order.getShippingAddress());
-            orderDTO.setTotal(order.getTotal());
-            orderDTO.setOwnerId(order.getOwner().getId());
-            orderDTO.setPhone(userRepository.findById(orderDTO.getOwnerId()).get().getPhone());
-            orderDTO.setOwnerName(userRepository.findById(orderDTO.getOwnerId()).get().getProfile().getName());
-            orderDTO.setReason(order.getReason());
-            orderDTO.setPaymentProof(order.getPaymentProof());
-            if(order.getVoucher() != null) {
-                orderDTO.setVoucherId(order.getVoucher().getId());
-                orderDTO.setVoucherAmount(order.getVoucher().getDiscountValue());
-            }else orderDTO.setVoucherAmount(BigDecimal.ZERO);
-            orderDTO.setShipperId(order.getShipper() != null ? order.getShipper().getId() : null);
-            orderDTO.setStatus(order.getStatus().toString());
-            orderDTO.setPaymentMethodId(order.getPaymentMethod() != null ? order.getPaymentMethod().getId() : null);
-            orderDTO.setShipMethodId(order.getDeliveryMethod() != null ? order.getDeliveryMethod().getId() : null);
-            List<OrderItemDTO> orderItemDTOList = new ArrayList<>();
-        BigDecimal orderItemTotal = BigDecimal.ZERO;
-            for (OrderItem orderItem : order.getOrderItems()) {
-                OrderItemDTO orderItemDTO = new OrderItemDTO();
-                orderItemDTO.setId(orderItem.getId());
-                orderItemDTO.setQuantity(orderItem.getQuantity());
-                orderItemDTO.setProductId(orderItem.getProduct().getId());
-                orderItemDTO.setTotal(orderItem.getTotalPrice());
-                List<Discount> discount=discountRepository.findAllByProduct_Id((orderItem.getId()));
-                if(discount!=null) {
-                    List<DiscountDTO2> discountDTOs=new ArrayList<>();
-                    for (Discount discount1:discount) {
-                        DiscountDTO2 discountDTO=new DiscountDTO2();;
-                        discountDTO.setAmount(discount1.getDiscount_percentage());
-                        discountDTO.setId(discount1.getId());
-                        discountDTO.setStartDate(discount1.getStartDate());
-                        discountDTO.setEndDate(discount1.getEndDate());
-                        discountDTO.setStatus(discount1.getStatus().toString());
-                        discountDTOs.add(discountDTO);
-                    }
-                    orderItemDTO.setDiscount(discountDTOs);
-                }else {
-                    orderItemDTO.setDiscount(null);
+
+        orderDTO.setId(order.getId());
+        orderDTO.setAddress(order.getShippingAddress());
+        orderDTO.setTotal(order.getTotal());
+        orderDTO.setOwnerId(order.getOwner().getId());
+        orderDTO.setPhone(userRepository.findById(orderDTO.getOwnerId()).get().getPhone());
+        orderDTO.setOwnerName(userRepository.findById(orderDTO.getOwnerId()).get().getProfile().getName());
+        orderDTO.setReason(order.getReason());
+        orderDTO.setPaymentProof(order.getPaymentProof());
+
+        if(order.getVoucher() != null) {
+            orderDTO.setVoucherId(order.getVoucher().getId());
+            orderDTO.setVoucherAmount(order.getVoucher().getDiscountValue());
+        } else {
+            orderDTO.setVoucherAmount(BigDecimal.ZERO);
+        }
+
+        orderDTO.setShipperId(order.getShipper() != null ? order.getShipper().getId() : null);
+        orderDTO.setStatus(order.getStatus().toString());
+        orderDTO.setPaymentMethodId(order.getPaymentMethod() != null ? order.getPaymentMethod().getId() : null);
+        orderDTO.setShipMethodId(order.getDeliveryMethod() != null ? order.getDeliveryMethod().getId() : null);
+
+        List<OrderItemDTO> orderItemDTOList = new ArrayList<>();
+
+        // Duyệt qua từng OrderItem
+        for (OrderItem orderItem : order.getOrderItems()) {
+            OrderItemDTO orderItemDTO = new OrderItemDTO();
+            orderItemDTO.setId(orderItem.getId());
+            orderItemDTO.setQuantity(orderItem.getQuantity());
+            orderItemDTO.setProductId(orderItem.getProduct().getId());
+            orderItemDTO.setTotal(orderItem.getTotalPrice());
+
+            // Lấy danh sách discount của sản phẩm (lưu ý: có thể cần dùng orderItem.getProduct().getId())
+            List<Discount> discountList = discountRepository.findAllByProduct_Id(orderItem.getId());
+            if (discountList != null) {
+                List<DiscountDTO2> discountDTOs = new ArrayList<>();
+                for (Discount discount : discountList) {
+                    DiscountDTO2 discountDTO = new DiscountDTO2();
+                    discountDTO.setAmount(discount.getDiscount_percentage());
+                    discountDTO.setId(discount.getId());
+                    discountDTO.setStartDate(discount.getStartDate());
+                    discountDTO.setEndDate(discount.getEndDate());
+                    discountDTO.setStatus(discount.getStatus().toString());
+                    discountDTOs.add(discountDTO);
                 }
-                orderItemDTO.setCreatedAt(orderItem.getCreatedAt());
-                orderItemDTO.setOrderId(order.getId());
-                orderDTO.setShopName(shopRepository.findByProduct(orderItemDTO.getProductId()).getName());
-                orderDTO.setShopId(shopRepository.findByProduct(orderItemDTO.getProductId()).getId());
-                orderDTO.setShopAddress(shopRepository.findByProduct(orderItemDTO.getProductId()).getAddress());
-                orderDTO.setImage(shopRepository.findByProduct(orderItemDTO.getProductId()).getBackgroundImage());
-                orderItemDTO.setProductName(productRepository.findById(orderItemDTO.getProductId()).get().getName());
-                orderItemDTO.setImage(productRepository.findById(orderItemDTO.getProductId()).get().getImage());
-                List<OrderItemOptionDTO> orderItemOptionDTOList = new ArrayList<>();
-                BigDecimal orderItemOptionTotal = BigDecimal.ZERO;
-                for (OrderItemOption orderItemOption : orderItem.getOrderItemOptions()) {
-                    OrderItemOptionDTO orderItemOptionDTO = new OrderItemOptionDTO();
-                    orderItemOptionDTO.setId(orderItemOption.getId());
-                    orderItemOptionDTO.setOptionId(orderItemOption.getFoodOption().getId());
-                    orderItemOptionDTO.setQuantity(orderItemOption.getQuantity());
-                    orderItemOptionDTO.setOrderItemId(orderItem.getId());
-                    orderItemOptionDTO.setPrice(foodOptionRepository.findById(orderItemOptionDTO.getOptionId()).get().getPrice());
-                    orderItemOptionDTO.setTypeId(orderItemOption.getFoodOption().getType().getId());
-                    if (orderItemOptionDTO.getTypeId() == 2) {
-                        BigDecimal unitPrice = foodOptionRepository.findById(orderItemOptionDTO.getOptionId())
-                                .orElseThrow(() -> new RuntimeException("Food Option not found"))
-                                .getPrice();
-                        orderItemDTO.setPrice(unitPrice);
-                        orderItemDTO.setTotal(unitPrice.multiply(BigDecimal.valueOf(orderItemDTO.getQuantity())));
-                        orderItemTotal=orderItemTotal.add(orderItemDTO.getTotal());
-                        orderItemOptionDTO.setQuantity(orderItemDTO.getQuantity());
-                    }
-                    orderItemOptionDTO.setOptionName(orderItemOption.getFoodOption().getName());
-                    orderItemOptionDTO.setImage(orderItemOption.getFoodOption().getImage());
-                    if(orderItemOptionDTO.getTypeId() != 2){
-                        orderItemOptionDTO.setTotal(orderItemOptionDTO.getPrice().multiply(BigDecimal.valueOf(orderItemOptionDTO.getQuantity())));
-                        orderItemOptionTotal=orderItemOptionTotal.add(orderItemOptionDTO.getTotal());
-                    }
-                    orderItemOptionDTOList.add(orderItemOptionDTO);
-                }
-                orderItemTotal = orderItemTotal.add(orderItemOptionTotal);
-                for(Discount discount1:discount){
-                    if(discount1.getStatus().equals(Status.ACTIVE)){
-                        orderItemDTO.setTotal(orderItemTotal.multiply(BigDecimal.ONE.subtract(discount1.getDiscount_percentage())));
-                    }
-                }
-                orderItemTotal=orderItemDTO.getTotal();
-                orderItemDTO.setOrderItemOptions(orderItemOptionDTOList);
-                orderItemDTOList.add(orderItemDTO);
+                orderItemDTO.setDiscount(discountDTOs);
+            } else {
+                orderItemDTO.setDiscount(null);
             }
-            orderTotal = orderTotal.add(orderItemTotal);
-            orderDTO.setTotal(orderTotal.multiply(BigDecimal.ONE.subtract(orderDTO.getVoucherAmount())));
-            orderDTO.setOrderItem(orderItemDTOList);
+
+            orderItemDTO.setCreatedAt(orderItem.getCreatedAt());
+            orderItemDTO.setOrderId(order.getId());
+
+            // Lấy thông tin shop dựa vào product
+            orderDTO.setShopName(shopRepository.findByProduct(orderItemDTO.getProductId()).getName());
+            orderDTO.setShopId(shopRepository.findByProduct(orderItemDTO.getProductId()).getId());
+            orderDTO.setShopAddress(shopRepository.findByProduct(orderItemDTO.getProductId()).getAddress());
+            orderDTO.setImage(shopRepository.findByProduct(orderItemDTO.getProductId()).getBackgroundImage());
+
+            orderItemDTO.setProductName(productRepository.findById(orderItemDTO.getProductId()).get().getName());
+            orderItemDTO.setImage(productRepository.findById(orderItemDTO.getProductId()).get().getImage());
+
+            List<OrderItemOptionDTO> orderItemOptionDTOList = new ArrayList<>();
+            // Khai báo biến tổng riêng cho từng loại
+            BigDecimal totalType1 = BigDecimal.ZERO; // Chỉ cộng vào
+            BigDecimal totalType2 = BigDecimal.ZERO; // Sẽ áp dụng discount sau
+
+            // Duyệt qua các OrderItemOption
+            for (OrderItemOption orderItemOption : orderItem.getOrderItemOptions()) {
+                OrderItemOptionDTO orderItemOptionDTO = new OrderItemOptionDTO();
+                orderItemOptionDTO.setId(orderItemOption.getId());
+                orderItemOptionDTO.setOptionId(orderItemOption.getFoodOption().getId());
+                orderItemOptionDTO.setQuantity(orderItemOption.getQuantity());
+                orderItemOptionDTO.setOrderItemId(orderItem.getId());
+
+                // Lấy giá của FoodOption
+                BigDecimal optionPrice = foodOptionRepository.findById(orderItemOptionDTO.getOptionId())
+                        .orElseThrow(() -> new RuntimeException("Food Option not found"))
+                        .getPrice();
+                orderItemOptionDTO.setPrice(optionPrice);
+                orderItemOptionDTO.setTypeId(orderItemOption.getFoodOption().getType().getId());
+                orderItemOptionDTO.setOptionName(orderItemOption.getFoodOption().getName());
+                orderItemOptionDTO.setImage(orderItemOption.getFoodOption().getImage());
+
+                // Tính tổng cho tùy chọn hiện tại
+                BigDecimal optionTotal = optionPrice.multiply(BigDecimal.valueOf(orderItemOptionDTO.getQuantity()));
+                orderItemOptionDTO.setTotal(optionTotal);
+                orderItemOptionDTOList.add(orderItemOptionDTO);
+
+                // Phân loại tùy chọn theo typeId
+                if (orderItemOptionDTO.getTypeId() == 2) {
+                    totalType2 = totalType2.add(optionTotal);
+                } else { // Giả sử typeId = 1
+                    totalType1 = totalType1.add(optionTotal);
+                }
+            }
+
+            // Tính hệ số discount chỉ áp dụng cho type2
+            BigDecimal discountFactor = BigDecimal.ONE;
+            if (discountList != null) {
+                for (Discount discount : discountList) {
+                    if (discount.getStatus().equals(Status.ACTIVE)) {
+                        discountFactor = discountFactor.multiply(BigDecimal.ONE.subtract(discount.getDiscount_percentage()));
+                    }
+                }
+            }
+            BigDecimal discountedTotalType2 = totalType2.multiply(discountFactor);
+            // Tổng của OrderItem = tổng không discount (type1) + tổng discount (type2 đã nhân discount)
+            BigDecimal orderItemTotal = totalType1.add(discountedTotalType2);
+            orderItemDTO.setTotal(orderItemTotal);
+            orderItemDTO.setOrderItemOptions(orderItemOptionDTOList);
+            orderItemDTOList.add(orderItemDTO);
+        }
+
+        // Tính tổng đơn hàng từ tất cả OrderItem
+        BigDecimal finalOrderTotal = orderItemDTOList.stream()
+                .map(OrderItemDTO::getTotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        // Áp dụng voucher (nếu có) cho toàn đơn hàng
+        orderDTO.setTotal(finalOrderTotal.multiply(BigDecimal.ONE.subtract(orderDTO.getVoucherAmount())));
+        orderDTO.setOrderItem(orderItemDTOList);
+
         return orderDTO;
     }
+
 
 
     @Override
