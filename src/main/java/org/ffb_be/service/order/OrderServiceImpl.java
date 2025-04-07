@@ -254,22 +254,6 @@ public class OrderServiceImpl implements OrderService {
             orderItemDTO.setTotal(orderItem.getTotalPrice());
 
             // Lấy danh sách discount của sản phẩm (lưu ý: có thể cần dùng orderItem.getProduct().getId())
-            List<Discount> discountList = discountRepository.findAllByProduct_Id(orderItem.getProduct().getId());
-            if (discountList != null) {
-                List<DiscountDTO2> discountDTOs = new ArrayList<>();
-                for (Discount discount : discountList) {
-                    DiscountDTO2 discountDTO = new DiscountDTO2();
-                    discountDTO.setAmount(discount.getDiscount_percentage());
-                    discountDTO.setId(discount.getId());
-                    discountDTO.setStartDate(discount.getStartDate());
-                    discountDTO.setEndDate(discount.getEndDate());
-                    discountDTO.setStatus(discount.getStatus().toString());
-                    discountDTOs.add(discountDTO);
-                }
-                orderItemDTO.setDiscount(discountDTOs);
-            } else {
-                orderItemDTO.setDiscount(null);
-            }
 
             orderItemDTO.setCreatedAt(orderItem.getCreatedAt());
             orderItemDTO.setOrderId(order.getId());
@@ -320,6 +304,7 @@ public class OrderServiceImpl implements OrderService {
 
             // Tính hệ số discount chỉ áp dụng cho type2
             BigDecimal discountFactor = BigDecimal.ONE;
+            List<Discount> discountList = discountRepository.findAllByProduct_Id(orderItem.getProduct().getId());
             if (discountList != null) {
                 for (Discount discount : discountList) {
                     if (discount.getStatus().equals(Status.ACTIVE)) {
