@@ -188,7 +188,7 @@ public class CartServiceImpl implements CartService {
                 cartItemDTO.setCartId(cart.getId());
                 Long productId = cartItem.getProduct().getId();
                 cartItemDTO.setProductId(productId);
-
+                cartItemDTO.setQuantity(cartItem.getQuantity());
                 // Lấy thông tin sản phẩm
                 productRepository.findById(productId).ifPresent(product -> {
                     cartItemDTO.setProductName(product.getName());
@@ -219,7 +219,7 @@ public class CartServiceImpl implements CartService {
                     optionDTO.setOptionName(option.getFoodOption().getName());
                     optionDTO.setImage(option.getFoodOption().getImage());
                     optionDTO.setCartItemId(cartItem.getId());
-
+                    optionDTO.setQuantity(option.getQuantity());
                     // Lấy đơn giá của option từ FoodOption
                     Optional<FoodOption> foodOptionOpt = foodOptionRepository.findById(optionId);
                     if (!foodOptionOpt.isPresent()) {
