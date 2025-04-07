@@ -187,7 +187,14 @@ public class OrderServiceImpl implements OrderService {
                      orderItem.setUnitPrice(unitPrice);
                      orderItem.setTotalPrice(unitPrice.multiply(BigDecimal.valueOf(orderItemDTO.getQuantity())));
                      orderItemOption.setTotalPrice(BigDecimal.ZERO);
-                     orderItemTotal=orderItemTotal.add(orderItem.getTotalPrice());
+                     if(discount!=null && !discount.isEmpty()){
+                         for(Discount discount1:discount){
+                             if(discount1.getStatus().equals(Status.ACTIVE)){
+                                 orderItem.setDiscountValue(discount1.getDiscount_percentage());
+                             }
+                         }
+                     }else orderItem.setDiscountValue(BigDecimal.ZERO);
+                     orderItemTotal=orderItemTotal.multiply(BigDecimal.ONE.subtract(orderItem.getDiscountValue()));
                  }else{
                      orderItemOption.setQuantity(orderItemOptionDTO.getQuantity());
                      BigDecimal unitPrice = foodOptionRepository.findById(orderItemOptionDTO.getOptionId()).get().getPrice();
@@ -198,14 +205,7 @@ public class OrderServiceImpl implements OrderService {
                  orderItemOptionRepository.save(orderItemOption);
                  orderItemOptions.add(orderItemOption);
              }
-             if(discount!=null && !discount.isEmpty()){
-                 for(Discount discount1:discount){
-                     if(discount1.getStatus().equals(Status.ACTIVE)){
-                         orderItem.setDiscountValue(discount1.getDiscount_percentage());
-                     }
-                 }
-             }else orderItem.setDiscountValue(BigDecimal.ZERO);
-             orderItemTotal=orderItemTotal.multiply(BigDecimal.ONE.subtract(orderItem.getDiscountValue()));
+
              orderItem.setTotalPrice(orderItemTotal);
              orderItemRepository.save(orderItem);
              orderItemList.add(orderItem);
