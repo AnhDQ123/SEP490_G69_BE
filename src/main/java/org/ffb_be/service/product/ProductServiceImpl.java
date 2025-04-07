@@ -388,7 +388,12 @@ public class ProductServiceImpl implements ProductService {
         for (FoodOption foodOption : foodOptions) {
             FoodOptionDTO dto = new FoodOptionDTO();
             dto.setType_id(foodOption.getType().getId());
-            BeanUtils.copyProperties(foodOption, dto);
+            dto.setId(foodOption.getId());
+            dto.setName(foodOption.getName());
+            dto.setPrice(foodOption.getPrice());
+            dto.setImage(foodOption.getImage());
+            dto.setStatus(foodOption.getStatus().toString());
+            dto.setProduct_id(product.getId());
             foodOptionDTOs.add(dto);
         }
         BigDecimal defaultprice = null;
