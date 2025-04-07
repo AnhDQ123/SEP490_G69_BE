@@ -1,5 +1,7 @@
 package org.ffb_be.service.product;
 
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
 import org.ffb_be.dto.discount.DiscountDTO2;
 import org.ffb_be.dto.product.ProductResponseDTO;
@@ -14,13 +16,17 @@ import org.ffb_be.repository.*;
 import org.ffb_be.utils.mapping.FeedbackMapper;
 import org.ffb_be.utils.mapping.OrderMapper;
 import org.ffb_be.utils.mapping.ProductMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -37,15 +43,37 @@ public class RecommendationServiceImpl implements RecommendationService {
     private final OrderMapper orderMapper;
     private final FeedbackMapper feedbackMapper;
     private final RestTemplate restTemplate = new RestTemplate();
-    private static final String PYTHON_API_URL = "http://localhost:5000";
+
+    @Value("${rcm_url}")
+    private String PYTHON_API_URL;
+
+    @Value("${jwt.secret}")
+    private String JWT_SECRET;
 
     @Override
     public List<ProductResponseDTO> getRecommendations(Long userId, String productType, int top) {
         String url = String.format("%s/recommend/%d/%s/%d", PYTHON_API_URL, userId, productType, top);
 
+        // 1. Tạo JWT token
+        String token = Jwts.builder()
+                .claim("userId", userId)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 30)) // 30 phút
+                .signWith(SignatureAlgorithm.HS256, JWT_SECRET.getBytes(StandardCharsets.UTF_8))
+                .compact();
+
+        // 2. Tạo header với Authorization
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
+
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        // 3. Gửi request kèm header
         ResponseEntity<List<Map<String, Long>>> response = restTemplate.exchange(
-                url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {
-                }
+                url,
+                HttpMethod.GET,
+                entity,
+                new ParameterizedTypeReference<>() {}
         );
 
         if (response.getBody() == null || response.getBody().isEmpty()) {
