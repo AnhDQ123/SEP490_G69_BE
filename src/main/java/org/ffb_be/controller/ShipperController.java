@@ -98,4 +98,8 @@ public class ShipperController {
     public ResponseEntity<ShipperInfoDTO> getShipperDetail(@PathVariable Long userId) {
         return ResponseEntity.ok(shipperService.getShipperDetail(userId));
     }
+    @PutMapping("isBusy/{userId}")
+    public void updateShipperIsBusy(@PathVariable Long userId){
+        shipperService.changeIsBusy(userId);
+    }
 }

@@ -244,6 +244,13 @@ public class ShipperServiceImpl implements ShipperService {
         return decryptDTO(user);
     }
 
+    @Override
+    public void changeIsBusy(Long userId) {
+        User user=userRepository.findById(userId).get();
+        user.setDeliveryStatus(DeliveryStatus.BUSY);
+        userRepository.save(user);
+    }
+
     private ShipperInfoDTO decryptDTO(User user) {
         ShipperInfoDTO shipperInfoDTO = shipperMapper.toDTO(user);
         shipperInfoDTO.setCitizenIDNumber((shipperInfoDTO.getCitizenIDNumber()));

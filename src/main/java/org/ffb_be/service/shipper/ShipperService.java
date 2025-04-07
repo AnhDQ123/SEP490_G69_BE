@@ -39,4 +39,5 @@ public interface ShipperService {
     Page<ShipperInfoDTO> getShippersByStatus(String status, String search, Pageable pageable);
 
     ShipperInfoDTO getShipperDetail(Long userId);
+    void changeIsBusy(Long userId);
 }

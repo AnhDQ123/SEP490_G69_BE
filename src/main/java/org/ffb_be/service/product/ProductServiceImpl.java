@@ -445,15 +445,32 @@ public class ProductServiceImpl implements ProductService {
                 productResponseDTO.setFoodType(product.getType().toString());
                 productResponseDTO.setShopName(product.getShop().getName());
                 BigDecimal defaultprice = null;
-                List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product);
-                for (FoodOption foodOption : foodOptions) {
+                List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product); for (FoodOption foodOption : foodOptions) {
                     if (foodOption.getType().getId() == 2) {
-                        if (defaultprice == null || foodOption.getPrice().compareTo(defaultprice) < 0) {
-                            defaultprice = foodOption.getPrice();
-                        }
+                        defaultprice = foodOption.getPrice();
                     }
                 }
                 productResponseDTO.setDefaultPrice(defaultprice != null ? defaultprice : BigDecimal.ZERO);
+                // Tính defaultPrice từ các FoodOption có type id = 2
+                List<Discount> discount=discountRepository.findAllByProduct_Id((product.getId()));
+                if(discount!=null) {
+                    List<DiscountDTO2> discountDTOs=new ArrayList<>();
+                    for (Discount discount1:discount) {
+                        if(discount1.getStatus().equals(Status.ACTIVE)){
+                            DiscountDTO2 discountDTO=new DiscountDTO2();
+                            discountDTO.setAmount(discount1.getDiscount_percentage());
+                            discountDTO.setId(discount1.getId());
+                            discountDTO.setStartDate(discount1.getStartDate());
+                            discountDTO.setEndDate(discount1.getEndDate());
+                            discountDTO.setStatus(discount1.getStatus().toString());
+                            discountDTOs.add(discountDTO);
+                            defaultprice=defaultprice.multiply(BigDecimal.ONE.subtract(discount1.getDiscount_percentage()));
+                        }
+                    }
+                    productResponseDTO.setDiscount(discountDTOs);
+                }else {
+                    productResponseDTO.setDiscount(null);
+                }
                 productResponseDTOList.add(productResponseDTO);
             }
         }

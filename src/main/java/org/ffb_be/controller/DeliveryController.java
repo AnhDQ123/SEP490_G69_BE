@@ -10,6 +10,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/delivery")
@@ -41,5 +43,9 @@ public class DeliveryController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         deliveryMethodService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+    @GetMapping("/order")
+    public List<DeliveryDTO> getAllByShop(@RequestParam("shopId") Long shopId){
+        return deliveryMethodService.getAllByShop(shopId);
     }
 }
