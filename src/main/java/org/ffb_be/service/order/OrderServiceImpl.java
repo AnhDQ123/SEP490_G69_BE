@@ -194,7 +194,7 @@ public class OrderServiceImpl implements OrderService {
                              }
                          }
                      }else orderItem.setDiscountValue(BigDecimal.ZERO);
-                     orderItem.setTotalPrice(unitPrice.multiply(BigDecimal.valueOf(orderItemDTO.getQuantity())).multiply(orderItem.getDiscountValue()));
+                     orderItem.setTotalPrice(unitPrice.multiply(BigDecimal.valueOf(orderItemDTO.getQuantity())).multiply(BigDecimal.ONE.subtract(orderItem.getDiscountValue())));
                      orderItemTotal=orderItemTotal.add(orderItem.getTotalPrice());
                  }else{
                      orderItemOption.setQuantity(orderItemOptionDTO.getQuantity());
