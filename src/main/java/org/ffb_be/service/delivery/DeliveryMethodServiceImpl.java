@@ -3,8 +3,10 @@ package org.ffb_be.service.delivery;
 import lombok.RequiredArgsConstructor;
 import org.ffb_be.dto.delivery.DeliveryDTO;
 import org.ffb_be.entity.DeliveryMethod;
+import org.ffb_be.entity.Shop;
 import org.ffb_be.exception.NotFoundException;
 import org.ffb_be.repository.DeliveryMethodRepository;
+import org.ffb_be.repository.ShopRepository;
 import org.ffb_be.utils.enums.Status;
 import org.ffb_be.utils.mapping.DeliveryMapper;
 import org.springframework.data.domain.Page;
@@ -13,13 +15,15 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class DeliveryMethodServiceImpl implements DeliveryMethodService {
     private final DeliveryMethodRepository deliveryMethodRepository;
     private final DeliveryMapper deliveryMapper;
-
+    private final ShopRepository shopRepository;
     @Override
     public Page<DeliveryDTO> getAll(Pageable pageable) {
         Page<DeliveryMethod> deliveryMethods = deliveryMethodRepository.findByStatus(Status.ACTIVE, pageable);
@@ -73,5 +77,21 @@ public class DeliveryMethodServiceImpl implements DeliveryMethodService {
                 .orElseThrow(() -> new NotFoundException("Phương thức giao hàng"));
         deliveryMethod.setStatus(Status.DELETED);
         deliveryMethodRepository.save(deliveryMethod);
+    }
+
+    @Override
+    public List<DeliveryDTO> getAllByShop(Long shopId) {
+        List<DeliveryMethod> deliveryMethods=deliveryMethodRepository.findAllByStatus(Status.ACTIVE);
+        List<DeliveryDTO> deliveryDTOs=new ArrayList<>();
+        Shop shop=shopRepository.findById(shopId).get();
+        for (DeliveryMethod deliveryMethod : deliveryMethods) {
+            DeliveryDTO deliveryDTO=deliveryMapper.toDTO(deliveryMethod);
+            deliveryDTOs.add(deliveryDTO);
+        }
+        for(DeliveryDTO deliveryDTO:deliveryDTOs){
+            if(deliveryDTO.getId()==1&& shop.getIsShipping())
+                deliveryDTOs.remove(deliveryDTO);
+        }
+         return deliveryDTOs;
     }
 }
