@@ -254,7 +254,7 @@ public class OrderServiceImpl implements OrderService {
             orderItemDTO.setTotal(orderItem.getTotalPrice());
 
             // Lấy danh sách discount của sản phẩm (lưu ý: có thể cần dùng orderItem.getProduct().getId())
-            List<Discount> discountList = discountRepository.findAllByProduct_Id(orderItem.getId());
+            List<Discount> discountList = discountRepository.findAllByProduct_Id(orderItem.getProduct().getId());
             if (discountList != null) {
                 List<DiscountDTO2> discountDTOs = new ArrayList<>();
                 for (Discount discount : discountList) {
