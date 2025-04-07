@@ -102,4 +102,9 @@ public class ShipperController {
     public void updateShipperIsBusy(@PathVariable Long userId){
         shipperService.changeIsBusy(userId);
     }
+
+    @PutMapping("isAvailable/{userId}")
+    public void updateShipperIsAvailable(@PathVariable Long userId){
+        shipperService.changeIsAvailable(userId);
+    }
 }

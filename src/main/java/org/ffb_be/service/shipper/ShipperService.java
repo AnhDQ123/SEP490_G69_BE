@@ -40,4 +40,5 @@ public interface ShipperService {
 
     ShipperInfoDTO getShipperDetail(Long userId);
     void changeIsBusy(Long userId);
+    void changeIsAvailable(Long userId);
 }
