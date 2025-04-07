@@ -293,23 +293,24 @@ public class OrderServiceImpl implements OrderService {
                 BigDecimal optionTotal = optionPrice.multiply(BigDecimal.valueOf(orderItemOptionDTO.getQuantity()));
                 orderItemOptionDTO.setTotal(optionTotal);
                 orderItemOptionDTOList.add(orderItemOptionDTO);
-
+                List<Discount> discountList = discountRepository.findAllByProduct_Id(orderItemDTO.getProductId());
                 // Phân loại tùy chọn theo typeId
                 if (orderItemOptionDTO.getTypeId() == 2) {
                     totalType2 = totalType2.add(optionTotal);
+                    if(discountList!=null&&!discountList.isEmpty()) {
+                        for (Discount discount1:discountList) {
+                            if(discount1.getStatus().equals(Status.ACTIVE)){
+                                totalType2=totalType2.multiply(BigDecimal.ONE.subtract(discount1.getDiscount_percentage()));
+                            }
+                        }
+                    }
                 } else { // Giả sử typeId = 1
                     totalType1 = totalType1.add(optionTotal);
                 }
             }
             // Tính hệ số discount chỉ áp dụng cho type2
-            List<Discount> discountList = discountRepository.findAllByProduct_Id(orderItemDTO.getProductId());
-            if(discountList!=null&&!discountList.isEmpty()) {
-                for (Discount discount1:discountList) {
-                    if(discount1.getStatus().equals(Status.ACTIVE)){
-                        totalType2=totalType2.multiply(BigDecimal.ONE.subtract(discount1.getDiscount_percentage()));
-                    }
-                }
-            }
+
+
 
             // Tổng của OrderItem = tổng không discount (type1) + tổng discount (type2 đã nhân discount)
             BigDecimal orderItemTotal = totalType1.add(totalType2);
