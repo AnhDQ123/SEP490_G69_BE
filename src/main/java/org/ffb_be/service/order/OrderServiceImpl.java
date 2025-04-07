@@ -301,9 +301,8 @@ public class OrderServiceImpl implements OrderService {
                     totalType1 = totalType1.add(optionTotal);
                 }
             }
-            BigDecimal discountedTotalType2=totalType2;
             // Tính hệ số discount chỉ áp dụng cho type2
-            List<Discount> discountList = discountRepository.findAllByProduct_Id(orderItem.getProduct().getId());
+            List<Discount> discountList = discountRepository.findAllByProduct_Id(orderItemDTO.getProductId());
             if(discountList!=null&&!discountList.isEmpty()) {
                 for (Discount discount1:discountList) {
                     if(discount1.getStatus().equals(Status.ACTIVE)){
