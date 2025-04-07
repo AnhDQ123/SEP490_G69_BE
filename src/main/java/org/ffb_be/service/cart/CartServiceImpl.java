@@ -142,7 +142,7 @@ public class CartServiceImpl implements CartService {
                                     discountDTO.setEndDate(discount1.getEndDate());
                                     discountDTO.setStatus(discount1.getStatus().toString());
                                     discountDTOs.add(discountDTO);
-                                    item.setTotalPrice(item.getUnitPrice().multiply(BigDecimal.ONE.subtract(discount1.getDiscount_percentage())));
+                                    item.setTotalPrice(item.getTotalPrice().multiply(BigDecimal.ONE.subtract(discount1.getDiscount_percentage())));
                                 }
                             }
                         }
