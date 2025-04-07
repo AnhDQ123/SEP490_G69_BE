@@ -243,7 +243,7 @@ public class OrderServiceImpl implements OrderService {
         orderDTO.setStatus(order.getStatus().toString());
         orderDTO.setPaymentMethodId(order.getPaymentMethod() != null ? order.getPaymentMethod().getId() : null);
         orderDTO.setShipMethodId(order.getDeliveryMethod() != null ? order.getDeliveryMethod().getId() : null);
-
+        orderDTO.setTotal(order.getTotal());
         List<OrderItemDTO> orderItemDTOList = new ArrayList<>();
 
         // Duyệt qua từng OrderItem
@@ -307,41 +307,14 @@ public class OrderServiceImpl implements OrderService {
                 orderItemOptionDTO.setImage(orderItemOption.getFoodOption().getImage());
 
                 // Tính tổng cho tùy chọn hiện tại
-                BigDecimal optionTotal = optionPrice.multiply(BigDecimal.valueOf(orderItemOptionDTO.getQuantity()));
-                orderItemOptionDTO.setTotal(optionTotal);
-                orderItemOptionDTOList.add(orderItemOptionDTO);
 
-                // Phân loại tùy chọn theo typeId
-                if (orderItemOptionDTO.getTypeId() == 2) {
-                    totalType2 = totalType2.add(optionTotal);
-                } else { // Giả sử typeId = 1
-                    totalType1 = totalType1.add(optionTotal);
-                }
             }
 
-            // Tính hệ số discount chỉ áp dụng cho type2
-            BigDecimal discountFactor = BigDecimal.ONE;
-            if (discountList != null) {
-                for (Discount discount : discountList) {
-                    if (discount.getStatus().equals(Status.ACTIVE)) {
-                        discountFactor = discountFactor.multiply(BigDecimal.ONE.subtract(discount.getDiscount_percentage()));
-                    }
-                }
-            }
-            BigDecimal discountedTotalType2 = totalType2.multiply(discountFactor);
-            // Tổng của OrderItem = tổng không discount (type1) + tổng discount (type2 đã nhân discount)
-            BigDecimal orderItemTotal = totalType1.add(discountedTotalType2);
-            orderItemDTO.setTotal(orderItemTotal);
             orderItemDTO.setOrderItemOptions(orderItemOptionDTOList);
             orderItemDTOList.add(orderItemDTO);
         }
 
         // Tính tổng đơn hàng từ tất cả OrderItem
-        BigDecimal finalOrderTotal = orderItemDTOList.stream()
-                .map(OrderItemDTO::getTotal)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-        // Áp dụng voucher (nếu có) cho toàn đơn hàng
-        orderDTO.setTotal(finalOrderTotal.multiply(BigDecimal.ONE.subtract(orderDTO.getVoucherAmount())));
         orderDTO.setOrderItem(orderItemDTOList);
 
         return orderDTO;
