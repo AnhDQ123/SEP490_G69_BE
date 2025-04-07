@@ -133,7 +133,7 @@ public class CartServiceImpl implements CartService {
                         if(discount!=null&&!discount.isEmpty()) {
                             for (Discount discount1:discount) {
                                 if(discount1.getStatus().equals(Status.ACTIVE)){
-                                    item.setTotalPrice(item.getTotalPrice().multiply(BigDecimal.ONE.subtract(discount1.getDiscount_percentage())));
+                                    totalOptionPrice=item.getTotalPrice().multiply(BigDecimal.ONE.subtract(discount1.getDiscount_percentage()));
                                 }
                             }
                         }
