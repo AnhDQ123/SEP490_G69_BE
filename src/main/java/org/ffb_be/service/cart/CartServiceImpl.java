@@ -130,17 +130,9 @@ public class CartServiceImpl implements CartService {
                         item.setUnitPrice(unitPrice);
                         item.setTotalPrice(unitPrice.multiply(BigDecimal.valueOf(item.getQuantity())));
                         List<Discount> discount=discountRepository.findAllByProduct_Id((item.getProduct().getId()));
-                        if(discount!=null) {
-                            List<DiscountDTO2> discountDTOs=new ArrayList<>();
+                        if(discount!=null&&!discount.isEmpty()) {
                             for (Discount discount1:discount) {
                                 if(discount1.getStatus().equals(Status.ACTIVE)){
-                                    DiscountDTO2 discountDTO=new DiscountDTO2();
-                                    discountDTO.setAmount(discount1.getDiscount_percentage());
-                                    discountDTO.setId(discount1.getId());
-                                    discountDTO.setStartDate(discount1.getStartDate());
-                                    discountDTO.setEndDate(discount1.getEndDate());
-                                    discountDTO.setStatus(discount1.getStatus().toString());
-                                    discountDTOs.add(discountDTO);
                                     item.setTotalPrice(item.getTotalPrice().multiply(BigDecimal.ONE.subtract(discount1.getDiscount_percentage())));
                                 }
                             }
