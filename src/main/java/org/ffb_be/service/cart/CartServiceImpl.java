@@ -41,7 +41,6 @@ public class CartServiceImpl implements CartService {
             shopCartItems.computeIfAbsent(shopId, k -> new ArrayList<>()).add(cartItemDTO);
         }
 
-        // Duyệt các nhóm giỏ hàng theo shop
         for (Map.Entry<Long, List<CartItemDTO>> entry : shopCartItems.entrySet()) {
             Long shopId = entry.getKey();
             List<CartItemDTO> cartItemDTOList = entry.getValue();
@@ -51,7 +50,6 @@ public class CartServiceImpl implements CartService {
             BigDecimal totalCartPrice = cart.getTotal() != null ? cart.getTotal() : BigDecimal.ZERO;
 
             for (CartItemDTO cartItemDTO : cartItemDTOList) {
-                // Lấy thông tin sản phẩm
                 Product product = productRepository.findById(cartItemDTO.getProductId())
                         .orElseThrow(() -> new RuntimeException("Product not found"));
 
@@ -77,43 +75,35 @@ public class CartServiceImpl implements CartService {
 
                 CartItem item;
                 if (matchedItem != null) {
-                    // Nếu đã tồn tại, tăng số lượng và cập nhật thời gian
+                    // Nếu đã tồn tại, cập nhật số lượng và thời gian
                     item = matchedItem;
                     item.setQuantity(item.getQuantity() + cartItemDTO.getQuantity());
                     item.setUpdatedAt(LocalDateTime.now());
-
-                    // Xóa các option hiện có để tính lại giá từ đầu
+                    // Xóa các option hiện có để tính lại từ đầu
                     cartItemOptionRepository.deleteAllByCartItemId(item.getId());
+                    // Nếu item đã tồn tại, chắc chắn nó đã được lưu nên không cần phải save lại ngay lúc này
                 } else {
-                    // Nếu không có thì tạo mới CartItem
+                    // Tạo mới CartItem và lưu trước để có id persist cho CartItemOption
                     item = new CartItem();
                     item.setCart(cart);
                     item.setProduct(product);
                     item.setQuantity(cartItemDTO.getQuantity());
                     item.setCreatedAt(LocalDateTime.now());
+                    item = cartItemRepository.save(item);  // Lưu ngay để đảm bảo item không còn là transient
                 }
 
-                /*
-                 * TÍNH TOÁN GIÁ:
-                 * - Ban đầu, lấy giá cơ bản của sản phẩm từ bảng Product.
-                 * - Nếu có option có typeId == 2 (được hiểu là option chính), giá của option đó sẽ override giá sản phẩm.
-                 * - Các option khác sẽ cộng dồn vào giá phụ (extrasTotal).
-                 * - Sau đó tính subtotal = (basePrice + extrasTotal) * quantity.
-                 * - Nếu có discount active, chọn discount có % lớn nhất và áp dụng.
-                 */
-                BigDecimal basePrice = BigDecimal.ZERO; // giá cơ bản sản phẩm
-                BigDecimal extrasTotal = BigDecimal.ZERO;  // tổng giá của các option phụ
+                // TÍNH TOÁN GIÁ
+                BigDecimal basePrice = BigDecimal.ZERO; // Lấy giá cơ bản của sản phẩm
+                BigDecimal extrasTotal = BigDecimal.ZERO;  // Tổng giá của các option phụ
 
-                // Duyệt qua từng CartItemOptionDTO để tạo option và tính giá tương ứng
+                // Duyệt qua các option được truyền từ client
                 for (CartItemOptionDTO optionDTO : cartItemDTO.getCartItemOptionDTOList()) {
-                    // Tìm FoodOption (cần tránh gọi lặp lại, có thể lưu vào biến tạm nếu cần tối ưu)
                     FoodOption foodOption = foodOptionRepository.findById(optionDTO.getOptionId())
                             .orElseThrow(() -> new RuntimeException("Food Option not found"));
                     BigDecimal optionUnitPrice = foodOption.getPrice();
 
-                    // Tạo mới CartItemOption
                     CartItemOption option = new CartItemOption();
-                    option.setCartItem(item);
+                    option.setCartItem(item);  // Lưu ý: item đã được persist
                     option.setQuantity(optionDTO.getQuantity());
                     option.setCreatedAt(LocalDateTime.now());
                     option.setUpdatedAt(LocalDateTime.now());
@@ -122,20 +112,19 @@ public class CartServiceImpl implements CartService {
                     option.setFoodOption(foodOption);
                     cartItemOptionRepository.save(option);
 
-                    // Nếu option chính (typeId == 2) thì override giá cơ bản
+                    // Nếu option là option chính (typeId == 2) thì override giá cơ bản
                     if (optionDTO.getTypeId() == 2) {
                         basePrice = optionUnitPrice;
                     } else {
-                        // Cộng thêm giá của option phụ
                         extrasTotal = extrasTotal.add(optionUnitPrice.multiply(BigDecimal.valueOf(optionDTO.getQuantity())));
                     }
                 }
 
-                // Tính subtotal cho CartItem dựa trên số lượng sản phẩm
+                // Tính tổng giá cho CartItem: (basePrice + extrasTotal) * số lượng
                 BigDecimal itemSubTotal = (basePrice.add(extrasTotal))
                         .multiply(BigDecimal.valueOf(item.getQuantity()));
 
-                // Áp dụng discount (nếu có active discount)
+                // Áp dụng discount nếu có
                 List<Discount> discountList = discountRepository.findAllByProduct_Id(product.getId());
                 BigDecimal bestDiscount = BigDecimal.ZERO;
                 for (Discount discount : discountList) {
@@ -148,16 +137,15 @@ public class CartServiceImpl implements CartService {
                     itemSubTotal = itemSubTotal.multiply(BigDecimal.ONE.subtract(bestDiscount));
                 }
 
-                // Gán lại các giá trị cho CartItem
+                // Cập nhật lại giá cho CartItem
                 item.setUnitPrice(basePrice);
                 item.setTotalPrice(itemSubTotal);
                 cartItemRepository.save(item);
 
-                // Cộng dồn vào tổng giá của cart
                 totalCartPrice = totalCartPrice.add(itemSubTotal);
             }
 
-            // Cập nhật tổng giá cart và thời gian cập nhật
+            // Cập nhật tổng giá cho Cart
             cart.setTotal(totalCartPrice);
             cart.setUpdatedAt(LocalDateTime.now());
             cartRepository.save(cart);
@@ -176,6 +164,7 @@ public class CartServiceImpl implements CartService {
                     return cartRepository.save(newCart);
                 });
     }
+
     @Override
     public List<CartDTO> findByUserId(Long userId) {
         // Lấy danh sách giỏ hàng của user có trạng thái PENDING
