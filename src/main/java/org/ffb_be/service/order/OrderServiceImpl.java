@@ -13,6 +13,7 @@ import org.ffb_be.dto.product.TopProductDTO;
 import org.ffb_be.entity.*;
 import org.ffb_be.exception.NotFoundException;
 import org.ffb_be.repository.*;
+import org.ffb_be.utils.enums.DeliveryStatus;
 import org.ffb_be.utils.enums.OrderStatus;
 import org.ffb_be.utils.enums.Status;
 import org.ffb_be.utils.enums.upload.CloudinaryUpload;
@@ -448,6 +449,8 @@ public class OrderServiceImpl implements OrderService {
     public void acceptShipping(Long id,Long userId) {
         Order order=orderRepository.findById(id).get();
         order.setShipper(userRepository.findById(userId).get());
+        User user=userRepository.findById(userId).get();
+        user.setDeliveryStatus(DeliveryStatus.ASSIGNED);
         order.setStatus(OrderStatus.SHIPPING);
         order.setUpdatedAt(LocalDateTime.now());
         orderRepository.save(order);

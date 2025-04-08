@@ -12,6 +12,7 @@ import org.ffb_be.service.order.OrderService;
 import org.ffb_be.service.qr.QrService;
 import org.ffb_be.utils.enums.OrderStatus;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -204,15 +205,21 @@ public class OrderController {
         qrService.updatePaymentProof(orderId, paymentProof);
     }
     @GetMapping("/return/pending")
-    public Page<OrderDTO> getAllReturnPendingRequest(Pageable pageable) {
+    public Page<OrderDTO> getAllReturnPendingRequest(@RequestParam(value = "page", defaultValue = "1", required = false) Integer page,
+                                                     @RequestParam(value = "size", defaultValue = "20", required = false) Integer size) {
+        Pageable pageable = PageRequest.of(page-1, size);
         return orderService.findAllReturnPending(pageable);
     }
     @GetMapping("/return/rejected")
-    public Page<OrderDTO> getAllReturnRejectedRequest(Pageable pageable) {
+    public Page<OrderDTO> getAllReturnRejectedRequest(@RequestParam(value = "page", defaultValue = "1", required = false) Integer page,
+                                                      @RequestParam(value = "size", defaultValue = "20", required = false) Integer size) {
+        Pageable pageable = PageRequest.of(page-1, size);
         return orderService.findAllReturnRejected(pageable);
     }
     @GetMapping("/return/accepted")
-    public Page<OrderDTO> getAllReturnedRequest(Pageable pageable) {
+    public Page<OrderDTO> getAllReturnedRequest(@RequestParam(value = "page", defaultValue = "1", required = false) Integer page,
+                                                @RequestParam(value = "size", defaultValue = "20", required = false) Integer size) {
+        Pageable pageable = PageRequest.of(page-1, size);
         return orderService.findAllReturned(pageable);
     }
 }
