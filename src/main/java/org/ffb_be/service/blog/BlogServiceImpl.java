@@ -36,8 +36,13 @@ class BlogServiceImpl implements BlogService {
     private final CloudinaryUpload cloudinaryUpload;
 
     @Override
-    public List<BlogDTO> getBlogs(Pageable pageable) {
-        Page<Blog> blogPage = blogRepository.getBlogsByStatusOrderByCreatedAtDesc(Status.ACTIVE,pageable);
+    public List<BlogDTO> getBlogs(Pageable pageable, boolean isOperator) {
+        Page<Blog> blogPage;
+        if (isOperator) {
+            blogPage = blogRepository.getBlogsByStatusIsNotOrderByCreatedAt(Status.DELETED,pageable);
+        }else {
+            blogPage = blogRepository.getBlogsByStatusOrderByCreatedAtDesc(Status.ACTIVE,pageable);
+        }
         return blogPage.getContent().stream()
                 .map(this::mapBlogToDTO)
                 .collect(Collectors.toList());
