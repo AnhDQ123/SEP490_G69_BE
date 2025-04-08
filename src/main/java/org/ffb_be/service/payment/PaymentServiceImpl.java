@@ -1,6 +1,5 @@
 package org.ffb_be.service.payment;
 
-import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.ffb_be.dto.payment.PaymentDTO;
 import org.ffb_be.entity.Payment;
@@ -24,7 +23,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public Page<PaymentDTO> getAll(Pageable pageable) {
-        Page<Payment> payments = paymentRepository.findByStatus(Status.ACTIVE, pageable);
+        Page<Payment> payments = paymentRepository.findByStatusOrderByCreatedAtDesc(Status.ACTIVE, pageable);
         return payments.map(paymentMapper::toDTO);
     }
 

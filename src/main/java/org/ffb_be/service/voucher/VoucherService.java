@@ -8,7 +8,7 @@ import java.util.Map;
 
 public interface VoucherService {
 
-    List<VoucherDTO> getAllVouchers(Long shopId);
+    List<VoucherDTO> getAllVouchers(Long shopId, boolean isShopkeeper);
 
     VoucherDTO getVoucherByCode(String code);
 

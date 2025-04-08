@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.List;
 
 public interface BlogService {
-    List<BlogDTO> getBlogs(Pageable pageable);
+    List<BlogDTO> getBlogs(Pageable pageable, boolean isOperator);
 
     BlogDTO getBlogById(Long id);
 

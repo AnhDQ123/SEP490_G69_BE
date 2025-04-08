@@ -29,8 +29,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
     Optional<User> findByPhone(String phone);
 
-    Page<User> findByRoleAndShipperStatus(Role role, ShipperStatus status, Pageable pageable);
-
     @Query("""
     SELECT u FROM User u
     WHERE u.role.name = 'SHIPPER'

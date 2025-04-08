@@ -11,5 +11,5 @@ import java.util.Optional;
 public interface ConfigRepository extends JpaRepository<Config, Long> {
     Optional<Config> findByKey(String key);
 
-    Page<Config> findByCategoryAndStatus(ConfigCategory category, Status status, Pageable pageable);
+    Page<Config> findByCategoryAndStatusOrderByCreatedAtDesc(ConfigCategory category, Status status, Pageable pageable);
 }

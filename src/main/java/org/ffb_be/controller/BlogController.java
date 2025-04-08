@@ -26,8 +26,8 @@ public class BlogController {
 
     @GetMapping
     public ResponseEntity<List<BlogDTO>> getBlogs(
-            Pageable pageable) {
-        return ResponseEntity.ok(blogService.getBlogs(pageable));
+            Pageable pageable, @RequestParam(required = false) boolean isOperator) {
+        return ResponseEntity.ok(blogService.getBlogs(pageable, isOperator));
     }
 
     @GetMapping("/{id}")

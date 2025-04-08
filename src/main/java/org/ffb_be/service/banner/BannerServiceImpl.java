@@ -46,7 +46,7 @@ public class BannerServiceImpl implements BannerService {
     public void createBanner(Long shopId,ImageDTO image, MultipartFile file) throws IOException {
         Shop shop = shopRepository.findById(shopId)
                 .orElseThrow(() -> new NotFoundException("Shop"));
-        Types type = typesRepository.findByCategory(TypesCategory.BANNER)
+        Types type = typesRepository.findByCategoryOrderByCreatedAtDesc(TypesCategory.BANNER)
                 .orElseThrow(() -> new NotFoundException("Type"));
         Image banner = imageMapper.toEntity(image);
         if (file != null){

@@ -9,5 +9,5 @@ import java.util.Optional;
 
 @Repository
 public interface TypesRepository extends JpaRepository<Types, Long> {
-    Optional<Types> findByCategory(TypesCategory category);
+    Optional<Types> findByCategoryOrderByCreatedAtDesc(TypesCategory category);
 }

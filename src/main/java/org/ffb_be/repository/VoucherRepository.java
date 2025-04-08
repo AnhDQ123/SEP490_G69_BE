@@ -1,6 +1,7 @@
 package org.ffb_be.repository;
 
 import org.ffb_be.entity.Voucher;
+import org.ffb_be.utils.enums.Status;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -9,5 +10,7 @@ import java.util.Optional;
 public interface VoucherRepository extends JpaRepository<Voucher, Long> {
     Optional<Voucher> findByCode(String code);
 
-    List<Voucher> getAllByShopId(Long shopId);
+    List<Voucher> getAllByShopIdOrderByCreatedAtDesc(Long shopId);
+
+    List<Voucher> getAllByShopIdAndStatusOrderByCreatedAtDesc(Long shopId, Status status);
 }
