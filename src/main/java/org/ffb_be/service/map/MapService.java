@@ -15,7 +15,7 @@ public class MapService {
     @Value("${mapbox.api.key}")
     private String API_KEY;
 
-    private final String GEOCODING_URL = "https://api.mapbox.com/geocoding/v5/mapbox.places/%s.json?access_token=%s";
+    private final String GEOCODING_URL = "https://api.mapbox.com/geocoding/v5/mapbox.places/%s.json?access_token=%s&country=VN";
 
     public double[] getCoordinates(String address) {
         try {

@@ -13,6 +13,7 @@ import org.ffb_be.entity.Discount;
 import org.ffb_be.entity.FoodOption;
 import org.ffb_be.entity.Product;
 import org.ffb_be.repository.*;
+import org.ffb_be.utils.enums.Status;
 import org.ffb_be.utils.mapping.FeedbackMapper;
 import org.ffb_be.utils.mapping.OrderMapper;
 import org.ffb_be.utils.mapping.ProductMapper;
@@ -111,7 +112,7 @@ public class RecommendationServiceImpl implements RecommendationService {
                 .map(orderMapper::toDTOData)
                 .toList();
 
-        List<FoodDataDTO> foodDataDTOS = productRepository.findAll()
+        List<FoodDataDTO> foodDataDTOS = productRepository.getByStatus(Status.ACTIVE)
                 .stream()
                 .map(productMapper::toDTO)
                 .toList();
