@@ -63,5 +63,9 @@ public class Profile extends BaseEntity {
     @JoinColumn(name = "user_id", unique = true)
     private User user;
 
+    @Column(name="account_number")
+    private String accountNumber;
 
+    @Column(name="bank_code")
+    private String bankCode;
 }

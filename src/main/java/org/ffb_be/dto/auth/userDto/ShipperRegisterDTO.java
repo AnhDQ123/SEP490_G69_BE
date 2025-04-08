@@ -14,6 +14,8 @@ public class ShipperRegisterDTO {
     private LocalDate dob;
     private String phone;
     private String email;
+    private String accountNumber;
+    private String bankCode;
     private String citizenIDNumber;
     private LocalDate citizenIDExpiredDate;
     private LocalDate drivingLicenseExpiredDate;

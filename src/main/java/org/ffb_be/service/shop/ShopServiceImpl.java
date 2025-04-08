@@ -131,6 +131,7 @@ public class ShopServiceImpl implements ShopService {
 
         // Mã hóa thông tin nhạy cảm
         shop.setAccountNumber(encryptSafe(shopDTO.getAccountNumber()));
+        shop.setBankCode(shopDTO.getBankCode());
         profile.setTaxCode(encryptSafe(shopDTO.getTaxCode()));
         profile.setCitizenIDNumber(encryptSafe(shopDTO.getCitizenIDNumber()));
         profile.setCitizenIDExpiredDate(shopDTO.getCitizenIDExpiredDate());
@@ -235,8 +236,8 @@ public class ShopServiceImpl implements ShopService {
         if(shop.getIsActive() != Status.PENDING){
             throw new BadRequestException("Shop không ở trạng thái chờ duyệt");
         }
-        User user=userRepository.findById(shop.getOwner().getId()).get();
-        Role role=roleRepository.findById(2L).get();
+        User user = userRepository.findById(shop.getOwner().getId()).orElseThrow(() -> new NotFoundException("User"));
+        Role role=roleRepository.getByName("shopkeeper").orElseThrow(() -> new NotFoundException("Role"));
         user.setRole(role);
         userRepository.save(user);
         shop.setIsActive(Status.ACTIVE);
