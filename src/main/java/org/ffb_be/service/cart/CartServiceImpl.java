@@ -81,7 +81,6 @@ public class CartServiceImpl implements CartService {
                     item.setUpdatedAt(LocalDateTime.now());
                     // Xóa các option hiện có để tính lại từ đầu
                     cartItemOptionRepository.deleteAllByCartItemId(item.getId());
-                    // Nếu item đã tồn tại, chắc chắn nó đã được lưu nên không cần phải save lại ngay lúc này
                 } else {
                     // Tạo mới CartItem và lưu trước để có id persist cho CartItemOption
                     item = new CartItem();
@@ -95,7 +94,8 @@ public class CartServiceImpl implements CartService {
                 // TÍNH TOÁN GIÁ
                 BigDecimal basePrice = BigDecimal.ZERO; // Lấy giá cơ bản của sản phẩm
                 BigDecimal extrasTotal = BigDecimal.ZERO;  // Tổng giá của các option phụ
-
+                BigDecimal discountTotal = BigDecimal.ZERO; // Tổng discount cho các option có typeId == 2
+                BigDecimal totalItemPrice=BigDecimal.ZERO;
                 // Duyệt qua các option được truyền từ client
                 for (CartItemOptionDTO optionDTO : cartItemDTO.getCartItemOptionDTOList()) {
                     FoodOption foodOption = foodOptionRepository.findById(optionDTO.getOptionId())
@@ -111,38 +111,41 @@ public class CartServiceImpl implements CartService {
                     option.setTotalPrice(optionUnitPrice.multiply(BigDecimal.valueOf(optionDTO.getQuantity())));
                     option.setFoodOption(foodOption);
                     cartItemOptionRepository.save(option);
-
-                    // Nếu option là option chính (typeId == 2) thì override giá cơ bản
+                    List<Discount> discountList = discountRepository.findAllByProduct_Id(product.getId());
+                    // Nếu option là option chính (typeId == 2), áp dụng discount vào phần này
                     if (optionDTO.getTypeId() == 2) {
-                        basePrice = optionUnitPrice;
+                        BigDecimal bestDiscount = BigDecimal.ZERO;
+                        for (Discount discount : discountList) {
+                            if (discount.getStatus().equals(Status.ACTIVE)) {
+                                bestDiscount = discount.getDiscount_percentage();
+                            }
+                        }
+                        basePrice = optionUnitPrice; // Cập nhật lại giá cơ bản nếu là option chính
+                        discountTotal = discountTotal.add(basePrice.multiply(BigDecimal.valueOf(optionDTO.getQuantity()))); // Cộng dồn giá trị option chính vào discount
+                        discountTotal = discountTotal.multiply(BigDecimal.ONE.subtract(bestDiscount));
                     } else {
+                        // Cộng thêm giá của các option phụ
                         extrasTotal = extrasTotal.add(optionUnitPrice.multiply(BigDecimal.valueOf(optionDTO.getQuantity())));
                     }
                 }
 
-                // Tính tổng giá cho CartItem: (basePrice + extrasTotal) * số lượng
-                BigDecimal itemSubTotal = (basePrice.add(extrasTotal))
-                        .multiply(BigDecimal.valueOf(item.getQuantity()));
+                // Áp dụng discount vào các option chính (typeId == 2) trước khi tính tổng giá sản phẩm
+                totalItemPrice = discountTotal.add(extrasTotal);
 
-                // Áp dụng discount nếu có
-                List<Discount> discountList = discountRepository.findAllByProduct_Id(product.getId());
-                BigDecimal bestDiscount = BigDecimal.ZERO;
-                for (Discount discount : discountList) {
-                    if (discount.getStatus().equals(Status.ACTIVE) &&
-                            discount.getDiscount_percentage().compareTo(bestDiscount) > 0) {
-                        bestDiscount = discount.getDiscount_percentage();
-                    }
-                }
-                if (bestDiscount.compareTo(BigDecimal.ZERO) > 0) {
-                    itemSubTotal = itemSubTotal.multiply(BigDecimal.ONE.subtract(bestDiscount));
-                }
+                // Áp dụng discount vào giá sản phẩm nếu có
+
+
+
+                // Nếu có discount, áp dụng vào tổng giá đã tính cho CartItem
+
+                // Tính tổng giá cho CartItem: (basePrice + extrasTotal) * số lượng// Cộng dồn giá discount vào tổng
 
                 // Cập nhật lại giá cho CartItem
                 item.setUnitPrice(basePrice);
-                item.setTotalPrice(itemSubTotal);
+                item.setTotalPrice(totalItemPrice);
                 cartItemRepository.save(item);
 
-                totalCartPrice = totalCartPrice.add(itemSubTotal);
+                totalCartPrice = totalCartPrice.add(totalItemPrice);
             }
 
             // Cập nhật tổng giá cho Cart
@@ -164,6 +167,7 @@ public class CartServiceImpl implements CartService {
                     return cartRepository.save(newCart);
                 });
     }
+
 
     @Override
     public List<CartDTO> findByUserId(Long userId) {
