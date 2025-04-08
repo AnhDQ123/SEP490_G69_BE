@@ -203,4 +203,16 @@ public class OrderController {
     ) throws IOException {
         qrService.updatePaymentProof(orderId, paymentProof);
     }
+    @GetMapping("/return/pending")
+    public Page<OrderDTO> getAllReturnPendingRequest(Pageable pageable) {
+        return orderService.findAllReturnPending(pageable);
+    }
+    @GetMapping("/return/rejected")
+    public Page<OrderDTO> getAllReturnRejectedRequest(Pageable pageable) {
+        return orderService.findAllReturnRejected(pageable);
+    }
+    @GetMapping("/return/accepted")
+    public Page<OrderDTO> getAllReturnedRequest(Pageable pageable) {
+        return orderService.findAllReturned(pageable);
+    }
 }
