@@ -55,9 +55,9 @@ public class UserController {
         return ResponseEntity.ok().body(user);
     }
     @PutMapping("/update")
-    public ResponseEntity<?> updateProfile(@Validated @ModelAttribute("employee") UserUpdateDTO user,
+    public ResponseEntity<?> updateProfile(@Validated @RequestBody UserUpdateDTO user,
                                          BindingResult bindingResult,
-                                         @RequestParam("avatar") MultipartFile avatar) throws IOException {
+                                           MultipartFile avatar) throws IOException {
         if(bindingResult.hasErrors()) {
             return ResponseEntity.badRequest().body("Invalid data!");
         }
