@@ -142,4 +142,12 @@ public class UserController {
     public ResponseEntity<?> getUserProfile(@PathVariable("id") Long id) {
         return ResponseEntity.ok(userService.getRoleProfile(id));
     }
+    @PutMapping("/changePassword")
+    public void changePassword(@RequestParam Long id,@RequestParam String oldPassword,@RequestParam String newPassword,@RequestParam String confirmPassword) {
+        userService.changePassword(id, oldPassword, newPassword,confirmPassword);
+    }
+    @PutMapping("/forgot")
+    public void forgotPassword(@RequestParam String phone ,@RequestParam String password,@RequestParam String confirmPassword) {
+        userService.forgotPassword(phone,password,confirmPassword);
+    }
 }

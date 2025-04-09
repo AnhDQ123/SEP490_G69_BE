@@ -25,6 +25,10 @@ import org.ffb_be.utils.mapping.UserMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -47,8 +51,7 @@ public class UserServiceImpl implements UserService {
     private final ProfileRepository profileRepository;
     private final ShopRepository shopRepository;
     private final UserMapper userMapper;
-
-
+    private final AuthenticationManager authenticationManager;
     public void create(UserCreateDTO userCreateDTO) throws IOException {
         User user = new User();
         BeanUtils.copyProperties(userCreateDTO, user);
@@ -294,9 +297,28 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public void changePassword(Long id, String oldPassword, String newPassword,String confirmPassword) {
+        User user=userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), oldPassword));
+        if(newPassword.equals(confirmPassword)){
+            user.setPassword(passwordEncoder.encode(newPassword));
+        }else throw  new RuntimeException("Confirm password does not match");
+        userRepository.save(user);
+    }
+
+    @Override
     public UserRoleProfile getRoleProfile(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User"));
         return userMapper.toDTO(user);
+    }
+
+    @Override
+    public void forgotPassword( String phone, String password, String confirmPassword) {
+        User user=userRepository.findByPhone(phone).orElseThrow(() -> new RuntimeException("User not found"));
+        if(password.equals(confirmPassword)){
+            user.setPassword(passwordEncoder.encode(password));
+        }else throw  new RuntimeException("Confirm password does not match");
+        userRepository.save(user);
     }
 }
