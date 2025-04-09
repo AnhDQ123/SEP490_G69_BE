@@ -23,6 +23,9 @@ import java.util.Map;
 
 @Service
 public interface OrderService {
+    Page<OrderDTO> findAllReturnPending( Pageable pageable);
+    Page<OrderDTO> findAllReturnRejected( Pageable pageable);
+    Page<OrderDTO> findAllReturned( Pageable pageable);
     Order save(OrderDTO oderDTO) throws IOException;
     OrderDTO viewOrder(Long id) throws IOException;
     Page<OrderDTO> findAllByOwnerAndStatus(Long id, OrderStatus status, Pageable pageable);

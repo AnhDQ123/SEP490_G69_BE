@@ -184,8 +184,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
                                               LocalDateTime endDate,
                                                Long shopId);
 
-
-    List<Order> findAllByShopAndStatus(Shop shop, OrderStatus status);
-
     List<Order> findAllByShop_IdAndStatus(Long shopId, OrderStatus status);
+
+    Page<Order> findAllByStatus(OrderStatus status, Pageable pageable);
 }

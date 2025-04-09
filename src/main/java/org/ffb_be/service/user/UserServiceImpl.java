@@ -58,12 +58,9 @@ public class UserServiceImpl implements UserService {
         });
 
         Role role = roleRepository.findById(1L).get();
-        if(!role.getName().equals("operator")) {
-            userRepository.findByPhone(userCreateDTO.getPhone()).ifPresent((x)->{
-                throw new NonUniqueResultException("Phone already exists!");
-            });
-        }
-
+        userRepository.findByPhone(userCreateDTO.getPhone()).ifPresent((x)->{
+            throw new NonUniqueResultException("Phone already exists!");
+        });
         user.setEmail(userCreateDTO.getEmail());
         user.setPhone(userCreateDTO.getPhone());
         user.setUsername(userCreateDTO.getPhone());

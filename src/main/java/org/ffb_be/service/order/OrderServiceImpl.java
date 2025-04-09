@@ -13,6 +13,7 @@ import org.ffb_be.dto.product.TopProductDTO;
 import org.ffb_be.entity.*;
 import org.ffb_be.exception.NotFoundException;
 import org.ffb_be.repository.*;
+import org.ffb_be.utils.enums.DeliveryStatus;
 import org.ffb_be.utils.enums.OrderStatus;
 import org.ffb_be.utils.enums.Status;
 import org.ffb_be.utils.enums.upload.CloudinaryUpload;
@@ -62,6 +63,8 @@ public class OrderServiceImpl implements OrderService {
             orderDTO.setPhone(userRepository.findById(orderDTO.getOwnerId()).get().getPhone());
             orderDTO.setStatus(order.getStatus().toString());
             orderDTO.setReason(order.getReason());
+            orderDTO.setOrderCode(order.getOrderCode());
+            orderDTO.setCreatedAt(order.getCreatedAt());
             if (order.getVoucher() != null) {
                 orderDTO.setVoucherId(order.getVoucher().getId());
                 orderDTO.setVoucherAmount(order.getVoucher().getDiscountValue());
@@ -146,6 +149,25 @@ public class OrderServiceImpl implements OrderService {
         }
         return new PageImpl<>(orderDTOs, pageable, orders.getTotalElements());
     }
+
+    @Override
+    public Page<OrderDTO> findAllReturnPending( Pageable pageable) {
+        Page<Order> orders = orderRepository.findAllByStatus( OrderStatus.RETURN_PENDING, pageable);
+        return toDTO(orders,pageable);
+    }
+
+    @Override
+    public Page<OrderDTO> findAllReturnRejected(Pageable pageable) {
+        Page<Order> orders = orderRepository.findAllByStatus( OrderStatus.RETURN_REJECTED, pageable);
+        return toDTO(orders,pageable);
+    }
+
+    @Override
+    public Page<OrderDTO> findAllReturned(Pageable pageable) {
+        Page<Order> orders = orderRepository.findAllByStatus( OrderStatus.RETURNED, pageable);
+        return toDTO(orders,pageable);
+    }
+
     @Override
     public Order save(OrderDTO orderDTO) throws IOException {
          Order order = new Order();
@@ -231,7 +253,8 @@ public class OrderServiceImpl implements OrderService {
         orderDTO.setOwnerName(userRepository.findById(orderDTO.getOwnerId()).get().getProfile().getName());
         orderDTO.setReason(order.getReason());
         orderDTO.setPaymentProof(order.getPaymentProof());
-
+        orderDTO.setOrderCode(order.getOrderCode());
+        orderDTO.setCreatedAt(order.getCreatedAt());
         if(order.getVoucher() != null) {
             orderDTO.setVoucherId(order.getVoucher().getId());
             orderDTO.setVoucherAmount(order.getVoucher().getDiscountValue());
@@ -429,6 +452,8 @@ public class OrderServiceImpl implements OrderService {
     public void acceptShipping(Long id,Long userId) {
         Order order=orderRepository.findById(id).get();
         order.setShipper(userRepository.findById(userId).get());
+        User user=userRepository.findById(userId).get();
+        user.setDeliveryStatus(DeliveryStatus.ASSIGNED);
         order.setStatus(OrderStatus.SHIPPING);
         order.setUpdatedAt(LocalDateTime.now());
         orderRepository.save(order);
@@ -484,7 +509,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public ReturnOrderDTO viewReturnOrder(Long id) throws IOException {
         OrderDTO orderDTO=viewOrder(id);
-        List<Image> imageList=imageRepository.findAllByRelatedIdAndType_Id(orderDTO.getId(),3l);
+        List<Image> imageList=imageRepository.findAllByRelatedIdAndType_Id(orderDTO.getId(),3L);
         List<ImageDTO> imageDTOList=new ArrayList<>();
         for (Image image : imageList) {
             ImageDTO imageDTO=new ImageDTO();
@@ -492,7 +517,7 @@ public class OrderServiceImpl implements OrderService {
             imageDTO.setRelatedId(orderDTO.getId());
             imageDTO.setId(image.getId());
             imageDTO.setOwnerId(image.getOwnerId());
-            imageDTO.setTypeId(3l);
+            imageDTO.setTypeId(3L);
             imageDTOList.add(imageDTO);
         }
         ReturnOrderDTO returnOrderDTO=new ReturnOrderDTO();
