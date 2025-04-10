@@ -154,12 +154,17 @@ public class ProductServiceImpl implements ProductService {
     public Page<ProductResponseDTO> findAllByShop(Long id,Pageable pageable) {
         return productRepository.findAllByShop_Id(id,pageable).map(product -> {
             ProductResponseDTO productResponseDTO = new ProductResponseDTO();
-            productResponseDTO.setShopName(product.getShop().getName());
             productResponseDTO.setId(product.getId());
             productResponseDTO.setName(product.getName());
             productResponseDTO.setManufacturer(product.getManufacturer());
             productResponseDTO.setImage(product.getImage());
-            productResponseDTO.setCategory(product.getCategory().getName());
+            if (product.getCategory() != null) {
+                productResponseDTO.setCategory(product.getCategory().getName());
+            }
+
+            if (product.getShop() != null) {
+                productResponseDTO.setShopName(product.getShop().getName());
+            }
             productResponseDTO.setSupplier(product.getShop() != null ? product.getShop().getName() : "");
             productResponseDTO.setRate(product.getRate());
             productResponseDTO.setQuantity(product.getQuantity());
@@ -169,31 +174,36 @@ public class ProductServiceImpl implements ProductService {
             BigDecimal defaultprice = null;
             List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product);
             for (FoodOption foodOption : foodOptions) {
-                if (foodOption.getType().getId() == 2) {
+                if (foodOption.getType() != null && foodOption.getType().getId() == 2) {
                     defaultprice = foodOption.getPrice();
                 }
             }
-            productResponseDTO.setDefaultPrice(defaultprice != null ? defaultprice : BigDecimal.ZERO);
-            // Tính defaultPrice từ các FoodOption có type id = 2
-            List<Discount> discount=discountRepository.findAllByProduct_Id((product.getId()));
-            if(discount!=null) {
-                List<DiscountDTO2> discountDTOs=new ArrayList<>();
-                for (Discount discount1:discount) {
-                    if(discount1.getStatus().equals(Status.ACTIVE)){
-                        DiscountDTO2 discountDTO=new DiscountDTO2();
-                        discountDTO.setAmount(discount1.getDiscount_percentage());
-                        discountDTO.setId(discount1.getId());
-                        discountDTO.setStartDate(discount1.getStartDate());
-                        discountDTO.setEndDate(discount1.getEndDate());
-                        discountDTO.setStatus(discount1.getStatus().toString());
-                        discountDTOs.add(discountDTO);
-                        defaultprice=defaultprice.multiply(BigDecimal.ONE.subtract(discount1.getDiscount_percentage()));
+
+            List<Discount> discounts = discountRepository.findAllByProduct_Id(product.getId());
+            if (discounts != null) {
+                List<DiscountDTO2> discountDTOs = new ArrayList<>();
+                for (Discount d : discounts) {
+                    if (d.getStatus() == Status.ACTIVE && defaultprice != null) {
+                        DiscountDTO2 dto = new DiscountDTO2();
+                        dto.setAmount(d.getDiscount_percentage());
+                        dto.setId(d.getId());
+                        dto.setStartDate(d.getStartDate());
+                        dto.setEndDate(d.getEndDate());
+                        dto.setStatus(d.getStatus().toString());
+                        discountDTOs.add(dto);
+
+                        defaultprice = defaultprice
+                                .multiply(BigDecimal.ONE.subtract(d.getDiscount_percentage()))
+                                .setScale(2, RoundingMode.HALF_UP);
                     }
                 }
                 productResponseDTO.setDiscount(discountDTOs);
-            }else {
+            } else {
                 productResponseDTO.setDiscount(null);
             }
+
+// ✅ Move dòng này xuống cuối
+            productResponseDTO.setDefaultPrice(defaultprice != null ? defaultprice : BigDecimal.ZERO);
             BeanUtils.copyProperties(product, productResponseDTO);
             return productResponseDTO;
         });
@@ -398,31 +408,36 @@ public class ProductServiceImpl implements ProductService {
         }
         BigDecimal defaultprice = null;
         for (FoodOption foodOption : foodOptions) {
-            if (foodOption.getType().getId() == 2) {
+            if (foodOption.getType() != null && foodOption.getType().getId() == 2) {
                 defaultprice = foodOption.getPrice();
             }
         }
-        productResponseDTO.setDefaultPrice(defaultprice != null ? defaultprice : BigDecimal.ZERO);
-        List<Discount> discount=discountRepository.findAllByProduct_Id((product.getId()));
-        if(discount!=null) {
-            List<DiscountDTO2> discountDTOs=new ArrayList<>();
-            for (Discount discount1:discount) {
-                if(discount1.getStatus().equals(Status.ACTIVE)){
-                    DiscountDTO2 discountDTO=new DiscountDTO2();
-                    discountDTO.setAmount(discount1.getDiscount_percentage());
-                    discountDTO.setId(discount1.getId());
-                    discountDTO.setStartDate(discount1.getStartDate());
-                    discountDTO.setEndDate(discount1.getEndDate());
-                    discountDTO.setStatus(discount1.getStatus().toString());
-                    discountDTOs.add(discountDTO);
-                    defaultprice=defaultprice.multiply(BigDecimal.ONE.subtract(discount1.getDiscount_percentage()));
+
+        List<Discount> discounts = discountRepository.findAllByProduct_Id(product.getId());
+        if (discounts != null) {
+            List<DiscountDTO2> discountDTOs = new ArrayList<>();
+            for (Discount d : discounts) {
+                if (d.getStatus() == Status.ACTIVE && defaultprice != null) {
+                    DiscountDTO2 dto = new DiscountDTO2();
+                    dto.setAmount(d.getDiscount_percentage());
+                    dto.setId(d.getId());
+                    dto.setStartDate(d.getStartDate());
+                    dto.setEndDate(d.getEndDate());
+                    dto.setStatus(d.getStatus().toString());
+                    discountDTOs.add(dto);
+
+                    defaultprice = defaultprice
+                            .multiply(BigDecimal.ONE.subtract(d.getDiscount_percentage()))
+                            .setScale(2, RoundingMode.HALF_UP);
                 }
             }
             productResponseDTO.setDiscount(discountDTOs);
-        }else {
+        } else {
             productResponseDTO.setDiscount(null);
         }
-        productResponseDTO.setDefaultPrice(defaultprice);
+
+// ✅ Move dòng này xuống cuối
+        productResponseDTO.setDefaultPrice(defaultprice != null ? defaultprice : BigDecimal.ZERO);
         Optional<Category> c=categoryRepository.findById(product.getCategory().getId());
         Category category = c.get();
         productResponseDTO.setFoodOption(foodOptionDTOs);
@@ -450,32 +465,38 @@ public class ProductServiceImpl implements ProductService {
                 productResponseDTO.setFoodType(product.getType().toString());
                 productResponseDTO.setShopName(product.getShop().getName());
                 BigDecimal defaultprice = null;
-                List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product); for (FoodOption foodOption : foodOptions) {
-                    if (foodOption.getType().getId() == 2) {
+                List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product);
+                for (FoodOption foodOption : foodOptions) {
+                    if (foodOption.getType() != null && foodOption.getType().getId() == 2) {
                         defaultprice = foodOption.getPrice();
                     }
                 }
-                productResponseDTO.setDefaultPrice(defaultprice != null ? defaultprice : BigDecimal.ZERO);
-                // Tính defaultPrice từ các FoodOption có type id = 2
-                List<Discount> discount=discountRepository.findAllByProduct_Id((product.getId()));
-                if(discount!=null) {
-                    List<DiscountDTO2> discountDTOs=new ArrayList<>();
-                    for (Discount discount1:discount) {
-                        if(discount1.getStatus().equals(Status.ACTIVE)){
-                            DiscountDTO2 discountDTO=new DiscountDTO2();
-                            discountDTO.setAmount(discount1.getDiscount_percentage());
-                            discountDTO.setId(discount1.getId());
-                            discountDTO.setStartDate(discount1.getStartDate());
-                            discountDTO.setEndDate(discount1.getEndDate());
-                            discountDTO.setStatus(discount1.getStatus().toString());
-                            discountDTOs.add(discountDTO);
-                            defaultprice=defaultprice.multiply(BigDecimal.ONE.subtract(discount1.getDiscount_percentage()));
+
+                List<Discount> discounts = discountRepository.findAllByProduct_Id(product.getId());
+                if (discounts != null) {
+                    List<DiscountDTO2> discountDTOs = new ArrayList<>();
+                    for (Discount d : discounts) {
+                        if (d.getStatus() == Status.ACTIVE && defaultprice != null) {
+                            DiscountDTO2 dto = new DiscountDTO2();
+                            dto.setAmount(d.getDiscount_percentage());
+                            dto.setId(d.getId());
+                            dto.setStartDate(d.getStartDate());
+                            dto.setEndDate(d.getEndDate());
+                            dto.setStatus(d.getStatus().toString());
+                            discountDTOs.add(dto);
+
+                            defaultprice = defaultprice
+                                    .multiply(BigDecimal.ONE.subtract(d.getDiscount_percentage()))
+                                    .setScale(2, RoundingMode.HALF_UP);
                         }
                     }
                     productResponseDTO.setDiscount(discountDTOs);
-                }else {
+                } else {
                     productResponseDTO.setDiscount(null);
                 }
+
+// ✅ Move dòng này xuống cuối
+                productResponseDTO.setDefaultPrice(defaultprice != null ? defaultprice : BigDecimal.ZERO);
                 productResponseDTOList.add(productResponseDTO);
             }
         }
