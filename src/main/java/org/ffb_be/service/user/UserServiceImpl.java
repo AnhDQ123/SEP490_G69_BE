@@ -40,6 +40,7 @@ import java.time.LocalTime;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
@@ -324,6 +325,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public void forgotPassword( String phone, String password, String confirmPassword) {
         User user=userRepository.findByPhone(phone).orElseThrow(() -> new RuntimeException("User not found"));
+        String passwordRegex = "^(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$";
+
+        // Check if password matches the regex pattern
+        if (!Pattern.matches(passwordRegex, password)) {
+            throw new RuntimeException("Password must be at least 8 characters long, contain at least one uppercase letter, one digit, and one special character");
+        }
         if(password.equals(confirmPassword) && !password.isBlank()){
             user.setPassword(passwordEncoder.encode(password));
         }else throw  new RuntimeException("Confirm password does not match");
