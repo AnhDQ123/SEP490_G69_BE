@@ -36,7 +36,8 @@ public interface UserService {
     long countAllUser();
     String hasShop(Long id);
     void add();
-
+    void changePassword(Long id,String oldPassword, String newPassword,String confirmPassword);
     UserRoleProfile getRoleProfile(Long id);
+    void forgotPassword(String phone,String password,String confirmPassword);
 }
 

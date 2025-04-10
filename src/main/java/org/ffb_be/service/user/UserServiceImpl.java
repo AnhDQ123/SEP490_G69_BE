@@ -25,6 +25,10 @@ import org.ffb_be.utils.mapping.UserMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,6 +40,7 @@ import java.time.LocalTime;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
@@ -47,8 +52,7 @@ public class UserServiceImpl implements UserService {
     private final ProfileRepository profileRepository;
     private final ShopRepository shopRepository;
     private final UserMapper userMapper;
-
-
+    private final AuthenticationManager authenticationManager;
     public void create(UserCreateDTO userCreateDTO) throws IOException {
         User user = new User();
         BeanUtils.copyProperties(userCreateDTO, user);
@@ -67,6 +71,9 @@ public class UserServiceImpl implements UserService {
         user.setRole(role);
         Status status = Status.ACTIVE;
         user.setStatus(status);
+        if(passwordEncoder.encode(userCreateDTO.getPassword()) == null) {
+            throw new RuntimeException("Encoded password is null");
+        }
         user.setPassword(passwordEncoder.encode(userCreateDTO.getPassword()));
         userRepository.save(user);
 
@@ -83,22 +90,27 @@ public class UserServiceImpl implements UserService {
             UserResponseDTO userResponseDTO = new UserResponseDTO();
             BeanUtils.copyProperties(user, userResponseDTO);
             userResponseDTO.setId(user.getId());
-            userResponseDTO.setStatus(user.getStatus().toString());
+            userResponseDTO.setStatus(user.getStatus() != null ? user.getStatus().toString() : null);
+
             if (user.getProfile() != null) {
                 userResponseDTO.setAvatar(user.getProfile().getAvatar());
+                userResponseDTO.setName(user.getProfile().getName());
             } else {
                 userResponseDTO.setAvatar(null);
+                userResponseDTO.setName(null);
             }
-            userResponseDTO.setName(user.getProfile().getName());
-            userResponseDTO.setRole(user.getRole().getName());
-            userResponseDTO.setCreated_at(user.getCreatedAt().toString());
+
+            userResponseDTO.setRole(user.getRole() != null ? user.getRole().getName() : null);
+            userResponseDTO.setCreated_at(user.getCreatedAt() != null ? user.getCreatedAt().toString() : null);
+
             return userResponseDTO;
         });
     }
 
+
     @Override
     public ProfileDTO findById(Long id) {
-        Profile profile = profileRepository.findByUserId2(id).orElse(null);
+        Profile profile = profileRepository.findByUserId2(id).orElseThrow(() -> new RuntimeException("User not found"));
         ProfileDTO profileDTO = new ProfileDTO();
         profileDTO.setStatus(userRepository.findById(id).get().getStatus());
         profileDTO.setEmail(userRepository.findById(id).get().getEmail());
@@ -294,9 +306,34 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public void changePassword(Long id, String oldPassword, String newPassword,String confirmPassword) {
+        User user=userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), oldPassword));
+        if(newPassword.equals(confirmPassword)){
+            user.setPassword(passwordEncoder.encode(newPassword));
+        }else throw  new RuntimeException("Confirm password does not match");
+        userRepository.save(user);
+    }
+
+    @Override
     public UserRoleProfile getRoleProfile(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User"));
         return userMapper.toDTO(user);
+    }
+
+    @Override
+    public void forgotPassword( String phone, String password, String confirmPassword) {
+        User user=userRepository.findByPhone(phone).orElseThrow(() -> new RuntimeException("User not found"));
+        String passwordRegex = "^(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$";
+
+        // Check if password matches the regex pattern
+        if (!Pattern.matches(passwordRegex, password)) {
+            throw new RuntimeException("Password must be at least 8 characters long, contain at least one uppercase letter, one digit, and one special character");
+        }
+        if(password.equals(confirmPassword) && !password.isBlank()){
+            user.setPassword(passwordEncoder.encode(password));
+        }else throw  new RuntimeException("Confirm password does not match");
+        userRepository.save(user);
     }
 }
