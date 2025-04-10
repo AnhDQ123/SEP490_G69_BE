@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 @RequiredArgsConstructor
-class BlogServiceImpl implements BlogService {
+public class BlogServiceImpl implements BlogService {
     private final BlogRepository blogRepository;
     private final ImageRepository imageRepository;
     private final CommentRepository commentRepository;
