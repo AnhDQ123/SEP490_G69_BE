@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.ffb_be.dto.comment.CommentDTO;
 import org.ffb_be.entity.Blog;
 import org.ffb_be.entity.Comment;
+import org.ffb_be.exception.BadRequestException;
 import org.ffb_be.exception.NotFoundException;
 import org.ffb_be.repository.BlogRepository;
 import org.ffb_be.repository.CommentRepository;
@@ -40,6 +41,7 @@ public class CommentServiceImpl implements CommentService{
                 .map(comment -> {
                     CommentDTO dto = commentMapper.toDTOWithReplies(comment, rootComments, 0, 3);
                     dto.setHasMoreReplies(hasMoreComments);
+                    dto.setReplyCount(commentRepository.countByParentCommentId(dto.getId()));
                     return dto;
                 })
                 .collect(Collectors.toList());
@@ -73,6 +75,9 @@ public class CommentServiceImpl implements CommentService{
         if (commentDTO.getParentId() != null) {
             Comment parentComment = commentRepository.findById(commentDTO.getParentId())
                     .orElseThrow(() -> new NotFoundException("Parent comment"));
+            if (!blogId.equals(parentComment.getBlog().getId())) {
+                throw new BadRequestException("Blog id mismatch with parent comment");
+            }
             comment.setParentComment(parentComment);
         }
         commentRepository.save(comment);

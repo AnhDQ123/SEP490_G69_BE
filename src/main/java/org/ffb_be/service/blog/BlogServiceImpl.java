@@ -180,10 +180,10 @@ class BlogServiceImpl implements BlogService {
     public void blogStatusUpdate(Long id, Status status, String reason) {
         Blog blog = blogRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Blog"));
-        if (status == Status.ACTIVE) {
+        if (status == Status.ACTIVE&&!blog.getStatus().equals(Status.ACTIVE)) {
             blog.setReason(null);
         }
-        if (status == Status.INACTIVE) {
+        if (status == Status.INACTIVE&&!blog.getStatus().equals(Status.INACTIVE)) {
             blog.setReason(reason);
         }
         blog.setStatus(status);

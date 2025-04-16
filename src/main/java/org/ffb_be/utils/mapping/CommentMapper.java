@@ -40,6 +40,7 @@ public interface CommentMapper {
                 comment.getContent(),
                 toWriterDTO(comment.getWriter()),
                 comment.getParentComment() != null ? comment.getParentComment().getId() : null,
+                allReplies.size(),
                 limitedReplies.stream().map(c -> toDTOWithReplies(c, allReplies, depth + 1, maxDepth)).collect(Collectors.toList()),
                 hasMoreReplies
         );
