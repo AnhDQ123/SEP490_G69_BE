@@ -41,7 +41,6 @@ public class CartServiceImpl implements CartService {
             if(cartItemDTO.getProductId()!=null){
                 shopId= shopRepository.findByProduct(cartItemDTO.getProductId()).getId();
             }else shopId=null;
-
             shopCartItems.computeIfAbsent(shopId, k -> new ArrayList<>()).add(cartItemDTO);
         }
 
