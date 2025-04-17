@@ -37,7 +37,11 @@ public class CartServiceImpl implements CartService {
         // Nhóm các sản phẩm theo Shop
         Map<Long, List<CartItemDTO>> shopCartItems = new HashMap<>();
         for (CartItemDTO cartItemDTO : cartDTO.getCartItemDTOList()) {
-            Long shopId = shopRepository.findByProduct(cartItemDTO.getProductId()).getId();
+            Long shopId;
+            if(cartItemDTO.getProductId()!=null){
+                shopId= shopRepository.findByProduct(cartItemDTO.getProductId()).getId();
+            }else shopId=null;
+
             shopCartItems.computeIfAbsent(shopId, k -> new ArrayList<>()).add(cartItemDTO);
         }
 
