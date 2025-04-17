@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -164,7 +165,7 @@ public class ShopController {
         return shopService.countPendingShop();
     }
     @GetMapping("/revenue/day")
-    public Map<Long, Double> calculateShopRevenueByDay(
+    public Map<Long, BigDecimal> calculateShopRevenueByDay(
             @RequestParam("startDate") String startDate,
             @RequestParam("endDate") String endDate,
             @RequestParam("shopId") Long shopId) {
@@ -177,7 +178,7 @@ public class ShopController {
 
     // API để tính tổng doanh thu theo tháng cho cửa hàng cụ thể
     @GetMapping("/revenue/month")
-    public Map<String, Double> calculateShopRevenueByMonth(
+    public Map<String, BigDecimal> calculateShopRevenueByMonth(
             @RequestParam("startDate") String startDate,
             @RequestParam("endDate") String endDate,
             @RequestParam("shopId") Long shopId) {
@@ -190,7 +191,7 @@ public class ShopController {
 
     // API để tính tổng doanh thu theo năm cho cửa hàng cụ thể
     @GetMapping("/revenue/year")
-    public Map<Integer, Double> calculateShopRevenueByYear(
+    public Map<Integer, BigDecimal> calculateShopRevenueByYear(
             @RequestParam("startDate") String startDate,
             @RequestParam("endDate") String endDate,
             @RequestParam("shopId") Long shopId) {

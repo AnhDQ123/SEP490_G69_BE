@@ -745,15 +745,15 @@ public class OrderServiceImpl implements OrderService {
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         return orderRepository.countShopOrdersByStatusAndYear(status, startDateTime, endDateTime, shopId);
     }
-    public Map<Long, Double> calculateShopRevenueByDay(LocalDate startDate, LocalDate endDate, Long shopId) {
+    public Map<Long, BigDecimal> calculateShopRevenueByDay(LocalDate startDate, LocalDate endDate, Long shopId) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         List<Object[]> results = orderRepository.calculateShopRevenueByDay(startDateTime, endDateTime, shopId);
 
-        Map<Long, Double> shopRevenue = new HashMap<>();
+        Map<Long, BigDecimal> shopRevenue = new HashMap<>();
         for (Object[] result : results) {
             Long shopIdResult = (Long) result[0];
-            Double revenue = (Double) result[1];
+            BigDecimal revenue = (BigDecimal) result[1];
             shopRevenue.put(shopIdResult, revenue);
         }
         return shopRevenue;
@@ -762,30 +762,30 @@ public class OrderServiceImpl implements OrderService {
 
 
     // Tính tổng doanh thu theo tháng
-    public Map<String, Double> calculateShopRevenueByMonth(LocalDate startDate, LocalDate endDate, Long shopId) {
+    public Map<String, BigDecimal> calculateShopRevenueByMonth(LocalDate startDate, LocalDate endDate, Long shopId) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         List<Object[]> results = orderRepository.calculateShopRevenueByMonth(startDateTime, endDateTime, shopId);
 
-        Map<String, Double> shopRevenue = new HashMap<>();
+        Map<String, BigDecimal> shopRevenue = new HashMap<>();
         for (Object[] result : results) {
             String monthYear = result[0] + "-" + String.format("%02d", result[1]);  // Format: YYYY-MM
-            Double revenue = (Double) result[2];
+            BigDecimal revenue = (BigDecimal) result[2];
             shopRevenue.put(monthYear, revenue);
         }
         return shopRevenue;
     }
 
     // Tính tổng doanh thu theo năm
-    public Map<Integer, Double> calculateShopRevenueByYear(LocalDate startDate, LocalDate endDate, Long shopId) {
+    public Map<Integer, BigDecimal> calculateShopRevenueByYear(LocalDate startDate, LocalDate endDate, Long shopId) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         List<Object[]> results = orderRepository.calculateShopRevenueByYear(startDateTime, endDateTime, shopId);
 
-        Map<Integer, Double> shopRevenue = new HashMap<>();
+        Map<Integer, BigDecimal> shopRevenue = new HashMap<>();
         for (Object[] result : results) {
             Integer year = (Integer) result[0];
-            Double revenue = (Double) result[1];
+            BigDecimal revenue = (BigDecimal) result[1];
             shopRevenue.put(year, revenue);
         }
         return shopRevenue;
