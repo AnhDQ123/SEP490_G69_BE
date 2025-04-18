@@ -28,6 +28,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -112,8 +113,10 @@ public class RecommendationServiceImpl implements RecommendationService {
                 .map(orderMapper::toDTOData)
                 .toList();
 
-        List<FoodDataDTO> foodDataDTOS = productRepository.getByStatus(Status.ACTIVE)
-                .stream()
+        List<FoodDataDTO> foodDataDTOS = productRepository.findAll().stream()
+                .filter(product -> product.getStatus() == Status.ACTIVE)
+                .filter(product -> product.getExpired_date().isAfter(LocalDate.now()))
+                .filter(product -> product.getQuantity() > 0)
                 .map(productMapper::toDTO)
                 .toList();
 
@@ -135,7 +138,7 @@ public class RecommendationServiceImpl implements RecommendationService {
         return response;
     }
 
-    private ProductResponseDTO getDto(Product product) {
+     public ProductResponseDTO getDto(Product product) {
         ProductResponseDTO productResponseDTO = new ProductResponseDTO();
         productResponseDTO.setId(product.getId());
         productResponseDTO.setName(product.getName());
