@@ -34,8 +34,5 @@ public class FeedbackController {
         feedbackService.create(userId,productId,feedbackDTO);
     }
 
-    @GetMapping("/rate")
-    public Double getRate(@RequestParam("productId") Long productId) {
-       return feedbackService.getRate(productId);
-    }
+
 }
