@@ -94,7 +94,6 @@ public class ShopServiceImpl implements ShopService {
             throw new BadRequestException("User không thể tạo cửa hàng vì là shipper");
         }
 
-
         Shop shop = shopMapper.toEntity(shopDTO);
         shop.setOwner(owner);
         shop.setIsActive(Status.PENDING);

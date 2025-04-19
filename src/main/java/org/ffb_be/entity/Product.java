@@ -75,4 +75,7 @@ public class Product extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "shop_id")
     private Shop shop;
+
+    public Product(long l, String s, int i) {
+    }
 }
