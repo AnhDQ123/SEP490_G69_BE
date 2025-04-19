@@ -20,4 +20,9 @@ public class CartItemOptionDTO {
     private BigDecimal totalPrice;
     private int quantity;
 
+    public CartItemOptionDTO(Long l, Long i, int i1) {
+    }
+
+    public CartItemOptionDTO(long l, Long foodOptionId, int i, long l1) {
+    }
 }

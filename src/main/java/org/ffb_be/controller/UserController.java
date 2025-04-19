@@ -55,7 +55,7 @@ public class UserController {
         return ResponseEntity.ok().body(user);
     }
     @PutMapping("/update")
-    public ResponseEntity<?> updateProfile(@Validated @RequestBody UserUpdateDTO user,
+    public ResponseEntity<?> updateProfile(@Validated @ModelAttribute UserUpdateDTO user,
                                          BindingResult bindingResult,
                                            MultipartFile avatar) throws IOException {
         if(bindingResult.hasErrors()) {
