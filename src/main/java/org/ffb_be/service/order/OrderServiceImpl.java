@@ -770,8 +770,8 @@ public class OrderServiceImpl implements OrderService {
 
         Map<Long, BigDecimal> shopRevenue = new HashMap<>();
         for (Object[] result : results) {
-            Long shopIdResult = (Long) result[0];
-            BigDecimal revenue = (BigDecimal) result[1];
+            Long shopIdResult = (Long) result[1];
+            BigDecimal revenue = (BigDecimal) result[2];
             shopRevenue.put(shopIdResult, revenue);
         }
         return shopRevenue;
