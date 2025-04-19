@@ -15,6 +15,8 @@ import java.util.List;
 @Service
 public interface ProductService {
     void save(ProductCreateDTO productCreateDTO,MultipartFile avatar, List<MultipartFile>option) throws IOException;
+    void update(Long id,ProductCreateDTO productCreateDTO,MultipartFile avatar, List<MultipartFile>option) throws IOException;
+    void delete(Long id) throws IOException;
     Page<ProductResponseDTO> findAll(Pageable pageable);
     Page<ProductResponseDTO> findAllByShop(Long id,Pageable pageable);
     List<ProductResponseDTO> findPopularProducts();

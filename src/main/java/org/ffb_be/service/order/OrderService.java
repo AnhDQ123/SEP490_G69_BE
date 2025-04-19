@@ -6,6 +6,7 @@ import org.ffb_be.dto.CountDTOBy.CountByYearDTO;
 import org.ffb_be.dto.order.CountDTO;
 import org.ffb_be.dto.order.OrderDTO;
 import org.ffb_be.dto.order.ReturnOrderDTO;
+import org.ffb_be.dto.payment.ShipPaymentDTO;
 import org.ffb_be.dto.product.TopProductDTO;
 import org.ffb_be.entity.Order;
 import org.ffb_be.utils.enums.OrderStatus;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,11 +24,15 @@ import java.util.Map;
 
 @Service
 public interface OrderService {
-    List<Order> save(OrderDTO oderDTO) throws IOException;
+    Page<OrderDTO> findAllReturnPending( Pageable pageable);
+    Page<OrderDTO> findAllReturnRejected( Pageable pageable);
+    Page<OrderDTO> findAllReturned( Pageable pageable);
+    Order save(OrderDTO oderDTO) throws IOException;
     OrderDTO viewOrder(Long id) throws IOException;
     Page<OrderDTO> findAllByOwnerAndStatus(Long id, OrderStatus status, Pageable pageable);
     void cancelOrder(Long id,String reason);
     Page<OrderDTO> findAllByShopAndStatus(Long id,OrderStatus status,Pageable pageable);
+    List<ShipPaymentDTO> findAllShipPaymentByShopId(Long id);
     void acceptOrder(Long id);
     void rejectOrder(Long id);
     void changeStatus(Long id,Long userId, OrderStatus status, MultipartFile avatar) throws IOException;
@@ -52,8 +58,8 @@ public interface OrderService {
     List<Object[]> countShopOrdersByStatusAndYear(OrderStatus status, LocalDate startDate, LocalDate endDate, Long shopId);
     List<Object[]> countShopOrdersByStatusAndMonth(OrderStatus status, LocalDate startDate, LocalDate endDate, Long shopId);
     List<Object[]> countShopOrdersByStatusAndDay(OrderStatus status, LocalDate startDate, LocalDate endDate, Long shopId);
-    Map<Integer, Double> calculateShopRevenueByYear(LocalDate startDate, LocalDate endDate, Long shopId);
-    Map<String, Double> calculateShopRevenueByMonth(LocalDate startDate, LocalDate endDate, Long shopId);
-    Map<Long, Double> calculateShopRevenueByDay(LocalDate startDate, LocalDate endDate, Long shopId);
+    Map<Integer, BigDecimal> calculateShopRevenueByYear(LocalDate startDate, LocalDate endDate, Long shopId);
+    Map<String, BigDecimal> calculateShopRevenueByMonth(LocalDate startDate, LocalDate endDate, Long shopId);
+    Map<Long, BigDecimal> calculateShopRevenueByDay(LocalDate startDate, LocalDate endDate, Long shopId);
     Page<OrderDTO> findAllByShopAndPending(Long id,Pageable pageable);
 }

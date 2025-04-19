@@ -100,7 +100,6 @@ public class ShopServiceImpl implements ShopService {
             throw new BadRequestException("User không thể tạo cửa hàng vì là shipper");
         }
 
-
         Shop shop = shopMapper.toEntity(shopDTO);
         shop.setOwner(owner);
         shop.setIsActive(Status.PENDING);
@@ -458,6 +457,7 @@ public class ShopServiceImpl implements ShopService {
         image.setUrl(url);
         image.setRelatedId(shop.getId());
         image.setOwnerId(shop.getOwner().getId());
+        image.setStatus(Status.PENDING);
         image.setType(typesRepository.findById(8L).get());
         imageRepository.save(image);
     }
@@ -490,6 +490,26 @@ public class ShopServiceImpl implements ShopService {
             bannerDTOS.add(bannerDTO);
         }
         return bannerDTOS;
+    }
+
+    @Override
+    public Long shopId(Long productId) {
+        Shop shop=shopRepository.findById(productId).get();
+        return shop.getId();
+    }
+
+    @Override
+    public void changeIsShipping(Long shopId) {
+        Shop shop=shopRepository.findById(shopId).get();
+        shop.setIsShipping(!shop.getIsShipping());
+        shopRepository.save(shop);
+    }
+
+    @Override
+    public void changeIsOpen(Long shopId) {
+        Shop shop=shopRepository.findById(shopId).get();
+        shop.setIsOpening(!shop.getIsOpening());
+        shopRepository.save(shop);
     }
 
 

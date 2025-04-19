@@ -23,6 +23,7 @@ public interface ReportService {
     void addToReport(Long id,List<MultipartFile> option) throws IOException;
     Page<ReportViewDTO> findAllByShop(Long id,int page,int size);
     Page<ReportViewDTO> findAllByStatus(ReportStatus status, Pageable pageable);
+    Page<ReportViewDTO> findAllByType(Long id, Pageable pageable);
     Page<ReportViewDTO> findAll(Pageable pageable);
     List<CountByYearDTO > getReportCountByYear(ReportStatus status, LocalDate startDate, LocalDate endDate, Long type);
     List<CountByMonthDTO> getReportCountByMonth(ReportStatus status, LocalDate startDate, LocalDate endDate, Long type);

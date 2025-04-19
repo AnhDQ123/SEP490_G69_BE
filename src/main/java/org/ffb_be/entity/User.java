@@ -81,4 +81,7 @@ public class User extends BaseEntity{
 
     @OneToMany(mappedBy = "reporter")
     private List<Report> reports;
+
+    public User(long l, String reporter1) {
+    }
 }

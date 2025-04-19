@@ -55,9 +55,9 @@ public class UserController {
         return ResponseEntity.ok().body(user);
     }
     @PutMapping("/update")
-    public ResponseEntity<?> updateProfile(@Validated @ModelAttribute("employee") UserUpdateDTO user,
+    public ResponseEntity<?> updateProfile(@Validated @ModelAttribute UserUpdateDTO user,
                                          BindingResult bindingResult,
-                                         @RequestParam("avatar") MultipartFile avatar) throws IOException {
+                                           MultipartFile avatar) throws IOException {
         if(bindingResult.hasErrors()) {
             return ResponseEntity.badRequest().body("Invalid data!");
         }
@@ -141,5 +141,13 @@ public class UserController {
     @GetMapping("/profile/{id}")
     public ResponseEntity<?> getUserProfile(@PathVariable("id") Long id) {
         return ResponseEntity.ok(userService.getRoleProfile(id));
+    }
+    @PutMapping("/changePassword")
+    public void changePassword(@RequestParam Long id,@RequestParam String oldPassword,@RequestParam String newPassword,@RequestParam String confirmPassword) {
+        userService.changePassword(id, oldPassword, newPassword,confirmPassword);
+    }
+    @PutMapping("/forgot")
+    public void forgotPassword(@RequestParam String phone ,@RequestParam String password,@RequestParam String confirmPassword) {
+        userService.forgotPassword(phone,password,confirmPassword);
     }
 }

@@ -50,29 +50,58 @@ public class DiscountServiceImpl implements DiscountService{
     }
 
     @Override
-    public List<DiscountDTO> findAllByShopIdAndStatus(Long shopId,Status status) {
-        List<Discount> discounts=discountRepository.findAllByShop_IdAndStatus(shopId,status);
-        List<DiscountDTO> discountDTOs=new ArrayList<>();
-        for (Discount discount:discounts) {
-            DiscountDTO discountDTO=new DiscountDTO();
-            Product product=productRepository.findById(discount.getProduct().getId()).get();
-            ProductResponseDTO productResponseDTO=new ProductResponseDTO();
-            productResponseDTO.setId(product.getId());
-            productResponseDTO.setName(product.getName());
-            productResponseDTO.setManufacturer(product.getManufacturer());
-            productResponseDTO.setSupplier(product.getSupplier());
-            productResponseDTO.setImage(product.getImage());
-            productResponseDTO.setCategory(product.getCategory().getName());
+    public void update(DiscountDTO discount, Long productId) {
+        Discount discountEntity=discountRepository.findById(discount.getId());
+        discountEntity.setId(discount.getId());
+        discountEntity.setDiscount_percentage(discount.getAmount());
+        discountEntity.setStartDate(discount.getStartDate());
+        discountEntity.setEndDate(discount.getEndDate());
+        discountEntity.setStatus(Status.PENDING);
+        if (discount.getStartDate().isEqual(LocalDate.now())) {
+            discountEntity.setStatus(Status.ACTIVE);
+        }
+        Product product=productRepository.findById(productId).get();
+        discountEntity.setProduct(product);
+        discountRepository.save(discountEntity);
+    }
+
+    @Override
+    public void delete(Long id) {
+        Discount discountEntity=discountRepository.findById(id);
+        discountEntity.setStatus(Status.INACTIVE);
+        discountRepository.save(discountEntity);
+    }
+
+    @Override
+    public List<DiscountDTO> findAllByShopIdAndStatus(Long shopId, Status status) {
+        List<Discount> discounts = discountRepository.findAllByShop_IdAndStatus(shopId, status);
+        List<DiscountDTO> discountDTOs = new ArrayList<>();
+        for (Discount discount : discounts) {
+            DiscountDTO discountDTO = new DiscountDTO();
+
+            // Check if product is not null before accessing its fields
+            Product product = discount.getProduct();
+            if (product != null) {
+                ProductResponseDTO productResponseDTO = new ProductResponseDTO();
+                productResponseDTO.setId(product.getId());
+                productResponseDTO.setName(product.getName());
+                productResponseDTO.setManufacturer(product.getManufacturer());
+                productResponseDTO.setSupplier(product.getSupplier());
+                productResponseDTO.setImage(product.getImage());
+                productResponseDTO.setCategory(product.getCategory().getName());
+                discountDTO.setProductResponseDTO(productResponseDTO);
+            }
+
             discountDTO.setAmount(discount.getDiscount_percentage());
             discountDTO.setId(discount.getId());
             discountDTO.setStartDate(discount.getStartDate());
             discountDTO.setEndDate(discount.getEndDate());
             discountDTO.setStatus(discount.getStatus().toString());
-            discountDTO.setProductResponseDTO(productResponseDTO);
             discountDTOs.add(discountDTO);
         }
         return discountDTOs;
     }
+
 
     @Scheduled(cron = "0 0 0 * * ?")  // Lên lịch chạy mỗi ngày lúc nửa đêm
     public void checkAndUpdateDiscountStatus() {
@@ -92,6 +121,7 @@ public class DiscountServiceImpl implements DiscountService{
             }
         }
     }
+
 
 
 }

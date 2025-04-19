@@ -32,9 +32,9 @@ public class VoucherController {
         return ResponseEntity.ok(voucherService.getVoucherById(id));
     }
 
-    @PostMapping
-    public ResponseEntity<VoucherDTO> createVoucher(@RequestBody VoucherDTO dto) {
-        return ResponseEntity.ok(voucherService.addVoucher(dto));
+    @PostMapping("/create/{shopId}")
+    public ResponseEntity<VoucherDTO> createVoucher(@PathVariable Long shopId,@RequestBody VoucherDTO dto) {
+        return ResponseEntity.ok(voucherService.addVoucher(dto, shopId));
     }
 
     @PutMapping("/{code}")

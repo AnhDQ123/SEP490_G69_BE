@@ -10,7 +10,8 @@ import java.util.List;
 public interface DiscountService {
     void save(DiscountDTO discount,Long productId);
     DiscountDTO findById(Long id);
-
+    void update(DiscountDTO discount,Long productId);
+    void delete(Long id);
     List<DiscountDTO> findAllByShopIdAndStatus(Long shopId,Status status);
     void checkAndUpdateDiscountStatus();
 }

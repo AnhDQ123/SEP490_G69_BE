@@ -4,8 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.ffb_be.dto.voucher.VoucherDTO;
 
 import org.ffb_be.entity.Voucher;
+import org.ffb_be.exception.BadRequestException;
 import org.ffb_be.exception.NotFoundException;
 import org.ffb_be.repository.OrderRepository;
+import org.ffb_be.repository.ShopRepository;
 import org.ffb_be.repository.VoucherRepository;
 import org.ffb_be.utils.enums.DiscountType;
 import org.ffb_be.utils.enums.Status;
@@ -26,7 +28,7 @@ public class VoucherServiceImpl implements VoucherService {
     private final VoucherRepository voucherRepository;
     private final OrderRepository orderRepository;
     private final VoucherMapper voucherMapper;
-
+    private final ShopRepository shopRepository;
     @Override
     public List<VoucherDTO> getAllVouchers(Long shopId, boolean isShopkeeper) {
         List<Voucher> vouchers;
@@ -53,12 +55,16 @@ public class VoucherServiceImpl implements VoucherService {
     }
 
     @Override
-    public VoucherDTO addVoucher(VoucherDTO dto) {
+    public VoucherDTO addVoucher(VoucherDTO dto, Long shopId) {
         Voucher voucher = voucherMapper.toEntity(dto);
+        if (voucher == null) {
+            throw new BadRequestException("Voucher could not be created.");
+        }
         voucher.setUsedVouchers(0);
         if (voucher.getStartDate().isEqual(LocalDate.now())) {
             voucher.setStatus(Status.ACTIVE);
         }
+        voucher.setShop(shopRepository.getById(shopId));
         voucher = voucherRepository.save(voucher);
         return voucherMapper.toDTO(voucher);
     }
@@ -84,7 +90,8 @@ public class VoucherServiceImpl implements VoucherService {
     public void deleteVoucher(String code) {
         Voucher voucher = voucherRepository.findByCode(code)
                 .orElseThrow(() -> new NotFoundException("Voucher"));
-        voucherRepository.delete(voucher);
+        voucher.setStatus(Status.INACTIVE);
+        voucherRepository.save(voucher);
     }
 
     @Override
@@ -92,11 +99,18 @@ public class VoucherServiceImpl implements VoucherService {
         Voucher voucher = voucherRepository.findByCode(code)
                 .orElseThrow(() -> new RuntimeException("Voucher không tồn tại"));
 
+        // Check if voucher startDate or endDate is null
+        if (voucher.getStartDate() == null || voucher.getEndDate() == null) {
+            throw new RuntimeException("Voucher's start date or end date is missing");
+        }
+
         if (voucher.getStatus() != Status.ACTIVE) {
             throw new RuntimeException("Voucher không hợp lệ");
         }
 
         LocalDate today = LocalDate.now();
+
+        // Ensure the dates are properly compared
         if (today.isBefore(voucher.getStartDate()) || today.isAfter(voucher.getEndDate())) {
             throw new RuntimeException("Voucher đã hết hạn");
         }
@@ -127,6 +141,7 @@ public class VoucherServiceImpl implements VoucherService {
 
         return discountAmount.min(orderTotal);
     }
+
 
     @Override
     public Map<String, Integer> getVoucherUsageStats() {

@@ -5,6 +5,7 @@ import org.ffb_be.dto.CountDTOBy.CountByDateDTO;
 import org.ffb_be.dto.CountDTOBy.CountByMonthDTO;
 import org.ffb_be.dto.CountDTOBy.CountByYearDTO;
 import org.ffb_be.dto.banner.BannerDTO;
+import org.ffb_be.dto.payment.ShipPaymentDTO;
 import org.ffb_be.dto.shop.ShopDTO;
 import org.ffb_be.dto.shop.ShopRegisterDTO;
 import org.ffb_be.service.order.OrderService;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -58,13 +60,13 @@ public class ShopController {
     public ResponseEntity<?> registerShop(
             @RequestParam Long userId,
             @Validated @ModelAttribute ShopRegisterDTO shopDTO,
-            @RequestParam(value = "logo", required = false) MultipartFile logo,
-            @RequestParam(value = "background", required = false) MultipartFile background,
-            @RequestParam(value = "citizenIDFront", required = false) MultipartFile citizenIDFront,
-            @RequestParam(value = "citizenIDBack", required = false) MultipartFile citizenIDBack,
-            @RequestParam(value = "registrationCert", required = false) MultipartFile registrationCert,
-            @RequestParam(value = "foodSafetyCert", required = false) MultipartFile foodSafetyCert,
-            @RequestParam(value = "menu", required = false) MultipartFile menu,
+            @RequestParam(value = "logo") MultipartFile logo,
+            @RequestParam(value = "background") MultipartFile background,
+            @RequestParam(value = "citizenIDFront") MultipartFile citizenIDFront,
+            @RequestParam(value = "citizenIDBack") MultipartFile citizenIDBack,
+            @RequestParam(value = "registrationCert") MultipartFile registrationCert,
+            @RequestParam(value = "foodSafetyCert") MultipartFile foodSafetyCert,
+            @RequestParam(value = "menu") MultipartFile menu,
             BindingResult result
     ) throws IOException {
         if (result.hasErrors()) {
@@ -79,13 +81,13 @@ public class ShopController {
     public ResponseEntity<?> updateShop(
             @PathVariable Long shopId,
             @Validated @ModelAttribute ShopRegisterDTO shopDTO,
-            @RequestPart(value = "logo", required = false) MultipartFile logo,
-            @RequestParam(value = "background", required = false) MultipartFile background,
-            @RequestPart(value = "citizenIDFront", required = false) MultipartFile citizenIDFront,
-            @RequestPart(value = "citizenIDBack", required = false) MultipartFile citizenIDBack,
-            @RequestPart(value = "registrationCert", required = false) MultipartFile registrationCert,
-            @RequestPart(value = "foodSafetyCert", required = false) MultipartFile foodSafetyCert,
-            @RequestPart(value = "menu", required = false) MultipartFile menu,
+            @RequestPart(value = "logo") MultipartFile logo,
+            @RequestParam(value = "background") MultipartFile background,
+            @RequestPart(value = "citizenIDFront") MultipartFile citizenIDFront,
+            @RequestPart(value = "citizenIDBack") MultipartFile citizenIDBack,
+            @RequestPart(value = "registrationCert") MultipartFile registrationCert,
+            @RequestPart(value = "foodSafetyCert") MultipartFile foodSafetyCert,
+            @RequestPart(value = "menu") MultipartFile menu,
             BindingResult result
     ) throws IOException {
         if (result.hasErrors()) {
@@ -163,7 +165,7 @@ public class ShopController {
         return shopService.countPendingShop();
     }
     @GetMapping("/revenue/day")
-    public Map<Long, Double> calculateShopRevenueByDay(
+    public Map<Long, BigDecimal> calculateShopRevenueByDay(
             @RequestParam("startDate") String startDate,
             @RequestParam("endDate") String endDate,
             @RequestParam("shopId") Long shopId) {
@@ -176,7 +178,7 @@ public class ShopController {
 
     // API để tính tổng doanh thu theo tháng cho cửa hàng cụ thể
     @GetMapping("/revenue/month")
-    public Map<String, Double> calculateShopRevenueByMonth(
+    public Map<String, BigDecimal> calculateShopRevenueByMonth(
             @RequestParam("startDate") String startDate,
             @RequestParam("endDate") String endDate,
             @RequestParam("shopId") Long shopId) {
@@ -189,7 +191,7 @@ public class ShopController {
 
     // API để tính tổng doanh thu theo năm cho cửa hàng cụ thể
     @GetMapping("/revenue/year")
-    public Map<Integer, Double> calculateShopRevenueByYear(
+    public Map<Integer, BigDecimal> calculateShopRevenueByYear(
             @RequestParam("startDate") String startDate,
             @RequestParam("endDate") String endDate,
             @RequestParam("shopId") Long shopId) {
@@ -198,6 +200,10 @@ public class ShopController {
         LocalDate end = LocalDate.parse(endDate);
 
         return orderService.calculateShopRevenueByYear(start, end, shopId);
+    }
+    @GetMapping("/shop/shopId")
+    public Long shopId( @RequestParam("productId") Long productId) {
+        return shopService.shopId(productId);
     }
     @GetMapping("/count/order/day")
     public List<Object[]> countOrdersByStatusAndDay(
@@ -251,5 +257,18 @@ public class ShopController {
     @GetMapping("/banner/homepage")
     public List<BannerDTO> viewHomePageBanner(){
         return shopService.homePageBanner();
+    }
+    @PutMapping("/isOpen")
+    public void changeShopIsOpen(@RequestParam("shopId") Long shopId){
+        shopService.changeIsOpen(shopId);
+    }
+    @PutMapping("/isShipping")
+    public void changeShopIsShipping(@RequestParam("shopId") Long shopId){
+        shopService.changeIsShipping(shopId);
+    }
+    @GetMapping("/shipPayment/{shopId}")
+    public ResponseEntity<List<ShipPaymentDTO>> getShipPaymentsByShopId(@PathVariable Long shopId) {
+        List<ShipPaymentDTO> shipPayments = orderService.findAllShipPaymentByShopId(shopId);
+        return ResponseEntity.ok(shipPayments);
     }
 }

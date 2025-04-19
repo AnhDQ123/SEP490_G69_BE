@@ -24,7 +24,7 @@ public class FeedbackController {
                                           @RequestParam(value = "page", defaultValue = "1", required = false) Integer page,
                                           @RequestParam(value = "size", defaultValue = "20", required = false) Integer size) {
         Pageable pageable = PageRequest.of(page-1, size);
-        return ResponseEntity.ok(feedbackService.findAll(id,pageable) );
+        return ResponseEntity.ok(feedbackService.findAllByProduct(id,pageable) );
     }
 
     @PostMapping("/create")
@@ -32,5 +32,10 @@ public class FeedbackController {
                                     @RequestParam("productId") Long productId,
                                     @RequestBody FeedbackDTO feedbackDTO) {
         feedbackService.create(userId,productId,feedbackDTO);
+    }
+
+    @GetMapping("/rate")
+    public Double getRate(@RequestParam("productId") Long productId) {
+       return feedbackService.getRate(productId);
     }
 }

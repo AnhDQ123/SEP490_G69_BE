@@ -166,6 +166,12 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
+    public Page<ReportViewDTO> findAllByType(Long id, Pageable pageable) {
+        Page<Report> reports = reportRepository.findAllByType_Id(id,pageable);
+        return reports.map(this::convertToDTO);
+    }
+
+    @Override
     public Page<ReportViewDTO> findAll(Pageable pageable) {
         Page<Report> reports = reportRepository.findAll(pageable);
         return reports.map(this::convertToDTO);
@@ -251,26 +257,14 @@ public class ReportServiceImpl implements ReportService {
         Report report=reportRepository.findById(id).get();
         if(report.getType().getId()==4L){
             Blog blog=blogRepository.findById(report.getRelatedId()).get();
-            blog.setReportCount(blog.getReportCount()+1);
-            if(blog.getReportCount()>10){
-                blog.setStatus(Status.DELETED);
-            }
             blogRepository.save(blog);
         }
         if(report.getType().getId()==5L){
             Shop shop=shopRepository.findById(report.getRelatedId()).get();
-            shop.setReportCount(shop.getReportCount()+1);
-            if(shop.getReportCount()>20){
-                shop.setIsActive(Status.DELETED);
-            }
             shopRepository.save(shop);
         }
         if(report.getType().getId()==6L){
             Product product=productRepository.findById(report.getRelatedId()).get();
-            product.setReportCount(product.getReportCount()+1);
-            if(product.getReportCount()>10){
-                product.setStatus(Status.DELETED);
-            }
             productRepository.save(product);
         }
         reportRepository.save(report);
