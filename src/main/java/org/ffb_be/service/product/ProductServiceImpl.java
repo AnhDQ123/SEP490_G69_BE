@@ -248,6 +248,9 @@ public class ProductServiceImpl implements ProductService {
                     discountDTO.setEndDate(discount1.getEndDate());
                     discountDTO.setStatus(discount1.getStatus().toString());
                     discountDTOs.add(discountDTO);
+                        if (defaultprice == null) {
+                            defaultprice = BigDecimal.ZERO;
+                        }
                     defaultprice=defaultprice.multiply(BigDecimal.ONE.subtract(discount1.getDiscount_percentage()));
                 }
                 }
