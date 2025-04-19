@@ -40,8 +40,8 @@ public class CommentController {
         return commentService.getMoreReplies(parentId, offset, limit);
     }
 
-    @PostMapping
-    public ResponseEntity<String> addComment(@RequestParam Long blogId, @RequestBody CommentDTO commentDTO) {
+    @PostMapping("/{blogId}")
+    public ResponseEntity<String> addComment(@PathVariable Long blogId, @RequestBody CommentDTO commentDTO) {
         commentService.addComment(blogId, commentDTO);
         return ResponseEntity.ok("Comment added successfully");
     }
