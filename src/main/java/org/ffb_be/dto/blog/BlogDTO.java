@@ -15,6 +15,7 @@ public class BlogDTO extends BaseEntity {
     private Long id;
     private String content;
     private WriterDTO writer;
+    private int likeCount;
     private List<String> imageUrls;
     private int commentCount;
 }

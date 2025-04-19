@@ -17,6 +17,7 @@ public class CommentDTO extends BaseEntity {
     private WriterDTO writer;
     private Long parentId;
     private String parentWriterName;
+    private int likeCount;
     private int replyCount;
     private boolean hasMoreReplies;
 }
