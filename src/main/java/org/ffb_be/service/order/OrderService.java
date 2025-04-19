@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -60,6 +61,6 @@ public interface OrderService {
     List<Object[]> countShopOrdersByStatusAndDay(OrderStatus status, LocalDate startDate, LocalDate endDate, Long shopId);
     Map<Integer, BigDecimal> calculateShopRevenueByYear(LocalDate startDate, LocalDate endDate, Long shopId);
     Map<String, BigDecimal> calculateShopRevenueByMonth(LocalDate startDate, LocalDate endDate, Long shopId);
-    Map<Long, BigDecimal> calculateShopRevenueByDay(LocalDate startDate, LocalDate endDate, Long shopId);
+    Map<Date, BigDecimal> calculateShopRevenueByDay(LocalDate startDate, LocalDate endDate, Long shopId);
     Page<OrderDTO> findAllByShopAndPending(Long id,Pageable pageable);
 }
