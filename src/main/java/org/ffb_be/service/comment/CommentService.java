@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface CommentService {
 
-    List<CommentDTO> getCommentsByBlogId(Long blogId, int offset, int limit);
+    List<CommentDTO> getRootCommentsByBlogId(Long blogId, int offset, int limit);
 
     List<CommentDTO> getMoreReplies(Long parentId, int offset, int limit);
 
