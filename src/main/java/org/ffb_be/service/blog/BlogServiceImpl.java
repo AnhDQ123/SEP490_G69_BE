@@ -6,6 +6,7 @@ import org.ffb_be.entity.Blog;
 import org.ffb_be.entity.Image;
 import org.ffb_be.entity.Types;
 import org.ffb_be.entity.User;
+import org.ffb_be.exception.BadRequestException;
 import org.ffb_be.exception.NotFoundException;
 import org.ffb_be.repository.*;
 import org.ffb_be.utils.enums.Status;
@@ -66,8 +67,10 @@ public class BlogServiceImpl implements BlogService {
 
     @Override
     public void createBlog(BlogDTO blogDTO, MultipartFile[] files) throws IOException {
+        if (blogDTO.getContent() == null && (files == null || files.length == 0)) {
+            throw new RuntimeException("Content or file is required to create a blog");
+        }
         Blog blog = blogMapper.toEntity(blogDTO);
-
         if (blogDTO.getWriter() != null) {
             User writer = userRepository.findById(blogDTO.getWriter().getId())
                     .orElseThrow(() -> new NotFoundException("User"));
@@ -180,10 +183,13 @@ public class BlogServiceImpl implements BlogService {
     public void blogStatusUpdate(Long id, Status status, String reason) {
         Blog blog = blogRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Blog"));
-        if (status == Status.ACTIVE) {
+        if (blog.getStatus().equals(status)) {
+            throw new BadRequestException("Blog đã ở trạng thái này rồi");
+        }
+        if (status == Status.ACTIVE&&!blog.getStatus().equals(Status.ACTIVE)) {
             blog.setReason(null);
         }
-        if (status == Status.INACTIVE) {
+        if (status == Status.INACTIVE&&!blog.getStatus().equals(Status.INACTIVE)) {
             blog.setReason(reason);
         }
         blog.setStatus(status);

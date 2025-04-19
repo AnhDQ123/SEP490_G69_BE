@@ -101,4 +101,10 @@ public class Shop extends BaseEntity{
     @OneToOne
     @JoinColumn(name = "user_id")
     private User owner;
+
+    public Shop(Long shopId) {
+    }
+
+    public Shop(long l, String s) {
+    }
 }

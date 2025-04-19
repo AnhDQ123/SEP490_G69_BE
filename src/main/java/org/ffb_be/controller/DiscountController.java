@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.ffb_be.dto.discount.DiscountDTO;
 import org.ffb_be.service.discount.DiscountService;
 import org.ffb_be.utils.enums.Status;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,7 +18,7 @@ public class DiscountController {
     private final DiscountService discountService;
 
     @PostMapping("/add")
-    public void addDiscount(@RequestBody DiscountDTO discountDTO,@RequestParam Long productId) {
+    public void addDiscount(@Validated @RequestBody DiscountDTO discountDTO, @RequestParam Long productId) {
         discountService.save(discountDTO,productId);
     }
     @GetMapping

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.ffb_be.dto.voucher.VoucherDTO;
 
 import org.ffb_be.entity.Voucher;
+import org.ffb_be.exception.BadRequestException;
 import org.ffb_be.exception.NotFoundException;
 import org.ffb_be.repository.OrderRepository;
 import org.ffb_be.repository.ShopRepository;
@@ -56,6 +57,9 @@ public class VoucherServiceImpl implements VoucherService {
     @Override
     public VoucherDTO addVoucher(VoucherDTO dto, Long shopId) {
         Voucher voucher = voucherMapper.toEntity(dto);
+        if (voucher == null) {
+            throw new BadRequestException("Voucher could not be created.");
+        }
         voucher.setUsedVouchers(0);
         if (voucher.getStartDate().isEqual(LocalDate.now())) {
             voucher.setStatus(Status.ACTIVE);
@@ -95,11 +99,18 @@ public class VoucherServiceImpl implements VoucherService {
         Voucher voucher = voucherRepository.findByCode(code)
                 .orElseThrow(() -> new RuntimeException("Voucher không tồn tại"));
 
+        // Check if voucher startDate or endDate is null
+        if (voucher.getStartDate() == null || voucher.getEndDate() == null) {
+            throw new RuntimeException("Voucher's start date or end date is missing");
+        }
+
         if (voucher.getStatus() != Status.ACTIVE) {
             throw new RuntimeException("Voucher không hợp lệ");
         }
 
         LocalDate today = LocalDate.now();
+
+        // Ensure the dates are properly compared
         if (today.isBefore(voucher.getStartDate()) || today.isAfter(voucher.getEndDate())) {
             throw new RuntimeException("Voucher đã hết hạn");
         }
@@ -130,6 +141,7 @@ public class VoucherServiceImpl implements VoucherService {
 
         return discountAmount.min(orderTotal);
     }
+
 
     @Override
     public Map<String, Integer> getVoucherUsageStats() {

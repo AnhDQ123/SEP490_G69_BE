@@ -170,75 +170,93 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Order save(OrderDTO orderDTO) throws IOException {
-         Order order = new Order();
-         order.setOwner(userRepository.findById(orderDTO.getOwnerId()).get());
-         order.setPaymentMethod(paymentRepository.findById(orderDTO.getPaymentMethodId()).get());
-         order.setDeliveryMethod(deliveryMethodRepository.findById(orderDTO.getShipMethodId()).get());
-         orderRepository.save(order);
-         BigDecimal orderTotal = BigDecimal.ZERO;
-         List<OrderItemDTO> orderItemDTOList = orderDTO.getOrderItem();
-         List<OrderItem> orderItemList = new ArrayList<>();
-         for (OrderItemDTO orderItemDTO : orderItemDTOList) {
-             BigDecimal orderItemTotal = BigDecimal.ZERO;
-             Product product = productRepository.findById(orderItemDTO.getProductId()).get();
-             if(orderItemDTO.getQuantity()>product.getQuantity()){
-                 orderRepository.delete(order);
-                 return null;
-             }else {
-                 product.setQuantity(product.getQuantity() - orderItemDTO.getQuantity());
-                 productRepository.save(product);
-             }
-             OrderItem orderItem = new OrderItem();
-             orderItem.setId(orderItemDTO.getId());
-             orderItem.setQuantity(orderItemDTO.getQuantity());
-             orderItem.setProduct(productRepository.findById(orderItemDTO.getProductId()).get());
-             orderItem.setOrder(order);
-             orderItem.setCreatedAt(LocalDateTime.now());
-             orderItemRepository.save(orderItem);
-             List<Discount> discount=discountRepository.findAllByProduct_Id((orderItem.getProduct().getId()));
-             List<OrderItemOptionDTO> orderItemOptionDTOList = orderItemDTO.getOrderItemOptions();
-             List<OrderItemOption> orderItemOptions = new ArrayList<>();
-             for(OrderItemOptionDTO orderItemOptionDTO:orderItemOptionDTOList){
-                 OrderItemOption orderItemOption = new OrderItemOption();
-                 orderItemOption.setId(orderItemOptionDTO.getId());
-                 orderItemOption.setOrderItem(orderItem);
-                 orderItemOption.setFoodOption(foodOptionRepository.findById(orderItemOptionDTO.getOptionId()).get());
-                 if (orderItemOptionDTO.getTypeId() == 2) {
-                     orderItemOption.setQuantity(orderItem.getQuantity());
-                     BigDecimal unitPrice = foodOptionRepository.findById(orderItemOptionDTO.getOptionId()).get().getPrice();
-                     orderItem.setUnitPrice(unitPrice);
+        Order order = new Order();
+        order.setOwner(userRepository.findById(orderDTO.getOwnerId()).get());
+        order.setPaymentMethod(paymentRepository.findById(orderDTO.getPaymentMethodId()).get());
+        order.setDeliveryMethod(deliveryMethodRepository.findById(orderDTO.getShipMethodId()).get());
+        orderRepository.save(order);
 
-                     orderItemOption.setTotalPrice(BigDecimal.ZERO);
-                     if(discount!=null && !discount.isEmpty()){
-                         for(Discount discount1:discount){
-                             if(discount1.getStatus().equals(Status.ACTIVE)){
-                                 orderItem.setDiscountValue(discount1.getDiscount_percentage());
-                             }
-                         }
-                     }else orderItem.setDiscountValue(BigDecimal.ZERO);
-                     orderItem.setTotalPrice(unitPrice.multiply(BigDecimal.valueOf(orderItemDTO.getQuantity())).multiply(BigDecimal.ONE.subtract(orderItem.getDiscountValue())));
-                     orderItemTotal=orderItemTotal.add(orderItem.getTotalPrice());
-                 }else{
-                     orderItemOption.setQuantity(orderItemOptionDTO.getQuantity());
-                     BigDecimal unitPrice = foodOptionRepository.findById(orderItemOptionDTO.getOptionId()).get().getPrice();
-                     orderItemOption.setUnitPrice(unitPrice);
-                     orderItemOption.setTotalPrice(unitPrice.multiply(BigDecimal.valueOf(orderItemOption.getQuantity())));
-                     orderItemTotal=orderItemTotal.add(orderItemOption.getTotalPrice());
-                 }
-                 orderItemOptionRepository.save(orderItemOption);
-                 orderItemOptions.add(orderItemOption);
-             }
+        BigDecimal orderTotal = BigDecimal.ZERO;
+        List<OrderItemDTO> orderItemDTOList = orderDTO.getOrderItem();
+        List<OrderItem> orderItemList = new ArrayList<>();
 
-             orderItem.setTotalPrice(orderItemTotal);
-             orderItemRepository.save(orderItem);
-             orderItemList.add(orderItem);
-             order.setShop(shopRepository.findByProduct(orderItem.getProduct().getId()));
-             orderTotal=orderTotal.add(orderItemTotal);
-         }
-         order.setTotal(orderTotal);
-         orderRepository.save(order);
-         return order;
+        for (OrderItemDTO orderItemDTO : orderItemDTOList) {
+            BigDecimal orderItemTotal = BigDecimal.ZERO;
+            Product product = productRepository.findById(orderItemDTO.getProductId()).get();
+
+            if(orderItemDTO.getQuantity() > product.getQuantity()) {
+                orderRepository.delete(order);
+                return null;  // Product quantity is insufficient, so delete order and return null
+            } else {
+                product.setQuantity(product.getQuantity() - orderItemDTO.getQuantity());
+                productRepository.save(product);  // Save updated product quantity
+            }
+
+            OrderItem orderItem = new OrderItem();
+            orderItem.setId(orderItemDTO.getId());
+            orderItem.setQuantity(orderItemDTO.getQuantity());
+            orderItem.setProduct(product);
+            orderItem.setOrder(order);
+            orderItem.setCreatedAt(LocalDateTime.now());
+            orderItemRepository.save(orderItem);
+
+            // Initialize orderItemOptionDTOList to avoid NullPointerException
+            List<OrderItemOptionDTO> orderItemOptionDTOList = orderItemDTO.getOrderItemOptions();
+            if (orderItemOptionDTOList == null) {
+                orderItemOptionDTOList = new ArrayList<>();  // Initialize to an empty list if null
+            }
+
+            List<OrderItemOption> orderItemOptions = new ArrayList<>();
+            List<Discount> discounts = discountRepository.findAllByProduct_Id(orderItem.getProduct().getId());
+
+            for (OrderItemOptionDTO orderItemOptionDTO : orderItemOptionDTOList) {
+                OrderItemOption orderItemOption = new OrderItemOption();
+                orderItemOption.setId(orderItemOptionDTO.getId());
+                orderItemOption.setOrderItem(orderItem);
+                orderItemOption.setFoodOption(foodOptionRepository.findById(orderItemOptionDTO.getOptionId()).get());
+
+                if (orderItemOptionDTO.getTypeId() == 2) {
+                    orderItemOption.setQuantity(orderItem.getQuantity());
+                    BigDecimal unitPrice = foodOptionRepository.findById(orderItemOptionDTO.getOptionId()).get().getPrice();
+                    orderItem.setUnitPrice(unitPrice);
+                    orderItemOption.setTotalPrice(BigDecimal.ZERO);
+
+                    if (discounts != null && !discounts.isEmpty()) {
+                        for (Discount discount : discounts) {
+                            if (discount.getStatus().equals(Status.ACTIVE)) {
+                                orderItem.setDiscountValue(discount.getDiscount_percentage());
+                            }
+                        }
+                    } else {
+                        orderItem.setDiscountValue(BigDecimal.ZERO);
+                    }
+                    orderItem.setTotalPrice(unitPrice.multiply(BigDecimal.valueOf(orderItemDTO.getQuantity())).multiply(BigDecimal.ONE.subtract(orderItem.getDiscountValue())));
+                    orderItemTotal = orderItemTotal.add(orderItem.getTotalPrice());
+                } else {
+                    orderItemOption.setQuantity(orderItemOptionDTO.getQuantity());
+                    BigDecimal unitPrice = foodOptionRepository.findById(orderItemOptionDTO.getOptionId()).get().getPrice();
+                    orderItemOption.setUnitPrice(unitPrice);
+                    orderItemOption.setTotalPrice(unitPrice.multiply(BigDecimal.valueOf(orderItemOption.getQuantity())));
+                    orderItemTotal = orderItemTotal.add(orderItemOption.getTotalPrice());
+                }
+
+                orderItemOptionRepository.save(orderItemOption);
+                orderItemOptions.add(orderItemOption);
+            }
+
+            orderItem.setTotalPrice(orderItemTotal);
+            orderItemRepository.save(orderItem);
+            orderItemList.add(orderItem);
+
+            order.setShop(shopRepository.findByProduct(orderItem.getProduct().getId()));
+            orderTotal = orderTotal.add(orderItemTotal);
+        }
+
+        order.setTotal(orderTotal);
+        orderRepository.save(order);
+        return order;
     }
+
 
     @Override
     public OrderDTO viewOrder(Long id) throws IOException {
@@ -745,15 +763,15 @@ public class OrderServiceImpl implements OrderService {
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         return orderRepository.countShopOrdersByStatusAndYear(status, startDateTime, endDateTime, shopId);
     }
-    public Map<Long, Double> calculateShopRevenueByDay(LocalDate startDate, LocalDate endDate, Long shopId) {
+    public Map<Long, BigDecimal> calculateShopRevenueByDay(LocalDate startDate, LocalDate endDate, Long shopId) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         List<Object[]> results = orderRepository.calculateShopRevenueByDay(startDateTime, endDateTime, shopId);
 
-        Map<Long, Double> shopRevenue = new HashMap<>();
+        Map<Long, BigDecimal> shopRevenue = new HashMap<>();
         for (Object[] result : results) {
             Long shopIdResult = (Long) result[0];
-            Double revenue = (Double) result[1];
+            BigDecimal revenue = (BigDecimal) result[1];
             shopRevenue.put(shopIdResult, revenue);
         }
         return shopRevenue;
@@ -762,30 +780,30 @@ public class OrderServiceImpl implements OrderService {
 
 
     // Tính tổng doanh thu theo tháng
-    public Map<String, Double> calculateShopRevenueByMonth(LocalDate startDate, LocalDate endDate, Long shopId) {
+    public Map<String, BigDecimal> calculateShopRevenueByMonth(LocalDate startDate, LocalDate endDate, Long shopId) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         List<Object[]> results = orderRepository.calculateShopRevenueByMonth(startDateTime, endDateTime, shopId);
 
-        Map<String, Double> shopRevenue = new HashMap<>();
+        Map<String, BigDecimal> shopRevenue = new HashMap<>();
         for (Object[] result : results) {
             String monthYear = result[0] + "-" + String.format("%02d", result[1]);  // Format: YYYY-MM
-            Double revenue = (Double) result[2];
+            BigDecimal revenue = (BigDecimal) result[2];
             shopRevenue.put(monthYear, revenue);
         }
         return shopRevenue;
     }
 
     // Tính tổng doanh thu theo năm
-    public Map<Integer, Double> calculateShopRevenueByYear(LocalDate startDate, LocalDate endDate, Long shopId) {
+    public Map<Integer, BigDecimal> calculateShopRevenueByYear(LocalDate startDate, LocalDate endDate, Long shopId) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         List<Object[]> results = orderRepository.calculateShopRevenueByYear(startDateTime, endDateTime, shopId);
 
-        Map<Integer, Double> shopRevenue = new HashMap<>();
+        Map<Integer, BigDecimal> shopRevenue = new HashMap<>();
         for (Object[] result : results) {
             Integer year = (Integer) result[0];
-            Double revenue = (Double) result[1];
+            BigDecimal revenue = (BigDecimal) result[1];
             shopRevenue.put(year, revenue);
         }
         return shopRevenue;

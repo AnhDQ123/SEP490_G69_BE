@@ -162,16 +162,22 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void inactiveUser(Long id) {
-        User user=userRepository.findById(id).orElse(null);
-        user.setStatus(Status.INACTIVE);
-        userRepository.save(user);
+        User user=userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        if(!user.getStatus() .equals(Status.INACTIVE) ) {
+            user.setStatus(Status.INACTIVE);
+            userRepository.save(user);
+        }else throw new RuntimeException("User is already inactive");
+
     }
 
     @Override
     public void activeUser(Long id) {
-        User user=userRepository.findById(id).orElse(null);
-        user.setStatus(Status.ACTIVE);
-        userRepository.save(user);
+        User user=userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        if(!user.getStatus() .equals(Status.ACTIVE) ) {
+            user.setStatus(Status.ACTIVE);
+            userRepository.save(user);
+        }else throw new RuntimeException("User is already active");
+
     }
 
 
@@ -309,6 +315,12 @@ public class UserServiceImpl implements UserService {
     public void changePassword(Long id, String oldPassword, String newPassword,String confirmPassword) {
         User user=userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), oldPassword));
+        String passwordRegex = "^(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$";
+
+        // Check if password matches the regex pattern
+        if (!Pattern.matches(passwordRegex, newPassword)) {
+            throw new RuntimeException("Password must be at least 8 characters long, contain at least one uppercase letter, one digit, and one special character");
+        }
         if(newPassword.equals(confirmPassword)){
             user.setPassword(passwordEncoder.encode(newPassword));
         }else throw  new RuntimeException("Confirm password does not match");
