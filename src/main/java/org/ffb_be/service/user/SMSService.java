@@ -42,6 +42,7 @@ public class SMSService {
             // Tạo OTP ngẫu nhiên
             String otp = generateOtp();
             String message = "Ma OTP cua ban la: " + otp;
+            System.out.println(message);
             otpCacheService.putOtp(phone, otp);
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
