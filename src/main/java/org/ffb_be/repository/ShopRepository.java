@@ -20,7 +20,6 @@ import java.util.Optional;
 @Repository
 public interface ShopRepository extends JpaRepository<Shop, Long>, JpaSpecificationExecutor<Shop> {
 
-    Page<Shop> findAll(Specification<Shop> specification, Pageable pageable);
 
     boolean existsByOwnerId(Long userId);
 

@@ -57,8 +57,8 @@ public class ShipperServiceImpl implements ShipperService {
         if(user.getShipperStatus() == ShipperStatus.PENDING) {
             throw new BadRequestException("Shipper đang chở được duyệt không thể gửi đăng ký.");
         }
-        if(user.getRole().getName().equals("shopkeeper")) {
-            throw new BadRequestException("User đã đăng ký làm chủ cửa hàng không thể đăng ký làm shipper.");
+        if(!user.getRole().getName().equals("user")) {
+            throw new BadRequestException("Người dùng không đạt điều kiện để đăng ký làm shipper.");
         }
         Profile profile = profileRepository.getByUserId(userId)
                 .orElseThrow(() -> new NotFoundException("User"));
@@ -91,6 +91,8 @@ public class ShipperServiceImpl implements ShipperService {
         profile.setCitizenIDNumber(encryptSafe(shipperRegisterDTO.getCitizenIDNumber()));
         profile.setCitizenIDExpiredDate(shipperRegisterDTO.getCitizenIDExpiredDate());
         profile.setDrivingLicenseExpiredDate(shipperRegisterDTO.getDrivingLicenseExpiredDate());
+        profile.setAccountNumber(encryptSafe(shipperRegisterDTO.getAccountNumber()));
+        profile.setBankCode(shipperRegisterDTO.getBankCode());
         user.setShipperStatus(ShipperStatus.PENDING);
         profileRepository.save(profile);
         userRepository.save(user);
@@ -160,40 +162,50 @@ public class ShipperServiceImpl implements ShipperService {
         Profile profile = profileRepository.getByUserId(userId)
                 .orElseThrow(() -> new NotFoundException("Profile"));
 
+        boolean requireApproval = false;
+
         if (!Objects.equals(user.getRole().getName(), "shipper")) {
             throw new BadRequestException("User không phải là shipper.");
         }
 
         if (citizenIDFront != null && !citizenIDFront.isEmpty()) {
             profile.setCitizenIDCardFront(cloudinaryUpload.uploadFile(citizenIDFront));
+            requireApproval = true;
         }
 
         if (citizenIDBack != null && !citizenIDBack.isEmpty()) {
             profile.setCitizenIDCardBack(cloudinaryUpload.uploadFile(citizenIDBack));
+            requireApproval = true;
         }
 
         if (drivingLicenseFront != null && !drivingLicenseFront.isEmpty()) {
             profile.setDrivingLicenseFront(cloudinaryUpload.uploadFile(drivingLicenseFront));
+            requireApproval = true;
         }
 
         if (drivingLicenseBack != null && !drivingLicenseBack.isEmpty()) {
             profile.setDrivingLicenseBack(cloudinaryUpload.uploadFile(drivingLicenseBack));
+            requireApproval = true;
         }
 
         if (judicialRecord != null && !judicialRecord.isEmpty()) {
             profile.setJudicialRecord(cloudinaryUpload.uploadFile(judicialRecord));
+            requireApproval = true;
         }
 
         if (shipperRegisterDTO.getCitizenIDNumber() != null) {
             profile.setCitizenIDNumber(encryptSafe(shipperRegisterDTO.getCitizenIDNumber()));
+            requireApproval = true;
         }
 
         if (shipperRegisterDTO.getCitizenIDExpiredDate() != null) {
             profile.setCitizenIDExpiredDate(shipperRegisterDTO.getCitizenIDExpiredDate());
+            requireApproval = true;
         }
 
         if (shipperRegisterDTO.getDrivingLicenseExpiredDate() != null) {
             profile.setDrivingLicenseExpiredDate(shipperRegisterDTO.getDrivingLicenseExpiredDate());
+            requireApproval = true;
         }
 
         if (shipperRegisterDTO.getCitizenIDExpiredDate() != null && shipperRegisterDTO.getCitizenIDExpiredDate().isBefore(LocalDate.now().plusYears(1))) {
@@ -204,11 +216,24 @@ public class ShipperServiceImpl implements ShipperService {
             throw new BadRequestException("Bằng lái xe đã hết hạn!");
         }
 
+        if (shipperRegisterDTO.getAccountNumber() != null && !shipperRegisterDTO.getAccountNumber().isEmpty()) {
+            profile.setAccountNumber(encryptSafe(shipperRegisterDTO.getAccountNumber()));
+            requireApproval = true;
+        }
+
+        if (shipperRegisterDTO.getBankCode() != null && !shipperRegisterDTO.getBankCode().isEmpty()) {
+            profile.setBankCode(shipperRegisterDTO.getBankCode());
+            requireApproval = true;
+        }
+
         profile.setCitizenIDNumber((shipperRegisterDTO.getCitizenIDNumber()));
         profile.setCitizenIDExpiredDate(shipperRegisterDTO.getCitizenIDExpiredDate());
         profile.setDrivingLicenseExpiredDate(shipperRegisterDTO.getDrivingLicenseExpiredDate());
-        user.setRejectReason(null);
-        user.setShipperStatus(ShipperStatus.PENDING);
+        if (requireApproval){
+            user.setRejectReason(null);
+            user.setShipperStatus(ShipperStatus.PENDING);
+        }
+        user.setShipperStatus(ShipperStatus.ACTIVE);
         profileRepository.save(profile);
         userRepository.save(user);
     }

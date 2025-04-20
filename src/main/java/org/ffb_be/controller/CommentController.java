@@ -18,9 +18,19 @@ public class CommentController {
 
     @GetMapping("/{blogId}")
     public List<CommentDTO> getCommentsByBlog(@PathVariable Long blogId,
-                                              @RequestParam int offset,
-                                              @RequestParam int limit) {
-        return commentService.getCommentsByBlogId(blogId, offset, limit);
+                                              @RequestParam(defaultValue = "0") int offset,
+                                              @RequestParam(defaultValue = "10") int limit) {
+        return commentService.getRootCommentsByBlogId(blogId, offset, limit);
+    }
+
+    @GetMapping("/comments/{parentId}/replies")
+    public ResponseEntity<List<CommentDTO>> getReplies(
+            @PathVariable Long parentId,
+            @RequestParam(defaultValue = "0") int offset,
+            @RequestParam(defaultValue = "3") int limit
+    ) {
+        List<CommentDTO> replies = commentService.getMoreReplies(parentId, offset, limit);
+        return ResponseEntity.ok(replies);
     }
 
     @GetMapping("/replies")
@@ -30,8 +40,8 @@ public class CommentController {
         return commentService.getMoreReplies(parentId, offset, limit);
     }
 
-    @PostMapping
-    public ResponseEntity<String> addComment(@RequestParam Long blogId, @RequestBody CommentDTO commentDTO) {
+    @PostMapping("/{blogId}")
+    public ResponseEntity<String> addComment(@PathVariable Long blogId, @RequestBody CommentDTO commentDTO) {
         commentService.addComment(blogId, commentDTO);
         return ResponseEntity.ok("Comment added successfully");
     }

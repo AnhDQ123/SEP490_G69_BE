@@ -18,8 +18,8 @@ public class VoucherController {
     private final VoucherService voucherService;
 
     @GetMapping("/shop/{shopId}")
-    public ResponseEntity<List<VoucherDTO>> getAllVouchers(@PathVariable Long shopId) {
-        return ResponseEntity.ok(voucherService.getAllVouchers(shopId));
+    public ResponseEntity<List<VoucherDTO>> getAllVouchers(@PathVariable Long shopId, @RequestParam(required = false) boolean isShopkeeper) {
+        return ResponseEntity.ok(voucherService.getAllVouchers(shopId, isShopkeeper));
     }
 
     @GetMapping("/voucher/{code}")

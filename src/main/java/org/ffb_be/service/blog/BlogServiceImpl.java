@@ -37,8 +37,13 @@ public class BlogServiceImpl implements BlogService {
     private final CloudinaryUpload cloudinaryUpload;
 
     @Override
-    public List<BlogDTO> getBlogs(Pageable pageable) {
-        Page<Blog> blogPage = blogRepository.findAll(pageable);
+    public List<BlogDTO> getBlogs(Pageable pageable, boolean isOperator) {
+        Page<Blog> blogPage;
+        if (isOperator) {
+            blogPage = blogRepository.getBlogsByStatusIsNotOrderByCreatedAtDesc(Status.DELETED,pageable);
+        }else {
+            blogPage = blogRepository.getBlogsByStatusOrderByCreatedAtDesc(Status.ACTIVE,pageable);
+        }
         return blogPage.getContent().stream()
                 .map(this::mapBlogToDTO)
                 .collect(Collectors.toList());
@@ -77,7 +82,7 @@ public class BlogServiceImpl implements BlogService {
 
         blog = blogRepository.save(blog);
         if(files != null) {
-            Types blogType = typesRepository.findByCategory(TypesCategory.BLOG)
+            Types blogType = typesRepository.findByCategoryOrderByCreatedAtDesc(TypesCategory.BLOG)
                     .orElseThrow(() -> new NotFoundException("Types"));
             for(String url : cloudinaryUpload.uploadFiles(files)) {
                 imageRepository.saveBlogImages(url, blogType.getId(), blog.getId());
@@ -125,7 +130,7 @@ public class BlogServiceImpl implements BlogService {
         imageRepository.deleteByBlogIdAndUrlNotIn(blogId, imageUrls);
 
         // Thêm ảnh mới
-        Types blogType = typesRepository.findByCategory(TypesCategory.BLOG)
+        Types blogType = typesRepository.findByCategoryOrderByCreatedAtDesc(TypesCategory.BLOG)
                 .orElseThrow(() -> new NotFoundException("Types"));
 
         List<Image> newImages = imageUrls.stream()
