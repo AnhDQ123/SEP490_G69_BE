@@ -11,7 +11,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class BlogDTO extends BaseEntity {
+public class BlogDTO {
     private Long id;
     private String content;
     private WriterDTO writer;

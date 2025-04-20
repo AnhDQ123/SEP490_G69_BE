@@ -96,8 +96,8 @@ public class BlogServiceImpl implements BlogService {
                 .orElseThrow(() -> new NotFoundException("Blog"));
 
         blogMapper.updateEntity(blogDTO, blog);
+        blog.setUpdatedAt(LocalDateTime.now());
         blogRepository.save(blog);
-
         if(files != null) {
             // Nếu có file upload, upload lên Cloudinary
             List<String> uploadedUrls = (files.length > 0) ? cloudinaryUpload.uploadFiles(files) : new ArrayList<>();
