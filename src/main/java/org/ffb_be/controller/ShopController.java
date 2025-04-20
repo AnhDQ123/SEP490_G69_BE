@@ -24,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -165,7 +166,7 @@ public class ShopController {
         return shopService.countPendingShop();
     }
     @GetMapping("/revenue/day")
-    public Map<Long, BigDecimal> calculateShopRevenueByDay(
+    public Map<Date, BigDecimal> calculateShopRevenueByDay(
             @RequestParam("startDate") String startDate,
             @RequestParam("endDate") String endDate,
             @RequestParam("shopId") Long shopId) {

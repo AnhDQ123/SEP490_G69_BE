@@ -9,5 +9,4 @@ import org.springframework.stereotype.Service;
 public interface FeedbackService {
     Page<FeedbackDTO> findAllByProduct(Long id, Pageable pageable);
     void create(Long userId,Long productId,FeedbackDTO feedbackDTO);
-    Double getRate(Long productId);
 }

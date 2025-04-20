@@ -5,6 +5,7 @@ import org.ffb_be.dto.feedback.FeedbackDTO;
 import org.ffb_be.dto.image.ImageDTO;
 import org.ffb_be.entity.Feedback;
 import org.ffb_be.entity.Image;
+import org.ffb_be.entity.Product;
 import org.ffb_be.repository.*;
 import org.ffb_be.utils.enums.Status;
 import org.springframework.beans.BeanUtils;
@@ -36,19 +37,13 @@ public class FeedbackServiceImpl implements FeedbackService {
         feedback.setWriter(userRepository.findById(userId).get());
         feedback.setCreatedAt(LocalDateTime.now());
         feedback.setShop(shopRepository.findByProduct(productId));
+        Product product=productRepository.findById(productId).get();
+        long count= feedbackRepository.countAllByProduct_Id(productId);
+        product.setRate((float) (product.getRate()*count+feedback.getRate())/(count+1));
+        productRepository.save(product);
         feedbackRepository.save(feedback);
     }
 
-    @Override
-    public Double getRate(Long productId) {
-        List<Feedback> feedbacks=feedbackRepository.findAllByProduct_Id(productId);
-        Double rate=0.0;
-        long count= feedbackRepository.countAllByProduct_Id(productId);
-        for(Feedback feedback:feedbacks){
-            rate=rate+feedback.getRate();
-        }
-        return rate/count;
-    }
 
 
     @Override

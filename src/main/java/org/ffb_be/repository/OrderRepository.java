@@ -155,14 +155,14 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
                                                LocalDateTime endDate,
                                                Long shopId);
 
-    @Query("SELECT o.shop.id, SUM(o.total) " +
+    @Query("SELECT FUNCTION('DATE', o.createdAt) AS date, o.shop.id, SUM(o.total) " +
             "FROM Order o " +
             "WHERE FUNCTION('DATE', o.createdAt) BETWEEN FUNCTION('DATE', :startDate) AND FUNCTION('DATE', :endDate) " +  // Lọc theo ngày
             "AND o.shop.id = :shopId " +
-            "GROUP BY o.shop.id")
-    List<Object[]> calculateShopRevenueByDay( LocalDateTime startDate,
+            "GROUP BY FUNCTION('DATE', o.createdAt), o.shop.id")
+    List<Object[]> calculateShopRevenueByDay(LocalDateTime startDate,
                                              LocalDateTime endDate,
-                                              Long shopId);
+                                             Long shopId);
 
     @Query("SELECT FUNCTION('YEAR', o.createdAt), FUNCTION('MONTH', o.createdAt), SUM(o.total) " +
             "FROM Order o " +
