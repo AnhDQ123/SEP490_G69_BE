@@ -26,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.math.BigDecimal;
 
+import java.sql.Date;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -763,16 +764,17 @@ public class OrderServiceImpl implements OrderService {
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         return orderRepository.countShopOrdersByStatusAndYear(status, startDateTime, endDateTime, shopId);
     }
-    public Map<Long, BigDecimal> calculateShopRevenueByDay(LocalDate startDate, LocalDate endDate, Long shopId) {
+    public Map<Date, BigDecimal> calculateShopRevenueByDay(LocalDate startDate, LocalDate endDate, Long shopId) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // 2023-01-01T00:00:00
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         List<Object[]> results = orderRepository.calculateShopRevenueByDay(startDateTime, endDateTime, shopId);
 
-        Map<Long, BigDecimal> shopRevenue = new HashMap<>();
+        Map<Date, BigDecimal> shopRevenue = new HashMap<>();
         for (Object[] result : results) {
-            Long shopIdResult = (Long) result[0];
-            BigDecimal revenue = (BigDecimal) result[1];
-            shopRevenue.put(shopIdResult, revenue);
+            Date date=(java.sql.Date) result[0];
+            Long shopIdResult = (Long) result[1];
+            BigDecimal revenue = (BigDecimal) result[2];
+            shopRevenue.put(date, revenue);
         }
         return shopRevenue;
     }
