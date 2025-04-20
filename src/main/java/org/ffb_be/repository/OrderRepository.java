@@ -187,4 +187,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findAllByShop_IdAndStatus(Long shopId, OrderStatus status);
 
     Page<Order> findAllByStatus(OrderStatus status, Pageable pageable);
+
+    Long countAllByStatus(OrderStatus status);
 }

@@ -45,7 +45,7 @@ public interface OrderService {
     void acceptReturnOrder(Long id);
     void rejectReturnOrder(Long id);
     CountDTO countOrderByStatus(Long id);
-
+    Long countAllByStatus(OrderStatus status);
     Page<OrderDTO> findAllByFilter(String orderCode, OrderStatus status, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
 
     OrderDTO getOrder(Long id);
@@ -63,4 +63,5 @@ public interface OrderService {
     Map<String, BigDecimal> calculateShopRevenueByMonth(LocalDate startDate, LocalDate endDate, Long shopId);
     Map<Date, BigDecimal> calculateShopRevenueByDay(LocalDate startDate, LocalDate endDate, Long shopId);
     Page<OrderDTO> findAllByShopAndPending(Long id,Pageable pageable);
+
 }
