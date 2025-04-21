@@ -76,29 +76,12 @@ public class OrderServiceImpl implements OrderService {
             orderDTO.setPaymentMethodId(order.getPaymentMethod() != null ? order.getPaymentMethod().getId() : null);
             orderDTO.setShipMethodId(order.getDeliveryMethod() != null ? order.getDeliveryMethod().getId() : null);
             List<OrderItemDTO> orderItemDTOList = new ArrayList<>();
-            BigDecimal orderItemTotal = BigDecimal.ZERO;
             for (OrderItem orderItem : order.getOrderItems()) {
                 OrderItemDTO orderItemDTO = new OrderItemDTO();
                 orderItemDTO.setId(orderItem.getId());
                 orderItemDTO.setQuantity(orderItem.getQuantity());
                 orderItemDTO.setProductId(orderItem.getProduct().getId());
                 orderItemDTO.setTotal(orderItem.getTotalPrice());
-                List<Discount> discount=discountRepository.findAllByProduct_Id((orderItem.getId()));
-                if(discount!=null) {
-                    List<DiscountDTO2> discountDTOs=new ArrayList<>();
-                    for (Discount discount1:discount) {
-                        DiscountDTO2 discountDTO=new DiscountDTO2();;
-                        discountDTO.setAmount(discount1.getDiscount_percentage());
-                        discountDTO.setId(discount1.getId());
-                        discountDTO.setStartDate(discount1.getStartDate());
-                        discountDTO.setEndDate(discount1.getEndDate());
-                        discountDTO.setStatus(discount1.getStatus().toString());
-                        discountDTOs.add(discountDTO);
-                    }
-                    orderItemDTO.setDiscount(discountDTOs);
-                }else {
-                    orderItemDTO.setDiscount(null);
-                }
                 orderItemDTO.setCreatedAt(orderItem.getCreatedAt());
                 orderItemDTO.setOrderId(order.getId());
                 orderDTO.setShopName(shopRepository.findByProduct(orderItemDTO.getProductId()).getName());
@@ -108,7 +91,6 @@ public class OrderServiceImpl implements OrderService {
                 orderItemDTO.setProductName(productRepository.findById(orderItemDTO.getProductId()).get().getName());
                 orderItemDTO.setImage(productRepository.findById(orderItemDTO.getProductId()).get().getImage());
                 List<OrderItemOptionDTO> orderItemOptionDTOList = new ArrayList<>();
-                BigDecimal orderItemOptionTotal = BigDecimal.ZERO;
                 for (OrderItemOption orderItemOption : orderItem.getOrderItemOptions()) {
                     OrderItemOptionDTO orderItemOptionDTO = new OrderItemOptionDTO();
                     orderItemOptionDTO.setId(orderItemOption.getId());
@@ -117,34 +99,14 @@ public class OrderServiceImpl implements OrderService {
                     orderItemOptionDTO.setOrderItemId(orderItem.getId());
                     orderItemOptionDTO.setPrice(foodOptionRepository.findById(orderItemOptionDTO.getOptionId()).get().getPrice());
                     orderItemOptionDTO.setTypeId(orderItemOption.getFoodOption().getType().getId());
-                    if (orderItemOptionDTO.getTypeId() == 2) {
-                        BigDecimal unitPrice = foodOptionRepository.findById(orderItemOptionDTO.getOptionId())
-                                .orElseThrow(() -> new RuntimeException("Food Option not found"))
-                                .getPrice();
-                        orderItemDTO.setPrice(unitPrice);
-                        orderItemDTO.setTotal(unitPrice.multiply(BigDecimal.valueOf(orderItemDTO.getQuantity())));
-                        orderItemTotal = orderItemTotal.add(orderItemDTO.getTotal());
-                        orderItemOptionDTO.setQuantity(orderItemDTO.getQuantity());
-                    }
                     orderItemOptionDTO.setOptionName(orderItemOption.getFoodOption().getName());
                     orderItemOptionDTO.setImage(orderItemOption.getFoodOption().getImage());
-                    if (orderItemOptionDTO.getTypeId() != 2) {
-                        orderItemOptionDTO.setTotal(orderItemOptionDTO.getPrice().multiply(BigDecimal.valueOf(orderItemOptionDTO.getQuantity())));
-                        orderItemOptionTotal = orderItemOptionTotal.add(orderItemOptionDTO.getTotal());
-                    }
                     orderItemOptionDTOList.add(orderItemOptionDTO);
-                }
-                orderItemTotal = orderItemTotal.add(orderItemOptionTotal);
-                for(Discount discount1:discount){
-                    if(discount1.getStatus().equals(Status.ACTIVE)){
-                        orderItemDTO.setTotal(orderItemTotal.multiply(BigDecimal.ONE.subtract(discount1.getDiscount_percentage())));
-                    }
                 }
                 orderItemDTO.setOrderItemOptions(orderItemOptionDTOList);
                 orderItemDTOList.add(orderItemDTO);
             }
-            BigDecimal orderTotal = orderItemTotal;
-            orderDTO.setTotal(orderTotal.multiply(BigDecimal.ONE.subtract(orderDTO.getVoucherAmount())));
+            orderDTO.setTotal(order.getTotal());
             orderDTO.setOrderItem(orderItemDTOList);
             orderDTOs.add(orderDTO);
         }
@@ -154,7 +116,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Page<OrderDTO> findAllReturnPending( Pageable pageable) {
         Page<Order> orders = orderRepository.findAllByStatus( OrderStatus.RETURN_PENDING, pageable);
-        return orders.map(this::toDTO);
+        return toDTO(orders,pageable);
     }
 
     @Override
