@@ -7,13 +7,17 @@ import org.ffb_be.service.shipper.ShipperService;
 import org.ffb_be.utils.enums.ShipperStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/shippers")
@@ -26,19 +30,32 @@ public class ShipperController {
     public ResponseEntity<?> registerShipper(
             @PathVariable Long userId,
             @Validated @ModelAttribute ShipperRegisterDTO shipperRegisterDTO,
+            BindingResult result, // <-- BindingResult PHẢI đặt ngay sau DTO
             @RequestPart(value = "citizenIDFront") MultipartFile citizenIDFront,
             @RequestPart(value = "citizenIDBack") MultipartFile citizenIDBack,
-            @RequestParam(value = "drivingLicenseFront") MultipartFile drivingLicenseFront,
-            @RequestParam(value = "drivingLicenseBack") MultipartFile drivingLicenseBack,
-            @RequestParam(value = "judicialRecord") MultipartFile judicialRecord,
-            BindingResult result
+            @RequestPart(value = "drivingLicenseFront") MultipartFile drivingLicenseFront,
+            @RequestPart(value = "drivingLicenseBack") MultipartFile drivingLicenseBack,
+            @RequestPart(value = "judicialRecord") MultipartFile judicialRecord
     ) throws IOException {
+
         if (result.hasErrors()) {
-            return ResponseEntity.badRequest().body(result.getAllErrors());
+            List<String> messages = result.getFieldErrors().stream()
+                    .map(FieldError::getDefaultMessage) // Trả về đúng thông báo lỗi đã gán trong DTO
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.badRequest().body(messages);
         }
-        shipperService.registerShipper(userId, shipperRegisterDTO, citizenIDFront, citizenIDBack, drivingLicenseFront, drivingLicenseBack, judicialRecord);
-        return ResponseEntity.ok().build();
+
+        try {
+            shipperService.registerShipper(userId, shipperRegisterDTO, citizenIDFront, citizenIDBack,
+                    drivingLicenseFront, drivingLicenseBack, judicialRecord);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
     }
+
+
 
     @PostMapping("/approve/{userId}")
     public ResponseEntity<?> approveShipper(@PathVariable Long userId) {
@@ -56,19 +73,26 @@ public class ShipperController {
     public ResponseEntity<?> updateShipperInfo(
             @PathVariable Long userId,
             @Validated @ModelAttribute ShipperRegisterDTO shipperRegisterDTO,
+            BindingResult result,
             @RequestPart(value = "citizenIDFront") MultipartFile citizenIDFront,
             @RequestPart(value = "citizenIDBack") MultipartFile citizenIDBack,
             @RequestParam(value = "drivingLicenseFront") MultipartFile drivingLicenseFront,
             @RequestParam(value = "drivingLicenseBack") MultipartFile drivingLicenseBack,
-            @RequestParam(value = "judicialRecord") MultipartFile judicialRecord,
-            BindingResult result
+            @RequestParam(value = "judicialRecord") MultipartFile judicialRecord
     ) throws IOException {
         if (result.hasErrors()) {
-            return ResponseEntity.badRequest().body(result.getAllErrors());
+            List<String> messages = result.getFieldErrors().stream()
+                    .map(FieldError::getDefaultMessage)
+                    .collect(Collectors.toList());
+            return ResponseEntity.badRequest().body(messages);
         }
-        shipperService.updateShipperInfo(userId, shipperRegisterDTO, citizenIDFront, citizenIDBack, drivingLicenseFront, drivingLicenseBack, judicialRecord);
+
+        shipperService.updateShipperInfo(userId, shipperRegisterDTO,
+                citizenIDFront, citizenIDBack,
+                drivingLicenseFront, drivingLicenseBack, judicialRecord);
         return ResponseEntity.ok().build();
     }
+
 
     @PutMapping("/{userId}/active")
     public ResponseEntity<?> shipperActive(

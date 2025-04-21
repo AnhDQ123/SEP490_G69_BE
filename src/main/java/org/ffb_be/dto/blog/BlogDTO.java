@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import org.ffb_be.dto.auth.userDto.WriterDTO;
 import org.ffb_be.entity.BaseEntity;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -18,4 +19,5 @@ public class BlogDTO {
     private int likeCount;
     private List<String> imageUrls;
     private int commentCount;
+    private LocalDateTime createdAt;
 }

@@ -36,7 +36,7 @@ public class ShopRegisterDTO {
     private String taxCode;
 
     @NotBlank(message = "Citizen ID number cannot be blank")
-    @Pattern(regexp = "^[0-9]{12}$", message = "Citizen ID number must be 9 digits")
+    @Pattern(regexp = "^[0-9]{12}$", message = "Citizen ID number must be 12 digits")
     private String citizenIDNumber;
 
     @NotNull(message = "Citizen ID expiration date cannot be null")

@@ -195,4 +195,12 @@ public class BlogServiceImpl implements BlogService {
         blog.setStatus(status);
         blogRepository.save(blog);
     }
+
+    @Override
+    public List<BlogDTO> getBlogByUserId(Long userId, Pageable pageable) {
+        Page<Blog> blogPage = blogRepository.getBlogsByWriter_IdAndStatusIsNotOrderByCreatedAtDesc(userId,Status.DELETED, pageable);
+        return blogPage.getContent().stream()
+                .map(this::mapBlogToDTO)
+                .collect(Collectors.toList());
+    }
 }

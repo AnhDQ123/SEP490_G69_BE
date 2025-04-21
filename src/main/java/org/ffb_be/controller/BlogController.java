@@ -35,6 +35,11 @@ public class BlogController {
         return ResponseEntity.ok(blogService.getBlogById(id));
     }
 
+    @GetMapping("/{userId}")
+    public ResponseEntity<List<BlogDTO>> getBlogByUserId(@PathVariable Long userId, Pageable pageable) {
+        return ResponseEntity.ok(blogService.getBlogByUserId(userId, pageable));
+    }
+
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createBlog(
             @Validated @ModelAttribute BlogDTO blogDTO,

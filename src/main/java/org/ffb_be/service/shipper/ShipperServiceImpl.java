@@ -49,6 +49,10 @@ public class ShipperServiceImpl implements ShipperService {
             MultipartFile drivingLicenseBack,
             MultipartFile judicialRecord
     ) throws IOException {
+        if (citizenIDFront == null || citizenIDBack == null || drivingLicenseFront == null || drivingLicenseBack == null || judicialRecord == null) {
+            throw new BadRequestException("Tất cả các giấy tờ phải được tải lên.");
+        }
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User"));
         if(user.getRole().getName().equals("shipper")) {
@@ -61,39 +65,46 @@ public class ShipperServiceImpl implements ShipperService {
             throw new BadRequestException("Người dùng không đạt điều kiện để đăng ký làm shipper.");
         }
         Profile profile = profileRepository.getByUserId(userId)
-                .orElseThrow(() -> new NotFoundException("User"));
+                .orElseThrow(() -> new NotFoundException("profile"));
         profile.setName(shipperRegisterDTO.getName());
         profile.setGender(shipperRegisterDTO.getGender());
         profile.setDob(shipperRegisterDTO.getDob());
-        String citizenIDFrontUrl = cloudinaryUpload.uploadFile(citizenIDFront);
-        if (citizenIDFrontUrl != null) profile.setCitizenIDCardFront(citizenIDFrontUrl);
 
-        String citizenIDBackUrl = cloudinaryUpload.uploadFile(citizenIDBack);
-        if (citizenIDBackUrl != null) profile.setCitizenIDCardBack(citizenIDBackUrl);
+        // Upload các giấy tờ lên Cloudinary và xử lý lỗi nếu có
+        String citizenIDFrontUrl = uploadFile(citizenIDFront, "Giấy chứng minh nhân dân (mặt trước)");
+        String citizenIDBackUrl = uploadFile(citizenIDBack, "Giấy chứng minh nhân dân (mặt sau)");
+        String drivingLicenseFrontUrl = uploadFile(drivingLicenseFront, "Bằng lái xe (mặt trước)");
+        String drivingLicenseBackUrl = uploadFile(drivingLicenseBack, "Bằng lái xe (mặt sau)");
+        String judicialRecordUrl = uploadFile(judicialRecord, "Giấy xác nhận lý lịch tư pháp");
 
-        String drivingLicenseFrontUrl = cloudinaryUpload.uploadFile(drivingLicenseFront);
-        if (drivingLicenseFrontUrl != null) profile.setDrivingLicenseFront(drivingLicenseFrontUrl);
-
-        String drivingLicenseBackUrl = cloudinaryUpload.uploadFile(drivingLicenseBack);
-        if (drivingLicenseBackUrl != null) profile.setDrivingLicenseBack(drivingLicenseBackUrl);
-
-        String judicialRecordUrl = cloudinaryUpload.uploadFile(judicialRecord);
-        if (judicialRecordUrl != null) profile.setJudicialRecord(judicialRecordUrl);
-
-        if (shipperRegisterDTO.getCitizenIDExpiredDate() != null && shipperRegisterDTO.getCitizenIDExpiredDate().isBefore(LocalDate.now().plusYears(1))) {
+        // Kiểm tra ngày hết hạn giấy tờ
+        if (shipperRegisterDTO.getCitizenIDExpiredDate() != null &&
+                shipperRegisterDTO.getCitizenIDExpiredDate().isBefore(LocalDate.now())) {
             throw new BadRequestException("Giấy tờ tùy thân đã hết hạn!");
         }
 
-        if (shipperRegisterDTO.getDrivingLicenseExpiredDate() != null && shipperRegisterDTO.getDrivingLicenseExpiredDate().isBefore(LocalDate.now().plusYears(1))) {
+        if (shipperRegisterDTO.getDrivingLicenseExpiredDate() != null &&
+                shipperRegisterDTO.getDrivingLicenseExpiredDate().isBefore(LocalDate.now())) {
             throw new BadRequestException("Bằng lái xe đã hết hạn!");
         }
+
+        // Cập nhật các thông tin vào profile
+        profile.setCitizenIDCardFront(citizenIDFrontUrl);
+        profile.setCitizenIDCardBack(citizenIDBackUrl);
+        profile.setDrivingLicenseFront(drivingLicenseFrontUrl);
+        profile.setDrivingLicenseBack(drivingLicenseBackUrl);
+        profile.setJudicialRecord(judicialRecordUrl);
 
         profile.setCitizenIDNumber(encryptSafe(shipperRegisterDTO.getCitizenIDNumber()));
         profile.setCitizenIDExpiredDate(shipperRegisterDTO.getCitizenIDExpiredDate());
         profile.setDrivingLicenseExpiredDate(shipperRegisterDTO.getDrivingLicenseExpiredDate());
         profile.setAccountNumber(encryptSafe(shipperRegisterDTO.getAccountNumber()));
         profile.setBankCode(shipperRegisterDTO.getBankCode());
+
+        // Đặt trạng thái shipper là PENDING
         user.setShipperStatus(ShipperStatus.PENDING);
+
+        // Lưu các thay đổi vào database
         profileRepository.save(profile);
         userRepository.save(user);
     }
@@ -106,6 +117,7 @@ public class ShipperServiceImpl implements ShipperService {
         if (!Objects.equals(user.getRole().getName(), "shipper")) {
             throw new BadRequestException("User đã là shipper.");
         }
+
         if (user.getShipperStatus() != ShipperStatus.PENDING) {
             throw new BadRequestException("Chỉ có thể duyệt shipper đang ở trạng thái chờ.");
         }
@@ -158,41 +170,45 @@ public class ShipperServiceImpl implements ShipperService {
             MultipartFile judicialRecord
     ) throws IOException {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User"));
+                .orElseThrow(() -> new NotFoundException("User không tồn tại."));
         Profile profile = profileRepository.getByUserId(userId)
-                .orElseThrow(() -> new NotFoundException("Profile"));
+                .orElseThrow(() -> new NotFoundException("Profile không tồn tại."));
 
-        boolean requireApproval = false;
-
-        if (!Objects.equals(user.getRole().getName(), "shipper")) {
+        // Kiểm tra nếu user là shipper
+        if (!"shipper".equals(user.getRole().getName())) {
             throw new BadRequestException("User không phải là shipper.");
         }
 
+        // Biến kiểm tra xem có yêu cầu phê duyệt không
+        boolean requireApproval = false;
+
+        // Cập nhật ảnh nếu có và kiểm tra có cần phê duyệt không
         if (citizenIDFront != null && !citizenIDFront.isEmpty()) {
-            profile.setCitizenIDCardFront(cloudinaryUpload.uploadFile(citizenIDFront));
+            profile.setCitizenIDCardFront(uploadFile(citizenIDFront, "Giấy chứng minh nhân dân (mặt trước)"));
             requireApproval = true;
         }
 
         if (citizenIDBack != null && !citizenIDBack.isEmpty()) {
-            profile.setCitizenIDCardBack(cloudinaryUpload.uploadFile(citizenIDBack));
+            profile.setCitizenIDCardBack(uploadFile(citizenIDBack, "Giấy chứng minh nhân dân (mặt trước)"));
             requireApproval = true;
         }
 
         if (drivingLicenseFront != null && !drivingLicenseFront.isEmpty()) {
-            profile.setDrivingLicenseFront(cloudinaryUpload.uploadFile(drivingLicenseFront));
+            profile.setDrivingLicenseFront(uploadFile(drivingLicenseFront, "Bằng lái xe (mặt trước)"));
             requireApproval = true;
         }
 
         if (drivingLicenseBack != null && !drivingLicenseBack.isEmpty()) {
-            profile.setDrivingLicenseBack(cloudinaryUpload.uploadFile(drivingLicenseBack));
+            profile.setDrivingLicenseBack(uploadFile(drivingLicenseBack, "Bằng lái xe (mặt sau)"));
             requireApproval = true;
         }
 
         if (judicialRecord != null && !judicialRecord.isEmpty()) {
-            profile.setJudicialRecord(cloudinaryUpload.uploadFile(judicialRecord));
+            profile.setJudicialRecord(uploadFile(judicialRecord, "Giấy xác nhận lý lịch tư pháp"));
             requireApproval = true;
         }
 
+        // Cập nhật thông tin khác nếu có
         if (shipperRegisterDTO.getCitizenIDNumber() != null) {
             profile.setCitizenIDNumber(encryptSafe(shipperRegisterDTO.getCitizenIDNumber()));
             requireApproval = true;
@@ -208,14 +224,6 @@ public class ShipperServiceImpl implements ShipperService {
             requireApproval = true;
         }
 
-        if (shipperRegisterDTO.getCitizenIDExpiredDate() != null && shipperRegisterDTO.getCitizenIDExpiredDate().isBefore(LocalDate.now().plusYears(1))) {
-            throw new BadRequestException("Giấy tờ tùy thân đã hết hạn!");
-        }
-
-        if (shipperRegisterDTO.getDrivingLicenseExpiredDate() != null && shipperRegisterDTO.getDrivingLicenseExpiredDate().isBefore(LocalDate.now().plusYears(1))) {
-            throw new BadRequestException("Bằng lái xe đã hết hạn!");
-        }
-
         if (shipperRegisterDTO.getAccountNumber() != null && !shipperRegisterDTO.getAccountNumber().isEmpty()) {
             profile.setAccountNumber(encryptSafe(shipperRegisterDTO.getAccountNumber()));
             requireApproval = true;
@@ -226,14 +234,22 @@ public class ShipperServiceImpl implements ShipperService {
             requireApproval = true;
         }
 
-        profile.setCitizenIDNumber((shipperRegisterDTO.getCitizenIDNumber()));
-        profile.setCitizenIDExpiredDate(shipperRegisterDTO.getCitizenIDExpiredDate());
-        profile.setDrivingLicenseExpiredDate(shipperRegisterDTO.getDrivingLicenseExpiredDate());
-        if (requireApproval){
-            user.setRejectReason(null);
-            user.setShipperStatus(ShipperStatus.PENDING);
+        // Kiểm tra ngày hết hạn
+        if (shipperRegisterDTO.getCitizenIDExpiredDate() != null && shipperRegisterDTO.getCitizenIDExpiredDate().isBefore(LocalDate.now().plusYears(1))) {
+            throw new BadRequestException("Giấy tờ tùy thân đã hết hạn!");
         }
-        user.setShipperStatus(ShipperStatus.ACTIVE);
+
+        if (shipperRegisterDTO.getDrivingLicenseExpiredDate() != null && shipperRegisterDTO.getDrivingLicenseExpiredDate().isBefore(LocalDate.now().plusYears(1))) {
+            throw new BadRequestException("Bằng lái xe đã hết hạn!");
+        }
+
+        // Nếu có thay đổi, yêu cầu phê duyệt
+        if (requireApproval) {
+            user.setRejectReason(null);
+            user.setShipperStatus(ShipperStatus.PENDING); // Trạng thái chờ duyệt
+        }
+
+        // Lưu lại profile và user
         profileRepository.save(profile);
         userRepository.save(user);
     }
@@ -283,7 +299,6 @@ public class ShipperServiceImpl implements ShipperService {
         userRepository.save(user);
     }
 
-
     private ShipperInfoDTO decryptDTO(User user) {
         ShipperInfoDTO shipperInfoDTO = shipperMapper.toDTO(user);
         shipperInfoDTO.setCitizenIDNumber((shipperInfoDTO.getCitizenIDNumber()));
@@ -297,5 +312,16 @@ public class ShipperServiceImpl implements ShipperService {
 
     private String encryptSafe(String data) {
         return data != null ? encryptUtil.encrypt(data) : null;
+    }
+
+    private String uploadFile(MultipartFile file, String fileType) throws IOException {
+        if (file == null || file.isEmpty()) {
+            throw new BadRequestException(fileType + " không được phép để trống.");
+        }
+        String fileUrl = cloudinaryUpload.uploadFile(file);
+        if (fileUrl == null || fileUrl.isEmpty()) {
+            throw new BadRequestException(fileType + " tải lên không thành công.");
+        }
+        return fileUrl;
     }
 }

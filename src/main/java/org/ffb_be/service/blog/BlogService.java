@@ -22,4 +22,6 @@ public interface BlogService {
     void deleteBlog(Long id);
 
     void blogStatusUpdate(Long id, Status status, String reason);
+
+    List<BlogDTO> getBlogByUserId(Long userId, Pageable pageable);
 }

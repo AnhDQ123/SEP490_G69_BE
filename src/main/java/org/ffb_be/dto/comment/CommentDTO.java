@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import org.ffb_be.dto.auth.userDto.WriterDTO;
 import org.ffb_be.entity.BaseEntity;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -20,4 +21,5 @@ public class CommentDTO{
     private int likeCount;
     private int replyCount;
     private boolean hasMoreReplies;
+    private LocalDateTime createdAt;
 }
