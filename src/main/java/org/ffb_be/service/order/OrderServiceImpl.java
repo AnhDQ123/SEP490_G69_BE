@@ -154,19 +154,19 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Page<OrderDTO> findAllReturnPending( Pageable pageable) {
         Page<Order> orders = orderRepository.findAllByStatus( OrderStatus.RETURN_PENDING, pageable);
-        return toDTO(orders,pageable);
+        return orders.map(this::toDTO);
     }
 
     @Override
     public Page<OrderDTO> findAllReturnRejected(Pageable pageable) {
         Page<Order> orders = orderRepository.findAllByStatus( OrderStatus.RETURN_REJECTED, pageable);
-        return toDTO(orders,pageable);
+        return orders.map(this::toDTO);
     }
 
     @Override
     public Page<OrderDTO> findAllReturned(Pageable pageable) {
         Page<Order> orders = orderRepository.findAllByStatus( OrderStatus.RETURNED, pageable);
-        return toDTO(orders,pageable);
+        return orders.map(this::toDTO);
     }
 
     @Override
@@ -367,7 +367,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Page<OrderDTO> findAllByOwnerAndStatus(Long id, OrderStatus status, Pageable pageable) {
         Page<Order> orders = orderRepository.findAllByOwner_IdAndStatus(id, status, pageable);
-        return toDTO(orders,pageable);
+        return orders.map(this::toDTO);
     }
 
 
@@ -383,9 +383,8 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Page<OrderDTO> findAllByShopAndStatus(Long id, OrderStatus status,Pageable pageable) {
         Page<Order> orderList=orderRepository.findOrdersByShopIdAndStatus(id, status,pageable);
-        return toDTO(orderList,pageable);
+        return orderList.map(this::toDTO);
     }
-
     @Override
     public List<ShipPaymentDTO> findAllShipPaymentByShopId(Long shopId) {
         // Lấy tất cả các đơn hàng của shop có trạng thái DELIVERED
@@ -429,7 +428,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Page<OrderDTO> findAllByShopAndPending(Long id, Pageable pageable) {
         Page<Order> orderList=orderRepository.findOrdersByShopIdAndStatus(id, OrderStatus.PENDING,pageable);
-        return toDTO(orderList,pageable);
+        return orderList.map(this::toDTO);
     }
 
     @Override
@@ -481,7 +480,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Page<OrderDTO> findAllByShipper(Long id, Pageable pageable) {
         Page<Order> orders = orderRepository.findAllByShipper_Id(id, pageable);
-        return toDTO(orders,pageable);
+        return orders.map(this::toDTO);
     }
 
     @Override
@@ -583,7 +582,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public CountDTO countOrderByStatus(Long id) {
+    public CountDTO countOrderByStatus(Long id  ) {
         List<Object[]> results = orderRepository.countOrdersByStatusForShop(id);
         CountDTO dto = new CountDTO();
         for (Object[] row : results) {
@@ -604,6 +603,13 @@ public class OrderServiceImpl implements OrderService {
         }
         return dto;
     }
+
+    @Override
+    public Long countAllByStatus(OrderStatus status) {
+        Long count = orderRepository.countAllByStatus((status));
+        return count;
+    }
+
     public List<CountByYearDTO> getOrderCountByStatusAndYear(OrderStatus status, LocalDate startDate, LocalDate endDate) {
         LocalDateTime startDateTime = startDate.atStartOfDay(); // Chuyển startDate thành LocalDateTime
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX); // Chuyển endDate thành LocalDateTime

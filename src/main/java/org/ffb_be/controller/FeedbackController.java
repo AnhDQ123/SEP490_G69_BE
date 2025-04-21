@@ -2,6 +2,7 @@ package org.ffb_be.controller;
 
 
 
+import jakarta.validation.Valid;
 import org.ffb_be.dto.feedback.FeedbackDTO;
 import org.ffb_be.service.feedback.FeedbackService;
 import org.springframework.data.domain.PageRequest;
@@ -30,6 +31,7 @@ public class FeedbackController {
     @PostMapping("/create")
     public void create(@RequestParam("userId") Long userId,
                                     @RequestParam("productId") Long productId,
+                                    @Valid
                                     @RequestBody FeedbackDTO feedbackDTO) {
         feedbackService.create(userId,productId,feedbackDTO);
     }

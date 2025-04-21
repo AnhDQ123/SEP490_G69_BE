@@ -34,7 +34,7 @@ public class ReportController {
     @PostMapping("/create")
     public ResponseEntity<?> addReport(@Validated @ModelAttribute() ReportCreateDTO reportCreateDTO,
                                         BindingResult bindingResult,
-                                        @RequestParam("option") List<MultipartFile> option) throws IOException {
+                                         List<MultipartFile> option) throws IOException {
         if(bindingResult.hasErrors()) {
             return ResponseEntity.badRequest().body(bindingResult.getAllErrors());}
         reportService.createReport(reportCreateDTO, option);

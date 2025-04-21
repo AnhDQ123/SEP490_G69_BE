@@ -222,4 +222,8 @@ public class OrderController {
         Pageable pageable = PageRequest.of(page-1, size);
         return orderService.findAllReturned(pageable);
     }
+    @GetMapping("/return/count")
+    public Long countAllReturn() {
+        return orderService.countAllByStatus(OrderStatus.RETURN_PENDING);
+    }
 }
