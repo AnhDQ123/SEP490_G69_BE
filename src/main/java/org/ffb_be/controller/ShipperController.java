@@ -30,7 +30,7 @@ public class ShipperController {
     public ResponseEntity<?> registerShipper(
             @PathVariable Long userId,
             @Validated @ModelAttribute ShipperRegisterDTO shipperRegisterDTO,
-            BindingResult result, // <-- BindingResult PHẢI đặt ngay sau DTO
+            BindingResult result,
             @RequestPart(value = "citizenIDFront") MultipartFile citizenIDFront,
             @RequestPart(value = "citizenIDBack") MultipartFile citizenIDBack,
             @RequestPart(value = "drivingLicenseFront") MultipartFile drivingLicenseFront,
@@ -40,7 +40,7 @@ public class ShipperController {
 
         if (result.hasErrors()) {
             List<String> messages = result.getFieldErrors().stream()
-                    .map(FieldError::getDefaultMessage) // Trả về đúng thông báo lỗi đã gán trong DTO
+                    .map(FieldError::getDefaultMessage)
                     .collect(Collectors.toList());
 
             return ResponseEntity.badRequest().body(messages);

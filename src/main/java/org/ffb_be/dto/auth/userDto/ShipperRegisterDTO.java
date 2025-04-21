@@ -22,14 +22,6 @@ public class ShipperRegisterDTO {
     @Past(message = "Date of birth must be in the past")
     private LocalDate dob;
 
-    @NotBlank(message = "Phone number cannot be blank")
-    @Pattern(regexp = "^\\d{10}$", message = "Phone number must be 10 digits")
-    private String phone;
-
-    @NotBlank(message = "Email cannot be blank")
-    @Email(message = "Invalid email format")
-    private String email;
-
     @NotBlank(message = "Account number cannot be blank")
     private String accountNumber;
 

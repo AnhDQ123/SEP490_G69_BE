@@ -55,13 +55,13 @@ public class ShipperServiceImpl implements ShipperService {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User"));
-        if(user.getRole().getName().equals("shipper")) {
+        if(user.getRole().getName().equals("Shipper")) {
             throw new BadRequestException("User đã đăng ký làm shipper.");
         }
         if(user.getShipperStatus() == ShipperStatus.PENDING) {
             throw new BadRequestException("Shipper đang chở được duyệt không thể gửi đăng ký.");
         }
-        if(!user.getRole().getName().equals("user")) {
+        if(!user.getRole().getName().equals("User")) {
             throw new BadRequestException("Người dùng không đạt điều kiện để đăng ký làm shipper.");
         }
         Profile profile = profileRepository.getByUserId(userId)
@@ -114,14 +114,14 @@ public class ShipperServiceImpl implements ShipperService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User"));
 
-        if (!Objects.equals(user.getRole().getName(), "shipper")) {
+        if (!Objects.equals(user.getRole().getName(), "Shipper")) {
             throw new BadRequestException("User đã là shipper.");
         }
 
         if (user.getShipperStatus() != ShipperStatus.PENDING) {
             throw new BadRequestException("Chỉ có thể duyệt shipper đang ở trạng thái chờ.");
         }
-        Role role = roleRepository.getByName("shipper")
+        Role role = roleRepository.getByName("Shipper")
                 .orElseThrow(() ->new NotFoundException("Role"));
         user.setRole(role);
         user.setShipperStatus(ShipperStatus.ACTIVE);
@@ -137,7 +137,7 @@ public class ShipperServiceImpl implements ShipperService {
         if (user.getShipperStatus() != ShipperStatus.PENDING) {
             throw new IllegalStateException("Chỉ có thể từ chối shipper đang ở trạng thái chờ.");
         }
-        Role role = roleRepository.getByName("user")
+        Role role = roleRepository.getByName("User")
                 .orElseThrow(() ->new NotFoundException("Role"));
         user.setRole(role);
         user.setShipperStatus(null);
@@ -175,7 +175,7 @@ public class ShipperServiceImpl implements ShipperService {
                 .orElseThrow(() -> new NotFoundException("Profile không tồn tại."));
 
         // Kiểm tra nếu user là shipper
-        if (!"shipper".equals(user.getRole().getName())) {
+        if (!"Shipper".equals(user.getRole().getName())) {
             throw new BadRequestException("User không phải là shipper.");
         }
 
@@ -258,7 +258,7 @@ public class ShipperServiceImpl implements ShipperService {
     public Page<ShipperInfoDTO> getShippersByStatus(String status, String search, Pageable pageable) {
         Specification<User> spec = Specification.where((root, query, cb) -> {
             Join<User, Role> roleJoin = root.join("role", JoinType.INNER);
-            return cb.equal(roleJoin.get("name"), "shipper");
+            return cb.equal(roleJoin.get("name"), "Shipper");
         });
 
         if (status != null && !status.isEmpty()) {

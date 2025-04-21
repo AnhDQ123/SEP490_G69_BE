@@ -96,7 +96,7 @@ public class ShopServiceImpl implements ShopService {
                 .orElseThrow(() -> new NotFoundException("User"));
         Profile profile = profileRepository.getByUserId(userId)
                 .orElseThrow(() -> new NotFoundException("Profile"));
-        if (owner.getRole().getName().equals("shipper")) {
+        if (owner.getRole().getName().equals("Shipper")) {
             throw new BadRequestException("User không thể tạo cửa hàng vì là shipper");
         }
 
@@ -236,7 +236,7 @@ public class ShopServiceImpl implements ShopService {
             throw new BadRequestException("Shop không ở trạng thái chờ duyệt");
         }
         User user = userRepository.findById(shop.getOwner().getId()).orElseThrow(() -> new NotFoundException("User"));
-        Role role=roleRepository.getByName("shopkeeper").orElseThrow(() -> new NotFoundException("Role"));
+        Role role=roleRepository.getByName("Shopkeeper").orElseThrow(() -> new NotFoundException("Role"));
         user.setRole(role);
         userRepository.save(user);
         shop.setIsActive(Status.ACTIVE);
