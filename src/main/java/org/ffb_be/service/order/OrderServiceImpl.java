@@ -66,12 +66,6 @@ public class OrderServiceImpl implements OrderService {
             orderDTO.setReason(order.getReason());
             orderDTO.setOrderCode(order.getOrderCode());
             orderDTO.setCreatedAt(order.getCreatedAt());
-            if (order.getVoucher() != null) {
-                orderDTO.setVoucherId(order.getVoucher().getId());
-                orderDTO.setVoucherAmount(order.getVoucher().getDiscountValue());
-            } else {
-                orderDTO.setVoucherAmount(BigDecimal.ZERO);
-            }
             orderDTO.setShipperId(order.getShipper() != null ? order.getShipper().getId() : null);
             orderDTO.setPaymentMethodId(order.getPaymentMethod() != null ? order.getPaymentMethod().getId() : null);
             orderDTO.setShipMethodId(order.getDeliveryMethod() != null ? order.getDeliveryMethod().getId() : null);
@@ -236,13 +230,6 @@ public class OrderServiceImpl implements OrderService {
         orderDTO.setPaymentProof(order.getPaymentProof());
         orderDTO.setOrderCode(order.getOrderCode());
         orderDTO.setCreatedAt(order.getCreatedAt());
-        if(order.getVoucher() != null) {
-            orderDTO.setVoucherId(order.getVoucher().getId());
-            orderDTO.setVoucherAmount(order.getVoucher().getDiscountValue());
-        } else {
-            orderDTO.setVoucherAmount(BigDecimal.ZERO);
-        }
-
         orderDTO.setShipperId(order.getShipper() != null ? order.getShipper().getId() : null);
         orderDTO.setStatus(order.getStatus().toString());
         orderDTO.setPaymentMethodId(order.getPaymentMethod() != null ? order.getPaymentMethod().getId() : null);
@@ -518,6 +505,13 @@ public class OrderServiceImpl implements OrderService {
     public Page<OrderDTO> findAllByFilter(String orderCode, OrderStatus status, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
         Page<Order> orders = orderRepository.findByStatusAndCreatedAtBetween(status, startDate, endDate, orderCode, pageable);
         return orders.map(this::toDTO);
+    }
+
+    @Override
+    public void updatePrice(Long id, BigDecimal price) {
+        Order order=orderRepository.findById(id).get();
+        order.setTotal(price);
+        orderRepository.save(order);
     }
 
     @Override
