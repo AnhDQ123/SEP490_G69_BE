@@ -329,7 +329,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Page<OrderDTO> findAllByOwnerAndStatus(Long id, OrderStatus status, Pageable pageable) {
         Page<Order> orders = orderRepository.findAllByOwner_IdAndStatus(id, status, pageable);
-        return orders.map(this::toDTO);
+        return toDTO(orders,pageable);
     }
 
 
