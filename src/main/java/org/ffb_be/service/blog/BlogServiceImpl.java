@@ -98,17 +98,17 @@ public class BlogServiceImpl implements BlogService {
         blogMapper.updateEntity(blogDTO, blog);
         blog.setUpdatedAt(LocalDateTime.now());
         blogRepository.save(blog);
-        if(files != null) {
-            // Nếu có file upload, upload lên Cloudinary
-            List<String> uploadedUrls = (files.length > 0) ? cloudinaryUpload.uploadFiles(files) : new ArrayList<>();
+        if (files != null || blogDTO.getImageUrls() != null) {
+            // Upload ảnh mới nếu có
+            List<String> uploadedUrls = (files != null && files.length > 0)
+                    ? cloudinaryUpload.uploadFiles(files)
+                    : new ArrayList<>();
 
-            // Gộp URL cũ từ request và URL mới từ file upload
             List<String> finalImageUrls = new ArrayList<>(uploadedUrls);
             if (blogDTO.getImageUrls() != null) {
                 finalImageUrls.addAll(blogDTO.getImageUrls());
             }
-
-
+            imageRepository.deleteByBlogId(blogId);
             updateBlogImages(blogId, finalImageUrls);
         }
     }
