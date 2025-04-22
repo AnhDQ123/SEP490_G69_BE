@@ -35,7 +35,7 @@ public class BlogController {
         return ResponseEntity.ok(blogService.getBlogById(id));
     }
 
-    @GetMapping("/{userId}")
+    @GetMapping("myblog/{userId}")
     public ResponseEntity<List<BlogDTO>> getBlogByUserId(@PathVariable Long userId, Pageable pageable) {
         return ResponseEntity.ok(blogService.getBlogByUserId(userId, pageable));
     }
