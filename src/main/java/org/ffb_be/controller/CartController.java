@@ -49,5 +49,17 @@ public class CartController {
                                      @RequestParam("id") Long id){
         cartService.deleteOptionFromCart(cartId,id);
     }
-
+    @PostMapping("/option/increase")
+    public void increaseQuantity( @RequestParam("id") Long id){
+        cartService.increaseOptionQuantity(id);
+    }
+    @PostMapping("/option/decrease")
+    public void decreaseQuantity(@RequestParam("id") Long id){
+        cartService.decreaseOptionQuantity(id);
+    }
+    @PostMapping("/size/change")
+    public void changeSize(@RequestParam("id") Long id,
+                           @RequestParam("newId") Long newId){
+        cartService.changeSize(id,newId);
+    }
 }

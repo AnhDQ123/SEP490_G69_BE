@@ -180,6 +180,19 @@ public class UserServiceImpl implements UserService {
 
     }
 
+    @Override
+    public double userChangeRate() {
+        LocalDateTime startOfLastMonth = LocalDate.now().minusMonths(1).withDayOfMonth(1).atStartOfDay();
+        LocalDateTime endOfLastMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay().minusNanos(1);
+        double a=userRepository.countActiveUsersByMonth(startOfLastMonth, endOfLastMonth);
+        LocalDateTime startOfThisMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay();
+        LocalDateTime endOfThisMonth = LocalDate.now().plusMonths(1).withDayOfMonth(1).atStartOfDay().minusNanos(1);
+        double b=userRepository.countActiveUsersByMonth(startOfThisMonth, endOfThisMonth);
+        return (b-a)/a*100;
+    }
+
+
+
 
     public void update(UserUpdateDTO userUpdateDTO, MultipartFile avatar) throws IOException {
         User user = userRepository.findByPhone(userUpdateDTO.getPhone()).get();

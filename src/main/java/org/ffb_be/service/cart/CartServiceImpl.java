@@ -5,6 +5,7 @@ import org.ffb_be.dto.cart.CartDTO;
 import org.ffb_be.dto.cart.CartItemDTO;
 import org.ffb_be.dto.cart.CartItemOptionDTO;
 import org.ffb_be.dto.discount.DiscountDTO2;
+import org.ffb_be.dto.product.FoodOptionDTO;
 import org.ffb_be.entity.*;
 import org.ffb_be.repository.*;
 import org.ffb_be.utils.enums.CartStatus;
@@ -82,6 +83,7 @@ public class CartServiceImpl implements CartService {
                     // Nếu đã tồn tại, cập nhật số lượng và thời gian
                     item = matchedItem;
                     item.setQuantity(item.getQuantity() + cartItemDTO.getQuantity());
+                    item.setTotalPrice(item.getUnitPrice().multiply(new BigDecimal(item.getQuantity())));
                     item.setUpdatedAt(LocalDateTime.now());
 
                     // Lấy các CartItemOption cũ của CartItem này
@@ -93,6 +95,7 @@ public class CartServiceImpl implements CartService {
                         for (CartItemOptionDTO newOptionDTO : cartItemDTO.getCartItemOptionDTOList()) {
                             if (existingOption.getFoodOption().getId().equals(newOptionDTO.getOptionId())) {
                                 existingOption.setQuantity(existingOption.getQuantity() + newOptionDTO.getQuantity());
+                                existingOption.setTotalPrice(existingOption.getUnitPrice().multiply(new BigDecimal(existingOption.getQuantity())));
                                 cartItemOptionRepository.save(existingOption);
                                 break;
                             }
@@ -350,12 +353,40 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
+    public void increaseOptionQuantity(Long id) {
+        CartItemOption cartItemOption = cartItemOptionRepository.findById(id).get();
+        cartItemOption.setQuantity(cartItemOption.getQuantity() + 1);
+        cartItemOptionRepository.save(cartItemOption);
+    }
+
+    @Override
+    public void decreaseOptionQuantity(Long id) {
+        CartItemOption cartItemOption = cartItemOptionRepository.findById(id).get();
+        cartItemOption.setQuantity(cartItemOption.getQuantity() - 1);
+        cartItemOptionRepository.save(cartItemOption);
+        if (cartItemOption.getQuantity() == 0) {
+            cartItemOptionRepository.delete(cartItemOption);
+        }
+    }
+
+    @Override
+    public void changeSize(Long oldId, Long newId) {
+        CartItemOption cartItemOption = cartItemOptionRepository.findById(oldId).get();
+        FoodOption foodOption = foodOptionRepository.findById(newId).get();
+        cartItemOption.setFoodOption(foodOption);
+        cartItemOption.setUnitPrice(foodOption.getPrice());
+        cartItemOptionRepository.save(cartItemOption);
+    }
+
+    @Override
     public void deleteItemFromCart(Long cartId, Long id) {
-        Product product = productRepository.findById(cartId)
+        Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found")); // Ném ngoại lệ khi không tìm thấy sản phẩm
 
-        CartItem cartItem = cartItemRepository.findByProduct(product);
+        CartItem cartItem = cartItemRepository.findByCart_IdAndProduct_Id(cartId,id);
         if (cartItem != null) {
+            List<CartItemOption> cartItemOption=cartItemOptionRepository.findAllByCartItemId(cartItem.getId());
+            cartItemOptionRepository.deleteAll(cartItemOption);
             cartItemRepository.delete(cartItem);
         } else {
             throw new RuntimeException("CartItem not found for the product.");

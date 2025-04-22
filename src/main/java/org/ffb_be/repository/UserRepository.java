@@ -28,7 +28,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByEmail(String email);
     Optional<User> findByPhone(String phone);
-
+    @Query("SELECT COUNT(u) " +
+            "FROM User u " +
+            "WHERE u.status = 'ACTIVE' " +
+            "AND u.createdAt >= :startDate " +
+            "AND u.createdAt < :endDate")
+    Double countActiveUsersByMonth( LocalDateTime startDate,
+                                    LocalDateTime endDate);
     @Query("""
     SELECT u FROM User u
     WHERE u.role.name = 'SHIPPER'
