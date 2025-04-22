@@ -69,6 +69,7 @@ public class OrderServiceImpl implements OrderService {
             orderDTO.setShipperId(order.getShipper() != null ? order.getShipper().getId() : null);
             orderDTO.setPaymentMethodId(order.getPaymentMethod() != null ? order.getPaymentMethod().getId() : null);
             orderDTO.setShipMethodId(order.getDeliveryMethod() != null ? order.getDeliveryMethod().getId() : null);
+            orderDTO.setProofImage(order.getPaymentProof());
             List<OrderItemDTO> orderItemDTOList = new ArrayList<>();
             for (OrderItem orderItem : order.getOrderItems()) {
                 OrderItemDTO orderItemDTO = new OrderItemDTO();

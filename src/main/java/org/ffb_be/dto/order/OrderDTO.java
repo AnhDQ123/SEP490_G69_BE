@@ -38,6 +38,6 @@ public class OrderDTO {
     private String reason;
     private String phone;
     private String shopAddress;
-
+    private String proofImage;
 
 }
