@@ -150,4 +150,8 @@ public class UserController {
     public void forgotPassword(@RequestParam String phone ,@RequestParam String password,@RequestParam String confirmPassword) {
         userService.forgotPassword(phone,password,confirmPassword);
     }
+    @GetMapping("/change/rate")
+    public long getUserRate() {
+        return userService.userChangeRate();
+    }
 }
