@@ -33,8 +33,10 @@ public class ShipperRegisterDTO {
     private String citizenIDNumber;
 
     @NotNull(message = "Citizen ID expiration date cannot be null")
+    @Future(message = "Citizen ID expiration date must be in the future")
     private LocalDate citizenIDExpiredDate;
 
     @NotNull(message = "Driving license expiration date cannot be null")
+    @Future(message = "Driving license expiration date must be in the future")
     private LocalDate drivingLicenseExpiredDate;
 }

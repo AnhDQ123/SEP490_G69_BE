@@ -88,10 +88,9 @@ public class DeliveryMethodServiceImpl implements DeliveryMethodService {
             DeliveryDTO deliveryDTO=deliveryMapper.toDTO(deliveryMethod);
             deliveryDTOs.add(deliveryDTO);
         }
-        for(DeliveryDTO deliveryDTO:deliveryDTOs){
-            if(deliveryDTO.getId()==1&& shop.getIsShipping())
-                deliveryDTOs.remove(deliveryDTO);
-        }
-         return deliveryDTOs;
+        if(!shop.getIsShipping())
+            deliveryDTOs.remove(0);
+        return deliveryDTOs;
     }
+
 }
