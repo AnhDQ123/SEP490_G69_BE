@@ -5,6 +5,7 @@ import org.ffb_be.dto.cart.CartDTO;
 import org.ffb_be.dto.cart.CartItemDTO;
 import org.ffb_be.dto.cart.CartItemOptionDTO;
 import org.ffb_be.dto.discount.DiscountDTO2;
+import org.ffb_be.dto.product.FoodOptionDTO;
 import org.ffb_be.entity.*;
 import org.ffb_be.repository.*;
 import org.ffb_be.utils.enums.CartStatus;
@@ -349,6 +350,32 @@ public class CartServiceImpl implements CartService {
         }
         cartDTO.setCartItemDTOList(cartItemDTOList);
         return cartDTO;
+    }
+
+    @Override
+    public void increaseOptionQuantity(Long id) {
+        CartItemOption cartItemOption = cartItemOptionRepository.findById(id).get();
+        cartItemOption.setQuantity(cartItemOption.getQuantity() + 1);
+        cartItemOptionRepository.save(cartItemOption);
+    }
+
+    @Override
+    public void decreaseOptionQuantity(Long id) {
+        CartItemOption cartItemOption = cartItemOptionRepository.findById(id).get();
+        cartItemOption.setQuantity(cartItemOption.getQuantity() - 1);
+        cartItemOptionRepository.save(cartItemOption);
+        if (cartItemOption.getQuantity() == 0) {
+            cartItemOptionRepository.delete(cartItemOption);
+        }
+    }
+
+    @Override
+    public void changeSize(Long oldId, Long newId) {
+        CartItemOption cartItemOption = cartItemOptionRepository.findById(oldId).get();
+        FoodOption foodOption = foodOptionRepository.findById(newId).get();
+        cartItemOption.setFoodOption(foodOption);
+        cartItemOption.setUnitPrice(foodOption.getPrice());
+        cartItemOptionRepository.save(cartItemOption);
     }
 
     @Override
