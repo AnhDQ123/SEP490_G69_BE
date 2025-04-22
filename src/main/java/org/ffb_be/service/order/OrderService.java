@@ -25,6 +25,7 @@ import java.util.Map;
 
 @Service
 public interface OrderService {
+    void update(Long id,Long shipId,Long payId);
     Page<OrderDTO> findAllReturnPending( Pageable pageable);
     Page<OrderDTO> findAllReturnRejected( Pageable pageable);
     Page<OrderDTO> findAllReturned( Pageable pageable);

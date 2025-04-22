@@ -205,6 +205,10 @@ public class OrderController {
     ) throws IOException {
         qrService.updatePaymentProof(orderId, paymentProof);
     }
+    @PostMapping("/update")
+    public void update(@RequestParam Long orderId,@RequestParam Long shipId,@RequestParam Long payId){
+        orderService.update(orderId,shipId,payId);
+    }
     @GetMapping("/return/pending")
     public Page<OrderDTO> getAllReturnPendingRequest(@RequestParam(value = "page", defaultValue = "1", required = false) Integer page,
                                                      @RequestParam(value = "size", defaultValue = "20", required = false) Integer size) {

@@ -108,6 +108,14 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public void update(Long id, Long shipId, Long payId) {
+        Order order=orderRepository.findById(id).get();
+        order.setDeliveryMethod(deliveryMethodRepository.findById(shipId).get());
+        order.setPaymentMethod(paymentRepository.findById(payId).get());
+        orderRepository.save(order);
+    }
+
+    @Override
     public Page<OrderDTO> findAllReturnPending( Pageable pageable) {
         Page<Order> orders = orderRepository.findAllByStatus( OrderStatus.RETURN_PENDING, pageable);
         return toDTO(orders,pageable);
