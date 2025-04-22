@@ -296,7 +296,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Page<OrderDTO> findAllByShopAndStatus(Long id, OrderStatus status,Pageable pageable) {
         Page<Order> orderList=orderRepository.findOrdersByShopIdAndStatus(id, status,pageable);
-        return orderList.map(this::toDTO);
+        return toDTO(orderList,pageable);
     }
     @Override
     public List<ShipPaymentDTO> findAllShipPaymentByShopId(Long shopId) {
@@ -341,7 +341,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Page<OrderDTO> findAllByShopAndPending(Long id, Pageable pageable) {
         Page<Order> orderList=orderRepository.findOrdersByShopIdAndStatus(id, OrderStatus.PENDING,pageable);
-        return orderList.map(this::toDTO);
+        return toDTO(orderList,pageable);
     }
 
     @Override
@@ -393,7 +393,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Page<OrderDTO> findAllByShipper(Long id, Pageable pageable) {
         Page<Order> orders = orderRepository.findAllByShipper_Id(id, pageable);
-        return orders.map(this::toDTO);
+        return toDTO(orders,pageable);
     }
 
     @Override
