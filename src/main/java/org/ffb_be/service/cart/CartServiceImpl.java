@@ -82,6 +82,7 @@ public class CartServiceImpl implements CartService {
                     // Nếu đã tồn tại, cập nhật số lượng và thời gian
                     item = matchedItem;
                     item.setQuantity(item.getQuantity() + cartItemDTO.getQuantity());
+                    item.setTotalPrice(item.getUnitPrice().multiply(new BigDecimal(item.getQuantity())));
                     item.setUpdatedAt(LocalDateTime.now());
 
                     // Lấy các CartItemOption cũ của CartItem này
@@ -93,6 +94,7 @@ public class CartServiceImpl implements CartService {
                         for (CartItemOptionDTO newOptionDTO : cartItemDTO.getCartItemOptionDTOList()) {
                             if (existingOption.getFoodOption().getId().equals(newOptionDTO.getOptionId())) {
                                 existingOption.setQuantity(existingOption.getQuantity() + newOptionDTO.getQuantity());
+                                existingOption.setTotalPrice(existingOption.getUnitPrice().multiply(new BigDecimal(existingOption.getQuantity())));
                                 cartItemOptionRepository.save(existingOption);
                                 break;
                             }
