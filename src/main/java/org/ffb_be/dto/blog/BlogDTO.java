@@ -6,15 +6,18 @@ import lombok.NoArgsConstructor;
 import org.ffb_be.dto.auth.userDto.WriterDTO;
 import org.ffb_be.entity.BaseEntity;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class BlogDTO extends BaseEntity {
+public class BlogDTO {
     private Long id;
     private String content;
     private WriterDTO writer;
+    private int likeCount;
     private List<String> imageUrls;
     private int commentCount;
+    private LocalDateTime createdAt;
 }

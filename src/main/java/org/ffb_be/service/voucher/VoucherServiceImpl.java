@@ -30,8 +30,13 @@ public class VoucherServiceImpl implements VoucherService {
     private final VoucherMapper voucherMapper;
     private final ShopRepository shopRepository;
     @Override
-    public List<VoucherDTO> getAllVouchers(Long shopId) {
-        List<Voucher> vouchers = voucherRepository.getAllByShopId(shopId);
+    public List<VoucherDTO> getAllVouchers(Long shopId, boolean isShopkeeper) {
+        List<Voucher> vouchers;
+        if (isShopkeeper) {
+            vouchers = voucherRepository.getAllByShopIdOrderByCreatedAtDesc(shopId);
+        }else {
+            vouchers = voucherRepository.getAllByShopIdAndStatusOrderByCreatedAtDesc(shopId, Status.ACTIVE);
+        }
         return vouchers.stream().map(voucherMapper::toDTO).collect(Collectors.toList());
     }
 

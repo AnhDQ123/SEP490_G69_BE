@@ -3,6 +3,8 @@ package org.ffb_be.repository;
 
 import org.ffb_be.entity.Category;
 import org.ffb_be.entity.Product;
+import org.ffb_be.utils.enums.Status;
+import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,6 +13,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,12 +22,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Page<Product> findAllByShop_Id(Long shopId,Pageable pageable);
 
     Optional<Product> findById(Long id);
-
-//    @Query("SELECT p FROM Product p JOIN p.shop s WHERE p.sellType = 'Fresh'")
-//    List<Product> findFreshProducts();
-//
-//    @Query("SELECT p FROM Product p JOIN p.shop s WHERE s.sellType = 'Cooked'")
-//    List<Product> findCookedProducts();
 
     @Query("SELECT p FROM Product p WHERE p.name LIKE %:product%")
     List<Product> findSimilarProducts(String product);
@@ -61,5 +58,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "GROUP BY oi.product.id, oi.product.name " +
             "ORDER BY totalQuantity DESC")
     List<Object[]> findTopSellingProductsThisYear(Long shopId);
+
+    List<Product> getByStatus(Status status);
 }
 

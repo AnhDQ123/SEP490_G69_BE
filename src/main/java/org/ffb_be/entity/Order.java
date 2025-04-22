@@ -70,6 +70,7 @@ public class Order extends BaseEntity {
 
     private String reason;
 
+    @Column(name="payment_qr_code", columnDefinition = "TEXT")
     private String paymentQrCode;
 
     @OneToMany(mappedBy = "order")

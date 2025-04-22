@@ -32,5 +32,6 @@ public interface BlogMapper {
     @Mapping(source = "content", target = "content")
     Blog toEntity(BlogDTO blogDTO);
 
+    @Mapping(target = "createdAt", ignore = true)
     void updateEntity(BlogDTO blogDTO, @MappingTarget Blog blog);
 }

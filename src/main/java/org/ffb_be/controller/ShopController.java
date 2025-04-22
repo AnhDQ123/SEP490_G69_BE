@@ -61,13 +61,13 @@ public class ShopController {
     public ResponseEntity<?> registerShop(
             @RequestParam Long userId,
             @Validated @ModelAttribute ShopRegisterDTO shopDTO,
-            @RequestParam(value = "logo", required = false) MultipartFile logo,
-            @RequestParam(value = "background", required = false) MultipartFile background,
-            @RequestParam(value = "citizenIDFront", required = false) MultipartFile citizenIDFront,
-            @RequestParam(value = "citizenIDBack", required = false) MultipartFile citizenIDBack,
-            @RequestParam(value = "registrationCert", required = false) MultipartFile registrationCert,
-            @RequestParam(value = "foodSafetyCert", required = false) MultipartFile foodSafetyCert,
-            @RequestParam(value = "menu", required = false) MultipartFile menu,
+            @RequestParam(value = "logo") MultipartFile logo,
+            @RequestParam(value = "background") MultipartFile background,
+            @RequestParam(value = "citizenIDFront") MultipartFile citizenIDFront,
+            @RequestParam(value = "citizenIDBack") MultipartFile citizenIDBack,
+            @RequestParam(value = "registrationCert") MultipartFile registrationCert,
+            @RequestParam(value = "foodSafetyCert") MultipartFile foodSafetyCert,
+            @RequestParam(value = "menu") MultipartFile menu,
             BindingResult result
     ) throws IOException {
         if (result.hasErrors()) {
@@ -82,13 +82,13 @@ public class ShopController {
     public ResponseEntity<?> updateShop(
             @PathVariable Long shopId,
             @Validated @ModelAttribute ShopRegisterDTO shopDTO,
-            @RequestPart(value = "logo", required = false) MultipartFile logo,
-            @RequestParam(value = "background", required = false) MultipartFile background,
-            @RequestPart(value = "citizenIDFront", required = false) MultipartFile citizenIDFront,
-            @RequestPart(value = "citizenIDBack", required = false) MultipartFile citizenIDBack,
-            @RequestPart(value = "registrationCert", required = false) MultipartFile registrationCert,
-            @RequestPart(value = "foodSafetyCert", required = false) MultipartFile foodSafetyCert,
-            @RequestPart(value = "menu", required = false) MultipartFile menu,
+            @RequestPart(value = "logo") MultipartFile logo,
+            @RequestParam(value = "background") MultipartFile background,
+            @RequestPart(value = "citizenIDFront") MultipartFile citizenIDFront,
+            @RequestPart(value = "citizenIDBack") MultipartFile citizenIDBack,
+            @RequestPart(value = "registrationCert") MultipartFile registrationCert,
+            @RequestPart(value = "foodSafetyCert") MultipartFile foodSafetyCert,
+            @RequestPart(value = "menu") MultipartFile menu,
             BindingResult result
     ) throws IOException {
         if (result.hasErrors()) {

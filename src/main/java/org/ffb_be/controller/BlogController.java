@@ -26,13 +26,18 @@ public class BlogController {
 
     @GetMapping
     public ResponseEntity<List<BlogDTO>> getBlogs(
-            Pageable pageable) {
-        return ResponseEntity.ok(blogService.getBlogs(pageable));
+            Pageable pageable, @RequestParam(required = false) boolean isOperator) {
+        return ResponseEntity.ok(blogService.getBlogs(pageable, isOperator));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<BlogDTO> getBlogById(@PathVariable Long id) {
         return ResponseEntity.ok(blogService.getBlogById(id));
+    }
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<List<BlogDTO>> getBlogByUserId(@PathVariable Long userId, Pageable pageable) {
+        return ResponseEntity.ok(blogService.getBlogByUserId(userId, pageable));
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

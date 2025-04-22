@@ -8,5 +8,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 @Repository
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
-    Page<Payment> findByStatus(Status status, Pageable pageable);
+    Page<Payment> findByStatusOrderByCreatedAtDesc(Status status, Pageable pageable);
 }
