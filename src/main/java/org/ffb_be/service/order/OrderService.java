@@ -47,7 +47,7 @@ public interface OrderService {
     CountDTO countOrderByStatus(Long id);
     Long countAllByStatus(OrderStatus status);
     Page<OrderDTO> findAllByFilter(String orderCode, OrderStatus status, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
-
+    void updatePrice(Long id, BigDecimal price);
     OrderDTO getOrder(Long id);
     List<CountByYearDTO> getOrderCountByStatusAndYear(OrderStatus status, LocalDate startDate, LocalDate endDate);
     List<CountByMonthDTO> getOrderCountByStatusAndMonth(OrderStatus status, LocalDate startDate, LocalDate endDate);

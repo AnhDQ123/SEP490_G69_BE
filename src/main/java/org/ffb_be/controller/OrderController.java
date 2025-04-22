@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -225,5 +226,9 @@ public class OrderController {
     @GetMapping("/return/count")
     public Long countAllReturn() {
         return orderService.countAllByStatus(OrderStatus.RETURN_PENDING);
+    }
+    @PostMapping("/update/total")
+    public void updateTotal(@RequestParam("total") BigDecimal total,@RequestParam("id") Long id) {
+        orderService.updatePrice(id, total);
     }
 }
