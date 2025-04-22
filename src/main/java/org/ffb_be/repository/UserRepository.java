@@ -33,7 +33,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "WHERE u.status = 'ACTIVE' " +
             "AND u.createdAt >= :startDate " +
             "AND u.createdAt < :endDate")
-    Long countActiveUsersByMonth( LocalDateTime startDate,
+    Double countActiveUsersByMonth( LocalDateTime startDate,
                                     LocalDateTime endDate);
     @Query("""
     SELECT u FROM User u

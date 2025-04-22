@@ -151,7 +151,7 @@ public class UserController {
         userService.forgotPassword(phone,password,confirmPassword);
     }
     @GetMapping("/change/rate")
-    public long getUserRate() {
+    public double getUserRate() {
         return userService.userChangeRate();
     }
 }
