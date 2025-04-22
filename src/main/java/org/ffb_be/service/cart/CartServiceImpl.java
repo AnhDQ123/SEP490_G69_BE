@@ -380,11 +380,13 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public void deleteItemFromCart(Long cartId, Long id) {
-        Product product = productRepository.findById(cartId)
+        Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found")); // Ném ngoại lệ khi không tìm thấy sản phẩm
 
-        CartItem cartItem = cartItemRepository.findByProduct(product);
+        CartItem cartItem = cartItemRepository.findByCart_IdAndProduct_Id(cartId,id);
         if (cartItem != null) {
+            List<CartItemOption> cartItemOption=cartItemOptionRepository.findAllByCartItemId(cartItem.getId());
+            cartItemOptionRepository.deleteAll(cartItemOption);
             cartItemRepository.delete(cartItem);
         } else {
             throw new RuntimeException("CartItem not found for the product.");
