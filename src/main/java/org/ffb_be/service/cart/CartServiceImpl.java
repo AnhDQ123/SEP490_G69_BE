@@ -556,7 +556,7 @@ public class CartServiceImpl implements CartService {
                 a = 1;
             }
         }
-        if (a != 0) {
+        if (a == 0) {
             CartItemOption cartItemOption = new CartItemOption();
             cartItemOption.setFoodOption(foodOption);
             cartItemOption.setQuantity(1);
