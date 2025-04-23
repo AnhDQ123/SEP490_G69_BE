@@ -17,4 +17,5 @@ public interface CartService {
     void changeSize(Long oldId,Long newId);
     void deleteItemFromCart(Long cartId,Long id);
     void deleteOptionFromCart(Long cartId,Long optionId);
+    void addOptionToItem(Long cartItemId,Long optionId);
 }

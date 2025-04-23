@@ -362,6 +362,19 @@ public class CartServiceImpl implements CartService {
         cartItemOptionRepository.delete(cartItemOption);
     }
 
+    @Override
+    public void addOptionToItem(Long cartItemId, Long optionId) {
+        FoodOption foodOption=foodOptionRepository.findById(optionId).get();
+        CartItem cartItem=cartItemRepository.findById(cartItemId).get();
+        CartItemOption cartItemOption=new CartItemOption();
+        cartItemOption.setFoodOption(foodOption);
+        cartItemOption.setQuantity(1);
+        cartItemOption.setUnitPrice(foodOption.getPrice());
+        cartItemOption.setTotalPrice(foodOption.getPrice());
+        cartItemOption.setCartItem(cartItem);
+        cartItemOptionRepository.save(cartItemOption);
+    }
+
 
 }
 //@Override
