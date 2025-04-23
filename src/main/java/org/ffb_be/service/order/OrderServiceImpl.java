@@ -69,6 +69,7 @@ public class OrderServiceImpl implements OrderService {
             orderDTO.setShipperId(order.getShipper() != null ? order.getShipper().getId() : null);
             orderDTO.setPaymentMethodId(order.getPaymentMethod() != null ? order.getPaymentMethod().getId() : null);
             orderDTO.setShipMethodId(order.getDeliveryMethod() != null ? order.getDeliveryMethod().getId() : null);
+            orderDTO.setProofImage(order.getPaymentProof());
             List<OrderItemDTO> orderItemDTOList = new ArrayList<>();
             for (OrderItem orderItem : order.getOrderItems()) {
                 OrderItemDTO orderItemDTO = new OrderItemDTO();
@@ -296,7 +297,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Page<OrderDTO> findAllByShopAndStatus(Long id, OrderStatus status,Pageable pageable) {
         Page<Order> orderList=orderRepository.findOrdersByShopIdAndStatus(id, status,pageable);
-        return orderList.map(this::toDTO);
+        return toDTO(orderList,pageable);
     }
     @Override
     public List<ShipPaymentDTO> findAllShipPaymentByShopId(Long shopId) {
@@ -341,7 +342,23 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Page<OrderDTO> findAllByShopAndPending(Long id, Pageable pageable) {
         Page<Order> orderList=orderRepository.findOrdersByShopIdAndStatus(id, OrderStatus.PENDING,pageable);
-        return orderList.map(this::toDTO);
+        return toDTO(orderList,pageable);
+    }
+
+    @Override
+    public double orderChangeRate() {
+        LocalDateTime startOfLastMonth = LocalDate.now().minusMonths(1).withDayOfMonth(1).atStartOfDay();
+        LocalDateTime endOfLastMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay().minusNanos(1);
+        double a=orderRepository.countOrderByMonth(startOfLastMonth, endOfLastMonth);
+        LocalDateTime startOfThisMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay();
+        LocalDateTime endOfThisMonth = LocalDate.now().plusMonths(1).withDayOfMonth(1).atStartOfDay().minusNanos(1);
+        double b=orderRepository.countOrderByMonth(startOfThisMonth, endOfThisMonth);
+        return (b-a)/a*100;
+    }
+
+    @Override
+    public long countPendingOrder() {
+        return orderRepository.countReturnPendingOrders();
     }
 
     @Override
@@ -393,7 +410,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Page<OrderDTO> findAllByShipper(Long id, Pageable pageable) {
         Page<Order> orders = orderRepository.findAllByShipper_Id(id, pageable);
-        return orders.map(this::toDTO);
+        return toDTO(orders,pageable);
     }
 
     @Override

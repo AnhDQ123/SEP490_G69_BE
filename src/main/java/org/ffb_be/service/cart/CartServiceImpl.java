@@ -34,6 +34,7 @@ public class CartServiceImpl implements CartService {
 
 
     @Transactional
+    @Override
     public void save(CartDTO cartDTO) throws IOException {
         // Nhóm các sản phẩm theo Shop
         Map<Long, List<CartItemDTO>> shopCartItems = new HashMap<>();
@@ -267,7 +268,7 @@ public class CartServiceImpl implements CartService {
                     cartItemDTO.setCartId(cart.getId());
                     Long productId = cartItem.getProduct().getId();
                     cartItemDTO.setProductId(productId);
-                    cartItemDTO.setQuantity(cartItem.getQuantity());
+
 
                     // Lấy thông tin sản phẩm
                     productRepository.findById(productId).ifPresent(product -> {
@@ -277,29 +278,14 @@ public class CartServiceImpl implements CartService {
 
                     // Lấy giá của CartItem và đảm bảo giá trị không phải null
                     BigDecimal unitPrice = cartItem.getUnitPrice();
-                    if (unitPrice == null) {
-                        unitPrice = BigDecimal.ZERO;  // Nếu unitPrice là null, sử dụng giá mặc định (hoặc giá trị hợp lý)
-                    }
 
-                    // Lấy danh sách discount cho sản phẩm
-                    List<Discount> discountList = discountRepository.findAllByProduct_Id(productId);
-                    boolean discountApplied = false;
-                    BigDecimal discountMultiplier = BigDecimal.ONE;
-
-                    // Kiểm tra nếu có discount đang active
-                    for (Discount disc : discountList) {
-                        if (disc.getStatus() == Status.ACTIVE) {
-                            discountMultiplier = BigDecimal.ONE.subtract(disc.getDiscount_percentage());
-                            discountApplied = true;
-                            break; // Chỉ áp dụng discount đầu tiên active
-                        }
-                    }
 
                     BigDecimal cartItemTotal = BigDecimal.ZERO;
                     List<CartItemOptionDTO> cartItemOptionDTOList = new ArrayList<>();
                     if (cartItem.getCartItemOptions() != null) {
                         for (CartItemOption option : cartItem.getCartItemOptions()) {
                             CartItemOptionDTO optionDTO = new CartItemOptionDTO();
+                            optionDTO.setId(option.getId());
                             Long optionId = option.getFoodOption().getId();
                             optionDTO.setOptionId(optionId);
                             optionDTO.setOptionName(option.getFoodOption().getName());
@@ -313,24 +299,12 @@ public class CartServiceImpl implements CartService {
                                 continue;
                             }
                             FoodOption foodOption = foodOptionOpt.get();
-                            BigDecimal unitPriceOption = foodOption.getPrice();
-
-                            if (foodOption.getType().getId() == 2 && discountApplied) {
-                                // Với option loại 2, áp dụng discount cho toàn bộ sản phẩm
-                                optionDTO.setQuantity(cartItem.getQuantity());
-                                BigDecimal basePrice = unitPriceOption.multiply(BigDecimal.valueOf(cartItem.getQuantity()));
-                                BigDecimal finalPrice = basePrice.multiply(discountMultiplier);
-                                optionDTO.setTotalPrice(finalPrice);
-                                // Thiết lập giá cho CartItemDTO
-                                cartItemDTO.setPrice(unitPriceOption);
-                                cartItemDTO.setTotalPrice(finalPrice);
-                                cartItemTotal = finalPrice;
+                            if (foodOption.getType().getId() == 2) {
+                                cartItemDTO.setQuantity(option.getQuantity());
+                                optionDTO.setQuantity(option.getQuantity());
                             } else {
                                 // Với các option khác, tính giá theo số lượng option
                                 optionDTO.setQuantity(option.getQuantity());
-                                BigDecimal optionTotal = unitPriceOption.multiply(BigDecimal.valueOf(option.getQuantity()));
-                                optionDTO.setTotalPrice(optionTotal);
-                                cartItemTotal = cartItemTotal.add(optionTotal);
                             }
 
                             optionDTO.setPrice(option.getUnitPrice());
@@ -339,18 +313,7 @@ public class CartServiceImpl implements CartService {
                             cartItemOptionDTOList.add(optionDTO);
                         }
                     }
-
-
                     cartItemDTO.setCartItemOptionDTOList(cartItemOptionDTOList);
-
-                    // Nếu không có discount (không có option loại 2 active), sử dụng giá mặc định của CartItem
-                    if (!discountApplied) {
-                        cartItemDTO.setPrice(unitPrice);
-                        if (cartItemTotal.compareTo(BigDecimal.ZERO) == 0) {
-                            cartItemTotal = unitPrice.multiply(BigDecimal.valueOf(cartItem.getQuantity()));
-                        }
-                        cartItemDTO.setTotalPrice(cartItemTotal);
-                    }
                     cartItemDTOList.add(cartItemDTO);
                     cartTotal = cartTotal.add(cartItemTotal);
                 }
@@ -578,6 +541,29 @@ public class CartServiceImpl implements CartService {
             cartRepository.save(cart);
         } else {
             throw new RuntimeException("CartItemOption not found.");
+        }
+    }
+    @Override
+    public void addOptionToItem(Long cartItemId, Long optionId) {
+        FoodOption foodOption = foodOptionRepository.findById(optionId).get();
+        CartItem cartItem = cartItemRepository.findById(cartItemId).get();
+        int a = 0;
+        for (CartItemOption cartItemOption1 : cartItem.getCartItemOptions()) {
+            if (cartItemOption1.getFoodOption().getId().equals(optionId)) {
+                cartItemOption1.setQuantity(cartItemOption1.getQuantity() + 1);
+                cartItemOption1.setTotalPrice(foodOption.getPrice().multiply(BigDecimal.valueOf(cartItemOption1.getQuantity())));
+                cartItemOptionRepository.save(cartItemOption1);
+                a = 1;
+            }
+        }
+        if (a != 0) {
+            CartItemOption cartItemOption = new CartItemOption();
+            cartItemOption.setFoodOption(foodOption);
+            cartItemOption.setQuantity(1);
+            cartItemOption.setUnitPrice(foodOption.getPrice());
+            cartItemOption.setTotalPrice(foodOption.getPrice());
+            cartItemOption.setCartItem(cartItem);
+            cartItemOptionRepository.save(cartItemOption);
         }
     }
 }

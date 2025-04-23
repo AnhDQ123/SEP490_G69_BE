@@ -62,4 +62,9 @@ public class CartController {
                            @RequestParam("newId") Long newId){
         cartService.changeSize(id,newId);
     }
+    @PostMapping("/add/option")
+    public void addOption(@RequestParam("cartItemId") Long cartItemId,
+                          @RequestParam("optionId") Long optionId){
+        cartService.addOptionToItem(cartItemId,optionId);
+    }
 }

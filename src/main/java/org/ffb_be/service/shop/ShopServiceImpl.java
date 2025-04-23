@@ -512,5 +512,16 @@ public class ShopServiceImpl implements ShopService {
         shopRepository.save(shop);
     }
 
+    @Override
+    public double shopChangeRate() {
+        LocalDateTime startOfLastMonth = LocalDate.now().minusMonths(1).withDayOfMonth(1).atStartOfDay();
+        LocalDateTime endOfLastMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay().minusNanos(1);
+        double c=shopRepository.countActiveShopByMonth(startOfLastMonth, endOfLastMonth);
+        LocalDateTime startOfThisMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay();
+        LocalDateTime endOfThisMonth = LocalDate.now().plusMonths(1).withDayOfMonth(1).atStartOfDay().minusNanos(1);
+        double d=shopRepository.countActiveShopByMonth(startOfThisMonth, endOfThisMonth);
+        return (d-c)/c*100;
+    }
+
 
 }

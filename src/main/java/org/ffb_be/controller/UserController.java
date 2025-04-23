@@ -154,4 +154,10 @@ public class UserController {
     public double getUserRate() {
         return userService.userChangeRate();
     }
+
+    @GetMapping("/shipper/change/rate")
+    public double getShipperRate() {return userService.shipperChangeRate();}
+
+    @GetMapping("/pending/change/rate")
+    public double getPendingRate(){return userService.pendingChangeRate();}
 }

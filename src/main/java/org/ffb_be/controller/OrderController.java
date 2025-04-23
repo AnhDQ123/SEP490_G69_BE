@@ -235,4 +235,12 @@ public class OrderController {
     public void updateTotal(@RequestParam("total") BigDecimal total,@RequestParam("id") Long id) {
         orderService.updatePrice(id, total);
     }
+    @GetMapping("/change/rate")
+    public double changeRate() {
+        return orderService.orderChangeRate();
+    }
+    @GetMapping("/count/pending")
+    public Long countPendingOrders() {
+        return orderService.countPendingOrder();
+    }
 }
