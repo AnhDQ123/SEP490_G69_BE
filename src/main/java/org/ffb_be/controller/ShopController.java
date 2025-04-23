@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,6 +29,7 @@ import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/shops")
@@ -61,17 +63,21 @@ public class ShopController {
     public ResponseEntity<?> registerShop(
             @RequestParam Long userId,
             @Validated @ModelAttribute ShopRegisterDTO shopDTO,
+            BindingResult result,
             @RequestParam(value = "logo") MultipartFile logo,
             @RequestParam(value = "background") MultipartFile background,
             @RequestParam(value = "citizenIDFront") MultipartFile citizenIDFront,
             @RequestParam(value = "citizenIDBack") MultipartFile citizenIDBack,
             @RequestParam(value = "registrationCert") MultipartFile registrationCert,
             @RequestParam(value = "foodSafetyCert") MultipartFile foodSafetyCert,
-            @RequestParam(value = "menu") MultipartFile menu,
-            BindingResult result
+            @RequestParam(value = "menu") MultipartFile menu
     ) throws IOException {
         if (result.hasErrors()) {
-            return ResponseEntity.badRequest().body(result.getAllErrors());
+            List<String> messages = result.getFieldErrors().stream()
+                    .map(FieldError::getDefaultMessage)
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.badRequest().body(messages);
         }
         // Gửi toàn bộ file lên Service, kể cả file rỗng
         shopService.registerShop(userId, shopDTO, logo, background, citizenIDFront, citizenIDBack, registrationCert, foodSafetyCert, menu);
@@ -82,17 +88,21 @@ public class ShopController {
     public ResponseEntity<?> updateShop(
             @PathVariable Long shopId,
             @Validated @ModelAttribute ShopRegisterDTO shopDTO,
+            BindingResult result,
             @RequestPart(value = "logo") MultipartFile logo,
             @RequestParam(value = "background") MultipartFile background,
             @RequestPart(value = "citizenIDFront") MultipartFile citizenIDFront,
             @RequestPart(value = "citizenIDBack") MultipartFile citizenIDBack,
             @RequestPart(value = "registrationCert") MultipartFile registrationCert,
             @RequestPart(value = "foodSafetyCert") MultipartFile foodSafetyCert,
-            @RequestPart(value = "menu") MultipartFile menu,
-            BindingResult result
+            @RequestPart(value = "menu") MultipartFile menu
     ) throws IOException {
         if (result.hasErrors()) {
-            return ResponseEntity.badRequest().body(result.getAllErrors());
+            List<String> messages = result.getFieldErrors().stream()
+                    .map(FieldError::getDefaultMessage)
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.badRequest().body(messages);
         }
         shopService.updateShop(shopId, shopDTO, logo, background,citizenIDFront, citizenIDBack, registrationCert, foodSafetyCert, menu);
         return ResponseEntity.ok().build();

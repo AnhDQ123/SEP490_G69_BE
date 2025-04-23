@@ -60,5 +60,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Object[]> findTopSellingProductsThisYear(Long shopId);
 
     List<Product> getByStatus(Status status);
+
+    @Query("SELECT p FROM Product p WHERE p.id IN :ids")
+    List<Product> findByIds(List<Long> ids);
 }
 
