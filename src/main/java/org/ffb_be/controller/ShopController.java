@@ -272,4 +272,8 @@ public class ShopController {
         List<ShipPaymentDTO> shipPayments = orderService.findAllShipPaymentByShopId(shopId);
         return ResponseEntity.ok(shipPayments);
     }
+    @GetMapping("/change/rate")
+    public double shopChangeRate(){
+        return shopService.shopChangeRate();
+    }
 }

@@ -80,5 +80,21 @@ public interface UserRepository extends JpaRepository<User, Long> {
     long countPendingShipper();
     @Query("SELECT COUNT(u) FROM User u")
     long countAllUser();
+    @Query("SELECT COUNT(u) " +
+            "FROM User u " +
+            "WHERE u.status = 'ACTIVE' " +
+            "AND u.role.id=4 " +
+            "AND u.createdAt >= :startDate " +
+            "AND u.createdAt < :endDate")
+    Double countActiveShipperByMonth( LocalDateTime startDate,
+                                    LocalDateTime endDate);
+    @Query("SELECT COUNT(u) " +
+            "FROM User u " +
+            "WHERE u.shipperStatus = 'PENDING' " +
+            "AND u.role.id=4 " +
+            "AND u.createdAt >= :startDate " +
+            "AND u.createdAt < :endDate")
+    Double countPendingShipperByMonth( LocalDateTime startDate,
+                                      LocalDateTime endDate);
 }
 

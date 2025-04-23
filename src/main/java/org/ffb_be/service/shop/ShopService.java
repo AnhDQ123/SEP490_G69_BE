@@ -74,5 +74,5 @@ public interface ShopService {
     Long shopId(Long productId);
     void changeIsShipping(Long shopId);
     void changeIsOpen(Long shopId);
-
+    double shopChangeRate();
 }

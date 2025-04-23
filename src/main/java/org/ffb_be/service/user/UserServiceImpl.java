@@ -191,7 +191,29 @@ public class UserServiceImpl implements UserService {
         return (b-a)/a*100;
     }
 
+    @Override
+    public double shipperChangeRate() {
+        LocalDateTime startOfLastMonth = LocalDate.now().minusMonths(1).withDayOfMonth(1).atStartOfDay();
+        LocalDateTime endOfLastMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay().minusNanos(1);
+        double a=userRepository.countActiveShipperByMonth(startOfLastMonth, endOfLastMonth);
+        LocalDateTime startOfThisMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay();
+        LocalDateTime endOfThisMonth = LocalDate.now().plusMonths(1).withDayOfMonth(1).atStartOfDay().minusNanos(1);
+        double b=userRepository.countActiveShipperByMonth(startOfThisMonth, endOfThisMonth);
+        return (b-a)/a*100;
+    }
 
+    @Override
+    public double pendingChangeRate() {
+        LocalDateTime startOfLastMonth = LocalDate.now().minusMonths(1).withDayOfMonth(1).atStartOfDay();
+        LocalDateTime endOfLastMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay().minusNanos(1);
+        double a=userRepository.countActiveShipperByMonth(startOfLastMonth, endOfLastMonth);
+        LocalDateTime startOfThisMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay();
+        LocalDateTime endOfThisMonth = LocalDate.now().plusMonths(1).withDayOfMonth(1).atStartOfDay().minusNanos(1);
+        double b=userRepository.countActiveShipperByMonth(startOfThisMonth, endOfThisMonth);
+        double c=shopRepository.countActiveShopByMonth(startOfLastMonth, endOfLastMonth);
+        double d=shopRepository.countActiveShopByMonth(startOfThisMonth, endOfThisMonth);
+        return ((b+d)-(a+c))/(a+c)*100;
+    }
 
 
     public void update(UserUpdateDTO userUpdateDTO, MultipartFile avatar) throws IOException {

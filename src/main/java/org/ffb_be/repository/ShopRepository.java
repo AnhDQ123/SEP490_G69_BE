@@ -54,4 +54,18 @@ public interface ShopRepository extends JpaRepository<Shop, Long>, JpaSpecificat
     long countPendingShop();
     @Query("SELECT COUNT(u) FROM Shop u ")
     long countShop();
+    @Query("SELECT COUNT(u) " +
+            "FROM Shop u " +
+            "WHERE u.isActive = 'ACTIVE' " +
+            "AND u.createdAt >= :startDate " +
+            "AND u.createdAt < :endDate")
+    Double countActiveShopByMonth( LocalDateTime startDate,
+                                      LocalDateTime endDate);
+    @Query("SELECT COUNT(u) " +
+            "FROM Shop u " +
+            "WHERE u.isActive = 'PENDING' " +
+            "AND u.createdAt >= :startDate " +
+            "AND u.createdAt < :endDate")
+    Double countPendingShopByMonth( LocalDateTime startDate,
+                                   LocalDateTime endDate);
 }
