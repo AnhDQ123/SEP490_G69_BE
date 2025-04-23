@@ -345,13 +345,17 @@ public class CartServiceImpl implements CartService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found")); // Ném ngoại lệ khi không tìm thấy sản phẩm
 
-        CartItem cartItem = cartItemRepository.findByCart_IdAndProduct_Id(cartId,id);
+        CartItem cartItem = cartItemRepository.findByCart_IdAndProduct_Id(cartId, id);
         if (cartItem != null) {
-            List<CartItemOption> cartItemOption=cartItemOptionRepository.findAllByCartItemId(cartItem.getId());
+            List<CartItemOption> cartItemOption = cartItemOptionRepository.findAllByCartItemId(cartItem.getId());
             cartItemOptionRepository.deleteAll(cartItemOption);
             cartItemRepository.delete(cartItem);
         } else {
             throw new RuntimeException("CartItem not found for the product.");
+        }
+        Cart cart = cartRepository.findById(cartId).get();
+        if (cart.getCartItems().isEmpty()) {
+            cartRepository.delete(cart);
         }
 
     }
@@ -364,18 +368,27 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public void addOptionToItem(Long cartItemId, Long optionId) {
-        FoodOption foodOption=foodOptionRepository.findById(optionId).get();
-        CartItem cartItem=cartItemRepository.findById(cartItemId).get();
-        CartItemOption cartItemOption=new CartItemOption();
-        cartItemOption.setFoodOption(foodOption);
-        cartItemOption.setQuantity(1);
-        cartItemOption.setUnitPrice(foodOption.getPrice());
-        cartItemOption.setTotalPrice(foodOption.getPrice());
-        cartItemOption.setCartItem(cartItem);
-        cartItemOptionRepository.save(cartItemOption);
+        FoodOption foodOption = foodOptionRepository.findById(optionId).get();
+        CartItem cartItem = cartItemRepository.findById(cartItemId).get();
+        int a = 0;
+        for (CartItemOption cartItemOption1 : cartItem.getCartItemOptions()) {
+            if (cartItemOption1.getFoodOption().getId().equals(optionId)) {
+                cartItemOption1.setQuantity(cartItemOption1.getQuantity() + 1);
+                cartItemOption1.setTotalPrice(foodOption.getPrice().multiply(BigDecimal.valueOf(cartItemOption1.getQuantity())));
+                cartItemOptionRepository.save(cartItemOption1);
+                a = 1;
+            }
+        }
+        if (a != 0) {
+            CartItemOption cartItemOption = new CartItemOption();
+            cartItemOption.setFoodOption(foodOption);
+            cartItemOption.setQuantity(1);
+            cartItemOption.setUnitPrice(foodOption.getPrice());
+            cartItemOption.setTotalPrice(foodOption.getPrice());
+            cartItemOption.setCartItem(cartItem);
+            cartItemOptionRepository.save(cartItemOption);
+        }
     }
-
-
 }
 //@Override
 //public void save(CartDTO cartDTO) throws IOException {
