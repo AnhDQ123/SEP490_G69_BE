@@ -346,6 +346,17 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public double orderChangeRate() {
+        LocalDateTime startOfLastMonth = LocalDate.now().minusMonths(1).withDayOfMonth(1).atStartOfDay();
+        LocalDateTime endOfLastMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay().minusNanos(1);
+        double a=orderRepository.countOrderByMonth(startOfLastMonth, endOfLastMonth);
+        LocalDateTime startOfThisMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay();
+        LocalDateTime endOfThisMonth = LocalDate.now().plusMonths(1).withDayOfMonth(1).atStartOfDay().minusNanos(1);
+        double b=orderRepository.countOrderByMonth(startOfThisMonth, endOfThisMonth);
+        return (b-a)/a*100;
+    }
+
+    @Override
     public void acceptOrder(Long id) {
         Order order=orderRepository.findById(id).get();
         order.setStatus(OrderStatus.PROCESSING);
