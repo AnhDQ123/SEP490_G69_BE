@@ -65,4 +65,5 @@ public interface OrderService {
     Map<Date, BigDecimal> calculateShopRevenueByDay(LocalDate startDate, LocalDate endDate, Long shopId);
     Page<OrderDTO> findAllByShopAndPending(Long id,Pageable pageable);
     double orderChangeRate();
+    long countPendingOrder();
 }

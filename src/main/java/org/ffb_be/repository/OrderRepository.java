@@ -124,7 +124,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Object[]> findTopSellingProductsThisYear(Pageable pageable);
     @Query("SELECT COUNT(o) FROM Order o")
     Long countAllOrders();
-
+    @Query("SELECT COUNT(o) FROM Order o where o.status='RETURN_PENDING'")
+    Long countReturnPendingOrders();
     @Query("SELECT DATE(o.createdAt), COUNT(o) FROM Order o " +
             "WHERE o.status = :status " +
             "AND o.createdAt BETWEEN :startDate AND :endDate " +

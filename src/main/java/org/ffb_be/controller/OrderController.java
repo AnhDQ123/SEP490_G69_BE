@@ -239,4 +239,8 @@ public class OrderController {
     public double changeRate() {
         return orderService.orderChangeRate();
     }
+    @GetMapping("/count/pending")
+    public Long countPendingOrders() {
+        return orderService.countPendingOrder();
+    }
 }

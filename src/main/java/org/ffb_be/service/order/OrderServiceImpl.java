@@ -357,6 +357,11 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public long countPendingOrder() {
+        return orderRepository.countReturnPendingOrders();
+    }
+
+    @Override
     public void acceptOrder(Long id) {
         Order order=orderRepository.findById(id).get();
         order.setStatus(OrderStatus.PROCESSING);
