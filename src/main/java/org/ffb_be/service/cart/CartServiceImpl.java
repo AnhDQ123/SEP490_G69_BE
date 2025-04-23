@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -38,12 +39,29 @@ public class CartServiceImpl implements CartService {
         // Nhóm các sản phẩm theo Shop
         Map<Long, List<CartItemDTO>> shopCartItems = new HashMap<>();
         for (CartItemDTO cartItemDTO : cartDTO.getCartItemDTOList()) {
-            Long shopId;
-            if(cartItemDTO.getProductId()!=null){
-                shopId= shopRepository.findByProduct(cartItemDTO.getProductId()).getId();
-            }else shopId=null;
+            Long shopId = null;
+            if (cartItemDTO.getProductId() != null) {
+                shopId = shopRepository.findByProduct(cartItemDTO.getProductId()).getId();
+            }
             shopCartItems.computeIfAbsent(shopId, k -> new ArrayList<>()).add(cartItemDTO);
         }
+
+        // Lấy tất cả các sản phẩm và food options liên quan
+        List<Long> productIds = cartDTO.getCartItemDTOList().stream()
+                .map(CartItemDTO::getProductId)
+                .collect(Collectors.toList());
+        Map<Long, Product> productMap = productRepository.findByIds(productIds)
+                .stream()
+                .collect(Collectors.toMap(Product::getId, Function.identity()));
+
+        List<Long> foodOptionIds = cartDTO.getCartItemDTOList().stream()
+                .flatMap(item -> item.getCartItemOptionDTOList().stream())
+                .map(CartItemOptionDTO::getOptionId)
+                .collect(Collectors.toList());
+
+        Map<Long, FoodOption> foodOptionMap = foodOptionRepository.findByIds(foodOptionIds)
+                .stream()
+                .collect(Collectors.toMap(FoodOption::getId, Function.identity()));
 
         for (Map.Entry<Long, List<CartItemDTO>> entry : shopCartItems.entrySet()) {
             Long shopId = entry.getKey();
@@ -54,121 +72,153 @@ public class CartServiceImpl implements CartService {
             BigDecimal totalCartPrice = cart.getTotal() != null ? cart.getTotal() : BigDecimal.ZERO;
 
             for (CartItemDTO cartItemDTO : cartItemDTOList) {
-                Product product = productRepository.findById(cartItemDTO.getProductId())
-                        .orElseThrow(() -> new RuntimeException("Product not found"));
+                Product product = productMap.get(cartItemDTO.getProductId());
+                if (product == null) {
+                    throw new RuntimeException("Product not found");
+                }
 
                 // Kiểm tra xem đã có CartItem nào của sản phẩm này với foodOptionId tương ứng chưa
                 List<CartItem> existingItems = cartItemRepository.findAllByCartIdAndProductId(cart.getId(), product.getId());
                 List<Long> incomingFoodOptionIds = cartItemDTO.getCartItemOptionDTOList().stream()
-                        .map(CartItemOptionDTO::getOptionId) // Dùng foodOptionId thay vì optionId
+                        .map(CartItemOptionDTO::getOptionId)
                         .sorted()
                         .collect(Collectors.toList());
 
-                CartItem matchedItem = null;
-                for (CartItem existingItem : existingItems) {
-                    // Lấy danh sách foodOptionIds từ các CartItemOption đã lưu
-                    List<Long> existingFoodOptionIds = cartItemOptionRepository.findAllByCartItemId(existingItem.getId())
-                            .stream()
-                            .map(o -> o.getFoodOption().getId()) // Dùng foodOptionId
-                            .sorted()
-                            .collect(Collectors.toList());
-                    if (existingFoodOptionIds.equals(incomingFoodOptionIds)) {
-                        matchedItem = existingItem;
-                        break;
-                    }
-                }
+                // Tìm kiếm item đã tồn tại
+                CartItem matchedItem = findMatchedCartItem(existingItems, incomingFoodOptionIds);
 
                 CartItem item;
                 if (matchedItem != null) {
                     // Nếu đã tồn tại, cập nhật số lượng và thời gian
-                    item = matchedItem;
-                    item.setQuantity(item.getQuantity() + cartItemDTO.getQuantity());
-                    item.setTotalPrice(item.getUnitPrice().multiply(new BigDecimal(item.getQuantity())));
-                    item.setUpdatedAt(LocalDateTime.now());
-
-                    // Lấy các CartItemOption cũ của CartItem này
-                    List<CartItemOption> existingOptions = cartItemOptionRepository.findAllByCartItemId(item.getId());
-
-                    // Cộng dồn số lượng của các tùy chọn cũ vào số lượng mới
-                    for (CartItemOption existingOption : existingOptions) {
-                        // Cộng số lượng của các tùy chọn cũ vào tùy chọn mới
-                        for (CartItemOptionDTO newOptionDTO : cartItemDTO.getCartItemOptionDTOList()) {
-                            if (existingOption.getFoodOption().getId().equals(newOptionDTO.getOptionId())) {
-                                existingOption.setQuantity(existingOption.getQuantity() + newOptionDTO.getQuantity());
-                                existingOption.setTotalPrice(existingOption.getUnitPrice().multiply(new BigDecimal(existingOption.getQuantity())));
-                                cartItemOptionRepository.save(existingOption);
-                                break;
-                            }
-                        }
-                    }
+                    item = updateExistingItem(matchedItem, cartItemDTO, product, foodOptionMap);
                 } else {
                     // Tạo mới CartItem và lưu trước để có id persist cho CartItemOption
-                    item = new CartItem();
-                    item.setCart(cart);
-                    item.setProduct(product);
-                    item.setQuantity(cartItemDTO.getQuantity());
-                    item.setCreatedAt(LocalDateTime.now());
-                    item = cartItemRepository.save(item);  // Lưu ngay để đảm bảo item không còn là transient
-                    BigDecimal basePrice = BigDecimal.ZERO; // Lấy giá cơ bản của sản phẩm
-                    BigDecimal extrasTotal = BigDecimal.ZERO;  // Tổng giá của các option phụ
-                    BigDecimal discountTotal = BigDecimal.ZERO; // Tổng discount cho các option có typeId == 2
-                    BigDecimal totalItemPrice = BigDecimal.ZERO;
-
-                    // Tính toán giá của các option phụ
-                    for (CartItemOptionDTO optionDTO : cartItemDTO.getCartItemOptionDTOList()) {
-                        FoodOption foodOption = foodOptionRepository.findById(optionDTO.getOptionId())
-                                .orElseThrow(() -> new RuntimeException("Food Option not found"));
-                        BigDecimal optionUnitPrice = foodOption.getPrice();
-
-                        CartItemOption option = new CartItemOption();
-                        option.setCartItem(item);  // Lưu ý: item đã được persist
-                        option.setQuantity(optionDTO.getQuantity());
-                        option.setCreatedAt(LocalDateTime.now());
-                        option.setUpdatedAt(LocalDateTime.now());
-                        option.setUnitPrice(optionUnitPrice);
-                        option.setTotalPrice(optionUnitPrice.multiply(BigDecimal.valueOf(optionDTO.getQuantity())));
-                        option.setFoodOption(foodOption);
-                        cartItemOptionRepository.save(option);
-
-                        // Tính discount cho các option chính (typeId == 2)
-                        List<Discount> discountList = discountRepository.findAllByProduct_Id(product.getId());
-                        if (optionDTO.getTypeId() == 2) {
-                            BigDecimal bestDiscount = BigDecimal.ZERO;
-                            for (Discount discount : discountList) {
-                                if (discount.getStatus().equals(Status.ACTIVE)) {
-                                    bestDiscount = discount.getDiscount_percentage();
-                                }
-                            }
-                            basePrice = optionUnitPrice;
-                            discountTotal = discountTotal.add(basePrice.multiply(BigDecimal.valueOf(optionDTO.getQuantity())));
-                            discountTotal = discountTotal.multiply(BigDecimal.ONE.subtract(bestDiscount));
-                        } else {
-                            // Cộng thêm giá của các option phụ
-                            extrasTotal = extrasTotal.add(optionUnitPrice.multiply(BigDecimal.valueOf(optionDTO.getQuantity())));
-                        }
-                    }
-
-
-                    totalItemPrice = discountTotal.add(extrasTotal);
-
-                    // Cập nhật lại giá cho CartItem
-                    item.setUnitPrice(basePrice);
-                    item.setTotalPrice(totalItemPrice);
-                    cartItemRepository.save(item);
-
-                    totalCartPrice = totalCartPrice.add(totalItemPrice);
+                    item = createNewCartItem(cart, product, cartItemDTO, foodOptionMap);
                 }
-
-                // TÍNH TOÁN GIÁ
-
+                totalCartPrice = totalCartPrice.add(item.getTotalPrice());
+                // Cập nhật tổng giá cho Cart
+                cart.setTotal(totalCartPrice);
+                cart.setUpdatedAt(LocalDateTime.now());
+                cartRepository.save(cart);
             }
-
-            // Cập nhật tổng giá cho Cart
-            cart.setTotal(totalCartPrice);
-            cart.setUpdatedAt(LocalDateTime.now());
-            cartRepository.save(cart);
         }
     }
+
+    private CartItem findMatchedCartItem(List<CartItem> existingItems, List<Long> incomingFoodOptionIds) {
+        for (CartItem existingItem : existingItems) {
+            List<Long> existingFoodOptionIds = cartItemOptionRepository.findAllByCartItemId(existingItem.getId())
+                    .stream()
+                    .map(o -> o.getFoodOption().getId())
+                    .sorted()
+                    .toList();
+            if (existingFoodOptionIds.equals(incomingFoodOptionIds)) {
+                return existingItem;
+            }
+        }
+        return null;
+    }
+
+    private CartItem updateExistingItem(CartItem matchedItem, CartItemDTO cartItemDTO, Product product, Map<Long, FoodOption> foodOptionMap) {
+        // Cập nhật số lượng của CartItem
+        CartItem item = new CartItem();
+        matchedItem.setQuantity(matchedItem.getQuantity() + cartItemDTO.getQuantity());
+
+        // Tính toán lại tổng giá trị của CartItem (bao gồm cả giá trị giảm giá)
+        BigDecimal totalItemPrice = calculateTotalItemPrice(cartItemDTO, product, matchedItem.getUnitPrice(), foodOptionMap);
+
+        // Cập nhật lại giá trị tổng (totalPrice) của CartItem
+        item.setTotalPrice(totalItemPrice);
+        matchedItem.setTotalPrice(matchedItem.getTotalPrice().add(totalItemPrice));
+
+        // Cập nhật thời gian sửa đổi
+        matchedItem.setUpdatedAt(LocalDateTime.now());
+
+        // Cập nhật các CartItemOption
+        List<CartItemOption> existingOptions = cartItemOptionRepository.findAllByCartItemId(matchedItem.getId());
+        for (CartItemOption existingOption : existingOptions) {
+            for (CartItemOptionDTO newOptionDTO : cartItemDTO.getCartItemOptionDTOList()) {
+                if (existingOption.getFoodOption().getId().equals(newOptionDTO.getOptionId())) {
+                    // Cập nhật số lượng của CartItemOption
+                    existingOption.setQuantity(existingOption.getQuantity() + newOptionDTO.getQuantity());
+
+                    // Tính toán lại giá trị tổng của CartItemOption
+                    existingOption.setTotalPrice(existingOption.getUnitPrice().multiply(new BigDecimal(existingOption.getQuantity())));
+
+                    // Lưu lại CartItemOption sau khi cập nhật
+                    cartItemOptionRepository.save(existingOption);
+                    break;
+                }
+            }
+        }
+        return item;
+    }
+
+    private CartItem createNewCartItem(Cart cart, Product product, CartItemDTO cartItemDTO, Map<Long, FoodOption> foodOptionMap) {
+        CartItem item = new CartItem();
+        item.setCart(cart);
+        item.setProduct(product);
+        item.setQuantity(cartItemDTO.getQuantity());
+        item.setCreatedAt(LocalDateTime.now());
+
+        BigDecimal basePrice = BigDecimal.ZERO;
+        BigDecimal totalItemPrice = calculateTotalItemPrice(cartItemDTO, product, basePrice, foodOptionMap);
+
+        item.setUnitPrice(basePrice);
+        item.setTotalPrice(totalItemPrice);
+        cartItemRepository.save(item);
+
+        // Xử lý tùy chọn (options) cho sản phẩm
+        for (CartItemOptionDTO optionDTO : cartItemDTO.getCartItemOptionDTOList()) {
+            FoodOption foodOption = foodOptionMap.get(optionDTO.getOptionId());
+            BigDecimal optionUnitPrice = foodOption.getPrice();
+            if(optionDTO.getTypeId() == 2){
+                item.setUnitPrice(optionUnitPrice);
+            }
+            CartItemOption option = new CartItemOption();
+            option.setCartItem(item);
+            option.setQuantity(optionDTO.getQuantity());
+            option.setCreatedAt(LocalDateTime.now());
+            option.setUpdatedAt(LocalDateTime.now());
+            option.setUnitPrice(optionUnitPrice);
+            option.setTotalPrice(optionUnitPrice.multiply(BigDecimal.valueOf(optionDTO.getQuantity())));
+            option.setFoodOption(foodOption);
+            cartItemOptionRepository.save(option);
+        }
+
+        return item;
+    }
+
+    private BigDecimal calculateTotalItemPrice(CartItemDTO cartItemDTO, Product product, BigDecimal basePrice, Map<Long, FoodOption> foodOptionMap) {
+        BigDecimal extrasTotal = BigDecimal.ZERO;
+        BigDecimal discountTotal = BigDecimal.ZERO;
+
+        for (CartItemOptionDTO optionDTO : cartItemDTO.getCartItemOptionDTOList()) {
+            FoodOption foodOption = foodOptionMap.get(optionDTO.getOptionId());
+            BigDecimal optionUnitPrice = foodOption.getPrice();
+
+            if (optionDTO.getTypeId() == 2) {
+                discountTotal = applyDiscount(optionUnitPrice, optionDTO.getQuantity(), product);
+            } else {
+                extrasTotal = extrasTotal.add(optionUnitPrice.multiply(BigDecimal.valueOf(optionDTO.getQuantity())));
+            }
+        }
+
+        return discountTotal.add(extrasTotal);
+    }
+
+    private BigDecimal applyDiscount(BigDecimal optionUnitPrice, int quantity, Product product) {
+        BigDecimal bestDiscount = BigDecimal.ZERO;
+        List<Discount> discountList = discountRepository.findAllByProduct_Id(product.getId());
+
+        for (Discount discount : discountList) {
+            if (discount.getStatus().equals(Status.ACTIVE)) {
+                bestDiscount = discount.getDiscount_percentage();
+            }
+        }
+
+        return optionUnitPrice.multiply(BigDecimal.valueOf(quantity)).multiply(BigDecimal.ONE.subtract(bestDiscount));
+    }
+
 
 
     private Cart getOrCreateCart(Long userId, Long shopId) {
@@ -316,28 +366,105 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public void increaseOptionQuantity(Long id) {
+        // Lấy CartItemOption hiện tại
         CartItemOption cartItemOption = cartItemOptionRepository.findById(id).get();
+
+        // Tăng số lượng
         cartItemOption.setQuantity(cartItemOption.getQuantity() + 1);
+
+        // Cập nhật giá trị tổng của CartItemOption
+        cartItemOption.setTotalPrice(cartItemOption.getUnitPrice().multiply(new BigDecimal(cartItemOption.getQuantity())));
+
+        // Lưu lại CartItemOption
         cartItemOptionRepository.save(cartItemOption);
+
+        // Cập nhật giá trị tổng của CartItem (cập nhật lại tổng giá giỏ hàng)
+        CartItem cartItem = cartItemRepository.findById(cartItemOption.getCartItem().getId()).get();
+        cartItem.setTotalPrice(cartItem.getTotalPrice().add(cartItemOption.getUnitPrice()));  // Cập nhật giá trị tổng của CartItem
+
+        // Tính lại tổng giá của Cart (bao gồm tất cả các CartItem)
+        BigDecimal totalCartPrice = cartItemRepository.findByCartId(cartItem.getCart().getId())
+                .stream()
+                .map(CartItem::getTotalPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        Cart cart = cartItem.getCart();
+        cart.setTotal(totalCartPrice);  // Cập nhật tổng giá giỏ hàng
+        cartRepository.save(cart);  // Lưu lại Cart
     }
+
 
     @Override
     public void decreaseOptionQuantity(Long id) {
+        // Lấy CartItemOption hiện tại
         CartItemOption cartItemOption = cartItemOptionRepository.findById(id).get();
+
+        // Giảm số lượng
         cartItemOption.setQuantity(cartItemOption.getQuantity() - 1);
-        cartItemOptionRepository.save(cartItemOption);
-        if (cartItemOption.getQuantity() == 0) {
+
+        // Cập nhật giá trị tổng của CartItemOption nếu số lượng lớn hơn 0
+        if (cartItemOption.getQuantity() > 0) {
+            cartItemOption.setTotalPrice(cartItemOption.getUnitPrice().multiply(new BigDecimal(cartItemOption.getQuantity())));
+            cartItemOptionRepository.save(cartItemOption);
+        } else {
+            // Nếu số lượng bằng 0, xóa CartItemOption
             cartItemOptionRepository.delete(cartItemOption);
         }
+
+        // Cập nhật giá trị tổng của CartItem (cập nhật lại tổng giá giỏ hàng)
+        CartItem cartItem = cartItemRepository.findById(cartItemOption.getCartItem().getId()).get();
+        cartItem.setTotalPrice(cartItem.getTotalPrice().subtract(cartItemOption.getUnitPrice()));  // Cập nhật giá trị tổng của CartItem
+
+        // Tính lại tổng giá của Cart (bao gồm tất cả các CartItem)
+        BigDecimal totalCartPrice = cartItemRepository.findByCartId(cartItem.getCart().getId())
+                .stream()
+                .map(CartItem::getTotalPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        Cart cart = cartItem.getCart();
+        cart.setTotal(totalCartPrice);  // Cập nhật tổng giá giỏ hàng
+        cartRepository.save(cart);  // Lưu lại Cart
     }
 
     @Override
     public void changeSize(Long oldId, Long newId) {
+        // Lấy CartItemOption cũ
         CartItemOption cartItemOption = cartItemOptionRepository.findById(oldId).get();
+
+        // Lấy FoodOption mới
         FoodOption foodOption = foodOptionRepository.findById(newId).get();
+
+        // Cập nhật FoodOption và giá trị của CartItemOption
         cartItemOption.setFoodOption(foodOption);
         cartItemOption.setUnitPrice(foodOption.getPrice());
+
+        // Tính toán lại giá trị tổng của CartItemOption (bao gồm cả giảm giá nếu có)
+        BigDecimal totalOptionPrice = cartItemOption.getUnitPrice().multiply(new BigDecimal(cartItemOption.getQuantity()));
+        // Cập nhật tổng giá trị của CartItemOption
+        cartItemOption.setTotalPrice(totalOptionPrice);
+
+        // Lưu lại CartItemOption sau khi cập nhật
         cartItemOptionRepository.save(cartItemOption);
+
+        // Nếu FoodOption có giảm giá (typeId == 2), áp dụng giảm giá
+        if (foodOption.getType().getId() == 2) {
+            totalOptionPrice = applyDiscount(foodOption.getPrice(), cartItemOption.getQuantity(), cartItemOption.getFoodOption().getFood());
+        }
+
+        // Cập nhật giá trị tổng của CartItem
+        CartItem cartItem = cartItemRepository.findById(cartItemOption.getCartItem().getId()).get();
+        cartItem.setUnitPrice(foodOption.getPrice());
+        cartItem.setTotalPrice(totalOptionPrice);  // Cập nhật giá trị tổng của CartItem
+
+        // Tính lại tổng giá của Cart (bao gồm tất cả các CartItem)
+        BigDecimal totalCartPrice = cartItemRepository.findByCartId(cartItem.getCart().getId())
+                .stream()
+                .map(CartItem::getTotalPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        Cart cart = cartItem.getCart();
+        cart.setTotal(totalCartPrice);  // Cập nhật tổng giá giỏ hàng
+        cartRepository.save(cart);  // Lưu lại Cart
     }
 
     @Override
@@ -345,27 +472,77 @@ public class CartServiceImpl implements CartService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found")); // Ném ngoại lệ khi không tìm thấy sản phẩm
 
+        // Tìm CartItem theo cartId và productId
         CartItem cartItem = cartItemRepository.findByCart_IdAndProduct_Id(cartId, id);
         if (cartItem != null) {
+            // Lấy tất cả CartItemOption liên quan đến CartItem này
             List<CartItemOption> cartItemOption = cartItemOptionRepository.findAllByCartItemId(cartItem.getId());
+
+            // Xóa tất cả CartItemOption trước khi xóa CartItem
             cartItemOptionRepository.deleteAll(cartItemOption);
+
+            // Lưu lại CartItemOption trước khi xóa CartItem
             cartItemRepository.delete(cartItem);
+
+            // Cập nhật lại tổng giá của giỏ hàng sau khi xóa CartItem
+            BigDecimal totalCartPrice = cartItemRepository.findByCartId(cartId)
+                    .stream()
+                    .map(CartItem::getTotalPrice)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            Cart cart = cartRepository.findById(cartId).orElseThrow(() -> new RuntimeException("Cart not found"));
+            cart.setTotal(totalCartPrice); // Cập nhật lại tổng giá giỏ hàng
+            cartRepository.save(cart); // Lưu lại Cart
         } else {
             throw new RuntimeException("CartItem not found for the product.");
         }
-        Cart cart = cartRepository.findById(cartId).get();
-        if (cart.getCartItems().isEmpty()) {
-            cartRepository.delete(cart);
-        }
-
     }
 
     @Override
     public void deleteOptionFromCart(Long cartId, Long optionId) {
+        // Tìm CartItemOption theo cartId và optionId
         CartItemOption cartItemOption = cartItemOptionRepository.findByCartItem_IdAndFoodOption_Id(cartId, optionId);
-        cartItemOptionRepository.delete(cartItemOption);
-    }
 
+        if (cartItemOption != null) {
+            // Lấy CartItem liên quan đến CartItemOption này
+            CartItem cartItem = cartItemRepository.findById(cartItemOption.getCartItem().getId()).get();
+
+            // Xóa CartItemOption
+            cartItemOptionRepository.delete(cartItemOption);
+
+            // Tính toán lại tổng giá của CartItem (bao gồm tất cả các CartItemOption còn lại và giảm giá nếu có)
+            BigDecimal totalItemPrice = BigDecimal.ZERO;
+            List<CartItemOption> remainingOptions = cartItemOptionRepository.findAllByCartItemId(cartItem.getId());
+            for (CartItemOption option : remainingOptions) {
+                BigDecimal optionTotalPrice = option.getUnitPrice().multiply(BigDecimal.valueOf(option.getQuantity()));
+
+                // Nếu FoodOption có giảm giá, áp dụng giảm giá
+                if (option.getFoodOption().getType().getId() == 2) {
+                    optionTotalPrice = applyDiscount(option.getUnitPrice(), option.getQuantity(), option.getFoodOption().getFood());
+                }
+
+                totalItemPrice = totalItemPrice.add(optionTotalPrice);  // Cộng dồn giá trị các CartItemOption còn lại
+            }
+
+            // Cập nhật lại giá trị tổng của CartItem
+            cartItem.setTotalPrice(totalItemPrice);
+            cartItemRepository.save(cartItem);  // Lưu lại CartItem sau khi cập nhật
+
+            Cart cart = cartItem.getCart();
+            BigDecimal totalCartPrice = BigDecimal.ZERO;
+
+            // Tính tổng giá cho giỏ hàng
+            for (CartItem item : cart.getCartItems()) {
+                totalCartPrice = totalCartPrice.add(item.getTotalPrice());
+            }
+
+            // Cập nhật lại tổng giá giỏ hàng
+            cart.setTotal(totalCartPrice);
+            cartRepository.save(cart);
+        } else {
+            throw new RuntimeException("CartItemOption not found.");
+        }
+    }
     @Override
     public void addOptionToItem(Long cartItemId, Long optionId) {
         FoodOption foodOption = foodOptionRepository.findById(optionId).get();
@@ -390,42 +567,3 @@ public class CartServiceImpl implements CartService {
         }
     }
 }
-//@Override
-//public void save(CartDTO cartDTO) throws IOException {
-//    Cart cart = new Cart();
-//    List<CartItem> cartItem =cartItemRepository.findAllByCart_Id(cartDTO.getId());
-//    List<CartItemDTO> cartItemDTOS = new ArrayList<>();
-//    CartStatus pending = CartStatus.PENDING;
-//    cart.setOwner(userRepository.findById(cartDTO.getUserId()).get());
-//    cart.setStatus(pending);
-//    cart.setTotal(BigDecimal.ZERO);
-//    cart.setCreatedAt(LocalDateTime.now());
-//    cartRepository.save(cart);
-//
-//    for (CartItem cart1 : cartItem) {
-//        CartItemDTO cartItemDTO = new CartItemDTO();
-//        cartItemDTO.setId(cart1.getId());
-//        cartItemDTO.setProductId(cart1.getProduct().getId());
-//        cartItemDTO.setPrice(cart1.getUnitPrice());
-//        cartItemDTO.setTotalPrice(cart1.getTotalPrice());
-//        cartItemDTO.setQuantity(cart1.getQuantity());
-//        List<CartItemOption> cartItemOptions = cartItemOptionRepository.findAllByCartItem_Id(cart1.getId());
-//        cartItemOptionRepository.saveAll(cartItemOptions);
-//        List<CartItemOptionDTO> cartItemOptionDTOS = new ArrayList<>();
-//        for (CartItemOption cartItemOption : cartItemOptions) {
-//            CartItemOptionDTO cartItemOptionDTO = new CartItemOptionDTO();
-//            cartItemOptionDTO.setId(cartItemOption.getId());
-//            cartItemOptionDTO.setCartItemId(cartItemOption.getCartItem().getId());
-//            cartItemOptionDTO.setOptionId(cartItemOption.getFoodOption().getId());
-//            cartItemOptionDTO.setPrice(cartItemOption.getUnitPrice());
-//            cartItemOptionDTO.setQuantity(cartItemOption.getQuantity());
-//            cartItemOptionDTO.setTotalPrice(cartItemOption.getTotalPrice());
-//            cartItemOptionDTOS.add(cartItemOptionDTO);
-//        }
-//        cartItemDTO.setCartItemOptionDTOList(cartItemOptionDTOS);
-//        cartItemDTOS.add(cartItemDTO);
-//        cartItemRepository.saveAll(cartItem);
-//    }
-//
-//}
-

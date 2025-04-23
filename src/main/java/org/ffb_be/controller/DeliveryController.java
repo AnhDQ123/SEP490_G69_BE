@@ -44,8 +44,9 @@ public class DeliveryController {
         deliveryMethodService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
     @GetMapping("/order")
     public List<DeliveryDTO> getAllByShop(@RequestParam("shopId") Long shopId){
-        return deliveryMethodService.getAllByShop(shopId);
+        return ResponseEntity.ok(deliveryMethodService.getAllByShop(shopId)).getBody();
     }
 }
