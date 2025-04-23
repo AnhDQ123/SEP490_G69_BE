@@ -148,7 +148,7 @@ public class CartServiceImpl implements CartService {
                         }
                     }
 
-                    // Tính tổng giá sản phẩm
+
                     totalItemPrice = discountTotal.add(extrasTotal);
 
                     // Cập nhật lại giá cho CartItem
