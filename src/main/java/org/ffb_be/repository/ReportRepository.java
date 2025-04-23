@@ -46,7 +46,7 @@ public interface ReportRepository extends JpaRepository<Report,Long> {
                                                         LocalDateTime startDate,
                                                         LocalDateTime endDate,
                                                         Long type);
-    @Query("SELECT COUNT(r) FROM Report r where r.status='PENDING'")
+    @Query("SELECT COUNT(r) FROM Report r where r.status='PENDING' and r.type.id=4")
     Long countAllReports();
     Page<Report> findAllByStatus(ReportStatus status, Pageable pageable);
 
