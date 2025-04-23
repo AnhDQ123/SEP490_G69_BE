@@ -72,13 +72,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
                                               LocalDateTime endDate,
                                               Status status);
 
-    @Query("SELECT COUNT(u) FROM User u WHERE u.role.id = 4")
+    @Query("SELECT COUNT(u) FROM User u WHERE u.role.id = 4 and u.shipperStatus = 'ACTIVE' ")
     long countUsersAreShipper();
     @Query("SELECT COUNT(u) FROM User u WHERE u.role.id = 2")
     long countUsersHaveShop();
     @Query("SELECT COUNT(u) FROM User u WHERE u.shipperStatus = 'PENDING'")
     long countPendingShipper();
-    @Query("SELECT COUNT(u) FROM User u")
+    @Query("SELECT COUNT(u) FROM User u WHERE u.status = 'ACTIVE' ")
     long countAllUser();
     @Query("SELECT COUNT(u) " +
             "FROM User u " +

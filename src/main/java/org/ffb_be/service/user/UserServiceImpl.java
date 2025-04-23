@@ -206,12 +206,12 @@ public class UserServiceImpl implements UserService {
     public double pendingChangeRate() {
         LocalDateTime startOfLastMonth = LocalDate.now().minusMonths(1).withDayOfMonth(1).atStartOfDay();
         LocalDateTime endOfLastMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay().minusNanos(1);
-        double a=userRepository.countActiveShipperByMonth(startOfLastMonth, endOfLastMonth);
+        double a=userRepository.countPendingShipperByMonth(startOfLastMonth, endOfLastMonth);
+        double c=shopRepository.countPendingShopByMonth(startOfLastMonth, endOfLastMonth);
         LocalDateTime startOfThisMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay();
         LocalDateTime endOfThisMonth = LocalDate.now().plusMonths(1).withDayOfMonth(1).atStartOfDay().minusNanos(1);
-        double b=userRepository.countActiveShipperByMonth(startOfThisMonth, endOfThisMonth);
-        double c=shopRepository.countActiveShopByMonth(startOfLastMonth, endOfLastMonth);
-        double d=shopRepository.countActiveShopByMonth(startOfThisMonth, endOfThisMonth);
+        double b=userRepository.countPendingShipperByMonth(startOfThisMonth, endOfThisMonth);
+        double d=shopRepository.countPendingShopByMonth(startOfThisMonth, endOfThisMonth);
         return ((b+d)-(a+c))/(a+c)*100;
     }
 

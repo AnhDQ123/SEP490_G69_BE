@@ -52,7 +52,7 @@ public interface ShopRepository extends JpaRepository<Shop, Long>, JpaSpecificat
                                               LocalDateTime endDate);
     @Query("SELECT COUNT(u) FROM Shop u WHERE u.isActive = 'PENDING'")
     long countPendingShop();
-    @Query("SELECT COUNT(u) FROM Shop u ")
+    @Query("SELECT COUNT(u) FROM Shop u WHERE u.isActive = 'ACTIVE'")
     long countShop();
     @Query("SELECT COUNT(u) " +
             "FROM Shop u " +
