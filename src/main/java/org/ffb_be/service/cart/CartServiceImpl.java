@@ -251,6 +251,7 @@ public class CartServiceImpl implements CartService {
                     if (cartItem.getCartItemOptions() != null) {
                         for (CartItemOption option : cartItem.getCartItemOptions()) {
                             CartItemOptionDTO optionDTO = new CartItemOptionDTO();
+                            optionDTO.setId(option.getId());
                             Long optionId = option.getFoodOption().getId();
                             optionDTO.setOptionId(optionId);
                             optionDTO.setOptionName(option.getFoodOption().getName());
