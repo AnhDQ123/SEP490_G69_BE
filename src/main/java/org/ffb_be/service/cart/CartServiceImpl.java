@@ -543,27 +543,49 @@ public class CartServiceImpl implements CartService {
             throw new RuntimeException("CartItemOption not found.");
         }
     }
+
     @Override
     public void addOptionToItem(Long cartItemId, Long optionId) {
         FoodOption foodOption = foodOptionRepository.findById(optionId).get();
         CartItem cartItem = cartItemRepository.findById(cartItemId).get();
-        int a = 0;
-        for (CartItemOption cartItemOption1 : cartItem.getCartItemOptions()) {
-            if (cartItemOption1.getFoodOption().getId().equals(optionId)) {
-                cartItemOption1.setQuantity(cartItemOption1.getQuantity() + 1);
-                cartItemOption1.setTotalPrice(foodOption.getPrice().multiply(BigDecimal.valueOf(cartItemOption1.getQuantity())));
-                cartItemOptionRepository.save(cartItemOption1);
-                a = 1;
+
+        boolean isOptionUpdated = false; // Biến để theo dõi xem có CartItemOption nào đã được cập nhật không
+
+        // Cập nhật hoặc thêm CartItemOption
+        for (CartItemOption cartItemOption : cartItem.getCartItemOptions()) {
+            if (cartItemOption.getFoodOption().getId().equals(optionId)) {
+                // Nếu tùy chọn đã tồn tại, chỉ cần tăng số lượng
+                cartItemOption.setQuantity(cartItemOption.getQuantity() + 1);
+                // Cập nhật lại giá trị tổng cho CartItemOption
+                cartItemOption.setTotalPrice(foodOption.getPrice().multiply(BigDecimal.valueOf(cartItemOption.getQuantity())));
+                cartItemOptionRepository.save(cartItemOption); // Lưu CartItemOption sau khi cập nhật
+                isOptionUpdated = true;
             }
         }
-        if (a != 0) {
+
+        // Nếu CartItemOption không tồn tại, tạo mới CartItemOption
+        if (!isOptionUpdated) {
             CartItemOption cartItemOption = new CartItemOption();
             cartItemOption.setFoodOption(foodOption);
             cartItemOption.setQuantity(1);
             cartItemOption.setUnitPrice(foodOption.getPrice());
-            cartItemOption.setTotalPrice(foodOption.getPrice());
+            cartItemOption.setTotalPrice(foodOption.getPrice()); // Tổng giá của CartItemOption ban đầu bằng đơn giá
             cartItemOption.setCartItem(cartItem);
             cartItemOptionRepository.save(cartItemOption);
         }
+
+        cartItem.setTotalPrice(cartItem.getTotalPrice().add(foodOption.getPrice())); // Cập nhật lại tổng giá của CartItem
+        cartItemRepository.save(cartItem); // Lưu lại CartItem sau khi cập nhật tổng giá
+
+        // Cập nhật lại tổng giá cho Cart
+        BigDecimal totalCartPrice = BigDecimal.ZERO;
+        for (CartItem item : cartItem.getCart().getCartItems()) {
+            totalCartPrice = totalCartPrice.add(item.getTotalPrice()); // Cộng dồn giá trị các CartItem trong Cart
+        }
+
+        Cart cart = cartItem.getCart();
+        cart.setTotal(totalCartPrice); // Cập nhật lại tổng giá của Cart
+        cartRepository.save(cart); // Lưu lại Cart sau khi cập nhật tổng giá
     }
+
 }
