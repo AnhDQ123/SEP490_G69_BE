@@ -408,8 +408,8 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Page<OrderDTO> findAllByShipper(Long id, Pageable pageable) {
-        Page<Order> orders = orderRepository.findAllByShipper_Id(id, pageable);
+    public Page<OrderDTO> findAllByShipper(Long id, Pageable pageable,OrderStatus status) {
+        Page<Order> orders = orderRepository.findAllByShipper_IdAndStatus(id,status,pageable);
         return toDTO(orders,pageable);
     }
 

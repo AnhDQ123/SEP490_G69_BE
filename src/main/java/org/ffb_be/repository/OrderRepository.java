@@ -195,4 +195,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     Double countOrderByMonth( LocalDateTime startDate,
                                       LocalDateTime endDate);
     Long countAllByStatus(OrderStatus status);
+
+    Page<Order> findAllByShipper_IdAndStatus(Long shipperId, OrderStatus status, Pageable pageable);
 }

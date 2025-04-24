@@ -39,7 +39,7 @@ public interface OrderService {
     void rejectOrder(Long id);
     void changeStatus(Long id,Long userId, OrderStatus status, MultipartFile avatar) throws IOException;
     void acceptShipping(Long id,Long userId);
-    Page<OrderDTO>findAllByShipper(Long id, Pageable pageable);
+    Page<OrderDTO>findAllByShipper(Long id, Pageable pageable,OrderStatus status);
     void assignShipper();
     void returnOrder(Long id,Long userId,String reason,MultipartFile avatar) throws IOException;
     ReturnOrderDTO viewReturnOrder(Long id) throws IOException;

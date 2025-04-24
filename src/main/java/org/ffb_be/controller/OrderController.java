@@ -102,8 +102,9 @@ public class OrderController {
     }
 
     @GetMapping("/shipper")
-    public ResponseEntity<?> findByShipper(@RequestParam Long id, Pageable pageable) throws IOException {
-        return ResponseEntity.ok(orderService.findAllByShipper(id,pageable));
+    public ResponseEntity<?> findByShipper(@RequestParam Long id, Pageable pageable,@RequestParam String status ) throws IOException {
+        OrderStatus status1=OrderStatus.valueOf(status);
+        return ResponseEntity.ok(orderService.findAllByShipper(id,pageable,status1));
     }
     @PostMapping("/acceptShip")
     public void acceptShip(@RequestParam Long id,@RequestParam Long userId) throws IOException {
