@@ -15,6 +15,7 @@ public interface BannerService {
     void createBanner(Long shopId,ImageDTO banner, MultipartFile file) throws IOException;
 
     void updateBanner(Long id, ImageDTO image, MultipartFile file) throws IOException;
-
+    void activeBanner(Long id);
+    void inactivateBanner(Long id);
     void delete(Long id);
 }

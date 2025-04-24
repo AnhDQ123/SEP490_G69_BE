@@ -61,4 +61,12 @@ public class BannerController {
         bannerService.delete(bannerId);
         return ResponseEntity.ok().build();
     }
+    @PostMapping("/active/{bannerId}")
+    public void activeBanner(@PathVariable Long bannerId) {
+        bannerService.activeBanner(bannerId);
+    }
+    @PostMapping("/inactive/{bannerId}")
+    public void inactiveBanner(@PathVariable Long bannerId) {
+        bannerService.inactivateBanner(bannerId);
+    }
 }
