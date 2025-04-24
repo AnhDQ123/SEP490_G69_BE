@@ -117,4 +117,8 @@ public class ReportController {
     public Long countReportsByShop(@RequestParam("id") Long id) {
         return reportService.countAllByShop(id);
     }
+    @GetMapping("/change/rate")
+    public double reportChangeRate(){
+        return reportService.reportChangeRate();
+    }
 }

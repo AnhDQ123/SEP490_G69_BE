@@ -57,7 +57,6 @@ public class ProductServiceImpl implements ProductService {
         List<FoodOptionDTO> foodOptionDTOs = productCreateDTO.getFoodOption();
         product.setName(productCreateDTO.getName());
         product.setDescription(productCreateDTO.getDescription());
-        product.setExpired_date(productCreateDTO.getExpiryDate());
         product.setQuantity(productCreateDTO.getQuantity());
         product.setManufacturer(productCreateDTO.getManufacturer());
         product.setShop(shopRepository.findById(productCreateDTO.getShopId()).get());
@@ -104,7 +103,6 @@ public class ProductServiceImpl implements ProductService {
         List<FoodOptionDTO> foodOptionDTOs = productCreateDTO.getFoodOption();
         product.setName(productCreateDTO.getName());
         product.setDescription(productCreateDTO.getDescription());
-        product.setExpired_date(productCreateDTO.getExpiryDate());
         product.setQuantity(productCreateDTO.getQuantity());
         product.setManufacturer(productCreateDTO.getManufacturer());
         product.setShop(shopRepository.findById(productCreateDTO.getShopId()).get());

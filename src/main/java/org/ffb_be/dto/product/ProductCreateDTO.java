@@ -25,11 +25,6 @@ public class ProductCreateDTO {
     @Min(value = 1, message = "Quantity must be greater than 0")
     private int quantity;
 
-    @NotNull(message = "Expiry date is required")
-    @Future(message = "Expiry date must be in the future")
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-    private LocalDate expiryDate;
-
     private List<FoodOptionDTO> foodOption;
 
     private String supplier;
