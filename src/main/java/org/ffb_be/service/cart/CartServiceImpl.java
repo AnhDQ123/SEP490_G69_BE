@@ -262,7 +262,7 @@ public class CartServiceImpl implements CartService {
             CartDTO cartDTO = new CartDTO();
             cartDTO.setId(cart.getId());
             cartDTO.setUserId(cart.getOwner().getId());
-
+            cartDTO.setStatus(cart.getStatus().toString());
             // Giả sử tất cả sản phẩm trong giỏ hàng đều thuộc cùng 1 shop,
             // Lấy thông tin shop từ sản phẩm đầu tiên trong giỏ hàng
             if (cart.getCartItems() != null && !cart.getCartItems().isEmpty()) {
@@ -283,10 +283,10 @@ public class CartServiceImpl implements CartService {
                     CartItemDTO cartItemDTO = new CartItemDTO();
                     cartItemDTO.setId(cartItem.getId());
                     cartItemDTO.setCartId(cart.getId());
+                    cartItemDTO.setPrice(cartItem.getUnitPrice());
+                    cartItemDTO.setTotalPrice(cartItem.getTotalPrice());
                     Long productId = cartItem.getProduct().getId();
                     cartItemDTO.setProductId(productId);
-
-
                     // Lấy thông tin sản phẩm
                     productRepository.findById(productId).ifPresent(product -> {
                         cartItemDTO.setProductName(product.getName());
