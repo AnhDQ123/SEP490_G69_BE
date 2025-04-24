@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -130,5 +131,9 @@ public class ShipperController {
     @PutMapping("isAvailable/{userId}")
     public void updateShipperIsAvailable(@PathVariable Long userId){
         shipperService.changeIsAvailable(userId);
+    }
+    @GetMapping("/revenue/{userId}")
+    public BigDecimal getRevenue(@PathVariable Long userId) {
+        return shipperService.shipperBalance(userId);
     }
 }
