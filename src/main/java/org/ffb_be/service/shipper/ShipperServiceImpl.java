@@ -332,7 +332,7 @@ public class ShipperServiceImpl implements ShipperService {
         LocalDateTime startOfThisMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay();
         LocalDateTime endOfThisMonth = LocalDate.now().plusMonths(1).withDayOfMonth(1).atStartOfDay().minusNanos(1);
         long a=orderRepository.countOrdersByShipper_Id(userId,startOfThisMonth,endOfThisMonth);
-        BigDecimal b=BigDecimal.TEN;
+        BigDecimal b=BigDecimal.valueOf(10000);
         return b.multiply(BigDecimal.valueOf(a));
     }
 
