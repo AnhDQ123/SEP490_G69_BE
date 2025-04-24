@@ -10,6 +10,7 @@ import org.ffb_be.dto.product.FoodOptionDTO;
 import org.ffb_be.dto.product.ProductCreateDTO;
 import org.ffb_be.dto.product.ProductResponseDTO;
 
+import org.ffb_be.dto.product.TopProductDTO;
 import org.ffb_be.entity.*;
 import org.ffb_be.repository.*;
 
@@ -559,12 +560,23 @@ public class ProductServiceImpl implements ProductService {
             return productResponseDTO;
         });
     }
-    public List<Object[]> findTopSellingProductsToday(Long shopId) {
-        return productRepository.findTopSellingProductsToday(shopId);
+    public List<TopProductDTO> findTopSellingProductsToday(Long shopId) {
+        List<Object[]> results =productRepository.findTopSellingProductsToday(shopId);
+        List<TopProductDTO> topSellingProducts = new ArrayList<>();
+        // Chuyển đổi kết quả thành Map với key là "productName" và value là "totalQuantity"
+        for (Object[] result : results) {
+            TopProductDTO topProductDTO = new TopProductDTO();
+            topProductDTO.setName((String) result[1]);
+            topProductDTO.setTotalQuantity((Long) result[2]);
+            topProductDTO.setTotalValue((BigDecimal) result[3]);
+            topSellingProducts.add(topProductDTO);
+        }
+
+        return topSellingProducts;
     }
 
     // Tính danh sách sản phẩm bán chạy nhất trong tháng này cho cửa hàng cụ thể
-    public List<Object[]> findTopSellingProductsThisMonth(Long shopId) {
+    public List<TopProductDTO> findTopSellingProductsThisMonth(Long shopId) {
         LocalDate currentDate = LocalDate.now();
         LocalDate firstDayOfMonth = currentDate.with(TemporalAdjusters.firstDayOfMonth());  // Ngày đầu tháng
         LocalDate lastDayOfMonth = currentDate.with(TemporalAdjusters.lastDayOfMonth());    // Ngày cuối tháng
@@ -572,12 +584,34 @@ public class ProductServiceImpl implements ProductService {
         // Chuyển các ngày thành LocalDateTime
         LocalDateTime startOfMonth = firstDayOfMonth.atStartOfDay();
         LocalDateTime endOfMonth = lastDayOfMonth.atTime(23, 59, 59);
-        return productRepository.findTopSellingProductsThisMonth(shopId,startOfMonth,endOfMonth);
+        List<TopProductDTO> topSellingProducts = new ArrayList<>();
+        List<Object[]> results =productRepository.findTopSellingProductsThisMonth(shopId,startOfMonth,endOfMonth);
+        // Chuyển đổi kết quả thành Map với key là "productName" và value là "totalQuantity"
+        for (Object[] result : results) {
+            TopProductDTO topProductDTO = new TopProductDTO();
+            topProductDTO.setName((String) result[1]);
+            topProductDTO.setTotalQuantity((Long) result[2]);
+            topProductDTO.setTotalValue((BigDecimal) result[3]);
+            topSellingProducts.add(topProductDTO);
+        }
+
+        return topSellingProducts;
     }
 
     // Tính danh sách sản phẩm bán chạy nhất trong năm này cho cửa hàng cụ thể
-    public List<Object[]> findTopSellingProductsThisYear(Long shopId) {
-        return productRepository.findTopSellingProductsThisYear(shopId);
+    public List<TopProductDTO> findTopSellingProductsThisYear(Long shopId) {
+        List<Object[]> results =productRepository.findTopSellingProductsThisYear(shopId);
+        List<TopProductDTO> topSellingProducts = new ArrayList<>();
+        // Chuyển đổi kết quả thành Map với key là "productName" và value là "totalQuantity"
+        for (Object[] result : results) {
+            TopProductDTO topProductDTO = new TopProductDTO();
+            topProductDTO.setName((String) result[1]);
+            topProductDTO.setTotalQuantity((Long) result[2]);
+            topProductDTO.setTotalValue((BigDecimal) result[3]);
+            topSellingProducts.add(topProductDTO);
+        }
+
+        return topSellingProducts;
     }
 
     @Override

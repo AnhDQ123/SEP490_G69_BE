@@ -5,6 +5,7 @@ package org.ffb_be.controller;
 import lombok.RequiredArgsConstructor;
 import org.ffb_be.dto.product.ProductCreateDTO;
 import org.ffb_be.dto.product.ProductResponseDTO;
+import org.ffb_be.dto.product.TopProductDTO;
 import org.ffb_be.service.product.ProductService;
 
 import org.ffb_be.service.product.RecommendationService;
@@ -118,19 +119,19 @@ public class ProductController {
         return ResponseEntity.ok( productService.findAll(pageable));
     }
     @GetMapping("/top-selling/today")
-    public List<Object[]> findTopSellingProductsToday(@RequestParam("shopId") Long shopId) {
+    public List<TopProductDTO> findTopSellingProductsToday(@RequestParam("shopId") Long shopId) {
         return productService.findTopSellingProductsToday(shopId);
     }
 
     // API để lấy sản phẩm bán chạy nhất trong tháng này cho cửa hàng cụ thể
     @GetMapping("/top-selling/month")
-    public List<Object[]> findTopSellingProductsThisMonth(@RequestParam("shopId") Long shopId) {
+    public List<TopProductDTO> findTopSellingProductsThisMonth(@RequestParam("shopId") Long shopId) {
         return productService.findTopSellingProductsThisMonth(shopId);
     }
 
     // API để lấy sản phẩm bán chạy nhất trong năm này cho cửa hàng cụ thể
     @GetMapping("/top-selling/year")
-    public List<Object[]> findTopSellingProductsThisYear(@RequestParam("shopId") Long shopId) {
+    public List<TopProductDTO> findTopSellingProductsThisYear(@RequestParam("shopId") Long shopId) {
         return productService.findTopSellingProductsThisYear(shopId);
     }
 
