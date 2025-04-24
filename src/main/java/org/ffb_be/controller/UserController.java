@@ -19,6 +19,7 @@ import org.ffb_be.service.user.UserService;
 import org.ffb_be.utils.enums.Status;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
@@ -40,6 +41,7 @@ public class UserController {
     private final UserService userService;
     private final ShopRepository shopRepository;
     private final ShopService shopService;
+
     @GetMapping("/{id}")
     public ResponseEntity<?> getUserById(@PathVariable Long id) {
         return ResponseEntity.ok( userService.findById(id));
@@ -54,6 +56,7 @@ public class UserController {
         userService.create(user);
         return ResponseEntity.ok().body(user);
     }
+
     @PutMapping("/update")
     public ResponseEntity<?> updateProfile(@Validated @ModelAttribute UserUpdateDTO user,
                                          BindingResult bindingResult,
@@ -118,10 +121,12 @@ public class UserController {
     public long getUserAreShipperCount() {
         return userService.countUsersAreShipper();
     }
+
     @GetMapping("/count/pendingshipper")
     public long getPendingShipper() {
         return userService.countPendingShipper();
     }
+
     @GetMapping("/count/all")
     public long getAllUserCount() {
         return userService.countAllUser();
@@ -142,13 +147,30 @@ public class UserController {
     public ResponseEntity<?> getUserProfile(@PathVariable("id") Long id) {
         return ResponseEntity.ok(userService.getRoleProfile(id));
     }
+
     @PutMapping("/changePassword")
-    public void changePassword(@RequestParam Long id,@RequestParam String oldPassword,@RequestParam String newPassword,@RequestParam String confirmPassword) {
-        userService.changePassword(id, oldPassword, newPassword,confirmPassword);
+    public ResponseEntity<String> changePassword(@RequestParam Long id,
+                                                 @RequestParam String oldPassword,
+                                                 @RequestParam String newPassword,
+                                                 @RequestParam String confirmPassword) {
+        try {
+            userService.changePassword(id, oldPassword, newPassword, confirmPassword);
+            return ResponseEntity.ok("Đổi mật khẩu thành công");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Lỗi: " + e.getMessage());
+        }
     }
+
     @PutMapping("/forgot")
-    public void forgotPassword(@RequestParam String phone ,@RequestParam String password,@RequestParam String confirmPassword) {
-        userService.forgotPassword(phone,password,confirmPassword);
+    public ResponseEntity<String> forgotPassword(@RequestParam String phone,
+                                                 @RequestParam String password,
+                                                 @RequestParam String confirmPassword) {
+        try {
+            userService.forgotPassword(phone, password, confirmPassword);
+            return ResponseEntity.ok("Đổi mật khẩu thành công");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Lỗi: " + e.getMessage());
+        }
     }
     @GetMapping("/change/rate")
     public double getUserRate() {

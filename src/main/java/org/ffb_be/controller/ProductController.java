@@ -86,6 +86,7 @@ public class ProductController {
     public ResponseEntity<?> getPopular() {
         return ResponseEntity.ok(productService.findPopularProducts());
     }
+
     @PutMapping("/delete/{id}")
     public void deleteProduct(@PathVariable Long id) throws IOException {
         productService.delete(id);

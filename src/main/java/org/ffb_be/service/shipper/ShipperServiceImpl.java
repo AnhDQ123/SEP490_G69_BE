@@ -147,17 +147,41 @@ public class ShipperServiceImpl implements ShipperService {
 
     @Override
     public void shipperStatus(Long userId, ShipperStatus status, String reason) {
+        // Tìm người dùng từ userId
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User"));
-        if(status == ShipperStatus.INACTIVE) {
+
+        // Kiểm tra nếu trạng thái hiện tại là ACTIVE và cố gắng chuyển sang ACTIVE
+        if (user.getShipperStatus() == ShipperStatus.ACTIVE && status == ShipperStatus.ACTIVE) {
+            throw new IllegalStateException("Update status failed");
+        }
+
+        // Kiểm tra nếu trạng thái hiện tại là INACTIVE và cố gắng chuyển sang INACTIVE
+        if (user.getShipperStatus() == ShipperStatus.INACTIVE && status == ShipperStatus.INACTIVE) {
+            throw new IllegalStateException("Update status failed");
+        }
+
+        // Nếu trạng thái là INACTIVE, thêm lý do từ người dùng
+        if (status == ShipperStatus.INACTIVE) {
+            if (reason == null || reason.trim().isEmpty()) {
+                throw new IllegalArgumentException("Reason is required when setting status to INACTIVE");
+            }
             user.setRejectReason(reason);
         }
-        if(status == ShipperStatus.ACTIVE) {
+
+        // Nếu trạng thái là ACTIVE, xóa lý do từ người dùng
+        if (status == ShipperStatus.ACTIVE) {
             user.setRejectReason(null);
         }
+
+        // Cập nhật trạng thái mới cho người dùng
         user.setShipperStatus(status);
+
+        // Lưu người dùng vào cơ sở dữ liệu
         userRepository.save(user);
     }
+
+
 
     @Override
     public void updateShipperInfo(

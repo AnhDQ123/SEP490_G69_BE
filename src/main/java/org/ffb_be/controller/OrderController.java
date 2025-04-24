@@ -114,18 +114,24 @@ public class OrderController {
         orderService.returnOrder(id,userId,reason, avatar);
     }
 
+    // View detail by id
     @GetMapping("/viewReturn")
     public ReturnOrderDTO viewReturn(@RequestParam Long id) throws IOException {
         return orderService.viewReturnOrder(id);
     }
-    @PostMapping("/acceptReturn")
+
+    // Return to customer
+    @PutMapping("/acceptReturn")
     public void acceptReturn(@RequestParam Long id) throws IOException {
         orderService.acceptReturnOrder(id);
     }
+
+    // Rejected
     @PostMapping("/rejectReturn")
     public void rejectReturn(@RequestParam Long id) throws IOException {
         orderService.rejectReturnOrder(id);
     }
+
     @GetMapping("/count")
     public CountDTO countOrderByStatus(@RequestParam Long id ) {
         return orderService.countOrderByStatus(id);
@@ -174,6 +180,7 @@ public class OrderController {
 
         return orderService.getOrderCountByStatusAndYear(orderStatus, startDate, endDate);
     }
+
     @GetMapping("/top-selling/today")
     public List<TopProductDTO> getTopSellingProductsToday() {
         return orderService.getTopSellingProductsToday();
@@ -188,6 +195,7 @@ public class OrderController {
     public List<TopProductDTO> getTopSellingProductsThisYear() {
         return orderService.getTopSellingProductsThisYear();
     }
+
     @GetMapping("/count/orders")
     public Long countAllOrders() {
         return orderService.countAllOrders();

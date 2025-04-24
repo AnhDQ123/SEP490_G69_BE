@@ -267,6 +267,7 @@ public class ReportServiceImpl implements ReportService {
             Product product=productRepository.findById(report.getRelatedId()).get();
             productRepository.save(product);
         }
+        report.setStatus(ReportStatus.COMPLETED);
         reportRepository.save(report);
     }
 

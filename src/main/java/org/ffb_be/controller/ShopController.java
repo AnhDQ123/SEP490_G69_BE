@@ -143,6 +143,7 @@ public class ShopController {
         shopService.approveShop(shopId);
         return ResponseEntity.ok().build();
     }
+    
     @GetMapping("/count/day")
     public List<CountByDateDTO> getShopCountByDayAndStatus(
             @RequestParam("status") String status) {
