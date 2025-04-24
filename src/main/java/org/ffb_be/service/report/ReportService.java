@@ -31,4 +31,5 @@ public interface ReportService {
     Long countAllReports();
     void updateReportStatus(Long id);
     Long countAllByShop(Long shopId);
+    double reportChangeRate();
 }

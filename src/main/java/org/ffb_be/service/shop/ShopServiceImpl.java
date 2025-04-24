@@ -261,14 +261,19 @@ public class ShopServiceImpl implements ShopService {
     @Transactional
     @Override
     public void updateShopStatus(Long shopId, Status newStatus, String reason) {
+        // Fetch the shop by its ID
         Shop shop = shopRepository.findById(shopId)
-                .orElseThrow(() -> new NotFoundException("Shop"));
+                .orElseThrow(() -> new NotFoundException("Shop not found"));
 
+        // Check if the shop is already in the desired status
         if (shop.getIsActive() == newStatus) {
+            // If the status is already the same, throw an exception
             throw new BadRequestException("Shop đã ở trạng thái này rồi");
         }
 
+        // Update the shop's status
         shop.setIsActive(newStatus);
+        // Save the updated shop object
         shopRepository.save(shop);
     }
 

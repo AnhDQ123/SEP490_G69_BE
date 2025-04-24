@@ -10,6 +10,5 @@ import org.mapstruct.Mapping;
 public interface DeliveryMapper {
     DeliveryDTO toDTO(DeliveryMethod deliveryMethod);
 
-    @Mapping(target = "id", ignore = true)
     DeliveryMethod toEntity(DeliveryDTO deliveryDTO);
 }

@@ -11,6 +11,7 @@ import org.ffb_be.entity.Role;
 import org.ffb_be.entity.User;
 import org.ffb_be.exception.BadRequestException;
 import org.ffb_be.exception.NotFoundException;
+import org.ffb_be.repository.OrderRepository;
 import org.ffb_be.repository.ProfileRepository;
 import org.ffb_be.repository.RoleRepository;
 import org.ffb_be.repository.UserRepository;
@@ -26,7 +27,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Service
@@ -38,6 +41,7 @@ public class ShipperServiceImpl implements ShipperService {
     private final CloudinaryUpload cloudinaryUpload;
     private final EncryptUtil encryptUtil;
     private final ShipperMapper shipperMapper;
+    private final OrderRepository orderRepository;
 
     @Override
     public void registerShipper(
@@ -147,17 +151,41 @@ public class ShipperServiceImpl implements ShipperService {
 
     @Override
     public void shipperStatus(Long userId, ShipperStatus status, String reason) {
+        // Tìm người dùng từ userId
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User"));
-        if(status == ShipperStatus.INACTIVE) {
+
+        // Kiểm tra nếu trạng thái hiện tại là ACTIVE và cố gắng chuyển sang ACTIVE
+        if (user.getShipperStatus() == ShipperStatus.ACTIVE && status == ShipperStatus.ACTIVE) {
+            throw new IllegalStateException("Update status failed");
+        }
+
+        // Kiểm tra nếu trạng thái hiện tại là INACTIVE và cố gắng chuyển sang INACTIVE
+        if (user.getShipperStatus() == ShipperStatus.INACTIVE && status == ShipperStatus.INACTIVE) {
+            throw new IllegalStateException("Update status failed");
+        }
+
+        // Nếu trạng thái là INACTIVE, thêm lý do từ người dùng
+        if (status == ShipperStatus.INACTIVE) {
+            if (reason == null || reason.trim().isEmpty()) {
+                throw new IllegalArgumentException("Reason is required when setting status to INACTIVE");
+            }
             user.setRejectReason(reason);
         }
-        if(status == ShipperStatus.ACTIVE) {
+
+        // Nếu trạng thái là ACTIVE, xóa lý do từ người dùng
+        if (status == ShipperStatus.ACTIVE) {
             user.setRejectReason(null);
         }
+
+        // Cập nhật trạng thái mới cho người dùng
         user.setShipperStatus(status);
+
+        // Lưu người dùng vào cơ sở dữ liệu
         userRepository.save(user);
     }
+
+
 
     @Override
     public void updateShipperInfo(
@@ -297,6 +325,15 @@ public class ShipperServiceImpl implements ShipperService {
         User user=userRepository.findById(userId).get();
         user.setDeliveryStatus(DeliveryStatus.AVAILABLE);
         userRepository.save(user);
+    }
+
+    @Override
+    public BigDecimal shipperBalance(Long userId) {
+        LocalDateTime startOfThisMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay();
+        LocalDateTime endOfThisMonth = LocalDate.now().plusMonths(1).withDayOfMonth(1).atStartOfDay().minusNanos(1);
+        long a=orderRepository.countOrdersByShipper_Id(userId,startOfThisMonth,endOfThisMonth);
+        BigDecimal b=BigDecimal.valueOf(10000);
+        return b.multiply(BigDecimal.valueOf(a));
     }
 
     private ShipperInfoDTO decryptDTO(User user) {

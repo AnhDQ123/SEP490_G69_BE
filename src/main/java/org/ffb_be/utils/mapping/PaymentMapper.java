@@ -9,6 +9,5 @@ import org.mapstruct.Mapping;
 public interface PaymentMapper {
     PaymentDTO toDTO(Payment payment);
 
-    @Mapping(target = "id", ignore = true)
     Payment toEntity(PaymentDTO paymentDTO);
 }

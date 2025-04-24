@@ -267,11 +267,23 @@ public class ReportServiceImpl implements ReportService {
             Product product=productRepository.findById(report.getRelatedId()).get();
             productRepository.save(product);
         }
+        report.setStatus(ReportStatus.COMPLETED);
         reportRepository.save(report);
     }
 
     @Override
     public Long countAllByShop(Long shopId) {
         return reportRepository.countAllReportsByShop(shopId);
+    }
+
+    @Override
+    public double reportChangeRate() {
+        LocalDateTime startOfLastMonth = LocalDate.now().minusMonths(1).withDayOfMonth(1).atStartOfDay();
+        LocalDateTime endOfLastMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay().minusNanos(1);
+        double a=reportRepository.countPendingReportByMonth(startOfLastMonth, endOfLastMonth);
+        LocalDateTime startOfThisMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay();
+        LocalDateTime endOfThisMonth = LocalDate.now().plusMonths(1).withDayOfMonth(1).atStartOfDay().minusNanos(1);
+        double b=reportRepository.countPendingReportByMonth(startOfThisMonth, endOfThisMonth);
+        return (b-a)/a*100;
     }
 }

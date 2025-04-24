@@ -3,7 +3,6 @@ package org.ffb_be.controller;
 import lombok.RequiredArgsConstructor;
 import org.ffb_be.dto.blog.BlogDTO;
 import org.ffb_be.service.blog.BlogService;
-import org.ffb_be.utils.constants.PagingConstant;
 import org.ffb_be.utils.enums.Status;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -79,18 +78,28 @@ public class BlogController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteBlog(@PathVariable Long id) {
         blogService.deleteBlog(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok().body("Xóa bài viết thành công");
     }
 
     @PutMapping("/{id}/active")
     public ResponseEntity<?> activeBlog(@PathVariable Long id) {
-        blogService.blogStatusUpdate(id, Status.ACTIVE, null);
-        return ResponseEntity.ok().build();
+        try {
+            blogService.blogStatusUpdate(id, Status.ACTIVE, null);
+            return ResponseEntity.ok("Chuyển trạng thái thành công");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Chuyển trạng thái thất bại");
+        }
     }
 
     @PutMapping("/{id}/inactive")
     public ResponseEntity<?> inactiveBlog(@PathVariable Long id, @RequestParam String reason) {
-        blogService.blogStatusUpdate(id, Status.INACTIVE, reason);
-        return ResponseEntity.ok().build();
+        try {
+            blogService.blogStatusUpdate(id, Status.INACTIVE, reason);
+            return ResponseEntity.ok("Chuyển trạng thái thành công");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Chuyển trạng thái thất bại");
+        }
     }
 }

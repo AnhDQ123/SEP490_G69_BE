@@ -39,9 +39,6 @@ public class PaymentServiceImpl implements PaymentService {
         if (paymentMethod.getName() == null || paymentMethod.getName().isEmpty()) {
             throw new IllegalArgumentException("Tên phương thức thanh toán không được để trống");
         }
-        if (paymentMethod.getFee() == null || paymentMethod.getFee().compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException("Phí thanh toán không hợp lệ");
-        }
         Payment payment = paymentMapper.toEntity(paymentMethod);
         payment.setStatus(Status.ACTIVE);
         payment.setCreatedAt(LocalDateTime.now());
@@ -60,12 +57,9 @@ public class PaymentServiceImpl implements PaymentService {
         if (updatedPaymentMethod.getName() == null || updatedPaymentMethod.getName().isEmpty()) {
             throw new IllegalArgumentException("Tên phương thức thanh toán không được để trống");
         }
-        if (updatedPaymentMethod.getFee() == null || updatedPaymentMethod.getFee().compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException("Phí thanh toán không hợp lệ");
-        }
-
         paymentMethod = paymentMapper.toEntity(updatedPaymentMethod);
         paymentMethod.setUpdatedAt(LocalDateTime.now());
+        paymentMethod.setId(id);
         return paymentRepository.save(paymentMethod);
     }
 
