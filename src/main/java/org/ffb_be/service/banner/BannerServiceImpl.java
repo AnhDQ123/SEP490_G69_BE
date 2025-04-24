@@ -9,6 +9,7 @@ import org.ffb_be.exception.NotFoundException;
 import org.ffb_be.repository.ImageRepository;
 import org.ffb_be.repository.ShopRepository;
 import org.ffb_be.repository.TypesRepository;
+import org.ffb_be.utils.enums.Status;
 import org.ffb_be.utils.enums.TypesCategory;
 import org.ffb_be.utils.enums.upload.CloudinaryUpload;
 import org.ffb_be.utils.mapping.ImageMapper;
@@ -72,6 +73,21 @@ public class BannerServiceImpl implements BannerService {
         banner.setUpdatedAt(LocalDateTime.now());
         imageRepository.save(banner);
     }
+
+    @Override
+    public void activeBanner(Long id) {
+        Image image=imageRepository.findById(id).get();
+        image.setStatus(Status.ACTIVE);
+        imageRepository.save(image);
+    }
+
+    @Override
+    public void inactivateBanner(Long id) {
+        Image image=imageRepository.findById(id).get();
+        image.setStatus(Status.INACTIVE);
+        imageRepository.save(image);
+    }
+
 
     @Override
     public void delete(Long id) {

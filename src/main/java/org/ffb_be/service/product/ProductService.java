@@ -3,6 +3,7 @@ package org.ffb_be.service.product;
 
 import org.ffb_be.dto.product.ProductCreateDTO;
 import org.ffb_be.dto.product.ProductResponseDTO;
+import org.ffb_be.dto.product.TopProductDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -23,9 +24,9 @@ public interface ProductService {
     List<ProductResponseDTO> findByCategory(String cat);
     ProductResponseDTO findById(Long id);
     List<ProductResponseDTO> findSimimlarProduct(String name);
-    List<Object[]> findTopSellingProductsToday(Long shopId);
-    List<Object[]> findTopSellingProductsThisMonth(Long shopId);
-    List<Object[]> findTopSellingProductsThisYear(Long shopId);
+    List<TopProductDTO> findTopSellingProductsToday(Long shopId);
+    List<TopProductDTO> findTopSellingProductsThisMonth(Long shopId);
+    List<TopProductDTO> findTopSellingProductsThisYear(Long shopId);
     List<ProductResponseDTO> findByCategoryByShop(Long shopId);
     List<ProductResponseDTO> searchHighlySimilarProducts(String query, int page, int size);
     String syncAllProducts();

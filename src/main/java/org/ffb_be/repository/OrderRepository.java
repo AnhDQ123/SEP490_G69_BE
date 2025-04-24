@@ -195,4 +195,10 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     Double countOrderByMonth( LocalDateTime startDate,
                                       LocalDateTime endDate);
     Long countAllByStatus(OrderStatus status);
+    @Query("SELECT COUNT(u) " +
+            "FROM Order u " +
+            "WHERE u.shipper.id=:shipperId and u.createdAt >= :startDate " +
+            "AND u.createdAt < :endDate")
+    long countOrdersByShipper_Id(Long shipperId,LocalDateTime startDate,
+                                 LocalDateTime endDate);
 }

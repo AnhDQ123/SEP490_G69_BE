@@ -11,6 +11,7 @@ import org.ffb_be.entity.Role;
 import org.ffb_be.entity.User;
 import org.ffb_be.exception.BadRequestException;
 import org.ffb_be.exception.NotFoundException;
+import org.ffb_be.repository.OrderRepository;
 import org.ffb_be.repository.ProfileRepository;
 import org.ffb_be.repository.RoleRepository;
 import org.ffb_be.repository.UserRepository;
@@ -26,7 +27,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Service
@@ -38,6 +41,7 @@ public class ShipperServiceImpl implements ShipperService {
     private final CloudinaryUpload cloudinaryUpload;
     private final EncryptUtil encryptUtil;
     private final ShipperMapper shipperMapper;
+    private final OrderRepository orderRepository;
 
     @Override
     public void registerShipper(
@@ -321,6 +325,15 @@ public class ShipperServiceImpl implements ShipperService {
         User user=userRepository.findById(userId).get();
         user.setDeliveryStatus(DeliveryStatus.AVAILABLE);
         userRepository.save(user);
+    }
+
+    @Override
+    public BigDecimal shipperBalance(Long userId) {
+        LocalDateTime startOfThisMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay();
+        LocalDateTime endOfThisMonth = LocalDate.now().plusMonths(1).withDayOfMonth(1).atStartOfDay().minusNanos(1);
+        long a=orderRepository.countOrdersByShipper_Id(userId,startOfThisMonth,endOfThisMonth);
+        BigDecimal b=BigDecimal.TEN;
+        return b.multiply(BigDecimal.valueOf(a));
     }
 
     private ShipperInfoDTO decryptDTO(User user) {

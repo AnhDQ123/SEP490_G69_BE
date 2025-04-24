@@ -178,40 +178,33 @@ public class ShopController {
     }
     @GetMapping("/revenue/day")
     public Map<Date, BigDecimal> calculateShopRevenueByDay(
-            @RequestParam("startDate") String startDate,
-            @RequestParam("endDate") String endDate,
             @RequestParam("shopId") Long shopId) {
 
-        LocalDate start = LocalDate.parse(startDate);
-        LocalDate end = LocalDate.parse(endDate);
-
-        return orderService.calculateShopRevenueByDay(start, end, shopId);
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusDays(7);
+        return orderService.calculateShopRevenueByDay(startDate, endDate, shopId);
     }
 
     // API để tính tổng doanh thu theo tháng cho cửa hàng cụ thể
     @GetMapping("/revenue/month")
     public Map<String, BigDecimal> calculateShopRevenueByMonth(
-            @RequestParam("startDate") String startDate,
-            @RequestParam("endDate") String endDate,
             @RequestParam("shopId") Long shopId) {
 
-        LocalDate start = LocalDate.parse(startDate);
-        LocalDate end = LocalDate.parse(endDate);
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusMonths(7);
 
-        return orderService.calculateShopRevenueByMonth(start, end, shopId);
+        return orderService.calculateShopRevenueByMonth(startDate, endDate, shopId);
     }
 
     // API để tính tổng doanh thu theo năm cho cửa hàng cụ thể
     @GetMapping("/revenue/year")
     public Map<Integer, BigDecimal> calculateShopRevenueByYear(
-            @RequestParam("startDate") String startDate,
-            @RequestParam("endDate") String endDate,
             @RequestParam("shopId") Long shopId) {
 
-        LocalDate start = LocalDate.parse(startDate);
-        LocalDate end = LocalDate.parse(endDate);
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusYears(3);
 
-        return orderService.calculateShopRevenueByYear(start, end, shopId);
+        return orderService.calculateShopRevenueByYear(startDate, endDate, shopId);
     }
     @GetMapping("/shop/shopId")
     public Long shopId( @RequestParam("productId") Long productId) {
