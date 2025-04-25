@@ -2,10 +2,7 @@ package org.ffb_be.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.ffb_be.service.map.MapService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -15,8 +12,17 @@ import java.util.Map;
 public class MapController {
     private final MapService mapService;
 
-    @GetMapping("/geocode")
-    public double[] getCoordinates(@RequestParam String address) {
-        return mapService.getCoordinates(address);
+    @GetMapping("/geocode/{address}")
+    public String getGeocode(@PathVariable String address) {
+        return mapService.getGeocode(address);
+    }
+
+    @GetMapping("/reverse-geocode/{lat}/{lng}")
+    public String getReverseGeocode(@PathVariable double lat, @PathVariable double lng) {
+        return mapService.getReverseGeocode(lat, lng);
+    }
+    @GetMapping("/getRoute")
+    public String getRoute(@RequestParam String origin, @RequestParam String destination) {
+        return mapService.getRoute(origin, destination);
     }
 }

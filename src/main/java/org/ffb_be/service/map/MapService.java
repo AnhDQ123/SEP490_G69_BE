@@ -1,58 +1,54 @@
 package org.ffb_be.service.map;
 
+import lombok.RequiredArgsConstructor;
 import org.cloudinary.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
-
+@RequiredArgsConstructor
 @Service
 @Transactional
 public class MapService {
 
-    @Value("${mapbox.api.key}")
-    private String API_KEY;
+    @Value("${google.maps.api.key}")  // Lấy API Key từ application.properties
+    private String apiKey;
+    @Value("${routes.api.key}")  // Lấy API Key từ application.properties
+    private String ROUTES_API_URL;
+    private final RestTemplate restTemplate=new RestTemplate();
 
-    private final String GEOCODING_URL = "https://api.mapbox.com/geocoding/v5/mapbox.places/%s.json?access_token=%s&country=VN";
 
-    public double[] getCoordinates(String address) {
-        try {
-            // Xử lý encode địa chỉ
-            String formattedAddress = address.replace(" ", "%20");
-            String url = String.format(GEOCODING_URL, formattedAddress, API_KEY);
 
-            // Gửi request
-            RestTemplate restTemplate = new RestTemplate();
-            String response = restTemplate.getForObject(url, String.class);
+    public String getGeocode(String address) {
+        String url = "https://maps.googleapis.com/maps/api/geocode/json?address=" + address + "&key=" + apiKey;
 
-            // Kiểm tra response
-            if (response == null) {
-                System.out.println("⚠️ Không nhận được phản hồi từ Mapbox.");
-                return null;
-            }
+        // Gửi yêu cầu HTTP GET và nhận kết quả JSON
+        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
 
-            // Parse JSON
-            JSONObject json = new JSONObject(response);
-            if (!json.has("features") || json.getJSONArray("features") == null) {
-                System.out.println("⚠️ Không tìm thấy tọa độ cho địa chỉ: " + address);
-                return null;
-            }
+        // Trả về kết quả JSON
+        return response.getBody();
+    }
 
-            // Lấy tọa độ từ response
-            JSONObject location = json.getJSONArray("features").getJSONObject(0);
-            double lng = location.getJSONArray("center").getDouble(0);
-            double lat = location.getJSONArray("center").getDouble(1);
-            return new double[]{lat, lng};
+    public String getReverseGeocode(double lat, double lng) {
+        String url = "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + lat + "," + lng + "&key=" + apiKey;
 
-        } catch (HttpClientErrorException e) {
-            System.out.println("🚨 Lỗi HTTP: " + e.getStatusCode() + " - " + e.getResponseBodyAsString());
-        } catch (RestClientException e) {
-            System.out.println("🚨 Lỗi kết nối API Mapbox: " + e.getMessage());
-        } catch (Exception e) {
-            System.out.println("🚨 Lỗi không xác định: " + e.getMessage());
-        }
-        return null;
+        // Gửi yêu cầu HTTP GET và nhận kết quả JSON
+        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+
+        // Trả về kết quả JSON
+        return response.getBody();
+    }
+    public String getRoute(String origin, String destination) {
+        // Tạo URL với các tham số cần thiết
+        String url = ROUTES_API_URL + "?origin=" + origin + "&destination=" + destination + "&key=" + apiKey;
+
+        // Gửi yêu cầu GET đến API của Google Maps
+        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+
+        // Trả về kết quả dưới dạng JSON (có thể phân tích dữ liệu theo nhu cầu)
+        return response.getBody();
     }
 }
