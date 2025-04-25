@@ -140,6 +140,7 @@ public class OrderServiceImpl implements OrderService {
         order.setOwner(userRepository.findById(orderDTO.getOwnerId()).get());
         order.setPaymentMethod(paymentRepository.findById(orderDTO.getPaymentMethodId()).get());
         order.setDeliveryMethod(deliveryMethodRepository.findById(orderDTO.getShipMethodId()).get());
+        order.setCreatedAt(LocalDateTime.now());
         orderRepository.save(order);
 
         BigDecimal orderTotal = BigDecimal.ZERO;
@@ -280,7 +281,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Page<OrderDTO> findAllByOwnerAndStatus(Long id, OrderStatus status, Pageable pageable) {
-        Page<Order> orders = orderRepository.findAllByOwner_IdAndStatus(id, status, pageable);
+        Page<Order> orders = orderRepository.findALlByOwner_IdAndStatusOrderByCreatedAt(id, status, pageable);
         return toDTO(orders,pageable);
     }
 
@@ -409,7 +410,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Page<OrderDTO> findAllByShipper(Long id, Pageable pageable,OrderStatus status) {
-        Page<Order> orders = orderRepository.findAllByShipper_IdAndStatus(id,status,pageable);
+        Page<Order> orders = orderRepository.findAllByShipper_IdAndStatusOrderByCreatedAt(id,status,pageable);
         return toDTO(orders,pageable);
     }
 

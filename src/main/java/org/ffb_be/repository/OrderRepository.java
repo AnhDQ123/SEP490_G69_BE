@@ -25,7 +25,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "ORDER BY totalQuantity DESC")
     List<Object[]> findTopSellingProducts();
 
-    Page<Order> findAllByOwner_IdAndStatus(Long ownerId, OrderStatus status, Pageable pageable);
+    Page<Order> findALlByOwner_IdAndStatusOrderByCreatedAt(Long ownerId, OrderStatus status, Pageable pageable);
     @Override
     Optional<Order> findById(Long aLong);
 
@@ -37,7 +37,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("SELECT DISTINCT o FROM Order o " +
             "JOIN o.orderItems oi " +
             "JOIN oi.product p " +
-            "WHERE p.shop.id = :shopId AND o.status = :status")
+            "WHERE p.shop.id = :shopId AND o.status = :status" +
+            " order by o.createdAt ")
     Page<Order> findOrdersByShopIdAndStatus( Long shopId, OrderStatus status,Pageable pageable);
 
     @Query("""
@@ -196,7 +197,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
                                       LocalDateTime endDate);
     Long countAllByStatus(OrderStatus status);
 
-    Page<Order> findAllByShipper_IdAndStatus(Long shipperId, OrderStatus status, Pageable pageable);
+    Page<Order> findAllByShipper_IdAndStatusOrderByCreatedAt(Long shipperId, OrderStatus status, Pageable pageable);
     @Query("SELECT COUNT(u) " +
             "FROM Order u " +
             "WHERE u.shipper.id=:shipperId and u.createdAt >= :startDate " +
