@@ -16,15 +16,10 @@ public class FireBaseConfig {
 
     @Bean
     public FirebaseMessaging firebaseMessaging() throws IOException {
-        // Tải thông tin xác thực từ tài khoản dịch vụ đã được xác thực bởi Google Cloud SDK
-        InputStream credentialsStream = getClass().getClassLoader().getResourceAsStream("serviceAccountKey.json");
-
-        if (credentialsStream == null) {
-            throw new IOException("Unable to find the service account key file.");
-        }
+        FileInputStream serviceAccount = new FileInputStream("src/main/resources/serviceAccountKey.json");
 
         FirebaseOptions options = FirebaseOptions.builder()
-                .setCredentials(GoogleCredentials.fromStream(credentialsStream))
+                .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                 .build();
 
         FirebaseApp.initializeApp(options);
