@@ -7,6 +7,8 @@ import com.google.firebase.messaging.Notification;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import com.google.auth.oauth2.GoogleCredentials;
+import org.springframework.core.io.ClassPathResource;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,13 +18,15 @@ public class FireBaseConfig {
 
     @Bean
     public FirebaseMessaging firebaseMessaging() throws IOException {
-        FileInputStream serviceAccount = new FileInputStream("src/main/resources/serviceAccountKey.json");
+        InputStream serviceAccount = new ClassPathResource("serviceAccountKey.json").getInputStream();
 
         FirebaseOptions options = FirebaseOptions.builder()
                 .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                 .build();
 
-        FirebaseApp.initializeApp(options);
+        if (FirebaseApp.getApps().isEmpty()) {
+            FirebaseApp.initializeApp(options);
+        }
 
         return FirebaseMessaging.getInstance();
     }
