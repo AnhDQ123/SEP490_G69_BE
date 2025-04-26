@@ -64,7 +64,7 @@ public class VoucherServiceImpl implements VoucherService {
         if (voucher.getStartDate().isEqual(LocalDate.now())) {
             voucher.setStatus(Status.ACTIVE);
         }
-        dto.setDiscountValue(voucher.getDiscountValue().divide(BigDecimal.valueOf(100)));
+        dto.setDiscountValue(dto.getDiscountValue().divide(BigDecimal.valueOf(100)));
         voucher.setShop(shopRepository.getById(shopId));
         voucher = voucherRepository.save(voucher);
         return voucherMapper.toDTO(voucher);
