@@ -142,7 +142,7 @@ public class OrderServiceImpl implements OrderService {
         order.setDeliveryMethod(deliveryMethodRepository.findById(orderDTO.getShipMethodId()).get());
         order.setCreatedAt(LocalDateTime.now());
         orderRepository.save(order);
-
+        order.setShippingAddress(orderDTO.getAddress());
         BigDecimal orderTotal = BigDecimal.ZERO;
         List<OrderItemDTO> orderItemDTOList = orderDTO.getOrderItem();
         List<OrderItem> orderItemList = new ArrayList<>();
