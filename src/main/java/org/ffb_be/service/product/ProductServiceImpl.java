@@ -65,6 +65,8 @@ public class ProductServiceImpl implements ProductService {
         product.setCategory(category);
         product.setType(SellType.valueOf(productCreateDTO.getFoodType()));
         product.setStatus(Status.ACTIVE);
+        product.setCreatedAt(LocalDateTime.now());
+        product.setExpired_date(LocalDate.from(LocalDateTime.now().plusDays(1)));
         if (avatar != null && !avatar.isEmpty()) {
             System.out.println("Uploading Avatar: " + avatar.getOriginalFilename());
             String url = cloudinaryUpload.uploadFile(avatar);
@@ -89,6 +91,7 @@ public class ProductServiceImpl implements ProductService {
             foodOption.setImage(foodOptionDTO.getImage());
             foodOption.setStatus(Status.ACTIVE);
             foodOption.setPrice(foodOptionDTO.getPrice());
+            foodOption.setCreatedAt(LocalDateTime.now());
             foodOption.setType(typesRepository.findById(foodOptionDTO.getType_id()).get());
             foodOption.setFood(productRepository.findById(foodOptionDTO.getProduct_id()).get());
             foodOptions.add(foodOption);
