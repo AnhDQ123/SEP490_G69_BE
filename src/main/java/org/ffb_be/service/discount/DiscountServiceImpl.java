@@ -32,6 +32,7 @@ public class DiscountServiceImpl implements DiscountService{
         if (discount.getStartDate().isEqual(LocalDate.now())) {
             discountEntity.setStatus(Status.ACTIVE);
         }
+        discountEntity.setShop(productRepository.findById(productId).get().getShop());
         Product product=productRepository.findById(productId).get();
         discountEntity.setProduct(product);
         discountRepository.save(discountEntity);

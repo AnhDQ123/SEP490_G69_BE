@@ -192,7 +192,7 @@ public class OrderServiceImpl implements OrderService {
                         for (Discount discount : discounts) {
                             if (discount.getStatus().equals(Status.ACTIVE)) {
                                 orderItem.setDiscountValue(discount.getDiscount_percentage());
-                            }
+                            }else orderItem.setDiscountValue(BigDecimal.ZERO);
                         }
                     } else {
                         orderItem.setDiscountValue(BigDecimal.ZERO);
