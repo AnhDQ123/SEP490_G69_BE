@@ -56,6 +56,7 @@ public class VoucherServiceImpl implements VoucherService {
 
     @Override
     public VoucherDTO addVoucher(VoucherDTO dto, Long shopId) {
+        dto.setDiscountValue(dto.getDiscountValue().divide(BigDecimal.valueOf(100)));
         Voucher voucher = voucherMapper.toEntity(dto);
         if (voucher == null) {
             throw new BadRequestException("Voucher could not be created.");
@@ -64,7 +65,8 @@ public class VoucherServiceImpl implements VoucherService {
         if (voucher.getStartDate().isEqual(LocalDate.now())) {
             voucher.setStatus(Status.ACTIVE);
         }
-        dto.setDiscountValue(dto.getDiscountValue().divide(BigDecimal.valueOf(100)));
+
+
         voucher.setShop(shopRepository.getById(shopId));
         voucher = voucherRepository.save(voucher);
         return voucherMapper.toDTO(voucher);
