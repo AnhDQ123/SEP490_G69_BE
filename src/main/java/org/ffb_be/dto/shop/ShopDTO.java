@@ -31,4 +31,7 @@ public class ShopDTO {
     private Boolean isShipping;
     private Boolean isOpening;
     private OwnerDTO owner;
+    private Double longitude;
+    private Double latitude;
+
 }

@@ -38,7 +38,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "JOIN o.orderItems oi " +
             "JOIN oi.product p " +
             "WHERE p.shop.id = :shopId AND o.status = :status" +
-            " order by o.createdAt ")
+            " order by o.createdAt desc ")
     Page<Order> findOrdersByShopIdAndStatus( Long shopId, OrderStatus status,Pageable pageable);
 
     @Query("""
