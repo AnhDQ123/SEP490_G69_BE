@@ -119,16 +119,13 @@ public class ShipperServiceImpl implements ShipperService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User"));
 
-        if (!Objects.equals(user.getRole().getName(), "Shipper")) {
+        if (user.getShipperStatus() == ShipperStatus.ACTIVE) {
             throw new BadRequestException("User đã là shipper.");
         }
 
         if (user.getShipperStatus() != ShipperStatus.PENDING) {
             throw new BadRequestException("Chỉ có thể duyệt shipper đang ở trạng thái chờ.");
         }
-        Role role = roleRepository.getByName("Shipper")
-                .orElseThrow(() ->new NotFoundException("Role"));
-        user.setRole(role);
         user.setShipperStatus(ShipperStatus.ACTIVE);
         user.setDeliveryStatus(DeliveryStatus.AVAILABLE);
         userRepository.save(user);

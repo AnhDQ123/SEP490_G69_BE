@@ -21,7 +21,7 @@ public class Config extends BaseEntity{
     @Column(nullable = false)
     private ConfigCategory category;
 
-    @Column(name = "config_key", nullable = false, unique = true)
+    @Column(name = "config_key", nullable = false)
     private String key;
 
     @Column(nullable = false)
