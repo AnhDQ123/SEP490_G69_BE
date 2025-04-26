@@ -1,6 +1,8 @@
 package org.ffb_be.service.shop;
 
 import lombok.AllArgsConstructor;
+import org.cloudinary.json.JSONArray;
+import org.cloudinary.json.JSONObject;
 import org.ffb_be.dto.CountDTOBy.CountByDateDTO;
 import org.ffb_be.dto.CountDTOBy.CountByMonthDTO;
 import org.ffb_be.dto.CountDTOBy.CountByYearDTO;
@@ -13,6 +15,7 @@ import org.ffb_be.entity.*;
 import org.ffb_be.exception.BadRequestException;
 import org.ffb_be.exception.NotFoundException;
 import org.ffb_be.repository.*;
+import org.ffb_be.service.map.MapService;
 import org.ffb_be.utils.EncryptUtil;
 import org.ffb_be.utils.enums.Status;
 import org.ffb_be.utils.enums.upload.CloudinaryUpload;
@@ -48,6 +51,7 @@ public class ShopServiceImpl implements ShopService {
     private final RoleRepository roleRepository;
     private final TypesRepository typesRepository;
     private final ImageRepository imageRepository;
+    private final MapService mapService;
     @Override
     public Page<ShopDTO> getShops(String type, String status, String search, Pageable pageable) {
         Specification<Shop> spec = Specification.where(null);
@@ -99,9 +103,20 @@ public class ShopServiceImpl implements ShopService {
         if (owner.getRole().getName().equals("Shipper")) {
             throw new BadRequestException("User không thể tạo cửa hàng vì là shipper");
         }
+        JSONObject jsonObject = new JSONObject(mapService.getGeocode(shopDTO.getAddress()));
+
+        JSONArray results = jsonObject.getJSONArray("results");
+        JSONObject geometry = results.getJSONObject(0).getJSONObject("geometry");
+        JSONObject location = geometry.getJSONObject("location");
+
+        // Lấy vĩ độ và kinh độ
+        double latitude = location.getDouble("lat");
+        double longitude = location.getDouble("lng");
 
         Shop shop = shopMapper.toEntity(shopDTO);
         shop.setOwner(owner);
+        shop.setLatitude(latitude);
+        shop.setLongitude(longitude);
         shop.setIsActive(Status.PENDING);
         shop.setCreatedAt(LocalDateTime.now());
         String logoUrl = cloudinaryUpload.uploadFile(logo);
