@@ -134,7 +134,7 @@ public class VoucherServiceImpl implements VoucherService {
 
         BigDecimal discountAmount;
         if (voucher.getDiscountType() == DiscountType.PERCENTAGE) {
-            discountAmount = orderTotal.multiply(voucher.getDiscountValue()).divide(BigDecimal.valueOf(100));
+            discountAmount = orderTotal.multiply(voucher.getDiscountValue());
         } else {
             discountAmount = voucher.getDiscountValue();
         }
