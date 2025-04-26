@@ -6,6 +6,7 @@ import org.ffb_be.entity.Shop;
 import org.ffb_be.exception.NotFoundException;
 import org.ffb_be.repository.OrderRepository;
 import org.ffb_be.repository.ShopRepository;
+import org.ffb_be.utils.EncryptUtil;
 import org.ffb_be.utils.enums.upload.CloudinaryUpload;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -37,12 +38,14 @@ public class QrServiceImpl implements QrService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
+    private final EncryptUtil encryptUtil;
+
     @Override
     public String generateQrCode(Long orderId, Long shopId) {
         Order order = orderRepository.findById(orderId).orElseThrow (() -> new NotFoundException("Order"));
         Shop shop = shopRepository.findById(shopId).orElseThrow(() -> new NotFoundException("Shop"));
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("accountNo", shop.getAccountNumber());
+        requestBody.put("accountNo", decryptSafe(shop.getAccountNumber()));
         requestBody.put("accountName", shop.getName());
         requestBody.put("acqId", shop.getBankCode());
         requestBody.put("amount", order.getTotal());
@@ -78,4 +81,7 @@ public class QrServiceImpl implements QrService {
         orderRepository.save(order);
     }
 
+    private String decryptSafe(String data) {
+        return data != null ? encryptUtil.decrypt(data) : null;
+    }
 }
