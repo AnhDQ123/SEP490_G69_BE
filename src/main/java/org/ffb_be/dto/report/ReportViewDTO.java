@@ -14,6 +14,8 @@ public class ReportViewDTO {
     private Long reporterId;
     private Long reportedUserId;
     private Long reportItemId;
+    private Long shipperId;
+    private Long shopId;
     private String reason;
     private LocalDateTime createdAt;
     private String status;

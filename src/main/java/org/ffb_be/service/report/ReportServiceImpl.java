@@ -83,6 +83,8 @@ public class ReportServiceImpl implements ReportService {
             reportViewDTO.setReportName(orderRepository.findById(report.getRelatedId()).get().getOwner().getUsername());
             reportViewDTO.setReportedUserId(orderRepository.findById(report.getRelatedId()).get().getOwner().getId());
             reportViewDTO.setReportItemId(report.getRelatedId());
+            reportViewDTO.setShipperId(orderRepository.findById(report.getRelatedId()).get().getShipper().getId());
+            reportViewDTO.setShopId(orderRepository.findById(report.getRelatedId()).get().getShop().getId());
             reportViewDTO.setReportType("ORDER");
         }
         if(report.getType().getId()==5L){
