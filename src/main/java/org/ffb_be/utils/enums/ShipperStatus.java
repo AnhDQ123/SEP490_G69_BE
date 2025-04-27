@@ -4,4 +4,5 @@ public enum ShipperStatus {
     PENDING,
     ACTIVE,
     INACTIVE,
+    REJECTED,
 }

@@ -18,7 +18,7 @@ import java.time.LocalTime;
 @Validated
 public class ShopRegisterDTO {
     @NotBlank(message = "Name cannot be blank")
-    @Size(max = 20, message = "Name cannot be longer than 20 characters")
+    @Size(max = 20, min = 5, message = "Name must contain at least 5 characters and cannot be longer than 20 characters")
     private String name;
 
     @NotBlank(message = "Description cannot be blank")

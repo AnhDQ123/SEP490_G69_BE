@@ -119,7 +119,7 @@ public class ShipperServiceImpl implements ShipperService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User"));
 
-        if (!Objects.equals(user.getRole().getName(), "Shipper")) {
+        if (user.getShipperStatus() == ShipperStatus.ACTIVE) {
             throw new BadRequestException("User đã là shipper.");
         }
 
@@ -129,6 +129,7 @@ public class ShipperServiceImpl implements ShipperService {
         Role role = roleRepository.getByName("Shipper")
                 .orElseThrow(() ->new NotFoundException("Role"));
         user.setRole(role);
+        user.setRejectReason(null);
         user.setShipperStatus(ShipperStatus.ACTIVE);
         user.setDeliveryStatus(DeliveryStatus.AVAILABLE);
         userRepository.save(user);
@@ -152,6 +153,9 @@ public class ShipperServiceImpl implements ShipperService {
 
     @Override
     public void shipperStatus(Long userId, ShipperStatus status, String reason) {
+        if(status != ShipperStatus.ACTIVE && status != ShipperStatus.INACTIVE) {
+            throw new IllegalStateException("Update status failed");
+        }
         // Tìm người dùng từ userId
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User"));
@@ -171,12 +175,14 @@ public class ShipperServiceImpl implements ShipperService {
             if (reason == null || reason.trim().isEmpty()) {
                 throw new IllegalArgumentException("Reason is required when setting status to INACTIVE");
             }
+            user.setDeliveryStatus(null);
             user.setRejectReason(reason);
         }
 
         // Nếu trạng thái là ACTIVE, xóa lý do từ người dùng
         if (status == ShipperStatus.ACTIVE) {
             user.setRejectReason(null);
+            user.setDeliveryStatus(DeliveryStatus.AVAILABLE);
         }
 
         // Cập nhật trạng thái mới cho người dùng
