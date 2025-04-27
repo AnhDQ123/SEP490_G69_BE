@@ -46,6 +46,7 @@ public class ShopServiceImpl implements ShopService {
     private final ShopMapper shopMapper;
     private final UserRepository userRepository;
     private final ProfileRepository profileRepository;
+    private final ProductRepository productRepository;
     private final CloudinaryUpload cloudinaryUpload;
     private final EncryptUtil encryptUtil;
     private final RoleRepository roleRepository;
@@ -142,13 +143,17 @@ public class ShopServiceImpl implements ShopService {
         if (shopDTO.getCitizenIDExpiredDate() != null && shopDTO.getCitizenIDExpiredDate().isBefore(LocalDate.now().plusYears(1))) {
             throw new BadRequestException("Giấy tờ tùy thân đã hết hạn!");
         }
-
+        //Set role tam thoi
+        Role role = roleRepository.getByName("Shopkeeper")
+                .orElseThrow(() -> new NotFoundException("Role"));
+        owner.setRole(role);
         // Mã hóa thông tin nhạy cảm
         shop.setAccountNumber(encryptSafe(shopDTO.getAccountNumber()));
         shop.setBankCode(shopDTO.getBankCode());
         profile.setTaxCode(encryptSafe(shopDTO.getTaxCode()));
         profile.setCitizenIDNumber(encryptSafe(shopDTO.getCitizenIDNumber()));
         profile.setCitizenIDExpiredDate(shopDTO.getCitizenIDExpiredDate());
+        userRepository.save(owner);
         profileRepository.save(profile);
         shopRepository.save(shop);
     }
@@ -231,11 +236,17 @@ public class ShopServiceImpl implements ShopService {
         }
 
         // Nếu có thay đổi yêu cầu phê duyệt, cập nhật trạng thái shop
-        if (requireApproval) {
+        if (requireApproval && productRepository != null) {
             shop.setReason(null);
             shop.setIsActive(Status.PENDING);
+            List<Product> products = productRepository.getByShop_Id(shop.getId());
+            if (products != null) {
+                for (Product product : products) {
+                    product.setStatus(Status.PENDING);
+                    productRepository.save(product);
+                }
+            }
         }
-        shop.setIsActive(Status.ACTIVE);
         profileRepository.save(profile);
         shopRepository.save(shop);
     }
@@ -255,6 +266,8 @@ public class ShopServiceImpl implements ShopService {
         user.setRole(role);
         userRepository.save(user);
         shop.setIsActive(Status.ACTIVE);
+        shop.setIsOpening(false);
+        shop.setIsShipping(false);
         shopRepository.save(shop);
     }
 
@@ -277,6 +290,9 @@ public class ShopServiceImpl implements ShopService {
     @Override
     public void updateShopStatus(Long shopId, Status newStatus, String reason) {
         // Fetch the shop by its ID
+        if(newStatus != Status.ACTIVE && newStatus != Status.INACTIVE){
+            throw new BadRequestException("Không thể thay đổi trạng thái này");
+        }
         Shop shop = shopRepository.findById(shopId)
                 .orElseThrow(() -> new NotFoundException("Shop not found"));
 
