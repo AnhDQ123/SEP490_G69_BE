@@ -39,6 +39,8 @@ public class ReportServiceImpl implements ReportService {
     private final TypesRepository typesRepository;
     private final CloudinaryUpload cloudinaryUpload;
     private final ImageRepository imageRepository;
+    private final OrderRepository orderRepository;
+
     @Override
     public void createReport(ReportCreateDTO reportCreateDTO, List<MultipartFile> option) throws IOException {
         Report report = new Report();
@@ -71,11 +73,17 @@ public class ReportServiceImpl implements ReportService {
         ReportViewDTO reportViewDTO=new ReportViewDTO();
         reportViewDTO.setId(id);
         reportViewDTO.setReporterId(report.getReporter().getId());
-        if(report.getType().getId()==4L){
+        if(report.getType().getId()==3L){
             reportViewDTO.setReportName(blogRepository.findById(report.getRelatedId()).get().getWriter().getUsername());
             reportViewDTO.setReportedUserId(blogRepository.findById(report.getRelatedId()).get().getWriter().getId());
             reportViewDTO.setReportItemId(report.getRelatedId());
             reportViewDTO.setReportType("BLOG");
+        }
+        if(report.getType().getId()==4L){
+            reportViewDTO.setReportName(orderRepository.findById(report.getRelatedId()).get().getOwner().getUsername());
+            reportViewDTO.setReportedUserId(orderRepository.findById(report.getRelatedId()).get().getOwner().getId());
+            reportViewDTO.setReportItemId(report.getRelatedId());
+            reportViewDTO.setReportType("ORDER");
         }
         if(report.getType().getId()==5L){
             reportViewDTO.setReportName(shopRepository.findById(report.getRelatedId()).get().getName());
