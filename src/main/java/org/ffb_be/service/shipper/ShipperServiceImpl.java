@@ -149,6 +149,9 @@ public class ShipperServiceImpl implements ShipperService {
 
     @Override
     public void shipperStatus(Long userId, ShipperStatus status, String reason) {
+        if(status != ShipperStatus.ACTIVE && status != ShipperStatus.INACTIVE) {
+            throw new IllegalStateException("Update status failed");
+        }
         // Tìm người dùng từ userId
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User"));
@@ -168,12 +171,14 @@ public class ShipperServiceImpl implements ShipperService {
             if (reason == null || reason.trim().isEmpty()) {
                 throw new IllegalArgumentException("Reason is required when setting status to INACTIVE");
             }
+            user.setDeliveryStatus(null);
             user.setRejectReason(reason);
         }
 
         // Nếu trạng thái là ACTIVE, xóa lý do từ người dùng
         if (status == ShipperStatus.ACTIVE) {
             user.setRejectReason(null);
+            user.setDeliveryStatus(DeliveryStatus.AVAILABLE);
         }
 
         // Cập nhật trạng thái mới cho người dùng
