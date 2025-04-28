@@ -446,7 +446,7 @@ public class OrderServiceImpl implements OrderService {
             image.setUrl(url);
             image.setRelatedId(order.getId());
             image.setOwnerId(userId);
-            image.setType(typesRepository.findById(3l).get());
+            image.setType(typesRepository.findById(4L).get());
             imageRepository.save(image);
             System.out.println("Avatar URL: " + url);
         }
@@ -458,7 +458,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public ReturnOrderDTO viewReturnOrder(Long id) throws IOException {
         OrderDTO orderDTO=viewOrder(id);
-        List<Image> imageList=imageRepository.findAllByRelatedIdAndType_Id(orderDTO.getId(),3L);
+        List<Image> imageList=imageRepository.findAllByRelatedIdAndType_Id(orderDTO.getId(),4L);
         List<ImageDTO> imageDTOList=new ArrayList<>();
         for (Image image : imageList) {
             ImageDTO imageDTO=new ImageDTO();
@@ -466,7 +466,7 @@ public class OrderServiceImpl implements OrderService {
             imageDTO.setRelatedId(orderDTO.getId());
             imageDTO.setId(image.getId());
             imageDTO.setOwnerId(image.getOwnerId());
-            imageDTO.setTypeId(3L);
+            imageDTO.setTypeId(4L);
             imageDTOList.add(imageDTO);
         }
         ReturnOrderDTO returnOrderDTO=new ReturnOrderDTO();
