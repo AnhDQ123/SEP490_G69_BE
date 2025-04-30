@@ -1,7 +1,9 @@
 package org.ffb_be.service.map;
 
 import lombok.RequiredArgsConstructor;
+import org.cloudinary.json.JSONArray;
 import org.cloudinary.json.JSONObject;
+import org.ffb_be.exception.BadRequestException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -50,5 +52,16 @@ public class MapService {
 
         // Trả về kết quả dưới dạng JSON (có thể phân tích dữ liệu theo nhu cầu)
         return response.getBody();
+    }
+
+    public double[] getLatLngFromAddress(String address) {
+        try {
+            JSONObject json = new JSONObject(getGeocode(address));
+            JSONArray results = json.getJSONArray("results");
+            JSONObject location = results.getJSONObject(0).getJSONObject("geometry").getJSONObject("location");
+            return new double[]{location.getDouble("lat"), location.getDouble("lng")};
+        } catch (Exception e) {
+            throw new BadRequestException("Không thể lấy toạ độ từ địa chỉ. Vui lòng kiểm tra lại.");
+        }
     }
 }
