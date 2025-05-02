@@ -570,6 +570,8 @@ public class ProductServiceImpl implements ProductService {
         // Chuyển đổi kết quả thành Map với key là "productName" và value là "totalQuantity"
         for (Object[] result : results) {
             TopProductDTO topProductDTO = new TopProductDTO();
+            Product product=productRepository.findById((Long)result[0]).get();
+            topProductDTO.setImage(product.getImage());
             topProductDTO.setName((String) result[1]);
             topProductDTO.setTotalQuantity((Long) result[2]);
             topProductDTO.setTotalValue((BigDecimal) result[3]);
@@ -593,6 +595,8 @@ public class ProductServiceImpl implements ProductService {
         // Chuyển đổi kết quả thành Map với key là "productName" và value là "totalQuantity"
         for (Object[] result : results) {
             TopProductDTO topProductDTO = new TopProductDTO();
+            Product product=productRepository.findById((Long)result[0]).get();
+            topProductDTO.setImage(product.getImage());
             topProductDTO.setName((String) result[1]);
             topProductDTO.setTotalQuantity((Long) result[2]);
             topProductDTO.setTotalValue((BigDecimal) result[3]);
@@ -609,6 +613,8 @@ public class ProductServiceImpl implements ProductService {
         // Chuyển đổi kết quả thành Map với key là "productName" và value là "totalQuantity"
         for (Object[] result : results) {
             TopProductDTO topProductDTO = new TopProductDTO();
+            Product product=productRepository.findById((Long)result[0]).get();
+            topProductDTO.setImage(product.getImage());
             topProductDTO.setName((String) result[1]);
             topProductDTO.setTotalQuantity((Long) result[2]);
             topProductDTO.setTotalValue((BigDecimal) result[3]);

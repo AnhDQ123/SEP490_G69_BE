@@ -9,4 +9,5 @@ public class TopProductDTO {
     private String name;
     private Long totalQuantity;
     private BigDecimal totalValue;
+    private String image;
 }

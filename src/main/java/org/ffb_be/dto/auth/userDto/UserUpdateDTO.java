@@ -11,7 +11,11 @@ import java.time.LocalDate;
 @Validated
 @Data
 public class UserUpdateDTO {
+    @NotBlank(message = "Account number cannot be blank")
+    private String accountNumber;
 
+    @NotBlank(message = "Bank code cannot be blank")
+    private String bankCode;
     private Long id;
 
     @NotBlank(message = "Gender is required")

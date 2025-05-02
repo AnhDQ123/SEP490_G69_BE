@@ -220,6 +220,8 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByPhone(userUpdateDTO.getPhone()).get();
         Profile p = profileRepository.findByUserId2(user.getId())
                 .orElseThrow(() -> new RuntimeException("Profile not found"));
+        p.setBankCode(userUpdateDTO.getBankCode());
+        p.setAccountNumber(userUpdateDTO.getAccountNumber());
         p.setAddress(userUpdateDTO.getAddress());
         p.setName(userUpdateDTO.getName());
         p.setGender(userUpdateDTO.getGender());
