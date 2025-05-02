@@ -302,43 +302,44 @@ public class OrderServiceImpl implements OrderService {
     }
     @Override
     public List<ShipPaymentDTO> findAllShipPaymentByShopId(Long shopId) {
-        // Lấy tất cả các đơn hàng của shop có trạng thái DELIVERED
-        List<Order> orders = orderRepository.findAllByShop_IdAndStatus(shopId, OrderStatus.DELIVERED);
+        List<OrderStatus> validStatuses = Arrays.asList(
+                OrderStatus.DELIVERED,
+                OrderStatus.RETURNED,
+                OrderStatus.RETURN_REJECTED
+        );
 
-        // Map để gom nhóm shipperId với tổng phí giao hàng
+        List<Order> orders = orderRepository.findAllByShopIdAndStatusIn(shopId, validStatuses);
+
         Map<Long, BigDecimal> shipPaymentMap = new HashMap<>();
-        // Map để lưu shipperName tương ứng với shipperId
         Map<Long, String> shipperNameMap = new HashMap<>();
 
         for (Order order : orders) {
-            // Kiểm tra shipper và deliveryMethod có hợp lệ không
             if (order.getShipper() != null
                     && order.getDeliveryMethod() != null
                     && order.getDeliveryMethod().getFee() != null) {
+
                 Long shipperId = order.getShipper().getId();
                 BigDecimal fee = order.getDeliveryMethod().getFee();
 
-                // Cộng dồn phí giao hàng cho shipper tương ứng
-                shipPaymentMap.put(shipperId, shipPaymentMap.getOrDefault(shipperId, BigDecimal.ZERO).add(fee));
-                // Lưu tên shipper nếu chưa có
-                if (!shipperNameMap.containsKey(shipperId)) {
-                    shipperNameMap.put(shipperId, order.getShipper().getProfile().getName());
-                }
+                shipPaymentMap.put(shipperId,
+                        shipPaymentMap.getOrDefault(shipperId, BigDecimal.ZERO).add(fee));
+
+                shipperNameMap.putIfAbsent(shipperId, order.getShipper().getProfile().getName());
             }
         }
 
-        // Tạo danh sách DTO từ các Map đã có
-        List<ShipPaymentDTO> shipPaymentDTOList = new ArrayList<>();
+        List<ShipPaymentDTO> result = new ArrayList<>();
         for (Map.Entry<Long, BigDecimal> entry : shipPaymentMap.entrySet()) {
             ShipPaymentDTO dto = new ShipPaymentDTO();
             dto.setShipperId(entry.getKey());
             dto.setAmount(entry.getValue());
             dto.setShipperName(shipperNameMap.get(entry.getKey()));
-            shipPaymentDTOList.add(dto);
+            result.add(dto);
         }
 
-        return shipPaymentDTOList;
+        return result;
     }
+
 
     @Override
     public Page<OrderDTO> findAllByShopAndPending(Long id, Pageable pageable) {
@@ -426,12 +427,13 @@ public class OrderServiceImpl implements OrderService {
         int totalShippers = availableShippers.size();
 
         for (Order order : orders) {
-            User shipper = availableShippers.get(shipperIndex);
-            order.setShipper(shipper);
-            orderRepository.save(order);
+            if (order.getShipper() == null) {
+                User shipper = availableShippers.get(shipperIndex);
+                order.setShipper(shipper);
+                orderRepository.save(order);
 
-            // Gán tiếp cho shipper tiếp theo
-            shipperIndex = (shipperIndex + 1) % totalShippers;
+                shipperIndex = (shipperIndex + 1) % totalShippers;
+            }
         }
     }
 

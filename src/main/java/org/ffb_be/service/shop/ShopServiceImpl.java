@@ -101,58 +101,41 @@ public class ShopServiceImpl implements ShopService {
                 .orElseThrow(() -> new NotFoundException("User"));
         Profile profile = profileRepository.getByUserId(userId)
                 .orElseThrow(() -> new NotFoundException("Profile"));
-        if (owner.getRole().getName().equals("Shipper")) {
+        if ("Shipper".equals(owner.getRole().getName())) {
             throw new BadRequestException("User không thể tạo cửa hàng vì là shipper");
         }
-        JSONObject jsonObject = new JSONObject(mapService.getGeocode(shopDTO.getAddress()));
 
-        JSONArray results = jsonObject.getJSONArray("results");
-        JSONObject geometry = results.getJSONObject(0).getJSONObject("geometry");
-        JSONObject location = geometry.getJSONObject("location");
-
-        // Lấy vĩ độ và kinh độ
-        double latitude = location.getDouble("lat");
-        double longitude = location.getDouble("lng");
+        double[] latLng = mapService.getLatLngFromAddress(shopDTO.getAddress());
 
         Shop shop = shopMapper.toEntity(shopDTO);
         shop.setOwner(owner);
-        shop.setLatitude(latitude);
-        shop.setLongitude(longitude);
+        shop.setLatitude(latLng[0]);
+        shop.setLongitude(latLng[1]);
         shop.setIsActive(Status.PENDING);
         shop.setCreatedAt(LocalDateTime.now());
-        String logoUrl = cloudinaryUpload.uploadFile(logo);
-        if (logoUrl != null) shop.setLogo(logoUrl);
 
-        String backgroundUrl = cloudinaryUpload.uploadFile(background);
-        if (backgroundUrl != null) shop.setBackgroundImage(backgroundUrl);
+        shop.setLogo(cloudinaryUpload.safeUpload(logo, "Logo"));
+        shop.setBackgroundImage(cloudinaryUpload.safeUpload(background, "Background"));
+        profile.setCitizenIDCardFront(cloudinaryUpload.safeUpload(citizenIDFront, "CMND mặt trước"));
+        profile.setCitizenIDCardBack(cloudinaryUpload.safeUpload(citizenIDBack, "CMND mặt sau"));
+        shop.setRegistrationCertificate(cloudinaryUpload.safeUpload(registrationCert, "Giấy đăng ký kinh doanh"));
+        shop.setMenu(cloudinaryUpload.safeUpload(menu, "Menu"));
+        shop.setFoodSafetyCertificate(cloudinaryUpload.safeUpload(foodSafetyCert, "Giấy chứng nhận ATTP"));
 
-        String citizenIDFrontUrl = cloudinaryUpload.uploadFile(citizenIDFront);
-        if (citizenIDFrontUrl != null) profile.setCitizenIDCardFront(citizenIDFrontUrl);
-
-        String citizenIDBackUrl = cloudinaryUpload.uploadFile(citizenIDBack);
-        if (citizenIDBackUrl != null) profile.setCitizenIDCardBack(citizenIDBackUrl);
-
-        String registrationCertUrl = cloudinaryUpload.uploadFile(registrationCert);
-        if (registrationCertUrl != null) shop.setRegistrationCertificate(registrationCertUrl);
-
-        String menuUrl = cloudinaryUpload.uploadFile(menu);
-        if (menuUrl != null) shop.setMenu(menuUrl);
-
-        String foodSafetyCertUrl = cloudinaryUpload.uploadFile(foodSafetyCert);
-        if (foodSafetyCertUrl != null) shop.setFoodSafetyCertificate(foodSafetyCertUrl);
         if (shopDTO.getCitizenIDExpiredDate() != null && shopDTO.getCitizenIDExpiredDate().isBefore(LocalDate.now().plusYears(1))) {
             throw new BadRequestException("Giấy tờ tùy thân đã hết hạn!");
         }
-        //Set role tam thoi
+
         Role role = roleRepository.getByName("Shopkeeper")
                 .orElseThrow(() -> new NotFoundException("Role"));
         owner.setRole(role);
-        // Mã hóa thông tin nhạy cảm
+
         shop.setAccountNumber(encryptSafe(shopDTO.getAccountNumber()));
         shop.setBankCode(shopDTO.getBankCode());
         profile.setTaxCode(encryptSafe(shopDTO.getTaxCode()));
         profile.setCitizenIDNumber(encryptSafe(shopDTO.getCitizenIDNumber()));
         profile.setCitizenIDExpiredDate(shopDTO.getCitizenIDExpiredDate());
+
         userRepository.save(owner);
         profileRepository.save(profile);
         shopRepository.save(shop);
@@ -179,24 +162,23 @@ public class ShopServiceImpl implements ShopService {
 
         boolean requireApproval = false;
 
-        // Áp dụng mapper để cập nhật các trường không null
         shopMapper.updateShopFromDTO(shopDTO, shop);
 
-        // Xử lý thay đổi logo, menu (không cần phê duyệt)
+        double[] latLng = mapService.getLatLngFromAddress(shopDTO.getAddress());
+        shop.setLatitude(latLng[0]);
+        shop.setLongitude(latLng[1]);
+
         if (logo != null && !logo.isEmpty()) {
-            shop.setLogo(cloudinaryUpload.uploadFile(logo));
+            shop.setLogo(cloudinaryUpload.safeUpload(logo, "Logo"));
         }
-
         if (background != null && !background.isEmpty()) {
-            shop.setBackgroundImage(cloudinaryUpload.uploadFile(background));
+            shop.setBackgroundImage(cloudinaryUpload.safeUpload(background, "Background"));
         }
-
         if (menu != null && !menu.isEmpty()) {
-            shop.setMenu(cloudinaryUpload.uploadFile(menu));
+            shop.setMenu(cloudinaryUpload.safeUpload(menu, "Menu"));
         }
 
-        // Xử lý các trường cần phê duyệt lại
-        if (shopDTO.getAccountNumber() != null && !shopDTO.getAccountNumber().equals(shop.getAccountNumber())) {
+        if (shopDTO.getAccountNumber() != null && !encryptSafe(shopDTO.getAccountNumber()).equals(shop.getAccountNumber())) {
             shop.setAccountNumber(encryptSafe(shopDTO.getAccountNumber()));
             requireApproval = true;
         }
@@ -205,18 +187,19 @@ public class ShopServiceImpl implements ShopService {
             requireApproval = true;
         }
         if (registrationCert != null && !registrationCert.isEmpty()) {
-            shop.setRegistrationCertificate(cloudinaryUpload.uploadFile(registrationCert));
+            shop.setRegistrationCertificate(cloudinaryUpload.safeUpload(registrationCert, "Giấy đăng ký kinh doanh"));
             requireApproval = true;
         }
         if (foodSafetyCert != null && !foodSafetyCert.isEmpty()) {
-            shop.setFoodSafetyCertificate(cloudinaryUpload.uploadFile(foodSafetyCert));
+            shop.setFoodSafetyCertificate(cloudinaryUpload.safeUpload(foodSafetyCert, "Giấy chứng nhận ATTP"));
             requireApproval = true;
         }
-        if (shopDTO.getTaxCode() != null && !shopDTO.getTaxCode().equals(profile.getTaxCode())) {
+
+        if (shopDTO.getTaxCode() != null && !encryptSafe(shopDTO.getTaxCode()).equals(profile.getTaxCode())) {
             profile.setTaxCode(encryptSafe(shopDTO.getTaxCode()));
             requireApproval = true;
         }
-        if (shopDTO.getCitizenIDNumber() != null && !shopDTO.getCitizenIDNumber().equals(profile.getCitizenIDNumber())) {
+        if (shopDTO.getCitizenIDNumber() != null && !encryptSafe(shopDTO.getCitizenIDNumber()).equals(profile.getCitizenIDNumber())) {
             profile.setCitizenIDNumber(encryptSafe(shopDTO.getCitizenIDNumber()));
             requireApproval = true;
         }
@@ -225,18 +208,16 @@ public class ShopServiceImpl implements ShopService {
             requireApproval = true;
         }
 
-        // Xử lý citizen ID card
         if (citizenIDFront != null && !citizenIDFront.isEmpty()) {
-            profile.setCitizenIDCardFront(cloudinaryUpload.uploadFile(citizenIDFront));
+            profile.setCitizenIDCardFront(cloudinaryUpload.safeUpload(citizenIDFront, "CMND mặt trước"));
             requireApproval = true;
         }
         if (citizenIDBack != null && !citizenIDBack.isEmpty()) {
-            profile.setCitizenIDCardBack(cloudinaryUpload.uploadFile(citizenIDBack));
+            profile.setCitizenIDCardBack(cloudinaryUpload.safeUpload(citizenIDBack, "CMND mặt sau"));
             requireApproval = true;
         }
 
-        // Nếu có thay đổi yêu cầu phê duyệt, cập nhật trạng thái shop
-        if (requireApproval && productRepository != null) {
+        if (requireApproval) {
             shop.setReason(null);
             shop.setIsActive(Status.PENDING);
             List<Product> products = productRepository.getByShop_Id(shop.getId());
@@ -247,9 +228,11 @@ public class ShopServiceImpl implements ShopService {
                 }
             }
         }
+
         profileRepository.save(profile);
         shopRepository.save(shop);
     }
+
 
     @Override
     public void approveShop(Long id) {
@@ -386,8 +369,8 @@ public class ShopServiceImpl implements ShopService {
         if (ownerDTO != null) {
             BusinessProfileDTO profile = ownerDTO.getProfile();
             if (profile != null) {
-                profile.setTaxCode((profile.getTaxCode()));
-                profile.setCitizenIDNumber((profile.getCitizenIDNumber()));
+                profile.setTaxCode(decryptSafe(profile.getTaxCode()));
+                profile.setCitizenIDNumber(decryptSafe(profile.getCitizenIDNumber()));
             }
         }
         return shopDTO;

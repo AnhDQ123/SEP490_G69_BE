@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
@@ -126,7 +127,12 @@ public class CartServiceImpl implements CartService {
         // Cập nhật số lượng của CartItem
         CartItem item = new CartItem();
         matchedItem.setQuantity(matchedItem.getQuantity() + cartItemDTO.getQuantity());
-
+        if(matchedItem.getQuantity() > product.getQuantity()){
+            throw new RuntimeException("Not enough stock for product " + product.getName());
+        }
+        if(matchedItem.getQuantity() > 10){
+            throw new RuntimeException("Cannot add quantity above 10 for product " + product.getName());
+        }
         // Tính toán lại tổng giá trị của CartItem (bao gồm cả giá trị giảm giá)
         BigDecimal totalItemPrice = calculateTotalItemPrice(cartItemDTO, product, foodOptionMap);
 
@@ -158,6 +164,12 @@ public class CartServiceImpl implements CartService {
     }
 
     private CartItem createNewCartItem(Cart cart, Product product, CartItemDTO cartItemDTO, Map<Long, FoodOption> foodOptionMap) {
+        if(cartItemDTO.getQuantity() > product.getQuantity()){
+            throw new RuntimeException("Not enough stock for product " + product.getName());
+        }
+        if(cartItemDTO.getQuantity() > 10){
+            throw new RuntimeException("Cannot add quantity above 10 for product " + product.getName());
+        }
         CartItem item = new CartItem();
         CartItem temp = new CartItem();
         item.setCart(cart);
@@ -310,7 +322,7 @@ public class CartServiceImpl implements CartService {
 
                             // Lấy đơn giá của option từ FoodOption
                             Optional<FoodOption> foodOptionOpt = foodOptionRepository.findById(optionId);
-                            if (!foodOptionOpt.isPresent()) {
+                            if (foodOptionOpt.isEmpty()) {
                                 continue;
                             }
                             FoodOption foodOption = foodOptionOpt.get();
@@ -344,7 +356,8 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public CartDTO findById(Long id) {
-        Cart cart = cartRepository.findById(id).get();
+        Cart cart = cartRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Cart not found"));
         CartDTO cartDTO = new CartDTO();
         cartDTO.setUserId(cart.getOwner().getId());
         cartDTO.setId(cart.getId());
@@ -354,7 +367,9 @@ public class CartServiceImpl implements CartService {
             CartItemDTO cartItemDTO = new CartItemDTO();
             cartItemDTO.setProductId(cartItem.getProduct().getId());
             cartDTO.setShopId(shopRepository.findByProduct(cartItem.getProduct().getId()).getId());
-            cartDTO.setShopName(shopRepository.findById(cartDTO.getShopId()).get().getName());
+            cartDTO.setShopName(shopRepository.findById(cartDTO.getShopId())
+                    .orElseThrow(() -> new RuntimeException("Shop not found"))
+                    .getName());
             cartItemDTO.setQuantity(cartItem.getQuantity());
             cartItemDTO.setPrice(cartItem.getUnitPrice());
             cartItemDTO.setTotalPrice(cartItem.getTotalPrice());
@@ -385,6 +400,10 @@ public class CartServiceImpl implements CartService {
         CartItemOption cartItemOption = cartItemOptionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("CartItemOption not found"));
 
+        if (cartItemOption.getFoodOption().getType().getId() == 2 && cartItemOption.getQuantity() >= 10) {
+            throw new RuntimeException("Cannot increase quantity above 10");
+        }
+
         // Tăng số lượng
         cartItemOption.setQuantity(cartItemOption.getQuantity() + 1);
 
@@ -396,6 +415,18 @@ public class CartServiceImpl implements CartService {
 
         CartItem cartItem = cartItemRepository.findById(cartItemOption.getCartItem().getId())
                 .orElseThrow(() -> new RuntimeException("CartItem not found"));
+
+        if (cartItemOption.getFoodOption().getType().getId() == 2) {
+            cartItem.setQuantity(cartItem.getQuantity() + 1);
+            cartItem.setTotalPrice(applyDiscount(cartItemOption.getUnitPrice(), cartItemOption.getQuantity(), cartItemOption.getFoodOption().getFood()));
+            cartItemRepository.save(cartItem);
+            Cart cart = cartItem.getCart();
+            cart.setTotal(cart.getTotal().add(
+                    cartItem.getTotalPrice().divide(BigDecimal.valueOf(cartItem.getQuantity()), 0, RoundingMode.DOWN)
+            ));  // Cập nhật tổng giá giỏ hàng
+            cartRepository.save(cart);
+            return;
+        }
 
         Cart cart = cartItem.getCart();
         cart.setTotal(cart.getTotal().add(cartItemOption.getUnitPrice()));  // Cập nhật tổng giá giỏ hàng
@@ -409,11 +440,15 @@ public class CartServiceImpl implements CartService {
         CartItemOption cartItemOption = cartItemOptionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("CartItemOption not found"));
 
+        if (cartItemOption.getFoodOption().getType().getId() == 2 && cartItemOption.getQuantity() <= 1) {
+            throw new RuntimeException("Cannot decrease quantity below 1");
+        }
+
         // Giảm số lượng
         cartItemOption.setQuantity(cartItemOption.getQuantity() - 1);
 
         // Cập nhật giá trị tổng của CartItemOption nếu số lượng lớn hơn 0
-        if (cartItemOption.getQuantity() > 0) {
+        if (cartItemOption.getQuantity() >= 0) {
             cartItemOption.setTotalPrice(cartItemOption.getUnitPrice().multiply(new BigDecimal(cartItemOption.getQuantity())));
             cartItemOptionRepository.save(cartItemOption);
         } else {
@@ -425,6 +460,19 @@ public class CartServiceImpl implements CartService {
         // Cập nhật giá trị tổng của CartItem (cập nhật lại tổng giá giỏ hàng)
         CartItem cartItem = cartItemRepository.findById(cartItemOption.getCartItem().getId())
                 .orElseThrow(() -> new RuntimeException("CartItem not found"));
+
+        if (cartItemOption.getFoodOption().getType().getId() == 2) {
+            cartItem.setQuantity(cartItem.getQuantity() - 1);
+            cartItem.setTotalPrice(applyDiscount(cartItemOption.getUnitPrice(), cartItemOption.getQuantity(), cartItemOption.getFoodOption().getFood()));
+            cartItemRepository.save(cartItem);
+            Cart cart = cartItem.getCart();
+            cart.setTotal(cart.getTotal().subtract(
+                    cartItem.getTotalPrice().divide(BigDecimal.valueOf(cartItem.getQuantity()), 0, RoundingMode.DOWN)
+            ));
+            // Cập nhật tổng giá giỏ hàng
+            cartRepository.save(cart);
+            return;
+        }
 
         Cart cart = cartItem.getCart();
         cart.setTotal(cart.getTotal().subtract(cartItemOption.getUnitPrice()));  // Cập nhật tổng giá giỏ hàng

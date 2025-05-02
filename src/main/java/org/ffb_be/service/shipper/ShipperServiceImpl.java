@@ -345,7 +345,7 @@ public class ShipperServiceImpl implements ShipperService {
 
     private ShipperInfoDTO decryptDTO(User user) {
         ShipperInfoDTO shipperInfoDTO = shipperMapper.toDTO(user);
-        shipperInfoDTO.setCitizenIDNumber((shipperInfoDTO.getCitizenIDNumber()));
+        shipperInfoDTO.setCitizenIDNumber(decryptSafe(shipperInfoDTO.getCitizenIDNumber()));
         shipperInfoDTO.setId(user.getId());
         return shipperInfoDTO;
     }
@@ -362,7 +362,7 @@ public class ShipperServiceImpl implements ShipperService {
         if (file == null || file.isEmpty()) {
             throw new BadRequestException(fileType + " không được phép để trống.");
         }
-        String fileUrl = cloudinaryUpload.uploadFile(file);
+        String fileUrl = cloudinaryUpload.safeUpload(file, fileType);
         if (fileUrl == null || fileUrl.isEmpty()) {
             throw new BadRequestException(fileType + " tải lên không thành công.");
         }
