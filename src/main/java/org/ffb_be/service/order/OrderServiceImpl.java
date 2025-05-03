@@ -393,6 +393,13 @@ public class OrderServiceImpl implements OrderService {
             imageRepository.save(image);
             System.out.println("Avatar URL: " + url);
         }
+        if(status.equals(OrderStatus.DELIVERED)){
+            User user=userRepository.findById(userId).get();
+            if (user.getRole().getId() == 4L) {
+                user.setDeliveryStatus(DeliveryStatus.AVAILABLE);
+                userRepository.save(user);
+            }
+        }
         order.setStatus(status);
         order.setUpdatedAt(LocalDateTime.now());
         orderRepository.save(order);
