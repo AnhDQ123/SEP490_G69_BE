@@ -86,6 +86,9 @@ public class QrServiceImpl implements QrService {
         requestBody.put("acqId", profile.getBankCode());
         if (orderId != null) {
             Order order = orderRepository.findById(orderId).orElseThrow (() -> new NotFoundException("Order"));
+            if(!order.getOwner().getId().equals(userId)){
+                throw new RuntimeException("Order does not belong to this user");
+            }
             requestBody.put("amount", order.getTotal());
             requestBody.put("addInfo", "ORDER" + order.getOrderCode());
         }
