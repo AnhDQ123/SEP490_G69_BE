@@ -2,9 +2,11 @@ package org.ffb_be.service.qr;
 
 import lombok.RequiredArgsConstructor;
 import org.ffb_be.entity.Order;
+import org.ffb_be.entity.Profile;
 import org.ffb_be.entity.Shop;
 import org.ffb_be.exception.NotFoundException;
 import org.ffb_be.repository.OrderRepository;
+import org.ffb_be.repository.ProfileRepository;
 import org.ffb_be.repository.ShopRepository;
 import org.ffb_be.utils.EncryptUtil;
 import org.ffb_be.utils.enums.upload.CloudinaryUpload;
@@ -32,6 +34,8 @@ public class QrServiceImpl implements QrService {
 
     private final OrderRepository orderRepository;
 
+    private final ProfileRepository profileRepository;
+
     private final ShopRepository shopRepository;
 
     private final CloudinaryUpload cloudinaryUpload;
@@ -50,6 +54,41 @@ public class QrServiceImpl implements QrService {
         requestBody.put("acqId", shop.getBankCode());
         requestBody.put("amount", order.getTotal());
         requestBody.put("addInfo", "ORDER" + order.getOrderCode());
+        requestBody.put("template", "compact2");
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("x-client-id", clientId);
+        headers.set("x-api-key", apiKey);
+
+        HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(requestBody, headers);
+
+        ResponseEntity<Map> response = restTemplate.exchange(
+                "https://api.vietqr.io/v2/generate", HttpMethod.POST, requestEntity, Map.class
+        );
+        System.out.println("Response: " + response.getBody());
+        if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+            Map<String, Object> data = (Map<String, Object>) response.getBody().get("data");
+            if (data != null) {
+                return (String) data.get("qrDataURL");
+            }
+            return null;
+        }
+        return null;
+    }
+
+    @Override
+    public String getUserQrCode(Long userId, Long orderId) {
+        Profile profile = profileRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User"));
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("accountNo", decryptSafe(profile.getAccountNumber()));
+        requestBody.put("accountName", profile.getName());
+        requestBody.put("acqId", profile.getBankCode());
+        if (orderId != null) {
+            Order order = orderRepository.findById(orderId).orElseThrow (() -> new NotFoundException("Order"));
+            requestBody.put("amount", order.getTotal());
+            requestBody.put("addInfo", "ORDER" + order.getOrderCode());
+        }
         requestBody.put("template", "compact2");
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);

@@ -3,6 +3,7 @@ package org.ffb_be.controller;
 import lombok.RequiredArgsConstructor;
 import org.ffb_be.dto.auth.userDto.ShipperInfoDTO;
 import org.ffb_be.dto.auth.userDto.ShipperRegisterDTO;
+import org.ffb_be.service.qr.QrService;
 import org.ffb_be.service.shipper.ShipperService;
 import org.ffb_be.utils.enums.ShipperStatus;
 import org.springframework.data.domain.Page;
@@ -26,6 +27,8 @@ import java.util.stream.Collectors;
 @CrossOrigin("*")
 public class ShipperController {
     private final ShipperService shipperService;
+
+    private final QrService qrService;
 
     @PostMapping("/register/{userId}")
     public ResponseEntity<?> registerShipper(
@@ -56,7 +59,10 @@ public class ShipperController {
         }
     }
 
-
+    @GetMapping("/QrCode/{userId}")
+    public ResponseEntity<?> getQrCode(@PathVariable Long userId) {
+        return ResponseEntity.ok(qrService.getUserQrCode(userId, null));
+    }
 
     @PostMapping("/approve/{userId}")
     public ResponseEntity<?> approveShipper(@PathVariable Long userId) {

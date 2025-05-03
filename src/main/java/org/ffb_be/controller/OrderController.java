@@ -208,6 +208,11 @@ public class OrderController {
         return qrService.generateQrCode(orderId, shopId);
     }
 
+    @GetMapping("/getCustomerQr")
+    public ResponseEntity<?> getQr(@RequestParam Long orderId, @RequestParam Long userId) {
+        return ResponseEntity.ok(qrService.getUserQrCode(userId, orderId));
+    }
+
     @PostMapping("/updatePaymentProof/{orderId}")
     public void updatePaymentProof(@PathVariable Long orderId,
                                    @RequestParam("paymentProof") MultipartFile paymentProof

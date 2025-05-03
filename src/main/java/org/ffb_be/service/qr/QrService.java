@@ -7,5 +7,7 @@ import java.io.IOException;
 public interface QrService {
     String generateQrCode(Long orderId, Long shopId);
 
+    String getUserQrCode(Long userId, Long orderId);
+
     void updatePaymentProof(Long orderId, MultipartFile paymentProof) throws IOException;
 }
