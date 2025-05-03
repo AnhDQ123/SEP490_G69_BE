@@ -19,6 +19,7 @@ import org.ffb_be.repository.ProfileRepository;
 import org.ffb_be.repository.RoleRepository;
 import org.ffb_be.repository.ShopRepository;
 import org.ffb_be.repository.UserRepository;
+import org.ffb_be.utils.EncryptUtil;
 import org.ffb_be.utils.enums.Status;
 import org.ffb_be.utils.enums.upload.CloudinaryUpload;
 import org.ffb_be.utils.mapping.UserMapper;
@@ -51,6 +52,7 @@ public class UserServiceImpl implements UserService {
     private final RoleRepository roleRepository;
     private final ProfileRepository profileRepository;
     private final ShopRepository shopRepository;
+    private final EncryptUtil encryptUtil;
     private final UserMapper userMapper;
     private final AuthenticationManager authenticationManager;
     public void create(UserCreateDTO userCreateDTO) throws IOException {
@@ -150,6 +152,12 @@ public class UserServiceImpl implements UserService {
         }
         if(profile.getTaxCode() != null) {
             profileDTO.setTax_code(profile.getTaxCode());
+        }
+        if(profile.getBankCode() != null) {
+            profileDTO.setBankCode(profile.getBankCode());
+        }
+        if(profile.getAccountNumber() != null) {
+            profileDTO.setAccountNumber(decryptSafe(profile.getAccountNumber()));
         }
         if(userRepository.findById(id).get().getPhone()!=null) {
             profileDTO.setPhone(userRepository.findById(id).get().getPhone());
@@ -384,5 +392,9 @@ public class UserServiceImpl implements UserService {
             user.setPassword(passwordEncoder.encode(password));
         }else throw  new RuntimeException("Confirm password does not match");
         userRepository.save(user);
+    }
+
+    private String decryptSafe(String data) {
+        return data != null ? encryptUtil.decrypt(data) : null;
     }
 }

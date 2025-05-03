@@ -28,5 +28,7 @@ public class ProfileDTO {
     private String citizenIDCardFront;
     private String citizenIDCardBack;
     private LocalDate citizenIDExpiredDate;
+    private String bankCode;
+    private String accountNumber;
 
 }
