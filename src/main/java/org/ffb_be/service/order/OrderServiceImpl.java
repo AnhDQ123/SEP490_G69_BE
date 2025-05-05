@@ -19,6 +19,7 @@ import org.ffb_be.utils.enums.Status;
 import org.ffb_be.utils.enums.upload.CloudinaryUpload;
 import org.ffb_be.utils.mapping.OrderMapper;
 import org.springframework.data.domain.*;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -139,6 +140,9 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Order save(OrderDTO orderDTO) throws IOException {
         Order order = new Order();
+        if(orderDTO.getShopId() == shopRepository.findByOwnerId(orderDTO.getOwnerId()).get().getId()) {
+            throw new RuntimeException("You cannot place an order for your own shop!");
+        }
         order.setOwner(userRepository.findById(orderDTO.getOwnerId()).get());
         order.setPaymentMethod(paymentRepository.findById(orderDTO.getPaymentMethodId()).get());
         order.setDeliveryMethod(deliveryMethodRepository.findById(orderDTO.getShipMethodId()).get());
