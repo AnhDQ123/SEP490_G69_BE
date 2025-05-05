@@ -11,12 +11,10 @@ import org.ffb_be.entity.Role;
 import org.ffb_be.entity.User;
 import org.ffb_be.exception.BadRequestException;
 import org.ffb_be.exception.NotFoundException;
-import org.ffb_be.repository.OrderRepository;
-import org.ffb_be.repository.ProfileRepository;
-import org.ffb_be.repository.RoleRepository;
-import org.ffb_be.repository.UserRepository;
+import org.ffb_be.repository.*;
 import org.ffb_be.utils.EncryptUtil;
 import org.ffb_be.utils.enums.DeliveryStatus;
+import org.ffb_be.utils.enums.OrderStatus;
 import org.ffb_be.utils.enums.ShipperStatus;
 import org.ffb_be.utils.enums.upload.CloudinaryUpload;
 import org.ffb_be.utils.mapping.ShipperMapper;
@@ -30,6 +28,8 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -42,6 +42,7 @@ public class ShipperServiceImpl implements ShipperService {
     private final EncryptUtil encryptUtil;
     private final ShipperMapper shipperMapper;
     private final OrderRepository orderRepository;
+    private final DeliveryMethodRepository deliveryMethodRepository;
 
     @Override
     public void registerShipper(
@@ -338,10 +339,25 @@ public class ShipperServiceImpl implements ShipperService {
     public BigDecimal shipperBalance(Long userId) {
         LocalDateTime startOfThisMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay();
         LocalDateTime endOfThisMonth = LocalDate.now().plusMonths(1).withDayOfMonth(1).atStartOfDay().minusNanos(1);
-        long a=orderRepository.countOrdersByShipper_Id(userId,startOfThisMonth,endOfThisMonth);
-        BigDecimal b=BigDecimal.valueOf(10000);
-        return b.multiply(BigDecimal.valueOf(a));
+
+        List<OrderStatus> statuses = Arrays.asList(
+                OrderStatus.SHIPPING,
+                OrderStatus.DELIVERED,
+                OrderStatus.CANCELLED,
+                OrderStatus.RETURNED,
+                OrderStatus.REJECTED,
+                OrderStatus.RETURN_PENDING,
+                OrderStatus.RETURN_REJECTED
+        );
+
+        long orderCount = orderRepository.countOrdersByShipper_IdAndStatuses(userId, startOfThisMonth, endOfThisMonth, statuses);
+
+        BigDecimal deliveryFee = deliveryMethodRepository.findById(2L)
+                .orElseThrow(() -> new NotFoundException("DeliveryMethod")).getFee();
+
+        return deliveryFee.multiply(BigDecimal.valueOf(orderCount));
     }
+
 
     private ShipperInfoDTO decryptDTO(User user) {
         ShipperInfoDTO shipperInfoDTO = shipperMapper.toDTO(user);
