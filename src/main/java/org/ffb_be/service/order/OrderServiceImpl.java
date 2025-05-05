@@ -62,7 +62,7 @@ public class OrderServiceImpl implements OrderService {
             orderDTO.setAddress(order.getShippingAddress());
             orderDTO.setTotal(order.getTotal());
             orderDTO.setOwnerId(order.getOwner().getId());
-            orderDTO.setVoucherAmount(order.getVoucher() != null ?order.getVoucher().getDiscountValue().multiply(order.getTotal()): null);
+            orderDTO.setVoucherAmount(order.getVoucher() != null ?order.getVoucher().getDiscountValue().multiply(order.getTotal()): BigDecimal.ZERO);
             orderDTO.setOwnerName(userRepository.findById(orderDTO.getOwnerId()).get().getProfile().getName());
             orderDTO.setPhone(userRepository.findById(orderDTO.getOwnerId()).get().getPhone());
             orderDTO.setStatus(order.getStatus().toString());
@@ -72,6 +72,7 @@ public class OrderServiceImpl implements OrderService {
             orderDTO.setShipperId(order.getShipper() != null ? order.getShipper().getId() : null);
             orderDTO.setPaymentMethodId(order.getPaymentMethod() != null ? order.getPaymentMethod().getId() : null);
             orderDTO.setShipMethodId(order.getDeliveryMethod() != null ? order.getDeliveryMethod().getId() : null);
+            orderDTO.setShippingFee(order.getDeliveryMethod() != null ? order.getDeliveryMethod().getFee() : BigDecimal.ZERO);
             orderDTO.setProofImage(order.getPaymentProof());
             List<OrderItemDTO> orderItemDTOList = new ArrayList<>();
             for (OrderItem orderItem : order.getOrderItems()) {
