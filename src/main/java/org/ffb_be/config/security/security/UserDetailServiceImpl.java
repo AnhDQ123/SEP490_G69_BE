@@ -3,6 +3,7 @@ package org.ffb_be.config.security.security;
 import lombok.RequiredArgsConstructor;
 import org.ffb_be.entity.User;
 import org.ffb_be.repository.UserRepository;
+import org.ffb_be.utils.enums.Status;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -16,7 +17,7 @@ public class UserDetailServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String phone) throws UsernameNotFoundException {
         User user = userRepository.findByPhone(phone)
                 .orElseThrow(()-> new UsernameNotFoundException("User not found!"));
-    if (user.getStatus().equals("INACTIVE")) {
+    if (user.getStatus().compareTo(Status.INACTIVE)!=0) {
         throw new UsernameNotFoundException("User has been deactivated!");
     }
         return new UserSecurity(user);
