@@ -240,6 +240,8 @@ public class OrderServiceImpl implements OrderService {
         orderDTO.setOrderCode(order.getOrderCode());
         orderDTO.setCreatedAt(order.getCreatedAt());
         orderDTO.setShipperId(order.getShipper() != null ? order.getShipper().getId() : null);
+        orderDTO.setShipperName(userRepository.findById(order.getShipper().getId()).get().getProfile().getName());
+        orderDTO.setShipperPhone(userRepository.findById(order.getShipper().getId()).get().getPhone());
         orderDTO.setStatus(order.getStatus().toString());
         orderDTO.setPaymentMethodId(order.getPaymentMethod() != null ? order.getPaymentMethod().getId() : null);
         orderDTO.setShipMethodId(order.getDeliveryMethod() != null ? order.getDeliveryMethod().getId() : null);
