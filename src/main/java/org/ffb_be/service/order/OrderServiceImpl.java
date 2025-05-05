@@ -50,6 +50,7 @@ public class OrderServiceImpl implements OrderService {
     private final ImageRepository imageRepository;
     private final OrderMapper orderMapper;
     private final DiscountRepository discountRepository;
+    private final VoucherRepository voucherRepository;
 
 
     public Page<OrderDTO> toDTO(Page<Order> orders,Pageable pageable) {
@@ -60,6 +61,7 @@ public class OrderServiceImpl implements OrderService {
             orderDTO.setAddress(order.getShippingAddress());
             orderDTO.setTotal(order.getTotal());
             orderDTO.setOwnerId(order.getOwner().getId());
+            orderDTO.setVoucherAmount(order.getVoucher().getDiscountValue().multiply(order.getTotal()));
             orderDTO.setOwnerName(userRepository.findById(orderDTO.getOwnerId()).get().getProfile().getName());
             orderDTO.setPhone(userRepository.findById(orderDTO.getOwnerId()).get().getPhone());
             orderDTO.setStatus(order.getStatus().toString());
