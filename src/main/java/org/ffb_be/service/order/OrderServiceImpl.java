@@ -141,8 +141,8 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Order save(OrderDTO orderDTO) throws IOException {
         Order order = new Order();
-        if(orderDTO.getShopId() == shopRepository.findByOwnerId(orderDTO.getOwnerId()).get().getId()) {
-            throw new RuntimeException("You cannot place an order for your own shop!");
+        if(Objects.equals(shopRepository.findById(orderDTO.getShopId()).orElseThrow(() -> new RuntimeException("Shop not found")).getOwner().getId(), orderDTO.getOwnerId())) {
+            throw new RuntimeException("Cannot add product from your own shop");
         }
         order.setOwner(userRepository.findById(orderDTO.getOwnerId()).get());
         order.setPaymentMethod(paymentRepository.findById(orderDTO.getPaymentMethodId()).get());
