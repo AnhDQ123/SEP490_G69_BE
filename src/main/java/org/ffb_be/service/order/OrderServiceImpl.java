@@ -412,7 +412,7 @@ public class OrderServiceImpl implements OrderService {
         Order order=orderRepository.findById(id).get();
         order.setShipper(userRepository.findById(userId).get());
         User user=userRepository.findById(userId).get();
-        user.setDeliveryStatus(DeliveryStatus.ASSIGNED);
+        user.setDeliveryStatus(DeliveryStatus.PICKED_UP);
         order.setStatus(OrderStatus.SHIPPING);
         order.setUpdatedAt(LocalDateTime.now());
         orderRepository.save(order);
@@ -438,6 +438,8 @@ public class OrderServiceImpl implements OrderService {
         for (Order order : orders) {
             if (order.getShipper() == null) {
                 User shipper = availableShippers.get(shipperIndex);
+                shipper.setDeliveryStatus(DeliveryStatus.ASSIGNED);
+                userRepository.save(shipper);
                 order.setShipper(shipper);
                 orderRepository.save(order);
 
