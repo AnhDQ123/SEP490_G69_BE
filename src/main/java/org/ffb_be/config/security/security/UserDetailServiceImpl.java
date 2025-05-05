@@ -17,7 +17,7 @@ public class UserDetailServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String phone) throws UsernameNotFoundException {
         User user = userRepository.findByPhone(phone)
                 .orElseThrow(()-> new UsernameNotFoundException("User not found!"));
-    if (user.getStatus().compareTo(Status.INACTIVE)!=0) {
+    if (user.getStatus().compareTo(Status.INACTIVE)==0) {
         throw new UsernameNotFoundException("User has been deactivated!");
     }
         return new UserSecurity(user);
