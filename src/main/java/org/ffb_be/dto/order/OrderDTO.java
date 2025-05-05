@@ -26,6 +26,7 @@ public class OrderDTO {
     private Long voucherId;
     private BigDecimal voucherAmount;
     private String address;
+    private String shopPhone;
     private String shopName;
     private Long shopId;
     private String status;

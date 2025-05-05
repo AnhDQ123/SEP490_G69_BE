@@ -229,6 +229,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderDTO viewOrder(Long id) throws IOException {
         Order order = orderRepository.findById(id).get(); // Load tất cả đơn hàng
         OrderDTO orderDTO = new OrderDTO();
+        orderDTO.setShopPhone(shopRepository.findById(order.getShop().getId()).get().getPhone());
         orderDTO.setId(order.getId());
         orderDTO.setAddress(order.getShippingAddress());
         orderDTO.setTotal(order.getTotal());
