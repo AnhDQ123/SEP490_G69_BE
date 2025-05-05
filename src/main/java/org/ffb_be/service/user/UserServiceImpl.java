@@ -196,6 +196,7 @@ public class UserServiceImpl implements UserService {
         LocalDateTime startOfThisMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay();
         LocalDateTime endOfThisMonth = LocalDate.now().plusMonths(1).withDayOfMonth(1).atStartOfDay().minusNanos(1);
         double b=userRepository.countActiveUsersByMonth(startOfThisMonth, endOfThisMonth);
+        if(a==0)return 0;
         return (b-a)/a*100;
     }
 
@@ -207,6 +208,7 @@ public class UserServiceImpl implements UserService {
         LocalDateTime startOfThisMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay();
         LocalDateTime endOfThisMonth = LocalDate.now().plusMonths(1).withDayOfMonth(1).atStartOfDay().minusNanos(1);
         double b=userRepository.countActiveShipperByMonth(startOfThisMonth, endOfThisMonth);
+        if(a==0)return 0;
         return (b-a)/a*100;
     }
 
@@ -220,6 +222,7 @@ public class UserServiceImpl implements UserService {
         LocalDateTime endOfThisMonth = LocalDate.now().plusMonths(1).withDayOfMonth(1).atStartOfDay().minusNanos(1);
         double b=userRepository.countPendingShipperByMonth(startOfThisMonth, endOfThisMonth);
         double d=shopRepository.countPendingShopByMonth(startOfThisMonth, endOfThisMonth);
+        if((a+c)==0)return 0;
         return ((b+d)-(a+c))/(a+c)*100;
     }
 

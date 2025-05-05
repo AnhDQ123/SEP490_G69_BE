@@ -539,6 +539,7 @@ public class ShopServiceImpl implements ShopService {
         LocalDateTime startOfThisMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay();
         LocalDateTime endOfThisMonth = LocalDate.now().plusMonths(1).withDayOfMonth(1).atStartOfDay().minusNanos(1);
         double d=shopRepository.countActiveShopByMonth(startOfThisMonth, endOfThisMonth);
+        if(c==0)return 0;
         return (d-c)/c*100;
     }
 

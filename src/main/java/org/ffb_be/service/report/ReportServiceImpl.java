@@ -294,6 +294,7 @@ public class ReportServiceImpl implements ReportService {
         LocalDateTime startOfThisMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay();
         LocalDateTime endOfThisMonth = LocalDate.now().plusMonths(1).withDayOfMonth(1).atStartOfDay().minusNanos(1);
         double b=reportRepository.countPendingReportByMonth(startOfThisMonth, endOfThisMonth);
+        if(a==0)return 0;
         return (b-a)/a*100;
     }
 }
