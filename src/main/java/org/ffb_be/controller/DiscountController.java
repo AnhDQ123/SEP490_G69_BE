@@ -31,7 +31,7 @@ public class DiscountController {
         return discountService.findAllByShopIdAndStatus(shopId, status);
     }
     @PutMapping("/update/{id}")
-    public void update(@PathVariable Long id, @RequestBody DiscountDTO discountDTO) {
+    public void update(@PathVariable Long id,@Validated @RequestBody DiscountDTO discountDTO) {
         discountService.update(discountDTO,id);
     }
     @PutMapping("/delete/{id}")

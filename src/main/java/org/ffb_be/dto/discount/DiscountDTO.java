@@ -1,14 +1,17 @@
 package org.ffb_be.dto.discount;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Future;
 import lombok.Data;
 import org.ffb_be.dto.product.ProductResponseDTO;
+import org.springframework.validation.annotation.Validated;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+@Validated
 @Data
 public class DiscountDTO {
     private Long id;
