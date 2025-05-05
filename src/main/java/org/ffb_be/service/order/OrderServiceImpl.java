@@ -291,7 +291,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Page<OrderDTO> findAllByOwnerAndStatus(Long id, OrderStatus status, Pageable pageable) {
-        Page<Order> orders = orderRepository.findALlByOwner_IdAndStatusOrderByCreatedAt(id, status, pageable);
+        Page<Order> orders = orderRepository.findALlByOwner_IdAndStatusOrderByCreatedAtDesc(id, status, pageable);
         return toDTO(orders,pageable);
     }
 
@@ -428,7 +428,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Page<OrderDTO> findAllByShipper(Long id, Pageable pageable,OrderStatus status) {
-        Page<Order> orders = orderRepository.findAllByShipper_IdAndStatusOrderByCreatedAt(id,status,pageable);
+        Page<Order> orders = orderRepository.findAllByShipper_IdAndStatusOrderByCreatedAtDesc(id,status,pageable);
         return toDTO(orders,pageable);
     }
 
