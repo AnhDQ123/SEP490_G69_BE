@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import org.ffb_be.utils.enums.ShipperStatus;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -26,4 +27,6 @@ public class ShipperInfoDTO {
     private String judicialRecord;
     private LocalDate citizenIDExpiredDate;
     private LocalDate drivingLicenseExpiredDate;
+    private LocalDateTime createdAt;
+
 }
