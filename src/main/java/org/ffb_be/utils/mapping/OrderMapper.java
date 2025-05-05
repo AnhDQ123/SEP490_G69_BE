@@ -1,6 +1,7 @@
 package org.ffb_be.utils.mapping;
 
 import org.ffb_be.dto.order.OrderDTO;
+import org.ffb_be.dto.order.OrderItemDTO;
 import org.ffb_be.dto.product.recommendation.OrderDataDTO;
 import org.ffb_be.dto.product.recommendation.OrderItemDataDTO;
 import org.ffb_be.entity.Order;
@@ -26,6 +27,7 @@ public interface OrderMapper {
     @Mapping(target = "address", source = "shippingAddress")
     @Mapping(target = "status", source = "status")
     @Mapping(target = "orderItem", source = "orderItems")
+    @Mapping(target = "phone", source = "owner.phone")
     OrderDTO toDTO(Order order);
 
     OrderDataDTO toDTOData(Order order);
@@ -34,4 +36,11 @@ public interface OrderMapper {
     @Mapping(source = "order.owner.id", target = "userId")
     @Mapping(source = "product.id", target = "productId")
     OrderItemDataDTO toDTO(OrderItem orderItem);
+
+    @Mapping(target = "orderId", source = "order.id")
+    @Mapping(target = "productId", source = "product.id")
+    @Mapping(target = "productName", source = "product.name")
+    @Mapping(target = "price", source = "unitPrice")
+    @Mapping(target = "image", source = "product.image")
+    OrderItemDTO toItemDTO(OrderItem orderItem);
 }

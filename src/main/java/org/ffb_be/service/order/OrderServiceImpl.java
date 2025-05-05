@@ -517,6 +517,11 @@ public class OrderServiceImpl implements OrderService {
         orderDTO.setShopName(shopRepository.findByProduct(order.getOrderItems().get(0).getProduct().getId()).getName());
         orderDTO.setShopId(shopRepository.findByProduct(order.getOrderItems().get(0).getProduct().getId()).getId());
         orderDTO.setImage(shopRepository.findByProduct(order.getOrderItems().get(0).getProduct().getId()).getBackgroundImage());
+        List<OrderItemDTO> orderItems = new ArrayList<>();
+        for (OrderItem orderItem : order.getOrderItems()) {
+            orderItems.add(orderMapper.toItemDTO(orderItem));
+        }
+        orderDTO.setOrderItem(orderItems);
         return orderDTO;
     }
 
