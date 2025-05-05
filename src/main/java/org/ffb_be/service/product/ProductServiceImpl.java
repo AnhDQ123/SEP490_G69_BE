@@ -399,6 +399,7 @@ public class ProductServiceImpl implements ProductService {
         productResponseDTO.setDescription(product.getDescription());
         productResponseDTO.setFoodType(product.getType().toString());
         productResponseDTO.setShopId(shopRepository.findByProduct(id).getId());
+        productResponseDTO.setExpiryDate(product.getExpired_date());
         List<FoodOption> foodOptions = foodOptionRepository.findFoodOptionsByFood(product);
         List<FoodOptionDTO> foodOptionDTOs = new ArrayList<>();
         for (FoodOption foodOption : foodOptions) {
@@ -431,7 +432,6 @@ public class ProductServiceImpl implements ProductService {
                     dto.setEndDate(d.getEndDate());
                     dto.setStatus(d.getStatus().toString());
                     discountDTOs.add(dto);
-
                     defaultprice = defaultprice
                             .multiply(BigDecimal.ONE.subtract(d.getDiscount_percentage()))
                             .setScale(2, RoundingMode.HALF_UP);

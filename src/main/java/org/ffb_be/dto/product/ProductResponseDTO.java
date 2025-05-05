@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.ffb_be.dto.discount.DiscountDTO2;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 
@@ -32,4 +33,5 @@ public class ProductResponseDTO {
     private String foodType;
     private Long shopId;
     private int reportCount;
+    private LocalDate expiryDate;
 }
