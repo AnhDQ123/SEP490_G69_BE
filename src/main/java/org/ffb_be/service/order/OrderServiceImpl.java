@@ -444,16 +444,29 @@ public class OrderServiceImpl implements OrderService {
 
         for (Order order : orders) {
             if (order.getShipper() == null) {
-                User shipper = availableShippers.get(shipperIndex);
-                shipper.setDeliveryStatus(DeliveryStatus.ASSIGNED);
-                userRepository.save(shipper);
-                order.setShipper(shipper);
-                orderRepository.save(order);
+                int startIndex = shipperIndex;
+                boolean assigned = false;
 
-                shipperIndex = (shipperIndex + 1) % totalShippers;
+                do {
+                    User shipper = availableShippers.get(shipperIndex);
+
+                    // Tránh gán shipper là chính chủ đơn hàng
+                    if (!shipper.getId().equals(order.getOwner().getId())) {
+                        shipper.setDeliveryStatus(DeliveryStatus.ASSIGNED);
+                        userRepository.save(shipper);
+
+                        order.setShipper(shipper);
+                        orderRepository.save(order);
+
+                        assigned = true;
+                    }
+
+                    shipperIndex = (shipperIndex + 1) % totalShippers;
+                } while (!assigned && shipperIndex != startIndex);
             }
         }
     }
+
 
     @Override
     public void returnOrder(Long id,Long userId,String reason, MultipartFile avatar) throws IOException {

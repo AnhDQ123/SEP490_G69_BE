@@ -45,6 +45,10 @@ public class CartServiceImpl implements CartService {
             shopCartItems.computeIfAbsent(shopId, k -> new ArrayList<>()).add(cartItemDTO);
         }
 
+        if(Objects.equals(shopRepository.findById(cartDTO.getShopId()).orElseThrow(() -> new RuntimeException("Shop not found")).getOwner().getId(), cartDTO.getUserId())) {
+            throw new RuntimeException("Cannot add product from your own shop");
+        }
+
         // Lấy tất cả các sản phẩm và food options liên quan
         List<Long> productIds = cartDTO.getCartItemDTOList().stream()
                 .map(CartItemDTO::getProductId)
